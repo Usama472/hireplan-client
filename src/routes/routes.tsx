@@ -1,0 +1,66 @@
+import {
+  CONTACT_TEXT,
+  CREATE_JOB,
+  DASHBOARD_TEXT,
+  HOME_TEXT,
+  LOGIN_TEXT,
+  SIGNUP_TEXT,
+} from '@/constants'
+import { ROUTES } from '@/constants/routes'
+import type { AppRoutesType } from '@/interfaces'
+import ContactPage from '@/pages/contact'
+import DashboardPage from '@/pages/dashboard/jobs'
+import CreateJobPage from '@/pages/dashboard/jobs/create'
+
+// Public Pages
+import Home from '@/pages/home'
+
+// Auth Pages
+import Login from '@pages/auth/Login'
+import Signup from '@pages/auth/Signup'
+
+export const appRoutes: AppRoutesType[] = [
+  {
+    id: HOME_TEXT,
+    url: ROUTES.HOME,
+    element: <Home />,
+    isPrivate: false,
+  },
+  {
+    id: LOGIN_TEXT,
+    url: ROUTES.LOGIN,
+    element: <Login />,
+    isPrivate: false,
+  },
+
+  {
+    id: SIGNUP_TEXT,
+    url: ROUTES.SIGNUP,
+    element: <Signup />,
+    isPrivate: false,
+  },
+  {
+    id: SIGNUP_TEXT,
+    url: ROUTES.SIGNUP,
+    element: <Signup />,
+    isPrivate: false,
+  },
+  {
+    id: DASHBOARD_TEXT,
+    url: ROUTES.DASHBOARD.MAIN,
+    element: <DashboardPage />,
+    isPrivate: true,
+  },
+  {
+    id: CONTACT_TEXT,
+    url: ROUTES.CONTACT,
+    element: <ContactPage />,
+    isPrivate: false,
+  },
+  {
+    id: CREATE_JOB,
+    url: ROUTES.DASHBOARD.CREATE_JOB,
+    element: <CreateJobPage />,
+    isPrivate: true,
+  },
+]

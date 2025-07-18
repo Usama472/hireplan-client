@@ -1,0 +1,188 @@
+'use client'
+
+import { AIPreferencesStep } from '@/components/forms/onboardingForm/aiPreferenceStep'
+import { CompanyInfoStep } from '@/components/forms/onboardingForm/companyInfoStep'
+import { PersonalInfoStep } from '@/components/forms/onboardingForm/personalInfoStep'
+import { PlanSelectionStep } from '@/components/forms/onboardingForm/planSelectionStep'
+import { ReviewSubmitStep } from '@/components/forms/onboardingForm/reviewSubmitStep'
+import { StepIndicator } from '@/components/main/signup/StepIndicator'
+import { StepNavigation } from '@/components/main/signup/stepNavigation'
+import { Card, CardContent } from '@/components/ui/card'
+import { Form } from '@/components/ui/form'
+import { fullFormSchema } from '@/lib/validations'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useState } from 'react'
+import { FormProvider, useForm } from 'react-hook-form'
+import { z } from 'zod'
+
+type FormValues = z.infer<typeof fullFormSchema>
+
+export default function RecruiterOnboardingForm() {
+  const [currentStep, setCurrentStep] = useState(1)
+  const [completedSteps, setCompletedSteps] = useState<number[]>([])
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(fullFormSchema),
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      jobTitle: '',
+      companyName: '',
+      websiteDomain: '',
+      industry: '',
+      companySize: '',
+      address: '',
+      city: '',
+      state: '',
+      zipCode: '',
+      plan: 'starter' as const,
+      minimumMatchScore: 70,
+      autoRejectThreshold: 30,
+      experienceWeight: 40,
+      educationWeight: 25,
+      certificationsWeight: 20,
+      keywordsWeight: 15,
+    },
+    mode: 'onChange',
+    criteriaMode: 'all',
+  })
+
+  const { trigger, handleSubmit, clearErrors } = form
+
+  const stepFields = {
+    1: ['firstName', 'lastName', 'email', 'password', 'jobTitle'],
+    2: [
+      'companyName',
+      'industry',
+      'companySize',
+      'address',
+      'city',
+      'state',
+      'zipCode',
+    ],
+    3: ['plan'],
+    4: [
+      'minimumMatchScore',
+      'autoRejectThreshold',
+      'experienceWeight',
+      'educationWeight',
+      'certificationsWeight',
+      'keywordsWeight',
+    ],
+    5: [],
+  }
+
+  const handleNext = async () => {
+    clearErrors()
+
+    if (currentStep === 5) {
+      return
+    }
+
+    const fieldsToValidate = stepFields[currentStep as keyof typeof stepFields]
+
+    const isStepValid = await trigger(
+      fieldsToValidate as Array<keyof FormValues>,
+      {
+        shouldFocus: true,
+      }
+    )
+
+    if (isStepValid) {
+      setCompletedSteps((prev) => [
+        ...prev.filter((step) => step !== currentStep),
+        currentStep,
+      ])
+
+      setCurrentStep((prev) => {
+        const nextStep = Math.min(prev + 1, 5)
+        return nextStep
+      })
+
+      clearErrors()
+    }
+  }
+
+  const handlePrevious = () => {
+    clearErrors()
+    setCurrentStep((prev) => Math.max(prev - 1, 1))
+  }
+
+  const onSubmit = async (formData: FormValues) => {
+    if (currentStep !== 5) {
+      return
+    }
+
+    setIsSubmitting(true)
+
+    try {
+      console.log('Form submitted with:', formData)
+    } catch (error) {
+      console.error('Submission error:', error)
+      alert('There was an error creating your account. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const renderCurrentStep = () => {
+    switch (currentStep) {
+      case 1:
+        return <PersonalInfoStep />
+      case 2:
+        return <CompanyInfoStep />
+      case 3:
+        return <PlanSelectionStep />
+      case 4:
+        return <AIPreferencesStep />
+      case 5:
+        return <ReviewSubmitStep />
+      default:
+        return <PersonalInfoStep />
+    }
+  }
+
+  return (
+    <Card className='shadow-lg'>
+      <CardContent className='p-8'>
+        <StepIndicator
+          currentStep={currentStep}
+          completedSteps={completedSteps}
+        />
+
+        <FormProvider {...form}>
+          <Form {...form}>
+            <form
+              onSubmit={(e) => {
+                console.log('Form submit event triggered')
+                if (currentStep !== 5) {
+                  e.preventDefault()
+                  console.log('Prevented form submission on non-final step')
+                  return
+                }
+                handleSubmit(onSubmit)(e)
+              }}
+              className='space-y-6'
+            >
+              {renderCurrentStep()}
+
+              <StepNavigation
+                currentStep={currentStep}
+                totalSteps={5}
+                onNext={handleNext}
+                onPrevious={handlePrevious}
+                isFirstStep={currentStep === 1}
+                isLastStep={currentStep === 5}
+                isValid={true}
+                isSubmitting={isSubmitting}
+              />
+            </form>
+          </Form>
+        </FormProvider>
+      </CardContent>
+    </Card>
+  )
+}
