@@ -459,7 +459,6 @@ export const PAY_TYPES = [
   { value: 'other', label: 'Other', color: 'gray' },
 ]
 
-// Update MOCK_JOBS to use new structure
 export const MOCK_JOBS: Job[] = [
   {
     id: '1',
@@ -506,7 +505,6 @@ export const MOCK_JOBS: Job[] = [
       time: '09:00',
     },
 
-    // Legacy compatibility fields
     company: 'TechCorp Inc.',
     location: 'San Francisco, CA',
     type: 'full-time',
@@ -536,7 +534,6 @@ export const MOCK_JOBS: Job[] = [
     remote: false,
     featured: true,
   },
-  // Add more updated mock jobs...
 ]
 
 export * from './icons'

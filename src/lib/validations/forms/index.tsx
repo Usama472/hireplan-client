@@ -50,3 +50,32 @@ export const fullFormSchema = personalInfoSchema
   .merge(companyInfoSchema)
   .merge(planSelectionSchema)
   .merge(aiPreferencesSchema)
+
+export const profileFormSchema = z.object({
+  // Personal Information
+  firstName: z.string().min(1, { message: 'First name is required' }),
+  lastName: z.string().min(1, { message: 'Last name is required' }),
+  email: z.string().email({ message: 'Invalid email address' }),
+  profileImg: z.string().optional(),
+  companyRole: z.string().min(1, { message: 'Company role is required' }),
+
+  // Company Information
+  company: z.object({
+    companyName: z.string().min(1, { message: 'Company name is required' }),
+    websiteUrl: z
+      .string()
+      .url({ message: 'Invalid website URL' })
+      .optional()
+      .or(z.literal('')),
+    industry: z.string().min(1, { message: 'Industry is required' }),
+    companySize: z.string().min(1, { message: 'Company size is required' }),
+    address: z.string().min(1, { message: 'Address is required' }),
+    city: z.string().min(1, { message: 'City is required' }),
+    state: z.string().min(1, { message: 'State is required' }),
+    zipCode: z.string().min(1, { message: 'Zip code is required' }),
+    country: z.string().min(1, { message: 'Country is required' }),
+  }),
+
+  paymentPlan: z.enum(['starter', 'professional', 'enterprise']),
+  allowNotify: z.boolean(),
+})

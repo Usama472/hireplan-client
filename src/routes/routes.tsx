@@ -1,3 +1,4 @@
+import ProfilePage from "@/components/dashboard/profile";
 import {
   CONTACT_TEXT,
   CREATE_JOB,
@@ -5,19 +6,19 @@ import {
   HOME_TEXT,
   LOGIN_TEXT,
   SIGNUP_TEXT,
-} from '@/constants'
-import { ROUTES } from '@/constants/routes'
-import type { AppRoutesType } from '@/interfaces'
-import ContactPage from '@/pages/contact'
-import DashboardPage from '@/pages/dashboard/jobs'
-import CreateJobPage from '@/pages/dashboard/jobs/create'
+} from "@/constants";
+import { ROUTES } from "@/constants/routes";
+import type { AppRoutesType } from "@/interfaces";
+import ContactPage from "@/pages/contact";
+import DashboardPage from "@/pages/dashboard/jobs";
+import CreateJobPage from "@/pages/dashboard/jobs/create";
 
 // Public Pages
-import Home from '@/pages/home'
+import Home from "@/pages/home";
 
 // Auth Pages
-import Login from '@pages/auth/Login'
-import Signup from '@pages/auth/Signup'
+import Login from "@pages/auth/Login";
+import Signup from "@pages/auth/Signup";
 
 export const appRoutes: AppRoutesType[] = [
   {
@@ -63,4 +64,10 @@ export const appRoutes: AppRoutesType[] = [
     element: <CreateJobPage />,
     isPrivate: true,
   },
-]
+  {
+    id: CREATE_JOB,
+    url: ROUTES.DASHBOARD.PROFILE,
+    element: <ProfilePage />,
+    isPrivate: true,
+  },
+];

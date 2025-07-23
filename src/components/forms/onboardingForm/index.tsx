@@ -1,44 +1,51 @@
-'use client'
+"use client";
 
-import { AIPreferencesStep } from '@/components/forms/onboardingForm/aiPreferenceStep'
-import { CompanyInfoStep } from '@/components/forms/onboardingForm/companyInfoStep'
-import { PersonalInfoStep } from '@/components/forms/onboardingForm/personalInfoStep'
-import { PlanSelectionStep } from '@/components/forms/onboardingForm/planSelectionStep'
-import { ReviewSubmitStep } from '@/components/forms/onboardingForm/reviewSubmitStep'
-import { StepIndicator } from '@/components/main/signup/StepIndicator'
-import { StepNavigation } from '@/components/main/signup/stepNavigation'
-import { Card, CardContent } from '@/components/ui/card'
-import { Form } from '@/components/ui/form'
-import { fullFormSchema } from '@/lib/validations'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useState } from 'react'
-import { FormProvider, useForm } from 'react-hook-form'
-import { z } from 'zod'
+import { AIPreferencesStep } from "@/components/forms/onboardingForm/aiPreferenceStep";
+import { CompanyInfoStep } from "@/components/forms/onboardingForm/companyInfoStep";
+import { PersonalInfoStep } from "@/components/forms/onboardingForm/personalInfoStep";
+import { PlanSelectionStep } from "@/components/forms/onboardingForm/planSelectionStep";
+import { ReviewSubmitStep } from "@/components/forms/onboardingForm/reviewSubmitStep";
+import { StepIndicator } from "@/components/main/signup/StepIndicator";
+import { StepNavigation } from "@/components/main/signup/stepNavigation";
+import { Card, CardContent } from "@/components/ui/card";
+import { Form } from "@/components/ui/form";
+import { ROUTES } from "@/constants";
+import API from "@/http";
+import { getErrorMessage } from "@/lib/utils";
+import { fullFormSchema } from "@/lib/validations";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import { useNavigate } from "react-router";
+import { toast } from "sonner";
+import { z } from "zod";
 
-type FormValues = z.infer<typeof fullFormSchema>
+type FormValues = z.infer<typeof fullFormSchema>;
 
 export default function RecruiterOnboardingForm() {
-  const [currentStep, setCurrentStep] = useState(1)
-  const [completedSteps, setCompletedSteps] = useState<number[]>([])
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [currentStep, setCurrentStep] = useState(1);
+  const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const navigate = useNavigate();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(fullFormSchema),
     defaultValues: {
-      firstName: '',
-      lastName: '',
-      email: '',
-      password: '',
-      jobTitle: '',
-      companyName: '',
-      websiteDomain: '',
-      industry: '',
-      companySize: '',
-      address: '',
-      city: '',
-      state: '',
-      zipCode: '',
-      plan: 'starter' as const,
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      jobTitle: "",
+      companyName: "",
+      websiteDomain: "",
+      industry: "",
+      companySize: "",
+      address: "",
+      city: "",
+      state: "",
+      zipCode: "",
+      plan: "starter" as const,
       minimumMatchScore: 70,
       autoRejectThreshold: 30,
       experienceWeight: 40,
@@ -46,108 +53,133 @@ export default function RecruiterOnboardingForm() {
       certificationsWeight: 20,
       keywordsWeight: 15,
     },
-    mode: 'onChange',
-    criteriaMode: 'all',
-  })
+    mode: "onChange",
+    criteriaMode: "all",
+  });
 
-  const { trigger, handleSubmit, clearErrors } = form
+  const { trigger, handleSubmit, clearErrors } = form;
 
   const stepFields = {
-    1: ['firstName', 'lastName', 'email', 'password', 'jobTitle'],
+    1: ["firstName", "lastName", "email", "password", "jobTitle"],
     2: [
-      'companyName',
-      'industry',
-      'companySize',
-      'address',
-      'city',
-      'state',
-      'zipCode',
+      "companyName",
+      "industry",
+      "companySize",
+      "address",
+      "city",
+      "state",
+      "zipCode",
     ],
-    3: ['plan'],
+    3: ["plan"],
     4: [
-      'minimumMatchScore',
-      'autoRejectThreshold',
-      'experienceWeight',
-      'educationWeight',
-      'certificationsWeight',
-      'keywordsWeight',
+      "minimumMatchScore",
+      "autoRejectThreshold",
+      "experienceWeight",
+      "educationWeight",
+      "certificationsWeight",
+      "keywordsWeight",
     ],
     5: [],
-  }
+  };
 
   const handleNext = async () => {
-    clearErrors()
+    clearErrors();
 
     if (currentStep === 5) {
-      return
+      return;
     }
 
-    const fieldsToValidate = stepFields[currentStep as keyof typeof stepFields]
+    const fieldsToValidate = stepFields[currentStep as keyof typeof stepFields];
 
     const isStepValid = await trigger(
       fieldsToValidate as Array<keyof FormValues>,
       {
         shouldFocus: true,
       }
-    )
+    );
 
     if (isStepValid) {
       setCompletedSteps((prev) => [
         ...prev.filter((step) => step !== currentStep),
         currentStep,
-      ])
+      ]);
 
       setCurrentStep((prev) => {
-        const nextStep = Math.min(prev + 1, 5)
-        return nextStep
-      })
+        const nextStep = Math.min(prev + 1, 5);
+        return nextStep;
+      });
 
-      clearErrors()
+      clearErrors();
     }
-  }
+  };
 
   const handlePrevious = () => {
-    clearErrors()
-    setCurrentStep((prev) => Math.max(prev - 1, 1))
-  }
+    clearErrors();
+    setCurrentStep((prev) => Math.max(prev - 1, 1));
+  };
 
   const onSubmit = async (formData: FormValues) => {
     if (currentStep !== 5) {
-      return
+      return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
 
     try {
-      console.log('Form submitted with:', formData)
+      await API.auth.signup({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+        paymentPlan: formData.plan,
+        companyRole: formData.jobTitle,
+        minimumMatchScore: formData.minimumMatchScore,
+        autoRejectThreshold: formData.autoRejectThreshold,
+        experienceWeight: formData.experienceWeight,
+        educationWeight: formData.educationWeight,
+        certificationsWeight: formData.certificationsWeight,
+        keywordsWeight: formData.keywordsWeight,
+        companyName: formData.companyName,
+        websiteUrl: formData.websiteDomain,
+        industry: formData.industry,
+        companySize: formData.companySize,
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        zipCode: formData.zipCode,
+        // country: formData.
+      });
+
+      toast.success("Account created successfully");
+      navigate(ROUTES.DASHBOARD.MAIN);
     } catch (error) {
-      console.error('Submission error:', error)
-      alert('There was an error creating your account. Please try again.')
+      const errorMessage = getErrorMessage(error);
+      toast.error(errorMessage);
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const renderCurrentStep = () => {
     switch (currentStep) {
       case 1:
-        return <PersonalInfoStep />
+        return <PersonalInfoStep />;
       case 2:
-        return <CompanyInfoStep />
+        return <CompanyInfoStep />;
       case 3:
-        return <PlanSelectionStep />
+        return <PlanSelectionStep />;
       case 4:
-        return <AIPreferencesStep />
+        return <AIPreferencesStep />;
       case 5:
-        return <ReviewSubmitStep />
+        return <ReviewSubmitStep />;
       default:
-        return <PersonalInfoStep />
+        return <PersonalInfoStep />;
     }
-  }
+  };
 
   return (
-    <Card className='shadow-lg'>
-      <CardContent className='p-8'>
+    <Card className="shadow-lg">
+      <CardContent className="p-8">
         <StepIndicator
           currentStep={currentStep}
           completedSteps={completedSteps}
@@ -157,15 +189,15 @@ export default function RecruiterOnboardingForm() {
           <Form {...form}>
             <form
               onSubmit={(e) => {
-                console.log('Form submit event triggered')
+                console.log("Form submit event triggered");
                 if (currentStep !== 5) {
-                  e.preventDefault()
-                  console.log('Prevented form submission on non-final step')
-                  return
+                  e.preventDefault();
+                  console.log("Prevented form submission on non-final step");
+                  return;
                 }
-                handleSubmit(onSubmit)(e)
+                handleSubmit(onSubmit)(e);
               }}
-              className='space-y-6'
+              className="space-y-6"
             >
               {renderCurrentStep()}
 
@@ -184,5 +216,5 @@ export default function RecruiterOnboardingForm() {
         </FormProvider>
       </CardContent>
     </Card>
-  )
+  );
 }

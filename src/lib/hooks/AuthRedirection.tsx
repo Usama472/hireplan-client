@@ -1,5 +1,5 @@
 'use client'
-import { LoadingScreen } from '@/components/common/LoadingScreen'
+import { SimpleLoader } from '@/components/common/LoadingScreen'
 import { type PropsWithChildren, useEffect, useState } from 'react'
 import useAuthSessionContext from '../context/AuthSessionContext'
 
@@ -40,7 +40,7 @@ const AuthRedirection = ({ children }: PropsWithChildren) => {
   }, [])
 
   if (status === 'loading' || isReloading) {
-    return <LoadingScreen />
+    return <SimpleLoader />
   }
   return <>{children}</>
 }

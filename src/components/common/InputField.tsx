@@ -43,12 +43,17 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
 }: InputFieldProps<TFieldValues>) => {
   const { control, formState } = useFormContext()
   const [showPassword, setShowPassword] = useState(false)
-  const { errors } = formState
+  const { errors, dirtyFields } = formState
 
   // Determine if this field has an error
   const fieldError = name.split('.').reduce((acc: any, part) => {
     return acc && acc[part] ? acc[part] : undefined
   }, errors)
+
+  // Check if field is dirty
+  const isDirty = name.split('.').reduce((acc: any, part) => {
+    return acc && acc[part] !== undefined
+  }, dirtyFields)
 
   const renderFormLabel = (labelText?: string) => (
     <FormLabel
@@ -83,6 +88,10 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
       control={control}
       name={name}
       render={({ field }) => {
+        const handleChange = (e: any) => {
+          field.onChange(e)
+        }
+
         switch (type) {
           case INPUT_TYPES.CHECKBOX:
             return (
@@ -100,6 +109,7 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
                     type={type}
                     className='size-4 rounded-sm'
                     disabled={disabled}
+                    onChange={handleChange}
                   />
                 </FormControl>
                 <FormMessage />
@@ -115,7 +125,9 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
                 {renderFormLabel(label)}
                 <Select
                   value={field.value}
-                  onValueChange={field.onChange}
+                  onValueChange={(value) => {
+                    field.onChange(value)
+                  }}
                   disabled={disabled}
                 >
                   <FormControl>
@@ -123,7 +135,10 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
                       className={cn(
                         'w-full',
                         fieldError &&
-                          'border-red-500 focus-visible:ring-red-500'
+                          'border-red-500 focus-visible:ring-red-500',
+                        isDirty &&
+                          !fieldError &&
+                          'border-blue-300 focus-visible:ring-blue-500'
                       )}
                     >
                       <SelectValue
@@ -156,7 +171,9 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
                     {editorRef ? (
                       <Editor
                         value={field.value}
-                        fieldChange={field.onChange}
+                        fieldChange={(value) => {
+                          field.onChange(value)
+                        }}
                         editorRef={editorRef}
                       />
                     ) : (
@@ -225,6 +242,7 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
                         commonInputProps.className,
                         fieldError && 'border-red-500 focus:border-red-500'
                       )}
+                      onChange={handleChange}
                     />
                   </FormControl>
                   <FormMessage />
@@ -247,6 +265,7 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
                         commonInputProps.className,
                         fieldError && 'border-red-500 focus:border-red-500'
                       )}
+                      onChange={handleChange}
                     />
                     {type === INPUT_TYPES.PASSWORD && (
                       <Button

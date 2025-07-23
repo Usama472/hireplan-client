@@ -5,10 +5,8 @@ import {
   createRoutesFromElements,
 } from 'react-router-dom'
 
-// route constant
 import { appRoutes } from './routes'
 
-// Guards
 import { PrivateRoute } from './PrivateRoute'
 import PublicRoute from './PublicRoute'
 
@@ -31,7 +29,6 @@ export const router = createBrowserRouter(
           />
         )
       })}
-      {/* <Route path='/*' element={<NotFound />} /> */}
     </Fragment>
   )
 )

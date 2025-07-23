@@ -1,5 +1,5 @@
 import { LoadingScreen } from '@/components/common/LoadingScreen'
-import { DashboardSidebar } from '@/components/navigation/dashboard/sidebar'
+import { DashboardSidebar } from '@/components/common/navigation/dashboard/sidebar'
 import type { DefaultLayoutProps } from '@/interfaces'
 import useAuthSessionContext from '@/lib/context/AuthSessionContext'
 import { SidebarInset, SidebarProvider } from '@components/ui/sidebar'
@@ -7,7 +7,6 @@ import { SidebarInset, SidebarProvider } from '@components/ui/sidebar'
 export const PrivateRoute = ({ children }: DefaultLayoutProps) => {
   const { status } = useAuthSessionContext()
 
-  // Show loading state while checking authentication
   if (status === 'loading') {
     return <LoadingScreen />
   }
