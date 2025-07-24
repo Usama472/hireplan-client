@@ -10,8 +10,7 @@ export type CompanyRouteProps = {
 }
 
 const CompanyRoute: FC<CompanyRouteProps> = ({ children }) => {
-  const { data, status } = useAuthSessionContext()
-  const company = data?.user?.company || null
+  const { status } = useAuthSessionContext()
 
   if (status === 'loading') {
     return <LoadingScreen />
@@ -20,8 +19,6 @@ const CompanyRoute: FC<CompanyRouteProps> = ({ children }) => {
   if (status === 'unauthenticated') {
     return <Navigate to={ROUTES.LOGIN} />
   }
-
-  console.log(data)
 
   return <CompanyLayout>{children}</CompanyLayout>
 }
