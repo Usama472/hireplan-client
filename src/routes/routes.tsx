@@ -1,24 +1,27 @@
-import ProfilePage from "@/components/dashboard/profile";
+import ProfilePage from '@/components/dashboard/profile'
 import {
+  COMPANY_TEXT,
   CONTACT_TEXT,
   CREATE_JOB,
   DASHBOARD_TEXT,
   HOME_TEXT,
   LOGIN_TEXT,
   SIGNUP_TEXT,
-} from "@/constants";
-import { ROUTES } from "@/constants/routes";
-import type { AppRoutesType } from "@/interfaces";
-import ContactPage from "@/pages/contact";
-import DashboardPage from "@/pages/dashboard/jobs";
-import CreateJobPage from "@/pages/dashboard/jobs/create";
+} from '@/constants'
+import { ROUTES } from '@/constants/routes'
+import type { AppRoutesType } from '@/interfaces'
+import CompanyPage from '@/pages/company'
+import ContactPage from '@/pages/contact'
+import DashboardPage from '@/pages/dashboard/jobs'
+import CreateJobPage from '@/pages/dashboard/jobs/create'
+import JobDetailPage from '@/pages/dashboard/jobs/view'
 
 // Public Pages
-import Home from "@/pages/home";
+import Home from '@/pages/home'
 
 // Auth Pages
-import Login from "@pages/auth/Login";
-import Signup from "@pages/auth/Signup";
+import Login from '@pages/auth/Login'
+import Signup from '@pages/auth/Signup'
 
 export const appRoutes: AppRoutesType[] = [
   {
@@ -70,4 +73,17 @@ export const appRoutes: AppRoutesType[] = [
     element: <ProfilePage />,
     isPrivate: true,
   },
-];
+  {
+    id: CREATE_JOB,
+    url: ROUTES.DASHBOARD.VIEW_JOB_ID,
+    element: <JobDetailPage />,
+    isPrivate: true,
+  },
+
+  {
+    id: COMPANY_TEXT,
+    url: ROUTES.COMPANY,
+    element: <CompanyPage />,
+    isPrivate: false,
+  },
+]

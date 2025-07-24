@@ -23,6 +23,7 @@ export const PROFILE_TEXT = 'Profile'
 export const COMPOSE_EMAIL_TEXT = 'Compose Email'
 export const CONTACT_TEXT = 'Contact'
 export const CREATE_JOB = 'Create Job'
+export const COMPANY_TEXT = 'Company'
 
 // Constants
 export const InfoSectionData = [

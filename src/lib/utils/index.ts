@@ -23,80 +23,44 @@ export const errorResolver = (err: any) =>
   err?.message ??
   "Something went wrong.";
 
-// export const getStatusIcon = (status: string) => {
-//   switch (status) {
-//     case 'active':
-//       return <CheckCircle className='w-4 h-4' />
-//     case 'paused':
-//       return <Pause className='w-4 h-4' />
-//     case 'closed':
-//       return <Archive className='w-4 h-4' />
-//     case 'draft':
-//       return <FileText className='w-4 h-4' />
-//     default:
-//       return <AlertCircle className='w-4 h-4' />
-//   }
-// }
-
 export const getStatusColor = (status: string) => {
-  switch (status) {
+  switch (status?.toLowerCase()) {
     case "active":
-      return "bg-green-100 text-green-800 border-green-200";
-    case "paused":
-      return "bg-yellow-100 text-yellow-800 border-yellow-200";
-    case "closed":
-      return "bg-gray-100 text-gray-800 border-gray-200";
+      return "bg-green-100 text-green-800 border-green-200 hover:bg-green-200 hover:border-green-300 transition-colors";
     case "draft":
-      return "bg-blue-100 text-blue-800 border-blue-200";
+      return "bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200 hover:border-gray-300 transition-colors";
+    case "paused":
+      return "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200 hover:border-yellow-300 transition-colors";
+    case "closed":
+      return "bg-red-100 text-red-800 border-red-200 hover:bg-red-200 hover:border-red-300 transition-colors";
     default:
-      return "bg-gray-100 text-gray-800 border-gray-200";
+      return "bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200 hover:border-gray-300 transition-colors";
   }
 };
 
 export const getPriorityColor = (priority: string) => {
-  switch (priority) {
-    case "urgent":
-      return "bg-red-100 text-red-800 border-red-200";
+  switch (priority?.toLowerCase()) {
     case "high":
-      return "bg-orange-100 text-orange-800 border-orange-200";
+      return "bg-red-100 text-red-800 border-red-200 hover:bg-red-200 hover:border-red-300 transition-colors";
     case "medium":
-      return "bg-blue-100 text-blue-800 border-blue-200";
+      return "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200 hover:border-yellow-300 transition-colors";
     case "low":
-      return "bg-gray-100 text-gray-800 border-gray-200";
+      return "bg-green-100 text-green-800 border-green-200 hover:bg-green-200 hover:border-green-300 transition-colors";
     default:
-      return "bg-gray-100 text-gray-800 border-gray-200";
+      return "bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200 hover:border-gray-300 transition-colors";
   }
 };
 
-export const getWorkplaceTypeColor = (workplaceType: string) => {
-  switch (workplaceType) {
+export const getWorkplaceTypeColor = (type: string) => {
+  switch (type?.toLowerCase()) {
     case "remote":
-      return "bg-blue-100 text-blue-800 border-blue-200";
+      return "bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200 hover:border-blue-300 transition-colors";
     case "hybrid":
-      return "bg-purple-100 text-purple-800 border-purple-200";
+      return "bg-purple-100 text-purple-800 border-purple-200 hover:bg-purple-200 hover:border-purple-300 transition-colors";
     case "onsite":
-      return "bg-gray-100 text-gray-800 border-gray-200";
+      return "bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200 hover:border-gray-300 transition-colors";
     default:
-      return "bg-gray-100 text-gray-800 border-gray-200";
-  }
-};
-
-export const getPayTypeColor = (payType: string) => {
-  switch (payType) {
-    case "salary":
-      return "bg-green-100 text-green-800 border-green-200";
-    case "hourly":
-      return "bg-blue-100 text-blue-800 border-blue-200";
-    case "base-commission":
-      return "bg-purple-100 text-purple-800 border-purple-200";
-    case "base-tips":
-      return "bg-orange-100 text-orange-800 border-orange-200";
-    case "base-bonus":
-      return "bg-indigo-100 text-indigo-800 border-indigo-200";
-    case "commission-only":
-      return "bg-red-100 text-red-800 border-red-200";
-    default:
-      return "bg-gray-100 text-gray-800 border-gray-200";
+      return "bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200 hover:border-gray-300 transition-colors";
   }
 };
 

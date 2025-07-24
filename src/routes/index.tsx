@@ -7,6 +7,7 @@ import {
 
 import { appRoutes } from './routes'
 
+import CompanyRoute from './CompanyRoute'
 import { PrivateRoute } from './PrivateRoute'
 import PublicRoute from './PublicRoute'
 
@@ -14,6 +15,17 @@ export const router = createBrowserRouter(
   createRoutesFromElements(
     <Fragment>
       {appRoutes?.map(({ element, isPrivate, url, id }) => {
+        if (url.startsWith('/company/')) {
+          return (
+            <Route
+              key={id}
+              caseSensitive
+              path={url}
+              element={<CompanyRoute>{element}</CompanyRoute>}
+            />
+          )
+        }
+
         return (
           <Route
             key={id}
