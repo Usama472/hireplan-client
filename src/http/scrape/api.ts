@@ -1,3 +1,4 @@
 import { post } from '../apiHelper'
 
-export const scrapeWebsite = (url: string) => post('/scraper/scrape', { url })
+export const scrapeWebsite = (id: string, url: string) =>
+  post('/scraper/scrape', { id, url })

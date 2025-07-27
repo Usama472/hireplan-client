@@ -1,10 +1,10 @@
+import CompanyJobCard from '@/components/company/company-job-card'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import API from '@/http'
 import { scrapeWebsite } from '@/http/scrape/api'
-import type { CompanyInfo } from '@/interfaces'
-import useAuthSessionContext from '@/lib/context/AuthSessionContext'
-import { Building, Check, Globe, MapPin, Shield } from 'lucide-react'
+import type { Job } from '@/interfaces'
+import { Building } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
@@ -20,15 +20,15 @@ interface ScrapedWebsite {
 
 const CompanyPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>()
-  const { data } = useAuthSessionContext()
-  const company = data?.user?.company as CompanyInfo
 
   const [scrapedData, setScrapedData] = useState<ScrapedWebsite | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
   const [contentMode, setContentMode] = useState<'embed' | 'custom'>('embed')
+  const [companyId, setCompanyId] = useState<string | null>(null)
   const [websiteUrl, setWebsiteUrl] = useState<string | null>(null)
   const [domainName, setDomainName] = useState<string | null>(null)
+  const [jobs, setJobs] = useState<Job[]>([])
 
   useEffect(() => {
     const fetchWebsiteData = async () => {
@@ -48,12 +48,16 @@ const CompanyPage: React.FC = () => {
 
         setWebsiteUrl(websiteUrl)
         setDomainName(domainName)
+        setCompanyId(company.id)
 
-        const response = await scrapeWebsite(websiteUrl)
+        const response = await scrapeWebsite(company.id, websiteUrl)
         setScrapedData({
           ...response,
           domain: domainName,
         })
+
+        const jobs = response?.jobs?.results || []
+        setJobs(jobs)
 
         if (response.cssLinks && Array.isArray(response.cssLinks)) {
           response.cssLinks.forEach((cssLink: string) => {
@@ -114,8 +118,8 @@ const CompanyPage: React.FC = () => {
   const handleRetry = () => {
     setLoading(true)
     setError(null)
-    if (websiteUrl)
-      scrapeWebsite(websiteUrl)
+    if (websiteUrl && companyId)
+      scrapeWebsite(companyId, websiteUrl)
         .then((response) => {
           setScrapedData({
             ...response,
@@ -128,10 +132,6 @@ const CompanyPage: React.FC = () => {
           setError('Failed to load website content after retry')
           setLoading(false)
         })
-  }
-
-  const toggleContentMode = () => {
-    setContentMode((prev) => (prev === 'embed' ? 'custom' : 'embed'))
   }
 
   if (loading) {
@@ -167,73 +167,18 @@ const CompanyPage: React.FC = () => {
   if (contentMode === 'embed') {
     return (
       <>
-        <div className='fixed bottom-4 right-4 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 flex items-center space-x-2'>
-          <span className='text-sm text-gray-600 dark:text-gray-300 mr-2'>
-            <Shield className='inline-block w-4 h-4 mr-1' />
-            Embedding {scrapedData?.domain}
-          </span>
-          <Button
-            size='sm'
-            variant='outline'
-            onClick={toggleContentMode}
-            className='text-xs'
-          >
-            View Custom
-          </Button>
-        </div>
-
         {scrapedData?.header && (
           <div
             className='website-header w-full'
             dangerouslySetInnerHTML={{ __html: scrapedData.header }}
           />
         )}
-
-        <div className='container mx-auto px-4 py-10'>
-          {/* <div className='bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8'>
-            <h2 className='text-2xl font-bold mb-4 dark:text-white'>
-              {company?.companyName || domainName || 'Company Profile'}
-            </h2>
-            <div className='prose dark:prose-invert max-w-none'>
-              <p>
-                This is your company profile page with the website's original
-                header and footer.
-              </p>
-              <p>
-                You can customize this section with any content you want to
-                display.
-              </p>
-
-              {company && (
-                <div className='mt-4 grid grid-cols-1 md:grid-cols-2 gap-4'>
-                  <div className='flex items-center space-x-2'>
-                    <Building className='text-gray-500' />
-                    <span>
-                      <strong>Industry:</strong> {company.industry}
-                    </span>
-                  </div>
-                  <div className='flex items-center space-x-2'>
-                    <Users className='text-gray-500' />
-                    <span>
-                      <strong>Size:</strong> {company.companySize}
-                    </span>
-                  </div>
-                  <div className='flex items-center space-x-2'>
-                    <Globe className='text-gray-500' />
-                    <span>
-                      <strong>Website:</strong> {websiteUrl}
-                    </span>
-                  </div>
-                  <div className='flex items-center space-x-2'>
-                    <MapPin className='text-gray-500' />
-                    <span>
-                      <strong>Location:</strong> {company.city}, {company.state}
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div> */}
+        <div className='container mx-auto px-4 py-10 m-5'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
+            {jobs.map((job) => (
+              <CompanyJobCard key={job.id} job={job} />
+            ))}
+          </div>
         </div>
 
         {scrapedData?.footer && (
@@ -273,79 +218,6 @@ const CompanyPage: React.FC = () => {
                 ) : (
                   <Building className='h-10 w-10 mr-3 text-gray-500' />
                 )}
-                <div>
-                  <h1 className='text-2xl font-bold text-gray-800 dark:text-white'>
-                    {company?.companyName || scrapedData?.title || domainName}
-                  </h1>
-                  <p className='text-sm text-gray-500 dark:text-gray-400'>
-                    {scrapedData?.domain && (
-                      <a
-                        href={websiteUrl || `https://${scrapedData.domain}`}
-                        target='_blank'
-                        rel='noopener noreferrer'
-                        className='flex items-center hover:underline'
-                      >
-                        <Globe className='h-3.5 w-3.5 mr-1' />
-                        {scrapedData.domain}
-                      </a>
-                    )}
-                  </p>
-                </div>
-              </div>
-              <Button
-                variant='ghost'
-                onClick={toggleContentMode}
-                className='text-sm'
-              >
-                View Embedded
-              </Button>
-            </div>
-
-            <div className='prose dark:prose-invert max-w-none'>
-              <h2 className='text-xl font-semibold mb-4'>Company Profile</h2>
-              <p>
-                This is your custom company profile view without the embedded
-                header and footer.
-              </p>
-
-              {company && (
-                <div className='mt-6 grid grid-cols-1 md:grid-cols-2 gap-6'>
-                  <div className='bg-gray-50 dark:bg-gray-800 p-4 rounded-lg'>
-                    <h3 className='text-lg font-medium mb-2 flex items-center'>
-                      <Building className='mr-2 h-5 w-5' />
-                      Company Information
-                    </h3>
-                    <dl className='space-y-2'>
-                      <div className='flex justify-between'>
-                        <dt className='text-gray-500'>Industry</dt>
-                        <dd className='font-medium'>{company.industry}</dd>
-                      </div>
-                      <div className='flex justify-between'>
-                        <dt className='text-gray-500'>Size</dt>
-                        <dd className='font-medium'>{company.companySize}</dd>
-                      </div>
-                    </dl>
-                  </div>
-
-                  <div className='bg-gray-50 dark:bg-gray-800 p-4 rounded-lg'>
-                    <h3 className='text-lg font-medium mb-2 flex items-center'>
-                      <MapPin className='mr-2 h-5 w-5' />
-                      Location
-                    </h3>
-                    <address className='not-italic'>
-                      {company.address}
-                      <br />
-                      {company.city}, {company.state} {company.zipCode}
-                      <br />
-                      {company.country}
-                    </address>
-                  </div>
-                </div>
-              )}
-
-              <div className='mt-6 flex items-center space-x-1 text-sm text-gray-500'>
-                <Check className='h-4 w-4 text-green-500' />
-                <span>Verified company profile</span>
               </div>
             </div>
           </div>
