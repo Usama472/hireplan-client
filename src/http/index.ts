@@ -1,3 +1,5 @@
+import * as applicantApi from './applicant/api'
+import * as attachmentApi from './attachment/api'
 import * as authApi from './auth/api'
 import * as companyApi from './company/api'
 import * as jobApi from './job/api'
@@ -8,6 +10,8 @@ const API = {
   user: userApi,
   job: jobApi,
   company: companyApi,
+  attachment: attachmentApi,
+  applicant: applicantApi,
 }
 
 export default API

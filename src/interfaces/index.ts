@@ -151,6 +151,7 @@ export interface Job {
   matches: number
   createdAt: string
   updatedAt: string
+  applicantsCount: number
   deadline?: string // Mapped from endDate
   priority?: 'low' | 'medium' | 'high' | 'urgent' // Mapped from jobStatus
   remote?: boolean // Derived from workplaceType
@@ -301,5 +302,39 @@ export interface ErrorResponse {
   message: string
 }
 
+export interface CustomField {
+  field: string
+  value: string
+  required: boolean
+}
+
+export interface IApplicant {
+  firstName: string
+  lastName: string
+  city: string
+  state: string
+  currentSalary?: string
+  expectedSalary?: string
+  experienceYears?: string
+  currentJobTitle?: string
+  currentEmployer?: string
+  availabilityDate?: Date
+  resume?: string
+  email: string
+  phone?: string
+  education?: string
+  skills?: string[] | string
+  jobHistory?: string
+  coverLetter?: string
+  noticePeriod?: string
+  customFields?: CustomField[]
+  jobId: string
+  companyId: string
+  jobTitle?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
 export * from '@/interfaces/enums'
 export * from '@/interfaces/forms'
+
