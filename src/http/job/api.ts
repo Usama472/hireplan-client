@@ -11,3 +11,7 @@ export const getJobs = async ({
   limit: number
   searchQuery?: string
 }) => get('/jobs', { page, limit, searchQuery })
+
+export const getJobDetails = async (jobId: string) => get(`/jobs/p/${jobId}`)
+export const getPublicJobDetails = async (jobId: string) =>
+  get(`/jobs/p/${jobId}`)

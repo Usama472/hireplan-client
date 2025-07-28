@@ -17,19 +17,24 @@ import {
   WORKPLACE_TYPES,
 } from '@/constants'
 import { INPUT_TYPES } from '@/interfaces'
+import { useLocationFields } from '@/lib/hooks/useLocationFields'
 import { Plus, X } from 'lucide-react'
 import { useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 
 export function PositionDetailsStep() {
-  const { watch, setValue, formState } = useFormContext()
+  const { watch, setValue } = useFormContext()
   const [customDepartment, setCustomDepartment] = useState('')
   const [newRequirement, setNewRequirement] = useState('')
+
+  const { stateOptions, cityOptions } = useLocationFields({
+    stateFieldName: 'jobLocation.state',
+    cityFieldName: 'jobLocation.city',
+  })
 
   const payType = watch('payType')
   const payRateType = watch('payRate.type') || 'fixed'
   const jobRequirements = watch('jobRequirements') || []
-  const { errors, dirtyFields, touchedFields } = formState
 
   const addCustomDepartment = () => {
     if (customDepartment.trim()) {
@@ -103,16 +108,25 @@ export function PositionDetailsStep() {
               />
               <div className='grid grid-cols-2 gap-4'>
                 <InputField
-                  name='jobLocation.city'
-                  label='City'
-                  placeholder='San Francisco'
-                  showIsRequired
-                />
-                <InputField
                   name='jobLocation.state'
                   label='State'
-                  placeholder='CA'
+                  placeholder='Select a state'
                   showIsRequired
+                  type={INPUT_TYPES.SELECT}
+                  selectOptions={stateOptions}
+                />
+                <InputField
+                  name='jobLocation.city'
+                  label='City'
+                  placeholder={
+                    watch('jobLocation.state')
+                      ? 'Select a city'
+                      : 'Select state first'
+                  }
+                  showIsRequired
+                  type={INPUT_TYPES.SELECT}
+                  selectOptions={cityOptions}
+                  disabled={!watch('jobLocation.state')}
                 />
               </div>
               <InputField

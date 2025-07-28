@@ -1,28 +1,22 @@
 'use client'
 
-import { useState } from 'react'
-import { useFormContext } from 'react-hook-form'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { InputField } from '@/components/common/InputField'
-import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Plus, X, Mail, MessageSquare, Settings, Bell, Zap } from 'lucide-react'
 import { APPLICANT_STATUSES, INPUT_TYPES } from '@/interfaces'
+import { Bell, Mail, MessageSquare, Plus, Settings, X, Zap } from 'lucide-react'
+import { useState } from 'react'
+import { useFormContext } from 'react-hook-form'
 
 export function SettingsNotificationsStep() {
   const { watch, setValue } = useFormContext()
   const [newRecipient, setNewRecipient] = useState('')
-  const [newTemplate, setNewTemplate] = useState({
-    name: '',
-    type: 'email',
-    subject: '',
-    content: '',
-  })
-  const [newRule, setNewRule] = useState({ name: '', trigger: '', action: '' })
+  const [newCustomField, setNewCustomField] = useState('')
 
   const notifyOnApplication = watch('notifyOnApplication') || {
     enabled: false,
@@ -33,6 +27,7 @@ export function SettingsNotificationsStep() {
     recipients: [],
     time: '09:00',
   }
+  const customFields = watch('externalApplicationSetup.customFields') || []
 
   const addRecipient = (type: 'notify' | 'roundup') => {
     if (newRecipient.trim()) {
@@ -59,6 +54,21 @@ export function SettingsNotificationsStep() {
         : 'dailyRoundup.recipients',
       updatedRecipients
     )
+  }
+
+  const addCustomField = () => {
+    if (newCustomField.trim()) {
+      const updatedFields = [...customFields, newCustomField.trim()]
+      setValue('externalApplicationSetup.customFields', updatedFields)
+      setNewCustomField('')
+    }
+  }
+
+  const removeCustomField = (index: number) => {
+    const updatedFields = customFields.filter(
+      (_: any, i: number) => i !== index
+    )
+    setValue('externalApplicationSetup.customFields', updatedFields)
   }
 
   return (
@@ -126,11 +136,50 @@ export function SettingsNotificationsStep() {
                 <Label className='text-sm font-medium'>
                   Custom Application Fields
                 </Label>
-                <Input placeholder='Add custom field (e.g., Portfolio URL)' />
-                <Button type='button' size='sm' variant='outline'>
-                  <Plus className='w-4 h-4 mr-2' />
-                  Add Field
-                </Button>
+                <div className='flex gap-2'>
+                  <Input
+                    placeholder='Add custom field (e.g., Portfolio URL)'
+                    value={newCustomField}
+                    onChange={(e) => setNewCustomField(e.target.value)}
+                    onKeyDown={(e) =>
+                      e.key === 'Enter' &&
+                      (e.preventDefault(), addCustomField())
+                    }
+                  />
+                  <Button
+                    type='button'
+                    size='sm'
+                    variant='outline'
+                    onClick={addCustomField}
+                  >
+                    <Plus className='w-4 h-4 mr-2' />
+                    Add Field
+                  </Button>
+                </div>
+
+                {customFields.length > 0 && (
+                  <div className='mt-3 space-y-2 pl-2 border-l-2 border-blue-100'>
+                    <p className='text-xs text-gray-500'>Custom fields:</p>
+                    <div className='flex flex-wrap gap-2'>
+                      {customFields.map((field: string, index: number) => (
+                        <Badge
+                          key={index}
+                          variant='secondary'
+                          className='flex items-center gap-1 text-sm py-1 px-2'
+                        >
+                          <span>{field}</span>
+                          <X
+                            className='w-3 h-3 cursor-pointer ml-1'
+                            onClick={() => removeCustomField(index)}
+                          />
+                        </Badge>
+                      ))}
+                    </div>
+                    <p className='text-xs text-gray-500 mt-2'>
+                      These fields will appear on your application form.
+                    </p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

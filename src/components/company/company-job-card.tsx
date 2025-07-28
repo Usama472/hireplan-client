@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card'
 import type { Job } from '@/interfaces'
 import { Briefcase, Calendar, DollarSign, MapPin } from 'lucide-react'
 import React from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 
 interface CompanyJobCardProps {
   job: Job
@@ -58,6 +59,9 @@ const getWorkplaceTypeIcon = (type: Job['workplaceType']) => {
 }
 
 const CompanyJobCard: React.FC<CompanyJobCardProps> = ({ job, onApply }) => {
+  const { slug } = useParams<{ slug: string }>()
+  const navigate = useNavigate()
+
   const location = job.jobLocation
     ? `${job.jobLocation.city}, ${job.jobLocation.state}`
     : 'Location not specified'
@@ -70,6 +74,13 @@ const CompanyJobCard: React.FC<CompanyJobCardProps> = ({ job, onApply }) => {
 
   const priorityStyle = getPriorityColor(job.jobStatus)
 
+  const handleApplyClick = () => {
+    const applyUrl = `/company/${slug}/job/${job.id}/apply`
+    navigate(applyUrl)
+
+    if (onApply) onApply()
+  }
+
   return (
     <Card
       style={{
@@ -80,7 +91,7 @@ const CompanyJobCard: React.FC<CompanyJobCardProps> = ({ job, onApply }) => {
           '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
         transition: 'all 0.3s ease',
         backgroundColor: '#ffffff',
-        marginTop: '2rem', // Added margin above each card
+        marginTop: '2rem',
       }}
       onMouseOver={(e) => {
         e.currentTarget.style.boxShadow =
@@ -104,7 +115,7 @@ const CompanyJobCard: React.FC<CompanyJobCardProps> = ({ job, onApply }) => {
         >
           <h3
             style={{
-              fontSize: '2.125rem', // Further increased from 1.875rem
+              fontSize: '2.125rem',
               fontWeight: 'bold',
               color: '#111827',
               lineHeight: '1.2',
@@ -118,8 +129,8 @@ const CompanyJobCard: React.FC<CompanyJobCardProps> = ({ job, onApply }) => {
               background: priorityStyle.background,
               color: priorityStyle.color,
               textTransform: 'capitalize',
-              fontSize: '1.125rem', // Further increased from 1rem
-              padding: '0.625rem 1rem', // Slightly larger padding
+              fontSize: '1.125rem',
+              padding: '0.625rem 1rem',
               borderRadius: '9999px',
               fontWeight: '600',
             }}
@@ -134,7 +145,7 @@ const CompanyJobCard: React.FC<CompanyJobCardProps> = ({ job, onApply }) => {
               marginBottom: '1.5rem',
               color: '#374151',
               fontWeight: '500',
-              fontSize: '1.5rem', // Further increased from 1.375rem
+              fontSize: '1.5rem',
             }}
           >
             {job.company}
@@ -154,13 +165,13 @@ const CompanyJobCard: React.FC<CompanyJobCardProps> = ({ job, onApply }) => {
               display: 'flex',
               alignItems: 'center',
               color: '#4b5563',
-              fontSize: '1.375rem', // Further increased from 1.25rem
+              fontSize: '1.375rem',
             }}
           >
             <MapPin
               style={{
-                height: '1.75rem', // Further increased from 1.5rem
-                width: '1.75rem', // Further increased from 1.5rem
+                height: '1.75rem',
+                width: '1.75rem',
                 marginRight: '0.875rem',
                 color: '#6b7280',
               }}
@@ -173,13 +184,13 @@ const CompanyJobCard: React.FC<CompanyJobCardProps> = ({ job, onApply }) => {
               display: 'flex',
               alignItems: 'center',
               color: '#4b5563',
-              fontSize: '1.375rem', // Further increased from 1.25rem
+              fontSize: '1.375rem',
             }}
           >
             <Briefcase
               style={{
-                height: '1.75rem', // Further increased from 1.5rem
-                width: '1.75rem', // Further increased from 1.5rem
+                height: '1.75rem',
+                width: '1.75rem',
                 marginRight: '0.875rem',
                 color: '#6b7280',
               }}
@@ -194,7 +205,7 @@ const CompanyJobCard: React.FC<CompanyJobCardProps> = ({ job, onApply }) => {
               display: 'flex',
               alignItems: 'center',
               color: '#4b5563',
-              fontSize: '1.375rem', // Further increased from 1.25rem
+              fontSize: '1.375rem',
             }}
           >
             <span style={{ marginRight: '0.875rem', fontSize: '1.75rem' }}>
@@ -210,13 +221,13 @@ const CompanyJobCard: React.FC<CompanyJobCardProps> = ({ job, onApply }) => {
               display: 'flex',
               alignItems: 'center',
               color: '#4b5563',
-              fontSize: '1.375rem', // Further increased from 1.25rem
+              fontSize: '1.375rem',
             }}
           >
             <DollarSign
               style={{
-                height: '1.75rem', // Further increased from 1.5rem
-                width: '1.75rem', // Further increased from 1.5rem
+                height: '1.75rem',
+                width: '1.75rem',
                 marginRight: '0.875rem',
                 color: '#6b7280',
               }}
@@ -235,8 +246,8 @@ const CompanyJobCard: React.FC<CompanyJobCardProps> = ({ job, onApply }) => {
               WebkitLineClamp: 2,
               WebkitBoxOrient: 'vertical',
               overflow: 'hidden',
-              fontSize: '1.375rem', // Further increased from 1.25rem
-              lineHeight: '1.7', // Slightly increased for better readability
+              fontSize: '1.375rem',
+              lineHeight: '1.7',
             }}
           >
             {job.jobDescription.replace(/<[^>]*>?/gm, '')}
@@ -258,13 +269,13 @@ const CompanyJobCard: React.FC<CompanyJobCardProps> = ({ job, onApply }) => {
               display: 'flex',
               alignItems: 'center',
               color: '#6b7280',
-              fontSize: '1.25rem', // Further increased from 1.125rem
+              fontSize: '1.25rem',
             }}
           >
             <Calendar
               style={{
-                height: '1.5rem', // Further increased from 1.375rem
-                width: '1.5rem', // Further increased from 1.375rem
+                height: '1.5rem',
+                width: '1.5rem',
                 marginRight: '0.625rem',
               }}
             />
@@ -272,16 +283,16 @@ const CompanyJobCard: React.FC<CompanyJobCardProps> = ({ job, onApply }) => {
           </div>
 
           <Button
-            onClick={onApply}
+            onClick={handleApplyClick}
             style={{
               backgroundColor: '#2563eb',
               color: 'white',
-              paddingLeft: '2rem', // Further increased from 1.75rem
-              paddingRight: '2rem', // Further increased from 1.75rem
-              paddingTop: '0.875rem', // Further increased from 0.75rem
-              paddingBottom: '0.875rem', // Further increased from 0.75rem
+              paddingLeft: '2rem',
+              paddingRight: '2rem',
+              paddingTop: '0.875rem',
+              paddingBottom: '0.875rem',
               borderRadius: '0.5rem',
-              fontSize: '1.375rem', // Further increased from 1.25rem
+              fontSize: '1.375rem',
               fontWeight: '600',
               boxShadow:
                 '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',

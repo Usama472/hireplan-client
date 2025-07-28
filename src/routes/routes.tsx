@@ -11,6 +11,7 @@ import {
 import { ROUTES } from '@/constants/routes'
 import type { AppRoutesType } from '@/interfaces'
 import CompanyPage from '@/pages/company'
+import JobApplicationPage from '@/pages/company/apply'
 import ContactPage from '@/pages/contact'
 import DashboardPage from '@/pages/dashboard/jobs'
 import CreateJobPage from '@/pages/dashboard/jobs/create'
@@ -84,6 +85,12 @@ export const appRoutes: AppRoutesType[] = [
     id: COMPANY_TEXT,
     url: ROUTES.COMPANY,
     element: <CompanyPage />,
+    isPrivate: false,
+  },
+  {
+    id: 'apply-job',
+    url: ROUTES.APPLY_JOB,
+    element: <JobApplicationPage />,
     isPrivate: false,
   },
 ]

@@ -15,4 +15,5 @@ export const ROUTES = {
   DASHBOARD: DASHBOARD_ROUTES,
   CONTACT: '/contact',
   COMPANY: '/company/:slug',
+  APPLY_JOB: '/company/:slug/job/:jobId/apply',
 }
