@@ -7,9 +7,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { InputField } from "@/components/common/InputField";
 import { INPUT_TYPES } from "@/interfaces";
-import { Building2 } from "lucide-react";
+import { Building2, RefreshCw } from "lucide-react";
+import { useState } from "react";
+import useAuthSessionContext from "@/lib/context/AuthSessionContext";
+import { scrapeWebsite } from "@/http/scrape/api";
+import { toast } from "sonner";
 
 const industryOptions = [
   { value: "technology", label: "Technology" },
@@ -41,6 +46,69 @@ const countryOptions = [
 ];
 
 export function CompanyInfoForm() {
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const { data: authSession } = useAuthSessionContext();
+
+  // Helper function to save scraped data to backend
+  const saveScrapedDataToCache = async (companyId: string, data: any) => {
+    try {
+      await fetch(`${import.meta.env.VITE_API_URL || 'http://45.33.83.41:5000/v1'}/company/${companyId}/scraped-data`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          header: data.header || '',
+          footer: data.footer || '',
+          title: data.title || '',
+          favicon: data.favicon || null,
+          mainColor: data.mainColor || null,
+          cssLinks: data.cssLinks || [],
+        }),
+      });
+    } catch (error) {
+      console.error('Failed to save scraped data to cache:', error);
+      throw error;
+    }
+  };
+
+  const handleRefreshWebsiteData = async () => {
+    try {
+      setIsRefreshing(true);
+      
+      const company = authSession?.user?.company;
+      const websiteUrl = company?.websiteUrl;
+      const companyId = company?.id;
+
+      if (!websiteUrl || !companyId) {
+        toast.error("Please make sure your website URL is saved first");
+        return;
+      }
+
+      toast.info("Refreshing website data...", {
+        description: "This may take a few moments"
+      });
+
+      // Perform live scraping
+      const response = await scrapeWebsite(companyId, websiteUrl);
+      
+      // Save to cache
+      await saveScrapedDataToCache(companyId, response);
+      
+      toast.success("Website data refreshed successfully!", {
+        description: "Your company page will now show the updated website design"
+      });
+
+    } catch (error) {
+      console.error('Error refreshing website data:', error);
+      toast.error("Failed to refresh website data", {
+        description: "Please try again later"
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   return (
     <Card className="border-0 shadow-lg shadow-gray-100/50">
       <CardHeader className="pb-6">
@@ -62,12 +130,28 @@ export function CompanyInfoForm() {
             placeholder="Enter company name"
             label="Company Name"
           />
-          <InputField
-            name="company.websiteUrl"
-            type={INPUT_TYPES.TEXT}
-            placeholder="https://example.com"
-            label="Website URL"
-          />
+          <div className="space-y-2">
+            <InputField
+              name="company.websiteUrl"
+              type={INPUT_TYPES.TEXT}
+              placeholder="https://example.com"
+              label="Website URL"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleRefreshWebsiteData}
+              disabled={isRefreshing}
+              className="w-full sm:w-auto"
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+              {isRefreshing ? 'Refreshing...' : 'Refresh Website Data'}
+            </Button>
+            <p className="text-xs text-gray-500">
+              This will update your company page with the latest website design and content
+            </p>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

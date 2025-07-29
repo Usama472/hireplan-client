@@ -30,6 +30,28 @@ const CompanyPage: React.FC = () => {
   const [domainName, setDomainName] = useState<string | null>(null)
   const [jobs, setJobs] = useState<Job[]>([])
 
+  // Helper function to save scraped data to backend
+  const saveScrapedDataToCache = async (companyId: string, data: any) => {
+    try {
+      await fetch(`${import.meta.env.VITE_API_URL || 'http://45.33.83.41:5000/v1'}/company/${companyId}/scraped-data`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          header: data.header || '',
+          footer: data.footer || '',
+          title: data.title || '',
+          favicon: data.favicon || null,
+          mainColor: data.mainColor || null,
+          cssLinks: data.cssLinks || [],
+        }),
+      });
+    } catch (error) {
+      console.error('Failed to save scraped data to cache:', error);
+    }
+  };
+
   useEffect(() => {
     const fetchWebsiteData = async () => {
       try {
@@ -50,50 +72,105 @@ const CompanyPage: React.FC = () => {
         setDomainName(domainName)
         setCompanyId(company.id)
 
-        const response = await scrapeWebsite(company.id, websiteUrl)
-        setScrapedData({
-          ...response,
-          domain: domainName,
-        })
-
-        const jobs = response?.jobs?.results || []
-        setJobs(jobs)
-
-        if (response.cssLinks && Array.isArray(response.cssLinks)) {
-          response.cssLinks.forEach((cssLink: string) => {
-            if (!document.querySelector(`link[href="${cssLink}"]`)) {
-              const linkElement = document.createElement('link')
-              linkElement.rel = 'stylesheet'
-              linkElement.href = cssLink
-              linkElement.className = 'scraped-website-styles'
-              document.head.appendChild(linkElement)
-            }
+        // Check if we have cached scraped data - use it indefinitely until manually refreshed
+        if (company.scrapedData && company.scrapedData.header) {
+          console.log('Using cached scraped data')
+          setScrapedData({
+            ...company.scrapedData,
+            domain: domainName,
           })
-        }
 
-        if (response.favicon) {
-          const existingFavicon = document.querySelector('link[rel="icon"]')
-          if (existingFavicon) {
-            existingFavicon.setAttribute('href', response.favicon)
-          } else {
-            const faviconLink = document.createElement('link')
-            faviconLink.rel = 'icon'
-            faviconLink.href = response.favicon
-            document.head.appendChild(faviconLink)
+          // Get jobs from the cached data or fetch separately
+          const jobs = company.scrapedData.jobs?.results || []
+          setJobs(jobs)
+
+          // Apply cached styles and metadata
+          if (company.scrapedData.cssLinks && Array.isArray(company.scrapedData.cssLinks)) {
+            company.scrapedData.cssLinks.forEach((cssLink: string) => {
+              if (!document.querySelector(`link[href="${cssLink}"]`)) {
+                const linkElement = document.createElement('link')
+                linkElement.rel = 'stylesheet'
+                linkElement.href = cssLink
+                linkElement.className = 'scraped-website-styles'
+                document.head.appendChild(linkElement)
+              }
+            })
           }
-        }
 
-        if (response.mainColor) {
-          const metaThemeColor = document.querySelector(
-            'meta[name="theme-color"]'
-          )
-          if (metaThemeColor) {
-            metaThemeColor.setAttribute('content', response.mainColor)
-          } else {
-            const themeColorMeta = document.createElement('meta')
-            themeColorMeta.name = 'theme-color'
-            themeColorMeta.content = response.mainColor
-            document.head.appendChild(themeColorMeta)
+          if (company.scrapedData.favicon) {
+            const existingFavicon = document.querySelector('link[rel="icon"]')
+            if (existingFavicon) {
+              existingFavicon.setAttribute('href', company.scrapedData.favicon)
+            } else {
+              const faviconLink = document.createElement('link')
+              faviconLink.rel = 'icon'
+              faviconLink.href = company.scrapedData.favicon
+              document.head.appendChild(faviconLink)
+            }
+          }
+
+          if (company.scrapedData.mainColor) {
+            const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+            if (metaThemeColor) {
+              metaThemeColor.setAttribute('content', company.scrapedData.mainColor)
+            } else {
+              const themeColorMeta = document.createElement('meta')
+              themeColorMeta.name = 'theme-color'
+              themeColorMeta.content = company.scrapedData.mainColor
+              document.head.appendChild(themeColorMeta)
+            }
+          }
+        } else {
+          console.log('No cached data or cache is stale, performing live scraping')
+          
+          // Fallback to live scraping
+          const response = await scrapeWebsite(company.id, websiteUrl)
+          setScrapedData({
+            ...response,
+            domain: domainName,
+          })
+
+          const jobs = response?.jobs?.results || []
+          setJobs(jobs)
+
+          // Save the scraped data to cache for future use
+          await saveScrapedDataToCache(company.id, response)
+
+          // Apply scraped styles and metadata
+          if (response.cssLinks && Array.isArray(response.cssLinks)) {
+            response.cssLinks.forEach((cssLink: string) => {
+              if (!document.querySelector(`link[href="${cssLink}"]`)) {
+                const linkElement = document.createElement('link')
+                linkElement.rel = 'stylesheet'
+                linkElement.href = cssLink
+                linkElement.className = 'scraped-website-styles'
+                document.head.appendChild(linkElement)
+              }
+            })
+          }
+
+          if (response.favicon) {
+            const existingFavicon = document.querySelector('link[rel="icon"]')
+            if (existingFavicon) {
+              existingFavicon.setAttribute('href', response.favicon)
+            } else {
+              const faviconLink = document.createElement('link')
+              faviconLink.rel = 'icon'
+              faviconLink.href = response.favicon
+              document.head.appendChild(faviconLink)
+            }
+          }
+
+          if (response.mainColor) {
+            const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+            if (metaThemeColor) {
+              metaThemeColor.setAttribute('content', response.mainColor)
+            } else {
+              const themeColorMeta = document.createElement('meta')
+              themeColorMeta.name = 'theme-color'
+              themeColorMeta.content = response.mainColor
+              document.head.appendChild(themeColorMeta)
+            }
           }
         }
       } catch (err) {
@@ -118,20 +195,26 @@ const CompanyPage: React.FC = () => {
   const handleRetry = () => {
     setLoading(true)
     setError(null)
-    if (websiteUrl && companyId)
-      scrapeWebsite(companyId, websiteUrl)
-        .then((response) => {
-          setScrapedData({
-            ...response,
-            domain: domainName,
-          })
-          setLoading(false)
+
+    scrapeWebsite(companyId, websiteUrl)
+      .then(async (response) => {
+        setScrapedData({
+          ...response,
+          domain: domainName,
         })
-        .catch((err) => {
-          console.error('Retry failed:', err)
-          setError('Failed to load website content after retry')
-          setLoading(false)
-        })
+        
+        // Save the new scraped data to cache
+        if (companyId) {
+          await saveScrapedDataToCache(companyId, response)
+        }
+        
+        setLoading(false)
+      })
+      .catch((err) => {
+        console.error('Retry failed:', err)
+        setError('Failed to load website content after retry')
+        setLoading(false)
+      })
   }
 
   if (loading) {
