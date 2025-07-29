@@ -281,12 +281,7 @@ export interface RecruiterRegistrationInput {
   password: string
   paymentPlan: string
   companyRole: string
-  minimumMatchScore: number
-  autoRejectThreshold: number
-  experienceWeight: number
-  educationWeight: number
-  certificationsWeight: number
-  keywordsWeight: number
+  jobCategory: string
   companyName: string
   websiteUrl?: string
   industry: string

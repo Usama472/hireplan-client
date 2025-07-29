@@ -79,7 +79,87 @@ export default function CreateJob() {
     mode: 'onChange',
   })
 
-  const { trigger, handleSubmit, clearErrors } = form
+  const { trigger, handleSubmit, clearErrors, setValue } = form
+
+  // Load test data function
+  const loadTestData = () => {
+    const testData = {
+      jobTitle: 'Senior Full Stack Developer - Remote',
+      jobBoardTitle: 'Senior Full Stack Developer (React/Node.js)',
+      jobDescription: `We're seeking an experienced Full Stack Developer to join our growing tech team. You'll work on cutting-edge web applications using React, Node.js, and modern cloud technologies.
+
+Key Responsibilities:
+• Develop and maintain web applications using React and Node.js
+• Collaborate with cross-functional teams to define and implement new features
+• Optimize applications for maximum speed and scalability
+• Participate in code reviews and technical discussions
+• Mentor junior developers and contribute to best practices
+
+Requirements:
+• 5+ years of experience in full-stack development
+• Strong proficiency in React, Node.js, and TypeScript
+• Experience with PostgreSQL and MongoDB
+• Familiarity with AWS or similar cloud platforms
+• Strong problem-solving skills and attention to detail
+
+We offer competitive compensation, comprehensive benefits, and a collaborative remote-first culture.`,
+      backgroundScreeningDisclaimer: true,
+      jobStatus: 'high',
+      workplaceType: 'remote',
+      jobLocation: {
+        address: '123 Tech Street',
+        city: 'San Francisco',
+        state: 'CA',
+        zipCode: '94105',
+      },
+      employmentType: 'full-time',
+      educationRequirement: 'Bachelor\'s degree in Computer Science or related field',
+      department: 'Engineering',
+      payType: 'salary',
+      payRate: {
+        type: 'range',
+        minimum: 120000,
+        maximum: 160000,
+      },
+      positionsToHire: 2,
+      jobRequirements: [
+        'React.js proficiency',
+        'Node.js experience',
+        'TypeScript knowledge',
+        'Database design skills',
+        'Cloud platform experience'
+      ],
+      startDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 1 week from now
+      endDate: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 2 months from now
+      notifyOnApplication: {
+        enabled: true,
+        recipients: [
+          { email: 'hr@company.com', name: 'HR Team' },
+          { email: 'manager@company.com', name: 'Hiring Manager' }
+        ],
+      },
+      dailyRoundup: {
+        enabled: true,
+        recipients: [
+          { email: 'hr@company.com', name: 'HR Team' }
+        ],
+        time: '09:00',
+      },
+      externalApplicationSetup: {
+        customFields: [
+          { name: 'Portfolio URL', type: 'text', required: false },
+          { name: 'GitHub Profile', type: 'text', required: false }
+        ],
+      },
+    }
+
+    // Set all form values
+    Object.keys(testData).forEach((key) => {
+      setValue(key as any, (testData as any)[key])
+    })
+
+    toast.success('Test data loaded successfully!')
+  }
 
   const stepFields = {
     1: ['jobTitle', 'jobBoardTitle', 'jobDescription'],
@@ -182,6 +262,16 @@ export default function CreateJob() {
                 Create a comprehensive job posting to attract the right
                 candidates
               </p>
+            </div>
+            <div className='flex gap-2'>
+              <Button
+                type='button'
+                variant='outline'
+                onClick={loadTestData}
+                className='bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100'
+              >
+                🧪 Load Test Data
+              </Button>
             </div>
           </div>
         </div>

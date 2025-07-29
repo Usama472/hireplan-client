@@ -15,13 +15,20 @@ export const router = createBrowserRouter(
   createRoutesFromElements(
     <Fragment>
       {appRoutes?.map(({ element, isPrivate, url, id }) => {
+        // For company routes, respect the isPrivate flag
         if (url.startsWith('/company/')) {
           return (
             <Route
               key={id}
               caseSensitive
               path={url}
-              element={<CompanyRoute>{element}</CompanyRoute>}
+              element={
+                isPrivate ? (
+                  <CompanyRoute>{element}</CompanyRoute>
+                ) : (
+                  <PublicRoute>{element}</PublicRoute>
+                )
+              }
             />
           )
         }

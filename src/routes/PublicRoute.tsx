@@ -21,7 +21,8 @@ const PublicRoute: FC<PublicRouteProps> = ({ children }) => {
     return <LoadingScreen />;
   }
 
-  const shouldHideLayout = hideLayoutFor.includes(path);
+  // Hide layout for specific routes and all company routes
+  const shouldHideLayout = hideLayoutFor.includes(path) || path.startsWith("/company/");
 
   return shouldHideLayout ? (
     <>{children}</>

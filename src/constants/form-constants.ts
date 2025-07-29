@@ -12,12 +12,7 @@ export const FORM_STEPS = [
     title: 'Choose Your Plan',
     description: 'Select the right plan for you',
   },
-  {
-    id: 4,
-    title: 'AI Preferences',
-    description: 'Configure matching criteria',
-  },
-  { id: 5, title: 'Review & Submit', description: 'Confirm your information' },
+  { id: 4, title: 'Review & Submit', description: 'Confirm your information' },
 ]
 
 export const COMPANY_SIZES: SelectOption[] = [

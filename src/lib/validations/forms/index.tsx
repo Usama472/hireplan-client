@@ -13,7 +13,8 @@ export const personalInfoSchema = z.object({
       /[^a-zA-Z0-9]/,
       'Password must contain at least one special character'
     ),
-  jobTitle: z.string().min(2, 'Job title must be at least 2 characters'),
+  jobCategory: z.string().min(1, 'Please select a role category'),
+  jobTitle: z.string().min(1, 'Please select a job title'),
 })
 
 export const companyInfoSchema = z.object({
@@ -37,19 +38,9 @@ export const planSelectionSchema = z.object({
   }),
 })
 
-export const aiPreferencesSchema = z.object({
-  minimumMatchScore: z.number().min(0).max(100),
-  autoRejectThreshold: z.number().min(0).max(100),
-  experienceWeight: z.number().min(0).max(100),
-  educationWeight: z.number().min(0).max(100),
-  certificationsWeight: z.number().min(0).max(100),
-  keywordsWeight: z.number().min(0).max(100),
-})
-
 export const fullFormSchema = personalInfoSchema
   .merge(companyInfoSchema)
   .merge(planSelectionSchema)
-  .merge(aiPreferencesSchema)
 
 export const profileFormSchema = z.object({
   // Personal Information

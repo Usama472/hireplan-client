@@ -1,7 +1,7 @@
 import { clientAccessToken } from '@/constants'
 import axios from 'axios'
 
-export const API_URL = 'http://localhost:9009/v1'
+export const API_URL = import.meta.env.VITE_API_URL || 'http://45.33.83.41:5000/v1'
 
 export const axiosApi = axios.create({
   baseURL: API_URL,

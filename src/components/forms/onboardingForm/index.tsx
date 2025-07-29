@@ -1,6 +1,6 @@
 "use client";
 
-import { AIPreferencesStep } from "@/components/forms/onboardingForm/aiPreferenceStep";
+
 import { CompanyInfoStep } from "@/components/forms/onboardingForm/companyInfoStep";
 import { PersonalInfoStep } from "@/components/forms/onboardingForm/personalInfoStep";
 import { PlanSelectionStep } from "@/components/forms/onboardingForm/planSelectionStep";
@@ -36,6 +36,7 @@ export default function RecruiterOnboardingForm() {
       lastName: "",
       email: "",
       password: "",
+      jobCategory: "",
       jobTitle: "",
       companyName: "",
       websiteDomain: "",
@@ -46,12 +47,7 @@ export default function RecruiterOnboardingForm() {
       state: "",
       zipCode: "",
       plan: "starter" as const,
-      minimumMatchScore: 70,
-      autoRejectThreshold: 30,
-      experienceWeight: 40,
-      educationWeight: 25,
-      certificationsWeight: 20,
-      keywordsWeight: 15,
+
     },
     mode: "onChange",
     criteriaMode: "all",
@@ -60,7 +56,7 @@ export default function RecruiterOnboardingForm() {
   const { trigger, handleSubmit, clearErrors } = form;
 
   const stepFields = {
-    1: ["firstName", "lastName", "email", "password", "jobTitle"],
+    1: ["firstName", "lastName", "email", "password", "jobCategory", "jobTitle"],
     2: [
       "companyName",
       "industry",
@@ -71,21 +67,13 @@ export default function RecruiterOnboardingForm() {
       "zipCode",
     ],
     3: ["plan"],
-    4: [
-      "minimumMatchScore",
-      "autoRejectThreshold",
-      "experienceWeight",
-      "educationWeight",
-      "certificationsWeight",
-      "keywordsWeight",
-    ],
-    5: [],
+    4: [],
   };
 
   const handleNext = async () => {
     clearErrors();
 
-    if (currentStep === 5) {
+    if (currentStep === 4) {
       return;
     }
 
@@ -133,12 +121,7 @@ export default function RecruiterOnboardingForm() {
         password: formData.password,
         paymentPlan: formData.plan,
         companyRole: formData.jobTitle,
-        minimumMatchScore: formData.minimumMatchScore,
-        autoRejectThreshold: formData.autoRejectThreshold,
-        experienceWeight: formData.experienceWeight,
-        educationWeight: formData.educationWeight,
-        certificationsWeight: formData.certificationsWeight,
-        keywordsWeight: formData.keywordsWeight,
+        jobCategory: formData.jobCategory,
         companyName: formData.companyName,
         websiteUrl: formData.websiteDomain,
         industry: formData.industry,
@@ -169,8 +152,6 @@ export default function RecruiterOnboardingForm() {
       case 3:
         return <PlanSelectionStep />;
       case 4:
-        return <AIPreferencesStep />;
-      case 5:
         return <ReviewSubmitStep />;
       default:
         return <PersonalInfoStep />;
@@ -190,7 +171,7 @@ export default function RecruiterOnboardingForm() {
             <form
               onSubmit={(e) => {
                 console.log("Form submit event triggered");
-                if (currentStep !== 5) {
+                if (currentStep !== 4) {
                   e.preventDefault();
                   console.log("Prevented form submission on non-final step");
                   return;
