@@ -48,20 +48,10 @@ export interface PlanSelection {
   plan: 'starter' | 'professional' | 'enterprise'
 }
 
-export interface AIPreferences {
-  minimumMatchScore: number
-  autoRejectThreshold: number
-  experienceWeight: number
-  educationWeight: number
-  certificationsWeight: number
-  keywordsWeight: number
-}
-
 export interface FormData
   extends PersonalInfo,
     CompanyInfo,
-    PlanSelection,
-    AIPreferences {}
+    PlanSelection {}
 
 export interface StepProps {
   onNext: () => void

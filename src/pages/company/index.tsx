@@ -1,11 +1,12 @@
 import CompanyJobCard from '@/components/company/company-job-card'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import API from '@/http'
 import { scrapeWebsite } from '@/http/scrape/api'
 import type { Job } from '@/interfaces'
-import { Building } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
+import { Building, MapPin } from 'lucide-react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 
 interface ScrapedWebsite {
@@ -29,11 +30,36 @@ const CompanyPage: React.FC = () => {
   const [websiteUrl, setWebsiteUrl] = useState<string | null>(null)
   const [domainName, setDomainName] = useState<string | null>(null)
   const [jobs, setJobs] = useState<Job[]>([])
+  const [selectedLocation, setSelectedLocation] = useState<string>('all')
+
+  // Get unique locations from jobs for filtering
+  const uniqueLocations = useMemo(() => {
+    const jobsWithLocation = jobs.filter(job => 
+      job.jobLocation && job.jobLocation.city && job.jobLocation.state
+    )
+    
+    const locations = jobsWithLocation.map(job => `${job.jobLocation.city}, ${job.jobLocation.state}`)
+    return [...new Set(locations)].sort()
+  }, [jobs])
+
+  // Filter jobs based on selected location
+  const filteredJobs = useMemo(() => {
+    if (selectedLocation === 'all') {
+      return jobs
+    }
+    return jobs.filter(job => {
+      if (!job.jobLocation || !job.jobLocation.city || !job.jobLocation.state) {
+        return false
+      }
+      const jobLocation = `${job.jobLocation.city}, ${job.jobLocation.state}`
+      return jobLocation === selectedLocation
+    })
+  }, [jobs, selectedLocation])
 
   // Helper function to save scraped data to backend
   const saveScrapedDataToCache = async (companyId: string, data: any) => {
     try {
-      await fetch(`${import.meta.env.VITE_API_URL || 'http://45.33.83.41:5000/v1'}/company/${companyId}/scraped-data`, {
+              await fetch(`${import.meta.env.VITE_API_URL || 'https://hireplan.co/api/v1'}/company/${companyId}/scraped-data`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -124,6 +150,9 @@ const CompanyPage: React.FC = () => {
           console.log('No cached data or cache is stale, performing live scraping')
           
           // Fallback to live scraping
+          if (!websiteUrl) {
+            throw new Error('Website URL is required for scraping')
+          }
           const response = await scrapeWebsite(company.id, websiteUrl)
           setScrapedData({
             ...response,
@@ -196,6 +225,12 @@ const CompanyPage: React.FC = () => {
     setLoading(true)
     setError(null)
 
+    if (!companyId || !websiteUrl) {
+      setError('Missing company information for retry')
+      setLoading(false)
+      return
+    }
+
     scrapeWebsite(companyId, websiteUrl)
       .then(async (response) => {
         setScrapedData({
@@ -255,12 +290,83 @@ const CompanyPage: React.FC = () => {
             className='website-header w-full'
             dangerouslySetInnerHTML={{ __html: scrapedData.header }}
           />
-        )}
-        <div className='container mx-auto px-4 py-10 m-5'>
+                )}
+        <div className='container mx-auto px-4 py-6'>
+          {/* Location Filter */}
+          {jobs.length > 0 && (
+            <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4'>
+              <div>
+                <h2 className='text-2xl font-bold text-gray-900'>Open Positions</h2>
+                <p className='text-gray-600 mt-1'>
+                  {selectedLocation === 'all' 
+                    ? `${jobs.length} total jobs available` 
+                    : `${filteredJobs.length} jobs in ${selectedLocation}`
+                  }
+                </p>
+              </div>
+              
+              <div className='flex items-center gap-2'>
+                <MapPin className='h-4 w-4 text-gray-400' />
+                <Select value={selectedLocation} onValueChange={setSelectedLocation}>
+                  <SelectTrigger className='w-52'>
+                    <SelectValue placeholder='All locations' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value='all'>
+                      All locations ({jobs.length})
+                    </SelectItem>
+                    {uniqueLocations.map((location) => {
+                      const jobCount = jobs.filter(job => 
+                        job.jobLocation && 
+                        `${job.jobLocation.city}, ${job.jobLocation.state}` === location
+                      ).length
+                      return (
+                        <SelectItem key={location} value={location}>
+                          {location} ({jobCount})
+                        </SelectItem>
+                      )
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
+          
+          {/* Jobs Grid */}
           <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
-            {jobs.map((job) => (
-              <CompanyJobCard key={job.id} job={job} />
-            ))}
+            {filteredJobs.length > 0 ? (
+              filteredJobs.map((job) => (
+                <CompanyJobCard key={job.id} job={job} />
+              ))
+            ) : selectedLocation !== 'all' ? (
+              <div className='col-span-full'>
+                <Card className='border-2 border-dashed border-gray-300 bg-gray-50'>
+                  <div className='text-center py-12 px-6'>
+                    <div className='w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4'>
+                      <MapPin className='h-6 w-6 text-gray-400' />
+                    </div>
+                    <h3 className='text-lg font-semibold text-gray-900 mb-2'>
+                      No jobs found in {selectedLocation}
+                    </h3>
+                    <p className='text-gray-600 mb-4 max-w-sm mx-auto text-sm'>
+                      Try selecting a different location or view all available positions.
+                    </p>
+                    <Button 
+                      onClick={() => setSelectedLocation('all')}
+                      variant='outline'
+                      size='sm'
+                    >
+                      <MapPin className='h-4 w-4 mr-2' />
+                      View All Jobs
+                    </Button>
+                  </div>
+                </Card>
+              </div>
+            ) : (
+              <div className='col-span-full text-center py-12'>
+                <p className='text-gray-500'>No jobs available at this time.</p>
+              </div>
+            )}
           </div>
         </div>
 

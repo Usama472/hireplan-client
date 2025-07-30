@@ -2,6 +2,7 @@ import { LoadingScreen } from "@/components/common/LoadingScreen";
 import { Footer } from "@/components/common/navigation/main/footer";
 import { Header } from "@/components/common/navigation/main/header";
 import useAuthSessionContext from "@/lib/context/AuthSessionContext";
+import { ScrollToTop } from "@/lib/hooks/ScrollToTop";
 import { type FC } from "react";
 import { useLocation } from "react-router-dom";
 
@@ -25,9 +26,13 @@ const PublicRoute: FC<PublicRouteProps> = ({ children }) => {
   const shouldHideLayout = hideLayoutFor.includes(path) || path.startsWith("/company/");
 
   return shouldHideLayout ? (
-    <>{children}</>
+    <>
+      <ScrollToTop />
+      {children}
+    </>
   ) : (
     <div>
+      <ScrollToTop />
       <Header />
       {children}
       <Footer />

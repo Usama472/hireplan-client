@@ -52,7 +52,7 @@ export function CompanyInfoForm() {
   // Helper function to save scraped data to backend
   const saveScrapedDataToCache = async (companyId: string, data: any) => {
     try {
-      await fetch(`${import.meta.env.VITE_API_URL || 'http://45.33.83.41:5000/v1'}/company/${companyId}/scraped-data`, {
+      await fetch(`${import.meta.env.VITE_API_URL || 'https://hireplan.co/api/v1'}/company/${companyId}/scraped-data`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

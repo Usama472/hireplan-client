@@ -14,19 +14,22 @@ export function PricingSection() {
   const navigate = useNavigate()
 
   return (
-    <section id='pricing' className='py-24 bg-gray-50'>
+    <section id='pricing' className='py-12 bg-gray-50'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-        <div className='text-center mb-20'>
+        <div className='text-center mb-12'>
           <div className='inline-flex items-center space-x-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-6 border border-blue-100'>
             <Zap className='h-4 w-4' />
             <span>Simple Pricing</span>
           </div>
           <h2 className='text-4xl sm:text-5xl font-bold text-gray-900 mb-6'>
-            Choose your plan
+            Plans that grow
+            <span className='block bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent'>
+              with your business
+            </span>
           </h2>
           <p className='text-xl text-gray-600 max-w-3xl mx-auto'>
             Start free, scale as you grow. All plans include our core AI
-            matching technology and 24/7 support.
+            matching technology, bias-free hiring, and 24/7 expert support.
           </p>
         </div>
 
@@ -76,16 +79,16 @@ export function PricingSection() {
                 <Button
                   className={`w-full py-3 text-base font-semibold transition-all duration-200 ${
                     plan.popular
-                      ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl'
+                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl'
                       : 'bg-gray-900 hover:bg-gray-800'
                   }`}
                   onClick={() =>
-                    navigate('/onboarding', {
-                      state: { planId: plan.id }, // optional: pass plan ID
+                    navigate('/signup', {
+                      state: { planId: plan.id },
                     })
                   }
                 >
-                  {plan.id === 'enterprise' ? 'Contact Sales' : 'Get Started'}
+                  {plan.id === 'enterprise' ? 'Contact Sales' : 'Start Free Trial'}
                 </Button>
               </CardContent>
             </Card>

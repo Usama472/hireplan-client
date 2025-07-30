@@ -13,6 +13,8 @@ import type { AppRoutesType } from '@/interfaces'
 import CompanyPage from '@/pages/company'
 import JobApplicationPage from '@/pages/company/apply'
 import ContactPage from '@/pages/contact'
+import PrivacyPage from '@/pages/privacy'
+import TermsPage from '@/pages/terms'
 import DashboardPage from '@/pages/dashboard/jobs'
 import CreateJobPage from '@/pages/dashboard/jobs/create'
 import JobDetailPage from '@/pages/dashboard/jobs/view'
@@ -23,6 +25,7 @@ import Home from '@/pages/home'
 // Auth Pages
 import Login from '@pages/auth/Login'
 import Signup from '@pages/auth/Signup'
+import ForgotPassword from '@pages/auth/ForgotPassword'
 
 export const appRoutes: AppRoutesType[] = [
   {
@@ -45,9 +48,9 @@ export const appRoutes: AppRoutesType[] = [
     isPrivate: false,
   },
   {
-    id: SIGNUP_TEXT,
-    url: ROUTES.SIGNUP,
-    element: <Signup />,
+    id: 'forgot-password',
+    url: ROUTES.FORGOT_PASSWORD,
+    element: <ForgotPassword />,
     isPrivate: false,
   },
   {
@@ -60,6 +63,18 @@ export const appRoutes: AppRoutesType[] = [
     id: CONTACT_TEXT,
     url: ROUTES.CONTACT,
     element: <ContactPage />,
+    isPrivate: false,
+  },
+  {
+    id: 'privacy',
+    url: ROUTES.PRIVACY,
+    element: <PrivacyPage />,
+    isPrivate: false,
+  },
+  {
+    id: 'terms',
+    url: ROUTES.TERMS,
+    element: <TermsPage />,
     isPrivate: false,
   },
   {

@@ -1,7 +1,7 @@
 import { clientAccessToken } from '@/constants'
 import axios from 'axios'
 
-export const API_URL = import.meta.env.VITE_API_URL || 'http://45.33.83.41:5000/v1'
+export const API_URL = import.meta.env.VITE_API_URL || 'https://hireplan.co/api/v1'
 
 export const axiosApi = axios.create({
   baseURL: API_URL,
@@ -24,8 +24,19 @@ axiosApi.interceptors.response.use(
     return response
   },
   (error) => {
+    // Only redirect to login for 401s that happen on authenticated routes,
+    // not during login attempts themselves
     if (error.response && error.response.status === 401) {
-      window.location.href = '/login'
+      const currentPath = window.location.pathname
+      const isLoginPage = currentPath === '/login'
+      const isSignupPage = currentPath === '/signup'
+      const isForgotPasswordPage = currentPath === '/forgot-password'
+      
+      // Don't redirect if user is already on auth pages
+      if (!isLoginPage && !isSignupPage && !isForgotPasswordPage) {
+        localStorage.removeItem(clientAccessToken)
+        window.location.href = '/login'
+      }
     }
     return Promise.reject(error)
   }

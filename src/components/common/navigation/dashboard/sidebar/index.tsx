@@ -11,17 +11,13 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 import { APP_NAME, ROUTES } from '@/constants'
+import useAuthSessionContext from '@/lib/context/AuthSessionContext'
 import { useNavigate } from 'react-router-dom'
 import { NavProjects } from './nav-projects'
 import { NavSecondary } from './nav-secondary'
 import { NavUser } from './nav-user'
 
-const data = {
-  user: {
-    name: 'usama',
-    email: 'usamakla1122@gmail.com',
-    avatar: '/avatars/shadcn.jpg',
-  },
+const staticData = {
   navSecondary: [
     {
       title: 'Support',
@@ -52,6 +48,17 @@ export const DashboardSidebar = ({
   ...props
 }: React.ComponentProps<typeof Sidebar>) => {
   const navigate = useNavigate()
+  const { data: authData } = useAuthSessionContext()
+
+  // Create user object from auth data with fallbacks
+  const user = {
+    name: authData?.user?.firstName && authData?.user?.lastName 
+      ? `${authData.user.firstName} ${authData.user.lastName}`
+      : authData?.user?.email?.split('@')[0] || 'User',
+    email: authData?.user?.email || 'user@example.com',
+    avatar: authData?.user?.avatar || '/avatars/default.jpg',
+  }
+
   return (
     <Sidebar
       variant='inset'
@@ -75,11 +82,11 @@ export const DashboardSidebar = ({
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent className='bg-gray-200'>
-        <NavProjects name='Jobs' projects={data.projects} />
-        <NavSecondary items={data.navSecondary} className='mt-auto' />
+        <NavProjects name='Jobs' projects={staticData.projects} />
+        <NavSecondary items={staticData.navSecondary} className='mt-auto' />
       </SidebarContent>
       <SidebarFooter className='bg-primary rounded-lg'>
-        <NavUser user={data.user} />
+        <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
   )

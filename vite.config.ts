@@ -6,6 +6,17 @@ import { defineConfig } from 'vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  server: {
+    host: '0.0.0.0',
+    port: 5173,
+    allowedHosts: [
+      'hireplan.co',
+      'www.hireplan.co',
+      'localhost',
+      '127.0.0.1',
+      '45.33.83.41'
+    ]
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

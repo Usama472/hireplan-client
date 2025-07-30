@@ -13,12 +13,33 @@ export function Header() {
   const navigation = [
     { name: "Features", href: "#features" },
     { name: "Pricing", href: "#pricing" },
-    { name: "Resources", href: "#resources" },
     { name: "Contact", href: "/contact" },
   ];
 
   const handleNavigation = (href: string) => {
-    navigate(href);
+    if (href.startsWith('#')) {
+      // Handle anchor links
+      if (window.location.pathname !== '/') {
+        // If not on home page, navigate to home page with hash
+        navigate('/' + href);
+        // Use setTimeout to ensure the navigation completes before scrolling
+        setTimeout(() => {
+          const element = document.querySelector(href);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+          }
+        }, 100);
+      } else {
+        // If on home page, scroll to section immediately
+        const element = document.querySelector(href);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+    } else {
+      // Handle regular navigation
+      navigate(href);
+    }
     setIsMenuOpen(false);
   };
 
@@ -117,7 +138,7 @@ export function Header() {
                 </Button>
                 <Button
                   className="w-full bg-gradient-to-r from-blue-600 to-blue-700"
-                  onClick={() => handleNavigation("/onboarding")}
+                  onClick={() => handleNavigation("/signup")}
                 >
                   Get Started
                 </Button>

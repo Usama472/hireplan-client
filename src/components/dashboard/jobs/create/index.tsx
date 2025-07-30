@@ -147,8 +147,8 @@ We offer competitive compensation, comprehensive benefits, and a collaborative r
       },
       externalApplicationSetup: {
         customFields: [
-          { name: 'Portfolio URL', type: 'text', required: false },
-          { name: 'GitHub Profile', type: 'text', required: false }
+          'Portfolio URL',
+          'GitHub Profile'
         ],
       },
     }

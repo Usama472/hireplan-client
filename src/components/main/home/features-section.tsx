@@ -64,19 +64,22 @@ export function FeaturesSection() {
   }
 
   return (
-    <section id='features' className='py-24 bg-gray-50'>
+    <section id='features' className='py-12 bg-gray-50'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-        <div className='text-center mb-20'>
+        <div className='text-center mb-12'>
           <div className='inline-flex items-center space-x-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-6 border border-blue-100'>
             <Zap className='h-4 w-4' />
             <span>Powerful Features</span>
           </div>
           <h2 className='text-4xl sm:text-5xl font-bold text-gray-900 mb-6'>
-            Everything you need to hire smarter
+            Everything you need to hire smarter,
+            <span className='block bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent'>
+              not harder
+            </span>
           </h2>
           <p className='text-xl text-gray-600 max-w-3xl mx-auto'>
             Our comprehensive AI platform streamlines every step of your hiring
-            process, from candidate discovery to final selection.
+            process, from candidate discovery to final selection. Transform weeks of work into days.
           </p>
         </div>
 

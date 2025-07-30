@@ -12,8 +12,11 @@ export const ROUTES = {
   HOME: '/',
   LOGIN: '/login',
   SIGNUP: '/signup',
+  FORGOT_PASSWORD: '/forgot-password',
   DASHBOARD: DASHBOARD_ROUTES,
   CONTACT: '/contact',
+  PRIVACY: '/privacy',
+  TERMS: '/terms',
   COMPANY: '/company/:slug',
   APPLY_JOB: '/company/:slug/job/:jobId/apply',
 }

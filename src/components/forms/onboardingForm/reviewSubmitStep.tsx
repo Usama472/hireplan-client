@@ -115,37 +115,6 @@ export function ReviewSubmitStep() {
             )}
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className='text-lg'>AI Preferences</CardTitle>
-          </CardHeader>
-          <CardContent className='space-y-3'>
-            <div>
-              <span className='text-sm font-medium text-gray-500'>
-                Minimum Match Score:
-              </span>
-              <p className='text-sm'>{formData.minimumMatchScore}%</p>
-            </div>
-            <div>
-              <span className='text-sm font-medium text-gray-500'>
-                Auto-Reject Threshold:
-              </span>
-              <p className='text-sm'>{formData.autoRejectThreshold}%</p>
-            </div>
-            <div className='pt-2'>
-              <span className='text-sm font-medium text-gray-500'>
-                Evaluation Weights:
-              </span>
-              <div className='grid grid-cols-2 gap-2 mt-1 text-xs'>
-                <div>Experience: {formData.experienceWeight}%</div>
-                <div>Education: {formData.educationWeight}%</div>
-                <div>Certifications: {formData.certificationsWeight}%</div>
-                <div>Keywords: {formData.keywordsWeight}%</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
       <Card className='border-green-200 bg-green-50'>

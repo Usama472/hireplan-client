@@ -3,11 +3,12 @@ import useAuthSessionContext from '@/lib/context/AuthSessionContext'
 import { ArrowRight, Star, TrendingUp, Users, Zap } from 'lucide-react'
 import { useNavigate } from 'react-router'
 
+
 export function HeroSection() {
   const navigate = useNavigate()
   const { status } = useAuthSessionContext()
   return (
-    <section className='relative pt-32 pb-20 overflow-hidden'>
+    <section className='relative pt-20 pb-12 overflow-hidden'>
       {/* Background Elements */}
       <div className='absolute inset-0 bg-gradient-to-br from-blue-50/50 via-white to-purple-50/30'></div>
       <div className='absolute top-20 left-10 w-72 h-72 bg-blue-100 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse'></div>
@@ -38,12 +39,35 @@ export function HeroSection() {
           {/* CTA Buttons */}
           {status !== 'authenticated' ? (
             <div className='flex flex-col sm:flex-row gap-4 justify-center items-center mb-12'>
-              <Button size='lg' onClick={() => navigate('/login')}>
+              <Button 
+                size='lg' 
+                className='bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 text-lg px-8 py-4 h-auto'
+                onClick={() => navigate('/signup')}
+              >
                 Start Free Trial
                 <ArrowRight className='ml-2 h-5 w-5' />
               </Button>
+              <Button 
+                variant='outline' 
+                size='lg'
+                className='border-2 border-gray-300 hover:border-gray-400 text-lg px-8 py-4 h-auto'
+                onClick={() => navigate('/contact')}
+              >
+                Watch Demo
+              </Button>
             </div>
-          ) : null}
+          ) : (
+            <div className='flex justify-center items-center mb-12'>
+              <Button 
+                size='lg' 
+                className='bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 text-lg px-8 py-4 h-auto'
+                onClick={() => navigate('/dashboard')}
+              >
+                Go to Dashboard
+                <ArrowRight className='ml-2 h-5 w-5' />
+              </Button>
+            </div>
+          )}
 
           {/* Trust Indicators */}
           <p className='text-sm text-gray-500 mb-16'>
@@ -75,6 +99,8 @@ export function HeroSection() {
             <div className='text-gray-600'>Successful hires</div>
           </div>
         </div>
+
+
       </div>
     </section>
   )

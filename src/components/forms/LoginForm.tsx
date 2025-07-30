@@ -115,18 +115,22 @@ export const LoginForm = () => {
               </FormItem>
             )}
           />
-          <Button
-            variant='link'
-            className='text-sm font-medium text-primary underline-offset-4 hover:underline px-0'
-            onClick={() => navigate('/forgot-password')}
-          >
-            Forgot password?
-          </Button>
         </div>
 
         <Button type='submit' className='w-full mt-5' disabled={isLoading}>
           {isLoading ? 'Signing in...' : 'Sign in'}
         </Button>
+
+        {/* Moved forgot password link below submit button to prevent accidental clicks */}
+        <div className='text-center mt-4'>
+          <Button
+            variant='link'
+            className='text-sm font-medium text-muted-foreground underline-offset-4 hover:underline px-0'
+            onClick={() => navigate('/forgot-password')}
+          >
+            Forgot password?
+          </Button>
+        </div>
       </form>
     </FormProvider>
   )
