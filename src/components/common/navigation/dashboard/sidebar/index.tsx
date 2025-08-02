@@ -1,5 +1,5 @@
-import { Frame, LifeBuoy, PieChart, Send } from 'lucide-react'
-import type * as React from 'react'
+import { Briefcase, LifeBuoy, Send, PlusCircle } from "lucide-react";
+import type * as React from "react";
 
 import {
   Sidebar,
@@ -9,85 +9,85 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from '@/components/ui/sidebar'
-import { APP_NAME, ROUTES } from '@/constants'
-import useAuthSessionContext from '@/lib/context/AuthSessionContext'
-import { useNavigate } from 'react-router-dom'
-import { NavProjects } from './nav-projects'
-import { NavSecondary } from './nav-secondary'
-import { NavUser } from './nav-user'
+} from "@/components/ui/sidebar";
+import { APP_NAME, ROUTES } from "@/constants";
+import useAuthSessionContext from "@/lib/context/AuthSessionContext";
+import { useNavigate } from "react-router-dom";
+import { NavProjects } from "./nav-projects";
+// import { NavSecondary } from "./nav-secondary";
+import { NavUser } from "./nav-user";
 
 const staticData = {
   navSecondary: [
     {
-      title: 'Support',
-      url: '#',
+      title: "Support",
+      url: "#",
       icon: LifeBuoy,
     },
     {
-      title: 'Feedback',
-      url: '#',
+      title: "Feedback",
+      url: "#",
       icon: Send,
     },
   ],
   projects: [
     {
-      name: 'Jobs',
+      name: "Jobs",
       url: ROUTES.DASHBOARD.MAIN,
-      icon: Frame,
+      icon: Briefcase, // Job-specific icon
     },
     {
-      name: 'Create Job',
+      name: "Create Job",
       url: ROUTES.DASHBOARD.CREATE_JOB,
-      icon: PieChart,
+      icon: PlusCircle, // Creation-specific icon
     },
   ],
-}
+};
 
 export const DashboardSidebar = ({
   ...props
 }: React.ComponentProps<typeof Sidebar>) => {
-  const navigate = useNavigate()
-  const { data: authData } = useAuthSessionContext()
+  const navigate = useNavigate();
+  const { data: authData } = useAuthSessionContext();
 
   // Create user object from auth data with fallbacks
   const user = {
-    name: authData?.user?.firstName && authData?.user?.lastName 
-      ? `${authData.user.firstName} ${authData.user.lastName}`
-      : authData?.user?.email?.split('@')[0] || 'User',
-    email: authData?.user?.email || 'user@example.com',
-    avatar: authData?.user?.avatar || '/avatars/default.jpg',
-  }
+    name:
+      authData?.user?.firstName && authData?.user?.lastName
+        ? `${authData.user.firstName} ${authData.user.lastName}`
+        : authData?.user?.email?.split("@")[0] || "User",
+    email: authData?.user?.email || "user@example.com",
+    avatar: authData?.user?.avatar || "/avatars/default.jpg",
+  };
 
   return (
     <Sidebar
-      variant='inset'
+      variant="inset"
       {...props}
-      collapsible='icon'
-      className='bg-gray-200'
+      collapsible="icon"
+      className="bg-gray-200"
     >
-      <SidebarHeader className='bg-gray-200'>
+      <SidebarHeader className="bg-gray-200">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size='lg' asChild>
-              <div onClick={() => navigate('/')} className='cursor-pointer'>
-                <img src='../../../../../public/logo.png' className='w-8' />
-                <div className='grid flex-1 text-left text-sm leading-tight'>
-                  <span className='truncate font-semibold'>{APP_NAME}</span>
-                  {/* <span className="truncate text-xs">Enterprise</span> */}
+            <SidebarMenuButton size="lg" asChild>
+              <div onClick={() => navigate("/")} className="cursor-pointer">
+                <img src="../../../../../public/logo.png" className="w-8" />
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-semibold">{APP_NAME}</span>
                 </div>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent className='bg-gray-200'>
-        <NavProjects name='Jobs' projects={staticData.projects} />
-        <NavSecondary items={staticData.navSecondary} className='mt-auto' />
+      <SidebarContent className="bg-gray-200">
+        <NavProjects name="Jobs" projects={staticData.projects} />
+        {/* <NavSecondary items={staticData.navSecondary} className='mt-auto' /> */}
       </SidebarContent>
-      <SidebarFooter className='bg-primary rounded-lg'>
+      <SidebarFooter className="bg-primary rounded-lg">
         <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
-  )
-}
+  );
+};

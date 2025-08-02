@@ -52,22 +52,27 @@ export function CompanyInfoForm() {
   // Helper function to save scraped data to backend
   const saveScrapedDataToCache = async (companyId: string, data: any) => {
     try {
-      await fetch(`${import.meta.env.VITE_API_URL || 'https://hireplan.co/api/v1'}/company/${companyId}/scraped-data`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          header: data.header || '',
-          footer: data.footer || '',
-          title: data.title || '',
-          favicon: data.favicon || null,
-          mainColor: data.mainColor || null,
-          cssLinks: data.cssLinks || [],
-        }),
-      });
+      await fetch(
+        `${
+          import.meta.env.VITE_API_URL || "https://hireplan.co/api/v1"
+        }/company/${companyId}/scraped-data`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            header: data.header || "",
+            footer: data.footer || "",
+            title: data.title || "",
+            favicon: data.favicon || null,
+            mainColor: data.mainColor || null,
+            cssLinks: data.cssLinks || [],
+          }),
+        }
+      );
     } catch (error) {
-      console.error('Failed to save scraped data to cache:', error);
+      console.error("Failed to save scraped data to cache:", error);
       throw error;
     }
   };
@@ -75,7 +80,7 @@ export function CompanyInfoForm() {
   const handleRefreshWebsiteData = async () => {
     try {
       setIsRefreshing(true);
-      
+
       const company = authSession?.user?.company;
       const websiteUrl = company?.websiteUrl;
       const companyId = company?.id;
@@ -86,23 +91,23 @@ export function CompanyInfoForm() {
       }
 
       toast.info("Refreshing website data...", {
-        description: "This may take a few moments"
+        description: "This may take a few moments",
       });
 
       // Perform live scraping
       const response = await scrapeWebsite(companyId, websiteUrl);
-      
+
       // Save to cache
       await saveScrapedDataToCache(companyId, response);
-      
-      toast.success("Website data refreshed successfully!", {
-        description: "Your company page will now show the updated website design"
-      });
 
+      toast.success("Website data refreshed successfully!", {
+        description:
+          "Your company page will now show the updated website design",
+      });
     } catch (error) {
-      console.error('Error refreshing website data:', error);
+      console.error("Error refreshing website data:", error);
       toast.error("Failed to refresh website data", {
-        description: "Please try again later"
+        description: "Please try again later",
       });
     } finally {
       setIsRefreshing(false);
@@ -123,14 +128,17 @@ export function CompanyInfoForm() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <InputField
-            name="company.companyName"
-            type={INPUT_TYPES.TEXT}
-            placeholder="Enter company name"
-            label="Company Name"
-          />
-          <div className="space-y-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <div className="col-span-2">
+            <InputField
+              name="company.companyName"
+              type={INPUT_TYPES.TEXT}
+              placeholder="Enter company name"
+              label="Company Name"
+            />
+          </div>
+
+          <div className="col-span-2">
             <InputField
               name="company.websiteUrl"
               type={INPUT_TYPES.TEXT}
@@ -145,16 +153,19 @@ export function CompanyInfoForm() {
               disabled={isRefreshing}
               className="w-full sm:w-auto"
             >
-              <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-              {isRefreshing ? 'Refreshing...' : 'Refresh Website Data'}
+              <RefreshCw
+                className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
+              />
+              {isRefreshing ? "Refreshing..." : "Refresh Website Data"}
             </Button>
-            <p className="text-xs text-gray-500">
-              This will update your company page with the latest website design and content
+            <p className="text-xs text-gray-500 mt-2">
+              This will update your company page with the latest website design
+              and content
             </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           <InputField
             type={INPUT_TYPES.SELECT}
             name="company.industry"
@@ -178,7 +189,7 @@ export function CompanyInfoForm() {
           label="Address"
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
           <InputField
             name="company.city"
             type={INPUT_TYPES.TEXT}

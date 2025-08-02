@@ -1,10 +1,20 @@
-import { Eye, EyeOff } from 'lucide-react'
-import { useState } from 'react'
-import type { FieldValues } from 'react-hook-form'
-import { useFormContext } from 'react-hook-form'
+import { Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
+import type { FieldValues } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 
-import Editor from '@/components/editor'
-import { Button } from '@/components/ui/button'
+// Add calendar imports
+import { Calendar as CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
+import Editor from "@/components/editor";
+import { Button } from "@/components/ui/button";
 import {
   FormControl,
   FormDescription,
@@ -12,20 +22,19 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import type { InputFieldProps } from '@/interfaces'
-import { INPUT_TYPES } from '@/interfaces'
-import { capitalizeText, cn } from '@/lib/utils'
-import { Textarea } from '@components/ui/textarea'
-// import TagCard from '../cards/TagCard'
+} from "@/components/ui/select";
+import type { InputFieldProps } from "@/interfaces";
+import { INPUT_TYPES } from "@/interfaces";
+import { capitalizeText, cn } from "@/lib/utils";
+import { Textarea } from "@components/ui/textarea";
 
 export const InputField = <TFieldValues extends FieldValues = FieldValues>({
   name,
@@ -41,56 +50,63 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
   description,
   editorRef,
 }: InputFieldProps<TFieldValues>) => {
-  const { control, formState } = useFormContext()
-  const [showPassword, setShowPassword] = useState(false)
-  const { errors, dirtyFields } = formState
+  const { control, formState } = useFormContext();
+  const [showPassword, setShowPassword] = useState(false);
+  const { errors, dirtyFields } = formState;
 
-  // Determine if this field has an error
-  const fieldError = name.split('.').reduce((acc: any, part) => {
-    return acc && acc[part] ? acc[part] : undefined
-  }, errors)
+  const fieldError = name.split(".").reduce((acc: any, part) => {
+    return acc && acc[part] ? acc[part] : undefined;
+  }, errors);
 
-  // Check if field is dirty
-  const isDirty = name.split('.').reduce((acc: any, part) => {
-    return acc && acc[part] !== undefined
-  }, dirtyFields)
+  const isDirty = name.split(".").reduce((acc: any, part) => {
+    return acc && acc[part] !== undefined;
+  }, dirtyFields);
 
   const renderFormLabel = (labelText?: string) => (
     <FormLabel
       className={cn(
-        'paragraph-medium text-dark400_light700',
-        fieldError && 'text-red-500'
+        "paragraph-medium text-dark400_light700",
+        fieldError && "text-red-500"
       )}
     >
-      {capitalizeText(labelText || '')}
-      {showIsRequired && <span className='text-red-400'>{` * `}</span>}
+      {capitalizeText(labelText || "")}
+      {showIsRequired && <span className="text-red-400">{` * `}</span>}
     </FormLabel>
-  )
+  );
 
   const commonInputProps = {
     placeholder,
     type:
       type === INPUT_TYPES.PASSWORD
         ? showPassword
-          ? 'text'
-          : 'password'
+          ? "text"
+          : "password"
         : type,
     defaultValue,
     disabled,
     className: cn(
-      'paragraph-regular background-light900_dark300 light-border-2 text-dark300_light700 no-focus min-h-12 resize-none rounded-1.5 border',
-      fieldError && 'border-red-500 focus:border-red-500'
+      "paragraph-regular background-light900_dark300 light-border-2 text-dark300_light700 no-focus min-h-12 resize-none rounded-1.5 border",
+      fieldError && "border-red-500 focus:border-red-500"
     ),
-  }
+  };
 
   return (
     <FormField
       control={control}
       name={name}
       render={({ field }) => {
-        const handleChange = (e: any) => {
-          field.onChange(e)
-        }
+        const handleChange = (
+          e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | string
+        ) => {
+          let value: any = typeof e === "string" ? e : e.target.value;
+
+          if (type === INPUT_TYPES.NUMBER) {
+            const parsed = parseFloat(value);
+            value = isNaN(parsed) ? "" : parsed;
+          }
+
+          field.onChange(value);
+        };
 
         switch (type) {
           case INPUT_TYPES.CHECKBOX:
@@ -98,26 +114,26 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
               <FormItem
                 className={cn(
                   className,
-                  'flex items-center w-full flex-col gap-2.5'
+                  "flex items-center w-full flex-col gap-2.5"
                 )}
               >
                 {renderFormLabel(label)}
                 <FormControl>
                   <Input
                     {...field}
-                    value={defaultValue}
-                    type={type}
-                    className='size-4 rounded-sm'
+                    type="checkbox"
+                    checked={field.value}
+                    className="size-4 rounded-sm"
                     disabled={disabled}
-                    onChange={handleChange}
+                    onChange={(e) => field.onChange(e.target.checked)}
                   />
                 </FormControl>
                 <FormMessage />
-                <FormDescription className='body-regular mt-2.5 text-light-400'>
+                <FormDescription className="body-regular mt-2.5 text-light-400">
                   {description}
                 </FormDescription>
               </FormItem>
-            )
+            );
 
           case INPUT_TYPES.SELECT:
             return (
@@ -126,23 +142,23 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
                 <Select
                   value={field.value}
                   onValueChange={(value) => {
-                    field.onChange(value)
+                    field.onChange(value);
                   }}
                   disabled={disabled}
                 >
                   <FormControl>
                     <SelectTrigger
                       className={cn(
-                        'w-full',
+                        "w-full",
                         fieldError &&
-                          'border-red-500 focus-visible:ring-red-500',
+                          "border-red-500 focus-visible:ring-red-500",
                         isDirty &&
                           !fieldError &&
-                          'border-blue-300 focus-visible:ring-blue-500'
+                          "border-blue-300 focus-visible:ring-blue-500"
                       )}
                     >
                       <SelectValue
-                        placeholder={capitalizeText(placeholder || '')}
+                        placeholder={capitalizeText(placeholder || "")}
                       />
                     </SelectTrigger>
                   </FormControl>
@@ -156,75 +172,81 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
                   </SelectContent>
                 </Select>
                 <FormMessage />
-                <FormDescription className='body-regular mt-2.5 text-light-400'>
+                <FormDescription className="body-regular mt-2.5 text-light-400">
                   {description}
                 </FormDescription>
               </FormItem>
-            )
+            );
 
           case INPUT_TYPES.EDITOR:
             return (
-              <FormItem className={cn(className, ' w-full gap-2.5')}>
+              <FormItem className={cn(className, " w-full gap-2.5")}>
                 {renderFormLabel(label)}
                 <FormControl>
-                  <div className='w-full'>
+                  <div className="w-full">
                     {editorRef ? (
                       <Editor
                         value={field.value}
                         fieldChange={(value) => {
-                          field.onChange(value)
+                          field.onChange(value);
                         }}
                         editorRef={editorRef}
                       />
                     ) : (
-                      <div className='text-red-400'>
+                      <div className="text-red-400">
                         Editor ref is not provided
                       </div>
                     )}
                   </div>
                 </FormControl>
                 <FormMessage />
-                <FormDescription className='body-regular mt-2.5 text-light-400'>
+                <FormDescription className="body-regular mt-2.5 text-light-400">
                   {description}
                 </FormDescription>
               </FormItem>
-            )
+            );
 
-          // case INPUT_TYPES.TAGS:
-          //   return (
-          //     <FormItem className={cn(className, ' w-full gap-2.5')}>
-          //       {renderFormLabel(label)}
-          //       <FormControl>
-          //         <div>
-          //           <Input
-          //             {...commonInputProps}
-          //             onKeyDown={(e) => handleKeyDown(e, field)}
-          //           />
-          //           <div>
-          //             {field.value.length > 0 && (
-          //               <div className='flex-start mt-2.5 flex-wrap gap-2.5'>
-          //                 {field.value.map((tag: string) => (
-          //                   <TagCard
-          //                     key={tag}
-          //                     _id={tag}
-          //                     name={tag}
-          //                     compact
-          //                     remove
-          //                     isButton
-          //                     handleRemove={() => handleTagRemove(tag, field)}
-          //                   />
-          //                 ))}
-          //               </div>
-          //             )}
-          //           </div>
-          //         </div>
-          //       </FormControl>
-          //       <FormMessage className='text-red-400' />
-          //       <FormDescription className='body-regular mt-2.5 text-light-400'>
-          //         {description}
-          //       </FormDescription>
-          //     </FormItem>
-          //   )
+          // New calendar input type
+          case INPUT_TYPES.DATE:
+            return (
+              <FormItem className={className}>
+                {renderFormLabel(label)}
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground",
+                          fieldError && "border-red-500 focus:border-red-500"
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "PPP")
+                        ) : (
+                          <span>{placeholder || "Pick a date"}</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      disabled={disabled}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+                <FormDescription className="body-regular mt-2.5 text-light-400">
+                  {description}
+                </FormDescription>
+              </FormItem>
+            );
 
           default:
             if (multiline) {
@@ -236,65 +258,62 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
                       {...field}
                       rows={5}
                       placeholder={placeholder}
-                      defaultValue={defaultValue}
+                      value={field.value ?? ""}
                       disabled={disabled}
                       className={cn(
                         commonInputProps.className,
-                        fieldError && 'border-red-500 focus:border-red-500'
+                        fieldError && "border-red-500 focus:border-red-500"
                       )}
                       onChange={handleChange}
                     />
                   </FormControl>
                   <FormMessage />
-                  <FormDescription className='body-regular mt-2.5 text-light-400'>
+                  <FormDescription className="body-regular mt-2.5 text-light-400">
                     {description}
                   </FormDescription>
                 </FormItem>
-              )
+              );
             }
 
             return (
               <FormItem className={className}>
                 {renderFormLabel(label)}
                 <FormControl>
-                  <div className='relative'>
+                  <div className="relative">
                     <Input
                       {...field}
                       {...commonInputProps}
-                      className={cn(
-                        commonInputProps.className,
-                        fieldError && 'border-red-500 focus:border-red-500'
-                      )}
+                      value={field.value ?? ""}
                       onChange={handleChange}
                     />
                     {type === INPUT_TYPES.PASSWORD && (
                       <Button
-                        type='button'
-                        variant='icon'
-                        size='sm'
-                        className='absolute right-0 top-1 h-10 w-10 px-3 py-2'
+                        type="button"
+                        variant="icon"
+                        size="sm"
+                        className="absolute right-0 top-1 h-10 w-10 px-3 py-2"
                         onClick={() => setShowPassword(!showPassword)}
                         aria-label={
-                          showPassword ? 'Hide password' : 'Show password'
+                          showPassword ? "Hide password" : "Show password"
                         }
                       >
                         {showPassword ? (
-                          <EyeOff className='h-4 w-4' />
+                          <EyeOff className="h-4 w-4" />
                         ) : (
-                          <Eye className='h-4 w-4' />
+                          <Eye className="h-4 w-4" />
                         )}
                       </Button>
                     )}
                   </div>
                 </FormControl>
-                <FormMessage className='text-red-500' />
-                <FormDescription className='body-regular mt-2.5 text-light-400'>
+                <FormMessage className="text-red-500" />
+                <FormDescription className="body-regular mt-2.5 text-light-400">
                   {description}
                 </FormDescription>
               </FormItem>
-            )
+            );
         }
       }}
     />
-  )
-}
+  );
+};

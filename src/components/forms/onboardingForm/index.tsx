@@ -1,6 +1,5 @@
 "use client";
 
-
 import { CompanyInfoStep } from "@/components/forms/onboardingForm/companyInfoStep";
 import { PersonalInfoStep } from "@/components/forms/onboardingForm/personalInfoStep";
 import { PlanSelectionStep } from "@/components/forms/onboardingForm/planSelectionStep";
@@ -47,7 +46,6 @@ export default function RecruiterOnboardingForm() {
       state: "",
       zipCode: "",
       plan: "starter" as const,
-
     },
     mode: "onChange",
     criteriaMode: "all",
@@ -56,7 +54,14 @@ export default function RecruiterOnboardingForm() {
   const { trigger, handleSubmit, clearErrors } = form;
 
   const stepFields = {
-    1: ["firstName", "lastName", "email", "password", "jobCategory", "jobTitle"],
+    1: [
+      "firstName",
+      "lastName",
+      "email",
+      "password",
+      "jobCategory",
+      "jobTitle",
+    ],
     2: [
       "companyName",
       "industry",
@@ -107,7 +112,7 @@ export default function RecruiterOnboardingForm() {
   };
 
   const onSubmit = async (formData: FormValues) => {
-    if (currentStep !== 5) {
+    if (currentStep !== 4) {
       return;
     }
 
@@ -184,11 +189,11 @@ export default function RecruiterOnboardingForm() {
 
               <StepNavigation
                 currentStep={currentStep}
-                totalSteps={5}
+                totalSteps={4}
                 onNext={handleNext}
                 onPrevious={handlePrevious}
                 isFirstStep={currentStep === 1}
-                isLastStep={currentStep === 5}
+                isLastStep={currentStep === 4}
                 isValid={true}
                 isSubmitting={isSubmitting}
               />

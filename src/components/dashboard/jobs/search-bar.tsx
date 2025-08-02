@@ -1,15 +1,15 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, X } from "lucide-react";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
 
 interface SearchBarProps {
   placeholder?: string;
   onSearch: (query: string) => void;
   onClear?: () => void;
   className?: string;
+  searchQuery: string;
 }
 
 export function SearchBar({
@@ -17,16 +17,13 @@ export function SearchBar({
   onSearch,
   onClear,
   className = "",
+  searchQuery,
 }: SearchBarProps) {
-  const [searchQuery, setSearchQuery] = useState("");
-
   const handleSearch = (value: string) => {
-    setSearchQuery(value);
     onSearch(value);
   };
 
   const handleClear = () => {
-    setSearchQuery("");
     onSearch("");
     onClear?.();
   };
