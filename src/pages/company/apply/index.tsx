@@ -10,17 +10,73 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import API from '@/http'
-import type { Job } from '@/interfaces'
 import type { ICity, IState } from 'country-state-city'
 import { City, State } from 'country-state-city'
-import { Building, Calendar, ChevronLeft, MapPin, Upload, DollarSign, CheckCircle, User, Briefcase, FileText } from 'lucide-react'
+import {
+  Briefcase,
+  Building,
+  Calendar,
+  CheckCircle,
+  ChevronLeft,
+  DollarSign,
+  FileText,
+  MapPin,
+  Upload,
+  User,
+} from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+// Temporary interface until it's properly exported from @/interfaces
+interface Job {
+  jobId: string
+  jobTitle: string
+  jobBoardTitle: string
+  jobDescription: string
+  jobLocation?: {
+    city: string
+    state: string
+  }
+  employmentType: string
+  workplaceType: string
+  endDate?: string
+  payRate?: {
+    type: 'fixed' | 'range'
+    amount?: number
+    min?: number
+    max?: number
+  }
+  payType?:
+    | 'hourly'
+    | 'salary'
+    | 'base-commission'
+    | 'base-tips'
+    | 'base-bonus'
+    | 'commission-only'
+  jobRequirements?: string[]
+  externalApplicationSetup?: {
+    customFields?: string[]
+  }
+  customQuestions?: CustomQuestion[]
+}
 
 interface CustomField {
   field: string
   value: string
   required: boolean
+}
+
+interface CustomQuestion {
+  id: string
+  question: string
+  type: 'boolean' | 'select' | 'string'
+  required: boolean
+  options: string[]
+  placeholder?: string
+}
+
+interface CustomQuestionAnswer {
+  questionId: string
+  answer: string | boolean
 }
 
 interface JobApplicationFormData {
@@ -37,6 +93,7 @@ interface JobApplicationFormData {
   email: string
   phone: string
   customFields: CustomField[]
+  customQuestionAnswers: CustomQuestionAnswer[]
 }
 
 const JobApplicationPage: React.FC = () => {
@@ -55,7 +112,9 @@ const JobApplicationPage: React.FC = () => {
   const [stateCities, setStateCities] = useState<ICity[]>([])
   const [selectedState, setSelectedState] = useState<string>('')
   const [selectedCity, setSelectedCity] = useState<string>('')
-  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState<boolean>(false)
+  const [isDescriptionExpanded, setIsDescriptionExpanded] =
+    useState<boolean>(false)
+  const [customQuestions, setCustomQuestions] = useState<CustomQuestion[]>([])
 
   const [formData, setFormData] = useState<JobApplicationFormData>({
     firstName: '',
@@ -71,6 +130,7 @@ const JobApplicationPage: React.FC = () => {
     email: '',
     phone: '',
     customFields: [],
+    customQuestionAnswers: [],
   })
 
   useEffect(() => {
@@ -111,6 +171,24 @@ const JobApplicationPage: React.FC = () => {
           setFormData((prev) => ({
             ...prev,
             customFields: initialCustomFields,
+          }))
+        }
+
+        // Handle custom questions if present
+        if (job.customQuestions?.length > 0) {
+          setCustomQuestions(job.customQuestions)
+
+          // Initialize answers for custom questions
+          const initialAnswers = job.customQuestions.map(
+            (question: CustomQuestion) => ({
+              questionId: question.id,
+              answer: question.type === 'boolean' ? false : '',
+            })
+          )
+
+          setFormData((prev) => ({
+            ...prev,
+            customQuestionAnswers: initialAnswers,
           }))
         }
       } catch (err) {
@@ -174,6 +252,21 @@ const JobApplicationPage: React.FC = () => {
     })
   }
 
+  const handleCustomQuestionChange = (
+    questionId: string,
+    answer: string | boolean
+  ) => {
+    setFormData((prev) => {
+      const updatedAnswers = prev.customQuestionAnswers.map((item) =>
+        item.questionId === questionId ? { ...item, answer } : item
+      )
+      return {
+        ...prev,
+        customQuestionAnswers: updatedAnswers,
+      }
+    })
+  }
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
@@ -186,21 +279,26 @@ const JobApplicationPage: React.FC = () => {
   }
 
   const formatJobDescription = (text: string) => {
-    return text
-      // Replace line breaks with HTML breaks
-      .replace(/\n/g, '<br>')
-      // Format section headers
-      .replace(/(Key Responsibilities:|Requirements:|Benefits:|What We Offer:|Qualifications:)/gi, '<br><strong>$1</strong><br>')
-      // Format bullet points
-      .replace(/•\s*/g, '<br>• ')
-      // Remove multiple consecutive breaks
-      .replace(/(<br>\s*){3,}/g, '<br><br>')
-      // Clean up leading breaks
-      .replace(/^(<br>\s*)+/, '')
-      // Add proper spacing after periods that end sentences
-      .replace(/\.\s+([A-Z])/g, '.<br><br>$1')
-      // Clean up any remaining issues
-      .trim()
+    return (
+      text
+        // Replace line breaks with HTML breaks
+        .replace(/\n/g, '<br>')
+        // Format section headers
+        .replace(
+          /(Key Responsibilities:|Requirements:|Benefits:|What We Offer:|Qualifications:)/gi,
+          '<br><strong>$1</strong><br>'
+        )
+        // Format bullet points
+        .replace(/•\s*/g, '<br>• ')
+        // Remove multiple consecutive breaks
+        .replace(/(<br>\s*){3,}/g, '<br><br>')
+        // Clean up leading breaks
+        .replace(/^(<br>\s*)+/, '')
+        // Add proper spacing after periods that end sentences
+        .replace(/\.\s+([A-Z])/g, '.<br><br>$1')
+        // Clean up any remaining issues
+        .trim()
+    )
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -240,6 +338,30 @@ const JobApplicationPage: React.FC = () => {
       return
     }
 
+    // Validate required custom questions
+    const missingRequiredQuestions = customQuestions
+      .filter((q) => q.required)
+      .filter((q) => {
+        const answer = formData.customQuestionAnswers.find(
+          (a) => a.questionId === q.id
+        )?.answer
+        // Check if answer is empty string or undefined
+        if (typeof answer === 'string') {
+          return answer.trim() === ''
+        }
+        return answer === undefined
+      })
+      .map((q) => q.question)
+
+    if (missingRequiredQuestions.length > 0) {
+      setError(
+        `Please answer all required questions: ${missingRequiredQuestions.join(
+          ', '
+        )}`
+      )
+      return
+    }
+
     setSubmitting(true)
     setError(null)
 
@@ -250,9 +372,19 @@ const JobApplicationPage: React.FC = () => {
 
       const resumeUrl = await API.attachment.uploadAttachment(formData.resume)
 
+      // Filter out any empty custom question answers (for non-required fields)
+      const filteredCustomQuestionAnswers =
+        formData.customQuestionAnswers.filter((answer) => {
+          if (typeof answer.answer === 'string') {
+            return answer.answer.trim() !== ''
+          }
+          return answer.answer !== undefined
+        })
+
       const applicantPayload = {
         ...formData,
         customFields: filteredCustomFields,
+        customQuestionAnswers: filteredCustomQuestionAnswers,
         jobId,
         companyName,
         jobTitle: job.jobTitle,
@@ -459,17 +591,26 @@ const JobApplicationPage: React.FC = () => {
                     <span className='text-lg font-bold text-blue-800'>
                       {job.payRate.type === 'fixed' && job.payRate.amount
                         ? `$${job.payRate.amount.toLocaleString()}`
-                        : job.payRate.type === 'range' && job.payRate.min && job.payRate.max
+                        : job.payRate.type === 'range' &&
+                          job.payRate.min &&
+                          job.payRate.max
                         ? `$${job.payRate.min.toLocaleString()} - $${job.payRate.max.toLocaleString()}`
                         : 'Competitive'}
                     </span>
                     <span className='text-xs font-medium text-blue-700'>
-                      {job.payType === 'hourly' ? 'per hour' : 
-                       job.payType === 'salary' ? 'per year' :
-                       job.payType === 'base-commission' ? 'base + commission' :
-                       job.payType === 'base-tips' ? 'base + tips' :
-                       job.payType === 'base-bonus' ? 'base + bonus' :
-                       job.payType === 'commission-only' ? 'commission only' : ''}
+                      {job.payType === 'hourly'
+                        ? 'per hour'
+                        : job.payType === 'salary'
+                        ? 'per year'
+                        : job.payType === 'base-commission'
+                        ? 'base + commission'
+                        : job.payType === 'base-tips'
+                        ? 'base + tips'
+                        : job.payType === 'base-bonus'
+                        ? 'base + bonus'
+                        : job.payType === 'commission-only'
+                        ? 'commission only'
+                        : ''}
                     </span>
                   </div>
                 </div>
@@ -483,12 +624,17 @@ const JobApplicationPage: React.FC = () => {
                     Key Requirements
                   </h4>
                   <ul className='space-y-1'>
-                    {job.jobRequirements.slice(0, 5).map((req: string, index: number) => (
-                      <li key={index} className='flex items-start gap-2 text-xs text-gray-700'>
-                        <span className='w-1 h-1 bg-slate-500 rounded-full mt-1.5 flex-shrink-0'></span>
-                        <span>{req}</span>
-                      </li>
-                    ))}
+                    {job.jobRequirements
+                      .slice(0, 5)
+                      .map((req: string, index: number) => (
+                        <li
+                          key={index}
+                          className='flex items-start gap-2 text-xs text-gray-700'
+                        >
+                          <span className='w-1 h-1 bg-slate-500 rounded-full mt-1.5 flex-shrink-0'></span>
+                          <span>{req}</span>
+                        </li>
+                      ))}
                     {job.jobRequirements.length > 5 && (
                       <li className='text-xs text-gray-500 italic'>
                         +{job.jobRequirements.length - 5} more requirements
@@ -508,17 +654,22 @@ const JobApplicationPage: React.FC = () => {
                   className='prose prose-xs max-w-none text-gray-600 space-y-2 [&>strong]:font-semibold [&>strong]:text-gray-800 [&>strong]:block [&>strong]:mt-3 [&>strong]:mb-1'
                   style={{
                     fontSize: '11px',
-                    lineHeight: '1.5'
+                    lineHeight: '1.5',
                   }}
-                  dangerouslySetInnerHTML={{ 
-                    __html: !isDescriptionExpanded && job.jobDescription.length > 400 
-                      ? formatJobDescription(job.jobDescription.substring(0, 400)) + '...' 
-                      : formatJobDescription(job.jobDescription)
+                  dangerouslySetInnerHTML={{
+                    __html:
+                      !isDescriptionExpanded && job.jobDescription.length > 400
+                        ? formatJobDescription(
+                            job.jobDescription.substring(0, 400)
+                          ) + '...'
+                        : formatJobDescription(job.jobDescription),
                   }}
                 />
                 {job.jobDescription.length > 400 && (
-                  <button 
-                    onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                  <button
+                    onClick={() =>
+                      setIsDescriptionExpanded(!isDescriptionExpanded)
+                    }
                     className='text-xs text-blue-600 hover:text-blue-800 mt-2 font-medium transition-colors'
                   >
                     {isDescriptionExpanded ? 'Show less' : 'Read more'}
@@ -553,7 +704,8 @@ const JobApplicationPage: React.FC = () => {
                         htmlFor='firstName'
                         className='text-sm font-medium text-gray-700 mb-1 flex items-center'
                       >
-                        First Name <span className='text-red-500 ml-0.5'>*</span>
+                        First Name{' '}
+                        <span className='text-red-500 ml-0.5'>*</span>
                       </Label>
                       <Input
                         id='firstName'
@@ -585,7 +737,8 @@ const JobApplicationPage: React.FC = () => {
                         htmlFor='email'
                         className='text-sm font-medium text-gray-700 mb-1 flex items-center'
                       >
-                        Email Address <span className='text-red-500 ml-0.5'>*</span>
+                        Email Address{' '}
+                        <span className='text-red-500 ml-0.5'>*</span>
                       </Label>
                       <Input
                         id='email'
@@ -602,7 +755,8 @@ const JobApplicationPage: React.FC = () => {
                         htmlFor='phone'
                         className='text-sm font-medium text-gray-700 mb-1 flex items-center'
                       >
-                        Phone Number <span className='text-red-500 ml-0.5'>*</span>
+                        Phone Number{' '}
+                        <span className='text-red-500 ml-0.5'>*</span>
                       </Label>
                       <Input
                         id='phone'
@@ -633,7 +787,10 @@ const JobApplicationPage: React.FC = () => {
                         </SelectTrigger>
                         <SelectContent className='max-h-[220px]'>
                           {usStates.map((state) => (
-                            <SelectItem key={state.isoCode} value={state.isoCode}>
+                            <SelectItem
+                              key={state.isoCode}
+                              value={state.isoCode}
+                            >
                               {state.name}
                             </SelectItem>
                           ))}
@@ -776,7 +933,9 @@ const JobApplicationPage: React.FC = () => {
                         <FileText className='h-4 w-4' />
                       </span>
                       Additional Information{' '}
-                      <span className='text-xs text-gray-500 ml-2 font-normal'>(Optional)</span>
+                      <span className='text-xs text-gray-500 ml-2 font-normal'>
+                        (Optional)
+                      </span>
                     </h3>
                     <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                       {formData.customFields.map((customField, index) => (
@@ -795,6 +954,135 @@ const JobApplicationPage: React.FC = () => {
                             }
                             className='h-10 text-sm rounded-md focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-white'
                           />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Custom Questions */}
+                {customQuestions.length > 0 && (
+                  <div className='bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-4 border border-purple-200 shadow-sm'>
+                    <h3 className='text-base font-semibold text-gray-900 pb-2 mb-3 border-b border-purple-200 flex items-center'>
+                      <span className='bg-purple-100 text-purple-800 w-7 h-7 rounded-full inline-flex items-center justify-center text-sm mr-3 shadow-sm'>
+                        <FileText className='h-4 w-4' />
+                      </span>
+                      Additional Questions
+                    </h3>
+                    <div className='grid grid-cols-1 gap-5'>
+                      {customQuestions.map((question) => (
+                        <div
+                          key={question.id}
+                          className='bg-white p-4 rounded-md border border-purple-100 shadow-sm'
+                        >
+                          <Label
+                            htmlFor={question.id}
+                            className='text-sm font-medium text-gray-700 mb-2 flex items-start'
+                          >
+                            <div className='flex-grow'>
+                              {question.question}
+                              {question.required && (
+                                <span className='text-red-500 ml-0.5'>*</span>
+                              )}
+                            </div>
+                          </Label>
+
+                          {/* Different input types based on question type */}
+                          {question.type === 'string' && (
+                            <Input
+                              id={question.id}
+                              value={
+                                (formData.customQuestionAnswers.find(
+                                  (a) => a.questionId === question.id
+                                )?.answer as string) || ''
+                              }
+                              onChange={(e) =>
+                                handleCustomQuestionChange(
+                                  question.id,
+                                  e.target.value
+                                )
+                              }
+                              placeholder={question.placeholder}
+                              className='h-10 text-sm rounded-md focus:ring-purple-500 focus:border-purple-500 transition-all bg-white'
+                              required={question.required}
+                            />
+                          )}
+
+                          {question.type === 'boolean' && (
+                            <div className='flex gap-4'>
+                              <label className='flex items-center gap-2 cursor-pointer'>
+                                <input
+                                  type='radio'
+                                  name={question.id}
+                                  checked={
+                                    formData.customQuestionAnswers.find(
+                                      (a) => a.questionId === question.id
+                                    )?.answer === true
+                                  }
+                                  onChange={() =>
+                                    handleCustomQuestionChange(
+                                      question.id,
+                                      true
+                                    )
+                                  }
+                                  className='h-4 w-4 text-purple-600'
+                                  required={question.required}
+                                />
+                                <span className='text-sm text-gray-700'>
+                                  Yes
+                                </span>
+                              </label>
+                              <label className='flex items-center gap-2 cursor-pointer'>
+                                <input
+                                  type='radio'
+                                  name={question.id}
+                                  checked={
+                                    formData.customQuestionAnswers.find(
+                                      (a) => a.questionId === question.id
+                                    )?.answer === false
+                                  }
+                                  onChange={() =>
+                                    handleCustomQuestionChange(
+                                      question.id,
+                                      false
+                                    )
+                                  }
+                                  className='h-4 w-4 text-purple-600'
+                                  required={question.required}
+                                />
+                                <span className='text-sm text-gray-700'>
+                                  No
+                                </span>
+                              </label>
+                            </div>
+                          )}
+
+                          {question.type === 'select' && (
+                            <Select
+                              value={
+                                (formData.customQuestionAnswers.find(
+                                  (a) => a.questionId === question.id
+                                )?.answer as string) || ''
+                              }
+                              onValueChange={(value) =>
+                                handleCustomQuestionChange(question.id, value)
+                              }
+                            >
+                              <SelectTrigger
+                                id={question.id}
+                                className='h-10 text-sm bg-white focus:ring-purple-500 focus:border-purple-500 transition-all'
+                              >
+                                <SelectValue placeholder='Select an option' />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {question.options.map((option) => (
+                                  <SelectItem key={option} value={option}>
+                                    {option}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -855,7 +1143,9 @@ const JobApplicationPage: React.FC = () => {
                           <p className='text-sm font-medium text-gray-700'>
                             Accepted formats: PDF, DOC, DOCX
                           </p>
-                          <p className='text-xs text-gray-500'>Maximum file size: 5MB</p>
+                          <p className='text-xs text-gray-500'>
+                            Maximum file size: 5MB
+                          </p>
                         </div>
                       )}
                     </div>
@@ -872,7 +1162,9 @@ const JobApplicationPage: React.FC = () => {
                     <Button
                       type='submit'
                       className={`${
-                        submitting ? 'bg-blue-400' : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700'
+                        submitting
+                          ? 'bg-blue-400'
+                          : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700'
                       } text-white px-8 py-3 h-auto rounded-lg transition-all shadow-lg hover:shadow-xl font-semibold`}
                       disabled={submitting}
                     >
