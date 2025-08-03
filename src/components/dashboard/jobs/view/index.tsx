@@ -14,6 +14,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { QUESTION_TYPE_INFO, ROUTES } from "@/constants";
 import API from "@/http";
 import type { JobFormData } from "@/interfaces";
 import { errorResolver } from "@/lib/utils";
@@ -21,23 +22,28 @@ import {
   AlertCircle,
   ArrowLeft,
   Building2,
+  Calendar,
   CheckCircle,
   Clock,
   DollarSign,
   Edit,
   FileText,
+  HelpCircle,
   MapPin,
   RefreshCw,
   Settings,
   Share2,
   Trash2,
+  TrendingUp,
   Users,
+  X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
 import { ApplicantsSection } from "./applicants-section";
-import { ROUTES } from "@/constants";
+import { Progress } from "@/components/ui/progress";
 
 interface JobDetailsResponse {
   job: JobFormData & {
@@ -128,6 +134,7 @@ const getJobDefaults = (job: JobDetailsResponse["job"] | null) => {
       redirectUrl: "",
     },
     jobRequirements: job.jobRequirements || [],
+    customQuestions: job.customQuestions || [],
     payRate: job.payRate || {
       type: "fixed",
       amount: 0,
@@ -181,6 +188,10 @@ export default function JobDetails() {
     isRetrying: false,
   });
 
+  const getQuestionTypeInfo = (type: string) => {
+    return QUESTION_TYPE_INFO[type as keyof typeof QUESTION_TYPE_INFO];
+  };
+
   const fetchJobDetails = async (showRetryIndicator = false) => {
     if (!id) {
       setLoadingState({
@@ -205,7 +216,13 @@ export default function JobDetails() {
         throw new Error("Job not found");
       }
 
-      setJob(response.job);
+      const jobData = {
+        ...response.job,
+        startDate: new Date(response.job.startDate),
+        endDate: new Date(response.job.endDate),
+      };
+
+      setJob(jobData);
       setLoadingState({
         isLoading: false,
         error: null,
@@ -261,6 +278,15 @@ export default function JobDetails() {
       setIsDeleting(false);
       setShowDeleteModal(false);
     }
+  };
+
+  const getScoringTotal = () => {
+    if (!job) return;
+    if (!job.automation?.scoringWeights) return 0;
+    return Object.values(job.automation.scoringWeights).reduce(
+      (sum, weight) => sum + weight,
+      0
+    );
   };
 
   // Loading state
@@ -765,6 +791,135 @@ export default function JobDetails() {
                     </CardContent>
                   </Card>
 
+                  {/* Custom Questions */}
+                  {safeJob.customQuestions.length > 0 && (
+                    <Card className="border-slate-200 shadow-sm">
+                      <CardHeader className="pb-4">
+                        <CardTitle className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-xl bg-purple-50 flex items-center justify-center">
+                            <HelpCircle className="w-4 h-4 text-purple-600" />
+                          </div>
+                          Custom Questions
+                          <Badge className="bg-purple-100 text-purple-700 border-purple-300">
+                            {safeJob.customQuestions.length}
+                          </Badge>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center gap-3 mb-4">
+                          <Badge className="bg-red-100 text-red-700 border-red-300">
+                            {
+                              safeJob.customQuestions.filter((q) => q.required)
+                                .length
+                            }{" "}
+                            required
+                          </Badge>
+                          <Badge className="bg-slate-100 text-slate-700 border-slate-300">
+                            {
+                              safeJob.customQuestions.filter((q) => !q.required)
+                                .length
+                            }{" "}
+                            optional
+                          </Badge>
+                        </div>
+
+                        <div className="space-y-4">
+                          {safeJob.customQuestions.map((question, index) => {
+                            const typeInfo = getQuestionTypeInfo(question.type);
+                            const Icon = typeInfo?.icon || HelpCircle;
+
+                            return (
+                              <div
+                                key={question.id}
+                                className="p-4 border border-slate-200 rounded-xl bg-slate-50"
+                              >
+                                <div className="flex items-start gap-4">
+                                  <div className="flex flex-col items-center gap-2 flex-shrink-0">
+                                    <div
+                                      className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                                        typeInfo?.color || "bg-slate-100"
+                                      }`}
+                                    >
+                                      <Icon
+                                        className={`w-5 h-5 ${
+                                          typeInfo?.iconColor ||
+                                          "text-slate-600"
+                                        }`}
+                                      />
+                                    </div>
+                                    <span className="text-xs font-semibold text-slate-500 bg-slate-200 px-2 py-1 rounded-full">
+                                      #{index + 1}
+                                    </span>
+                                  </div>
+
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-3">
+                                      <Badge
+                                        className={`text-xs ${
+                                          typeInfo?.color ||
+                                          "bg-slate-100 text-slate-700"
+                                        } border-0`}
+                                      >
+                                        {typeInfo?.label || question.type}
+                                      </Badge>
+                                      {question.required && (
+                                        <Badge className="text-xs bg-red-100 text-red-700 border-0">
+                                          Required
+                                        </Badge>
+                                      )}
+                                    </div>
+
+                                    <h4 className="font-medium text-slate-900 mb-3 leading-relaxed">
+                                      {question.question}
+                                    </h4>
+
+                                    {question.type === "select" &&
+                                      question.options && (
+                                        <div>
+                                          <p className="text-xs text-slate-500 mb-2">
+                                            Options:
+                                          </p>
+                                          <div className="flex flex-wrap gap-2">
+                                            {question.options
+                                              .slice(0, 3)
+                                              .map((option, optIndex) => (
+                                                <Badge
+                                                  key={optIndex}
+                                                  variant="outline"
+                                                  className="text-xs bg-white border-slate-300"
+                                                >
+                                                  {option}
+                                                </Badge>
+                                              ))}
+                                            {question.options.length > 3 && (
+                                              <Badge
+                                                variant="outline"
+                                                className="text-xs bg-white border-slate-300"
+                                              >
+                                                +{question.options.length - 3}{" "}
+                                                more
+                                              </Badge>
+                                            )}
+                                          </div>
+                                        </div>
+                                      )}
+
+                                    {question.placeholder &&
+                                      question.type === "string" && (
+                                        <p className="text-xs text-slate-500 mt-2">
+                                          Placeholder: "{question.placeholder}"
+                                        </p>
+                                      )}
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
                   {/* Background Screening */}
                   {safeJob.backgroundScreeningDisclaimer && (
                     <Card>
@@ -790,6 +945,90 @@ export default function JobDetails() {
             </TabsContent>
 
             <TabsContent value="settings" className="space-y-6">
+              {safeJob.automation && (
+                <Card className="border-slate-200 shadow-sm">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-emerald-50 flex items-center justify-center">
+                        <TrendingUp className="w-4 h-4 text-emerald-600" />
+                      </div>
+                      AI Automation
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex justify-between items-center py-2 border-b border-slate-100">
+                      <span className="text-sm text-slate-600">
+                        Acceptance Threshold:
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-emerald-600">
+                          {safeJob.automation.acceptanceThreshold || 70}%
+                        </span>
+                        <Badge
+                          className={`text-xs ${
+                            (safeJob.automation.acceptanceThreshold || 70) >= 80
+                              ? "bg-red-100 text-red-700"
+                              : (safeJob.automation.acceptanceThreshold ||
+                                  70) >= 60
+                              ? "bg-amber-100 text-amber-700"
+                              : "bg-green-100 text-green-700"
+                          }`}
+                        >
+                          {(safeJob.automation.acceptanceThreshold || 70) >= 80
+                            ? "High"
+                            : (safeJob.automation.acceptanceThreshold || 70) >=
+                              60
+                            ? "Medium"
+                            : "Low"}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    {safeJob.automation.scoringWeights && (
+                      <div>
+                        <div className="flex justify-between items-center py-2 mb-3">
+                          <span className="text-sm text-slate-600">
+                            Scoring Weights:
+                          </span>
+                          <span className="font-medium text-slate-900">
+                            {getScoringTotal()}%
+                          </span>
+                        </div>
+                        <div className="space-y-3">
+                          {Object.entries(
+                            safeJob.automation.scoringWeights
+                          ).map(([key, value]) => (
+                            <div
+                              key={key}
+                              className="flex items-center justify-between"
+                            >
+                              <span className="text-xs text-slate-600 capitalize">
+                                {key.replace(/([A-Z])/g, " $1").trim()}
+                              </span>
+                              <div className="flex items-center gap-2">
+                                <Progress value={value} className="h-2 w-16" />
+                                <span className="text-xs font-medium text-slate-900 min-w-[2rem]">
+                                  {value}%
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-sm text-slate-600">
+                        Active Rules:
+                      </span>
+                      <Badge className="bg-blue-100 text-blue-700 border-blue-300">
+                        {safeJob.automation.enabledRules?.length || 0} enabled
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
               <Card>
                 <CardHeader>
                   <CardTitle>Automation & Settings</CardTitle>
@@ -797,58 +1036,63 @@ export default function JobDetails() {
                 <CardContent>
                   {safeJob.automation?.aiRules?.length > 0 ||
                   safeJob.automation?.enabledRules?.length > 0 ? (
-                    <div className="space-y-6">
-                      {/* AI Rules */}
-                      {safeJob.automation?.aiRules?.length > 0 && (
-                        <div>
-                          <h3 className="font-medium text-gray-900 mb-3">
-                            AI Scoring Rules
-                          </h3>
-                          <div className="space-y-3">
-                            {safeJob.automation.aiRules.map((rule, index) => (
-                              <div
-                                key={rule.id}
-                                className="p-4 bg-blue-50 rounded-lg border border-blue-100"
-                              >
-                                <div className="flex items-start gap-3">
-                                  <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <span className="text-blue-600 font-medium text-sm">
-                                      {index + 1}
-                                    </span>
-                                  </div>
-                                  <span className="text-gray-800">
-                                    {rule.text}
-                                  </span>
-                                </div>
+                    <div className="space-y-4">
+                      <div className="space-y-3">
+                        {[
+                          {
+                            id: "accept-notification",
+                            label: "Accept Notification",
+                            desc: "Send congratulatory email",
+                            icon: CheckCircle,
+                            color: "text-green-600",
+                          },
+                          {
+                            id: "rejection-notification",
+                            label: "Rejection Notification",
+                            desc: "Send polite rejection email",
+                            icon: X,
+                            color: "text-red-600",
+                          },
+                          {
+                            id: "interview-notification",
+                            label: "Interview Scheduling",
+                            desc: "Auto schedule interviews",
+                            icon: Calendar,
+                            color: "text-blue-600",
+                          },
+                        ].map((rule) => (
+                          <div
+                            key={rule.id}
+                            className="flex items-center justify-between p-3 bg-gray-50 rounded-md"
+                          >
+                            <div className="flex items-center gap-3">
+                              <rule.icon className={`w-4 h-4 ${rule.color}`} />
+                              <div>
+                                <p className="text-sm font-medium">
+                                  {rule.label}
+                                </p>
+                                <p className="text-xs text-gray-600">
+                                  {rule.desc}
+                                </p>
                               </div>
-                            ))}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {safeJob.automation.enabledRules.includes(
+                                rule.id
+                              ) && (
+                                <Badge variant="secondary" className="text-xs">
+                                  Active
+                                </Badge>
+                              )}
+                              <Switch
+                                checked={safeJob.automation.enabledRules.includes(
+                                  rule.id
+                                )}
+                              />
+                            </div>
                           </div>
-                        </div>
-                      )}
-
-                      {/* Enabled Rules */}
-                      {safeJob.automation?.enabledRules?.length > 0 && (
-                        <div>
-                          <h3 className="font-medium text-gray-900 mb-3">
-                            Active Automation Rules
-                          </h3>
-                          <div className="space-y-2">
-                            {safeJob.automation.enabledRules.map(
-                              (ruleId, index) => (
-                                <div
-                                  key={index}
-                                  className="flex items-center gap-3 p-3 bg-green-50 rounded border border-green-100"
-                                >
-                                  <div className="w-2 h-2 bg-green-500 rounded-full" />
-                                  <span className="text-green-800">
-                                    Rule "{ruleId}" is active
-                                  </span>
-                                </div>
-                              )
-                            )}
-                          </div>
-                        </div>
-                      )}
+                        ))}
+                      </div>
                     </div>
                   ) : (
                     <div className="text-center py-12">

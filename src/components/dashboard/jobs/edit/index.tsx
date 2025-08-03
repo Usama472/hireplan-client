@@ -84,6 +84,7 @@ const getJobDefaults = (
     startDate: job.startDate || "",
     endDate: job.endDate || "",
     customApplicationUrl: job.customApplicationUrl || "",
+    customQuestions: job.customQuestions || [],
     externalApplicationSetup: job.externalApplicationSetup || {
       customFields: [],
       redirectUrl: "",
@@ -141,7 +142,11 @@ export default function EditJob() {
     mode: "onChange",
   });
 
-  const { trigger, handleSubmit, clearErrors, reset } = form;
+  const { trigger, handleSubmit, clearErrors, reset, getValues } = form;
+
+  const startDate = getValues("startDate");
+
+  console.log("::: startDate", startDate);
 
   const fetchJobDetails = async (showRetryIndicator = false) => {
     if (!id) {
@@ -169,7 +174,6 @@ export default function EditJob() {
 
       setJob(response.job);
 
-      // Reset form with job data
       const jobDefaults = getJobDefaults(response.job);
       reset(jobDefaults);
 
@@ -225,13 +229,13 @@ export default function EditJob() {
   };
 
   const onSubmit = async (data: JobFormSchema) => {
-    if (currentStep !== 4 || !job?.id) return;
+    if (currentStep !== 5 || !job?.id) return;
 
     setIsSubmitting(true);
     try {
       await API.job.updateJob(job.id, data);
       toast.success("Job updated successfully!");
-      navigate(`/dashboard/jobs/${job.id}`);
+      navigate(`${ROUTES.DASHBOARD.MAIN}`);
     } catch (err) {
       const errorMessage = errorResolver(err);
       toast.error(`Failed to update job: ${errorMessage}`);

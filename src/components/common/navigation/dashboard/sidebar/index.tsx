@@ -12,9 +12,8 @@ import {
 } from "@/components/ui/sidebar";
 import { APP_NAME, ROUTES } from "@/constants";
 import useAuthSessionContext from "@/lib/context/AuthSessionContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { NavProjects } from "./nav-projects";
-// import { NavSecondary } from "./nav-secondary";
 import { NavUser } from "./nav-user";
 
 const staticData = {
@@ -34,12 +33,12 @@ const staticData = {
     {
       name: "Jobs",
       url: ROUTES.DASHBOARD.MAIN,
-      icon: Briefcase, // Job-specific icon
+      icon: Briefcase,
     },
     {
       name: "Create Job",
       url: ROUTES.DASHBOARD.CREATE_JOB,
-      icon: PlusCircle, // Creation-specific icon
+      icon: PlusCircle,
     },
   ],
 };
@@ -49,8 +48,8 @@ export const DashboardSidebar = ({
 }: React.ComponentProps<typeof Sidebar>) => {
   const navigate = useNavigate();
   const { data: authData } = useAuthSessionContext();
+  const location = useLocation();
 
-  // Create user object from auth data with fallbacks
   const user = {
     name:
       authData?.user?.firstName && authData?.user?.lastName
@@ -82,8 +81,11 @@ export const DashboardSidebar = ({
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent className="bg-gray-200">
-        <NavProjects name="Jobs" projects={staticData.projects} />
-        {/* <NavSecondary items={staticData.navSecondary} className='mt-auto' /> */}
+        <NavProjects
+          name="Jobs"
+          projects={staticData.projects}
+          currentPath={location.pathname}
+        />
       </SidebarContent>
       <SidebarFooter className="bg-primary rounded-lg">
         <NavUser user={user} />

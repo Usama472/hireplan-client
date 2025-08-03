@@ -237,7 +237,6 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
                       selected={field.value}
                       onSelect={field.onChange}
                       disabled={disabled}
-                      initialFocus
                     />
                   </PopoverContent>
                 </Popover>
