@@ -1,4 +1,3 @@
-import type { Job } from "@/interfaces";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -64,35 +63,6 @@ export const getWorkplaceTypeColor = (type: string) => {
   }
 };
 
-export const formatSalary = (job: Job) => {
-  if (!job.payRate) return "Not specified";
-
-  const { type, amount, min, max } = job.payRate;
-  const isHourly = job.payType === "hourly";
-  const suffix = isHourly ? "/hr" : "/year";
-
-  if (type === "fixed" && amount) {
-    return `$${isHourly ? amount : (amount / 1000).toFixed(0) + "k"}${suffix}`;
-  } else if (type === "range" && min && max) {
-    if (isHourly) {
-      return `$${min}-${max}${suffix}`;
-    } else {
-      return `$${(min / 1000).toFixed(0)}k-${(max / 1000).toFixed(
-        0
-      )}k${suffix}`;
-    }
-  }
-
-  return "Competitive";
-};
-
-export const formatLocation = (job: Job) => {
-  if (job.jobLocation) {
-    return `${job.jobLocation.city}, ${job.jobLocation.state}`;
-  }
-  return job.location || "Location not specified";
-};
-
 export const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString("en-US", {
     month: "short",
@@ -107,22 +77,6 @@ export const getDaysUntilDeadline = (deadline: string) => {
       (1000 * 60 * 60 * 24)
   );
   return Math.max(0, days);
-};
-
-export const getJobDisplayTitle = (job: Job) => {
-  return job.jobBoardTitle || job.jobTitle || "Untitled Job";
-};
-
-export const getJobInternalTitle = (job: Job) => {
-  return job.jobTitle || job.jobBoardTitle || "Untitled Job";
-};
-
-export const isRemoteJob = (job: Job) => {
-  return job.workplaceType === "remote" || job.remote === true;
-};
-
-export const isHybridJob = (job: Job) => {
-  return job.workplaceType === "hybrid";
 };
 
 export const getEmploymentTypeLabel = (employmentType: string) => {

@@ -1,12 +1,12 @@
 import { ROUTES } from "@/constants";
 import { JobCard } from "./job-card";
-import type { Job } from "@/interfaces";
+import type { JobFormDataWithId } from "@/interfaces";
 import { useNavigate } from "react-router";
 
 interface JobsGridProps {
-  jobs: Job[];
-  onEdit?: (job: Job) => void;
-  onDelete?: (job: Job) => void;
+  jobs: JobFormDataWithId[];
+  onEdit?: (job: JobFormDataWithId) => void;
+  onDelete?: (job: JobFormDataWithId) => void;
 }
 
 export function JobsGrid({ jobs, onEdit, onDelete }: JobsGridProps) {

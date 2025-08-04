@@ -1,12 +1,12 @@
-import type { Job } from "@/interfaces";
+import type { JobFormDataWithId } from "@/interfaces";
 import { JobListItem } from "./job-list-item";
 import { ROUTES } from "@/constants";
 import { useNavigate } from "react-router";
 
 interface JobsListProps {
-  jobs: Job[];
-  onEdit?: (job: Job) => void;
-  onDelete?: (job: Job) => void;
+  jobs: JobFormDataWithId[];
+  onEdit?: (job: JobFormDataWithId) => void;
+  onDelete?: (job: JobFormDataWithId) => void;
 }
 
 export function JobsList({ jobs, onEdit, onDelete }: JobsListProps) {

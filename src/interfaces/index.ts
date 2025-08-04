@@ -91,7 +91,9 @@ export type JobFormDataWithId = JobFormSchema & {
   id: string;
   status?: string;
   applicantsCount?: number;
+  company?: string;
   createdAt: string;
+  views?: number;
 };
 
 export interface JobLocation {

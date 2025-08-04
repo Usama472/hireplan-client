@@ -17,7 +17,6 @@ import {
   CheckCircle,
   Clock,
   Mail,
-  MapPin,
   MessageSquare,
   Phone,
   Send,
@@ -180,7 +179,7 @@ export default function ContactPage() {
                   </CardContent>
                 </Card>
 
-<Card className="border-0 shadow-sm">
+                <Card className="border-0 shadow-sm">
                   <CardContent className="p-4">
                     <div className="flex items-start space-x-4">
                       <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center flex-shrink-0">

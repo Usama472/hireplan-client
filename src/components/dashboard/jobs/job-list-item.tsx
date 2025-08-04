@@ -6,10 +6,9 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { Job } from "@/interfaces";
+import type { JobFormDataWithId } from "@/interfaces";
 import { cn } from "@/lib/utils";
 import {
   ArrowRight,
@@ -18,12 +17,10 @@ import {
   Clock,
   DollarSign,
   Edit,
-  Eye,
   GraduationCap,
   MapPin,
   MoreVertical,
   Star,
-  Trash2,
   Users,
   Zap,
 } from "lucide-react";
@@ -31,14 +28,14 @@ import { useState } from "react";
 import { DeleteJobModal } from "./delete-job-modal";
 
 interface JobListItemProps {
-  job: Job;
-  onEdit?: (job: Job) => void;
-  onDelete?: (job: Job) => void;
-  onViewDetails?: (job: Job) => void;
+  job: JobFormDataWithId;
+  onEdit?: (job: JobFormDataWithId) => void;
+  onDelete?: (job: JobFormDataWithId) => void;
+  onViewDetails?: (job: JobFormDataWithId) => void;
 }
 
 // Helper functions to format data
-const formatSalary = (job: Job) => {
+const formatSalary = (job: JobFormDataWithId) => {
   if (!job.payRate) return "Competitive Salary";
   if (job.payRate.type === "fixed") {
     return `$${job.payRate.amount.toLocaleString()}`;
@@ -47,11 +44,11 @@ const formatSalary = (job: Job) => {
   }
 };
 
-const formatSalaryPeriod = (job: Job) => {
+const formatSalaryPeriod = (job: JobFormDataWithId) => {
   return job.payType === "hourly" ? "per hour" : "per year";
 };
 
-const formatLocation = (job: Job) => {
+const formatLocation = (job: JobFormDataWithId) => {
   if (job.jobLocation) {
     const { city, state } = job.jobLocation;
     return `${city}${state ? `, ${state}` : ""}`;
@@ -67,7 +64,7 @@ const formatDate = (dateString: string) => {
   });
 };
 
-const getDaysUntilDeadline = (endDate: string) => {
+const getDaysUntilDeadline = (endDate: Date) => {
   const today = new Date();
   const deadline = new Date(endDate);
   const diffTime = deadline.getTime() - today.getTime();
@@ -166,12 +163,7 @@ export function JobListItem({
   );
   const StatusIcon = statusConfig.icon;
 
-  const handleDeleteClick = () => {
-    setShowDeleteModal(true);
-    setIsDropdownOpen(false);
-  };
-
-  const handleDeleteConfirm = async (jobToDelete: Job) => {
+  const handleDeleteConfirm = async (jobToDelete: JobFormDataWithId) => {
     setIsDeleting(true);
     try {
       await onDelete?.(jobToDelete);
@@ -220,8 +212,8 @@ export function JobListItem({
                   >
                     <StatusIcon className="w-3 h-3" />
                     <span>
-                      {job.status?.charAt(0).toUpperCase() +
-                        job.status?.slice(1)}
+                      {(job.status || "").charAt(0).toUpperCase() +
+                        (job.status || "").slice(1)}
                     </span>
                   </div>
 
@@ -265,7 +257,7 @@ export function JobListItem({
                   <span>
                     {job.employmentType
                       ?.replace("-", " ")
-                      .replace(/\b\w/g, (l) => l.toUpperCase())}
+                      .replace(/\b\w/g, (l: string) => l.toUpperCase())}
                   </span>
                 </div>
 
@@ -321,13 +313,6 @@ export function JobListItem({
                     {job.applicantsCount || 0}
                   </span>
                   <span className="text-gray-500">applicants</span>
-                </div>
-
-                {/* Views Count */}
-                <div className="flex items-center gap-1.5 text-sm text-gray-700">
-                  <Eye className="w-4 h-4 text-purple-500" />
-                  <span className="font-medium">{job.views || 0}</span>
-                  <span className="text-gray-500">views</span>
                 </div>
 
                 {/* Created Date */}

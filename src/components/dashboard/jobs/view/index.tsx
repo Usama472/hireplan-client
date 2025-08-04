@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/tooltip";
 import { QUESTION_TYPE_INFO, ROUTES } from "@/constants";
 import API from "@/http";
-import type { JobFormData } from "@/interfaces";
+import type { JobFormData, JobFormDataWithId } from "@/interfaces";
 import { errorResolver } from "@/lib/utils";
 import {
   AlertCircle,
@@ -46,13 +46,7 @@ import { ApplicantsSection } from "./applicants-section";
 import { Progress } from "@/components/ui/progress";
 
 interface JobDetailsResponse {
-  job: JobFormData & {
-    id: string;
-    createdAt: string;
-    updatedAt: string;
-    applicantsCount: number;
-    views?: number;
-  };
+  job: JobFormDataWithId;
 }
 
 interface LoadingState {
@@ -1034,8 +1028,7 @@ export default function JobDetails() {
                   <CardTitle>Automation & Settings</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {safeJob.automation?.aiRules?.length > 0 ||
-                  safeJob.automation?.enabledRules?.length > 0 ? (
+                  {safeJob.automation?.enabledRules?.length > 0 ? (
                     <div className="space-y-4">
                       <div className="space-y-3">
                         {[
@@ -1112,7 +1105,6 @@ export default function JobDetails() {
           </Tabs>
         </div>
 
-        {/* Delete Confirmation Modal */}
         {job && (
           <DeleteJobModal
             job={job}

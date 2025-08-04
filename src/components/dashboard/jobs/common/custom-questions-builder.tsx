@@ -4,18 +4,19 @@ import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 import {
-  Plus,
-  X,
-  Edit,
-  Trash2,
-  HelpCircle,
-  CheckSquare,
-  List,
-  Type,
-  Eye,
-  MessageSquare,
-} from "lucide-react";
-import type { CustomQuestion } from "@/interfaces";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -25,32 +26,30 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
-import { Input } from "@/components/ui/input";
-import { Select, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  AlertDialog,
-  AlertDialogFooter,
-  AlertDialogDescription,
-  AlertDialogTitle,
-  AlertDialogHeader,
-  AlertDialogContent,
-  AlertDialogTrigger,
-  AlertDialogCancel,
-  AlertDialogAction,
-} from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { PayType } from "./position-details-step";
+import type { CustomQuestion } from "@/interfaces";
+import {
+  CheckSquare,
+  Edit,
+  Eye,
+  HelpCircle,
+  List,
+  MessageSquare,
+  Plus,
+  Trash2,
+  Type,
+  X,
+} from "lucide-react";
 
 const QUESTION_TYPES = [
   {
@@ -88,7 +87,7 @@ export function CustomQuestionsBuilder({
   description = "Add custom screening questions for applicants",
 }: CustomQuestionsBuilderProps) {
   const { setValue, watch } = useFormContext();
-  const questions = watch("customQuestions");
+  const questions: CustomQuestion[] = watch("customQuestions");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<CustomQuestion | null>(
     null

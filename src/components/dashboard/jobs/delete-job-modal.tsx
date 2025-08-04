@@ -11,14 +11,14 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import type { Job } from "@/interfaces";
+import type { JobFormDataWithId } from "@/interfaces";
 import { AlertTriangle, MapPin, Users } from "lucide-react";
 
 interface DeleteJobModalProps {
-  job: Job | null;
+  job: JobFormDataWithId | null;
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (job: Job) => void;
+  onConfirm: (job: JobFormDataWithId) => void;
   isDeleting?: boolean;
 }
 
@@ -34,6 +34,16 @@ export function DeleteJobModal({
   const location = job.jobLocation
     ? `${job.jobLocation.city}, ${job.jobLocation.state}`
     : "Location not specified";
+
+  const status = job.status
+    ? job.status.charAt(0).toUpperCase() + job.status.slice(1)
+    : "";
+
+  const employmentType = job.employmentType
+    ? job.employmentType
+        .replace("-", " ")
+        .replace(/\b\w/g, (l: string) => l.toUpperCase())
+    : "";
 
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
@@ -73,17 +83,15 @@ export function DeleteJobModal({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-xs">
-                  {job.status?.charAt(0).toUpperCase() + job.status?.slice(1)}
+                  {status}
                 </Badge>
                 <Badge variant="outline" className="text-xs">
-                  {job.employmentType
-                    ?.replace("-", " ")
-                    .replace(/\b\w/g, (l) => l.toUpperCase())}
+                  {employmentType}
                 </Badge>
               </div>
               <div className="flex items-center text-sm text-gray-600">
                 <Users className="w-4 h-4 mr-1" />
-                <span>{job.applicants || 0} applicants</span>
+                <span>{job.applicantsCount || 0} applicants</span>
               </div>
             </div>
           </div>
@@ -95,9 +103,9 @@ export function DeleteJobModal({
             <div className="text-sm text-yellow-800">
               <p className="font-medium mb-1">Warning</p>
               <p>
-                {job.applicants && job.applicants > 0
-                  ? `This job has ${job.applicants} applicant${
-                      job.applicants > 1 ? "s" : ""
+                {job.applicantsCount && job.applicantsCount > 0
+                  ? `This job has ${job.applicantsCount} applicant${
+                      job.applicantsCount > 1 ? "s" : ""
                     }. Deleting it will also remove all application data.`
                   : "All job data and settings will be permanently removed."}
               </p>

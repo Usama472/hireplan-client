@@ -159,7 +159,7 @@ export default function JobsPage() {
                       placeholder="Search jobs by title, company, or location..."
                       onSearch={handleSearch}
                       onClear={handleClearSearch}
-                      searchQuery={searchQuery}
+                      searchQuery={searchQuery as string}
                     />
                   </div>
 

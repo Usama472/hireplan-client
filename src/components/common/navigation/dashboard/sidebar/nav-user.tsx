@@ -5,7 +5,6 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -18,7 +17,7 @@ import { ROUTES } from "@/constants";
 import API from "@/http";
 import { mutateSession } from "@/http/auth/mutateSession";
 import useAuthSessionContext from "@/lib/context/AuthSessionContext";
-import { BadgeCheck, Bell, ChevronDown, LogOut, User } from "lucide-react";
+import { ChevronDown, LogOut, User } from "lucide-react";
 import { useNavigate } from "react-router";
 
 export function NavUser({

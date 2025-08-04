@@ -136,7 +136,7 @@ export default function EditJob() {
   });
   const navigate = useNavigate();
 
-  const form = useForm<JobFormSchema>({
+  const form = useForm({
     resolver: zodResolver(jobFormSchema),
     defaultValues: JOB_FORM_DEFAULT_VALUES,
     mode: "onChange",

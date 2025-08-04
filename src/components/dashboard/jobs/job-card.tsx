@@ -49,7 +49,7 @@ const formatLocation = (job: JobFormDataWithId) => {
   return "Remote";
 };
 
-const getDaysUntilDeadline = (endDate: string) => {
+const getDaysUntilDeadline = (endDate: Date) => {
   const today = new Date();
   const deadline = new Date(endDate);
   const diffTime = deadline.getTime() - today.getTime();

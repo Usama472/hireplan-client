@@ -1,4 +1,4 @@
-import type { EmailData, Job, TeamMember } from "@/interfaces";
+import type { EmailData, TeamMember } from "@/interfaces";
 import { CheckSquare, List, Rocket, Type } from "lucide-react";
 
 import { PlaneTakeoff } from "lucide-react";
@@ -458,83 +458,6 @@ export const PAY_TYPES = [
   { value: "base-bonus", label: "Base + Bonus", color: "indigo" },
   { value: "commission-only", label: "Commission Only", color: "red" },
   { value: "other", label: "Other", color: "gray" },
-];
-
-export const MOCK_JOBS: Job[] = [
-  {
-    id: "1",
-    jobTitle: "Senior Frontend Developer - SF Office",
-    jobBoardTitle: "Senior Frontend Developer",
-    jobDescription:
-      "We're looking for a Senior Frontend Developer to join our growing team. You'll work on cutting-edge web applications using React, TypeScript, and modern development tools. Our culture emphasizes collaboration, innovation, and continuous learning. We offer competitive benefits, flexible PTO, and opportunities for professional growth. The hiring process includes a technical interview and team meet-and-greet.",
-    backgroundScreeningDisclaimer: true,
-    jobStatus: "high",
-    workplaceType: "hybrid",
-    jobLocation: {
-      address: "123 Tech Street",
-      city: "San Francisco",
-      state: "CA",
-      zipCode: "94105",
-    },
-    employmentType: "full-time",
-    educationRequirement: "bachelor",
-    department: "Engineering",
-    payType: "salary",
-    payRate: {
-      type: "range",
-      min: 120000,
-      max: 160000,
-    },
-    positionsToHire: 2,
-    exemptStatus: "exempt",
-    eeoJobCategory: "Professionals",
-    jobRequirements: [
-      "5+ years of React experience",
-      "TypeScript proficiency",
-      "Experience with modern build tools",
-      "Strong CSS/SCSS skills",
-    ],
-    startDate: "2024-01-15",
-    endDate: "2024-02-15",
-    notifyOnApplication: {
-      enabled: true,
-      recipients: ["hiring@techcorp.com"],
-    },
-    dailyRoundup: {
-      enabled: true,
-      recipients: ["manager@techcorp.com"],
-      time: "09:00",
-    },
-
-    company: "TechCorp Inc.",
-    location: "San Francisco, CA",
-    type: "full-time",
-    experience: "senior",
-    salary: { min: 120000, max: 160000, currency: "USD" },
-    requirements: [
-      "5+ years of React experience",
-      "TypeScript proficiency",
-      "Experience with modern build tools",
-      "Strong CSS/SCSS skills",
-    ],
-    benefits: [
-      "Health Insurance",
-      "401k Matching",
-      "Flexible PTO",
-      "Remote Work Options",
-    ],
-    skills: ["React", "TypeScript", "Next.js", "Tailwind CSS", "GraphQL"],
-    status: "active",
-    applicants: 47,
-    views: 234,
-    matches: 12,
-    createdAt: "2024-01-15T10:00:00Z",
-    updatedAt: "2024-01-20T14:30:00Z",
-    deadline: "2024-02-15T23:59:59Z",
-    priority: "high",
-    remote: false,
-    featured: true,
-  },
 ];
 
 export const QUESTION_TYPE_INFO = {
