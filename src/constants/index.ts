@@ -342,10 +342,11 @@ export const PRIORITY_LEVELS = [
 ];
 
 export const EMPLOYMENT_TYPES = [
-  { value: "full-time", label: "Full-Time" },
-  { value: "part-time", label: "Part-Time" },
+  { value: "full-time", label: "Full-time" },
+  { value: "part-time", label: "Part-time" },
   { value: "contract", label: "Contract" },
-  { value: "seasonal", label: "Seasonal" },
+  { value: "temporary", label: "Temporary" },
+  { value: "internship", label: "Internship" },
 ];
 
 export const JOB_STATUSES = [
@@ -408,18 +409,38 @@ export const JOB_CREATION_STEPS = [
   },
   {
     id: 2,
-    title: "Position Details",
-    description: "Define job requirements and compensation",
+    title: "Company & Position Details",
+    description: "Company, openings, pay, and job type",
   },
   {
     id: 3,
-    title: "Settings & Notifications",
-    description: "Configure posting settings and alerts",
+    title: "Hours, Schedule & Benefits",
+    description: "Work hours, schedule, benefits, and location",
   },
   {
     id: 4,
+    title: "Compliance & Department",
+    description: "Exempt status, EEO category, and department",
+  },
+  {
+    id: 5,
+    title: "Job Qualifications",
+    description: "Required and preferred qualifications with scoring",
+  },
+  {
+    id: 6,
+    title: "Posting Schedule & Budget",
+    description: "Schedule, budget, and advertising settings",
+  },
+  {
+    id: 7,
+    title: "AI Ranking & Custom Rules",
+    description: "Advanced AI scoring and automation rules",
+  },
+  {
+    id: 8,
     title: "Review & Publish",
-    description: "Review and publish your job posting",
+    description: "Final review and publish your job posting",
   },
 ];
 
@@ -458,6 +479,117 @@ export const PAY_TYPES = [
   { value: "base-bonus", label: "Base + Bonus", color: "indigo" },
   { value: "commission-only", label: "Commission Only", color: "red" },
   { value: "other", label: "Other", color: "gray" },
+];
+
+export const HIRING_TIMELINE = [
+  { value: "1-3-days", label: "1-3 Days", priority: "urgent" },
+  { value: "3-7-days", label: "3-7 Days", priority: "urgent" },
+  { value: "1-2-weeks", label: "1-2 Weeks", priority: "high" },
+  { value: "2-4-weeks", label: "2-4 Weeks", priority: "medium" },
+  { value: "more-than-4-weeks", label: "More than 4 Weeks", priority: "low" },
+];
+
+export const PAY_RATE_TYPES = [
+  { value: "range", label: "Range" },
+  { value: "starting-amount", label: "Starting Amount" },
+  { value: "maximum-amount", label: "Maximum Amount" },
+  { value: "exact-amount", label: "Exact Amount" },
+];
+
+export const PAY_PERIODS = [
+  { value: "per-hour", label: "Per Hour" },
+  { value: "per-day", label: "Per Day" },
+  { value: "per-week", label: "Per Week" },
+  { value: "per-month", label: "Per Month" },
+  { value: "per-year", label: "Per Year" },
+];
+
+export const HOURS_PER_WEEK_TYPES = [
+  { value: "fixed-hours", label: "Fixed Hours" },
+  { value: "range", label: "Range" },
+  { value: "minimum", label: "Minimum" },
+  { value: "maximum", label: "Maximum" },
+];
+
+export const SCHEDULE_OPTIONS = [
+  "10 hour shift",
+  "12 hour shift", 
+  "4 hour shift",
+  "8 hour shift",
+  "After school",
+  "Choose your own hours",
+  "Day shift",
+  "Evening shift",
+  "Holidays",
+  "Monday to Friday",
+  "Night shift",
+  "No nights",
+  "No weekends",
+  "On call",
+  "Overtime",
+  "Overnight shift",
+  "Weekends as needed",
+  "Weekends only",
+  "Other",
+];
+
+export const BENEFIT_OPTIONS = [
+  "401(k)",
+  "401(k) matching",
+  "Dental insurance",
+  "Employee assistance program",
+  "Employee discount",
+  "Flexible schedule",
+  "Flexible spending account",
+  "Health insurance",
+  "Health savings account",
+  "Life insurance",
+  "Paid time off",
+  "Parental leave",
+  "Professional development assistance",
+  "Referral program",
+  "Relocation assistance",
+  "Retirement plan",
+  "Tuition reimbursement",
+  "Vision insurance",
+  "Other",
+];
+
+export const JOB_LOCATION_WORK_TYPES = [
+  { value: "in-person", label: "In person" },
+  { value: "fully-remote", label: "Fully Remote" },
+  { value: "hybrid", label: "Hybrid" },
+  { value: "on-the-road", label: "On the road" },
+];
+
+export const COUNTRIES = [
+  "United States",
+  "Canada",
+  "United Kingdom",
+  "Australia",
+  "Germany",
+  "France",
+  "Netherlands",
+  "Spain",
+  "Italy",
+  "Sweden",
+  "Norway",
+  "Denmark",
+  "Other",
+];
+
+export const LANGUAGES = [
+  "English",
+  "Spanish",
+  "French",
+  "German",
+  "Portuguese",
+  "Italian",
+  "Dutch",
+  "Swedish",
+  "Norwegian",
+  "Danish",
+  "Other",
 ];
 
 export const QUESTION_TYPE_INFO = {

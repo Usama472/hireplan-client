@@ -1,9 +1,13 @@
 "use client";
 
 import { JobAdStep } from "@/components/dashboard/jobs/common/job-ad-step";
-import { PositionDetailsStep } from "@/components/dashboard/jobs/common/position-details-step";
+import { CompanyPositionDetailsStep } from "@/components/dashboard/jobs/common/company-position-details-step";
+import { HoursScheduleBenefitsStep } from "@/components/dashboard/jobs/common/hours-schedule-benefits-step";
+import { ComplianceDepartmentStep } from "@/components/dashboard/jobs/common/compliance-department-step";
+import { JobQualificationsStep } from "@/components/dashboard/jobs/common/job-qualifications-step";
+import { PostingScheduleBudgetStep } from "@/components/dashboard/jobs/common/posting-schedule-budget-step";
+import { AIRankingStep } from "@/components/dashboard/jobs/common/ai-ranking-step";
 import { ReviewPublishStep } from "@/components/dashboard/jobs/common/review-publish-step";
-import { SettingsNotificationsStep } from "@/components/dashboard/jobs/common/settings-notifications-step";
 import { StepNavigation } from "@/components/main/signup/stepNavigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,7 +30,6 @@ import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { CustomQuestionsBuilder } from "../common/custom-questions-builder";
 
 export default function CreateJob() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -51,8 +54,9 @@ export default function CreateJob() {
   const handleNext = async () => {
     clearErrors();
 
-    if (currentStep === 4) {
-      setCurrentStep((prev) => Math.min(prev + 1, 5));
+    // Skip validation for steps 5, 6, and 7 (qualifications, schedule, and AI ranking) for now
+    if (currentStep === 5 || currentStep === 6 || currentStep === 7) {
+      setCurrentStep((prev) => Math.min(prev + 1, 8));
       return;
     }
 
@@ -62,7 +66,7 @@ export default function CreateJob() {
     });
 
     if (isStepValid) {
-      setCurrentStep((prev) => Math.min(prev + 1, 5));
+      setCurrentStep((prev) => Math.min(prev + 1, 8));
       clearErrors();
     }
   };
@@ -73,7 +77,7 @@ export default function CreateJob() {
   };
 
   const onSubmit = async (data: JobFormSchema) => {
-    if (currentStep !== 5) return;
+    if (currentStep !== 8) return;
 
     setIsSubmitting(true);
     try {
@@ -92,19 +96,18 @@ export default function CreateJob() {
       case 1:
         return <JobAdStep />;
       case 2:
-        return <PositionDetailsStep />;
+        return <CompanyPositionDetailsStep />;
       case 3:
-        return <SettingsNotificationsStep />;
-
+        return <HoursScheduleBenefitsStep />;
       case 4:
-        return (
-          <CustomQuestionsBuilder
-            name="customQuestions"
-            label="Custom Screening Questions"
-            description="Add custom questions to screen applicants and gather specific information during the application process"
-          />
-        );
+        return <ComplianceDepartmentStep />;
       case 5:
+        return <JobQualificationsStep />;
+      case 6:
+        return <PostingScheduleBudgetStep />;
+      case 7:
+        return <AIRankingStep />;
+      case 8:
         return <ReviewPublishStep />;
       default:
         return <JobAdStep />;
@@ -160,11 +163,11 @@ export default function CreateJob() {
                   {renderCurrentStep()}
                   <StepNavigation
                     currentStep={currentStep}
-                    totalSteps={5}
+                    totalSteps={8}
                     onNext={handleNext}
                     onPrevious={handlePrevious}
                     isFirstStep={currentStep === 1}
-                    isLastStep={currentStep === 5}
+                    isLastStep={currentStep === 8}
                     isValid={true}
                     isSubmitting={isSubmitting}
                   />

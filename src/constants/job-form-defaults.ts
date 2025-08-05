@@ -7,51 +7,117 @@ export const JOB_FORM_DEFAULT_VALUES: JobFormData = {
   jobDescription: "",
   backgroundScreeningDisclaimer: false,
 
-  // Step 2: Position Details
-  jobStatus: "medium",
-  workplaceType: "onsite",
+  // Step 2: Company & Position Details
+  company: "company-1",
+  positionsToHire: 1,
+  workSetting: "",
+  hiringTimeline: "2-4-weeks",
+  payType: "salary",
+  payRate: {
+    type: "range",
+    amount: 0,
+    min: 0,
+    max: 0,
+    period: "per-hour",
+  },
+  employmentType: "full-time",
+
+  // Step 3: Hours, Schedule & Benefits
+  hoursPerWeek: {
+    type: "fixed-hours",
+    amount: 40,
+    min: 0,
+    max: 0,
+  },
+  schedule: [],
+  benefits: [],
+  country: "United States",
+  language: "English",
+  jobLocationWorkType: "in-person",
   jobLocation: {
     address: "",
     city: "",
     state: "",
     zipCode: "",
+    country: "US",
   },
-  employmentType: "full-time",
-  educationRequirement: "",
-  department: "",
+  remoteLocationRequirement: {
+    required: false,
+    location: "",
+  },
+
+  // Step 4: Compliance & Department
+  exemptStatus: "not-applicable",
+  eeoJobCategory: "administrative-support-workers",
+  department: "engineering",
   customDepartment: "",
-  payType: "salary",
-  payRate: {
-    type: "fixed",
-    amount: 0,
-    min: 0,
-    max: 0,
-  },
-  positionsToHire: 1,
+
+  // Step 5: Job Qualifications
+  requiredQualifications: [],
+  preferredQualifications: [],
   jobRequirements: [],
-  exemptStatus: "",
-  eeoJobCategory: "",
-  // Custom Questions - Empty by default
   customQuestions: [],
 
-  // Step 3: Settings & Automation
+  // Step 6: Posting Schedule & Budget
   startDate: new Date(),
-  endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+  endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+  runIndefinitely: false,
+  dailyBudget: 0,
+  monthlyBudget: 0,
+  indeedBudget: 0,
+  zipRecruiterBudget: 0,
   customApplicationUrl: "",
   externalApplicationSetup: {
     customFields: [],
     redirectUrl: "",
   },
+
+  // Step 7: AI Ranking & Automation
   automation: {
     enabledRules: [],
-    acceptanceThreshold: 70,
+    acceptanceThreshold: 76,
+    manualReviewThreshold: 41,
+    autoRejectThreshold: 40,
     scoringWeights: {
       skillsMatch: 0,
       experienceRelevance: 0,
       educationQualifications: 0,
       culturalJobFit: 0,
     },
+    aiRankingCategories: [
+      {
+        name: "Skills Match",
+        weight: 25,
+        dataSource: { qualifications: true, screeningQuestions: true, resume: true },
+        customQuestions: [],
+      },
+      {
+        name: "Experience Relevance", 
+        weight: 25,
+        dataSource: { qualifications: false, screeningQuestions: false, resume: true },
+        customQuestions: [],
+      },
+      {
+        name: "Education Qualifications",
+        weight: 25,
+        dataSource: { qualifications: true, screeningQuestions: true, resume: true },
+        customQuestions: [],
+      },
+      {
+        name: "Cultural & Job Fit",
+        weight: 25,
+        dataSource: { qualifications: false, screeningQuestions: true, resume: false },
+        customQuestions: [],
+      },
+    ],
+    customRules: [],
+    templateId: "",
   },
+
+  // Legacy fields
+  jobStatus: "medium",
+  workplaceType: "onsite",
+  educationRequirement: "",
 };
 
 export const JOB_FORM_TEST_DATA: JobFormData = {
