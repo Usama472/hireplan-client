@@ -42,10 +42,6 @@ interface Applicant {
   phone?: string;
   city?: string;
   state?: string;
-  experienceYears?: number;
-  currentJobTitle?: string;
-  currentSalary?: string;
-  expectedSalary?: string;
   resume?: string;
   coverLetter?: string;
   createdAt: string;
@@ -210,19 +206,7 @@ const ApplicantCard = ({
               </div>
             )}
 
-            {applicant.experienceYears && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Briefcase className="w-4 h-4" />
-                <span>{applicant.experienceYears} years exp.</span>
-              </div>
-            )}
 
-            {applicant.currentJobTitle && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Building2 className="w-4 h-4" />
-                <span className="truncate">{applicant.currentJobTitle}</span>
-              </div>
-            )}
 
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Calendar className="w-4 h-4" />
@@ -230,27 +214,8 @@ const ApplicantCard = ({
             </div>
           </div>
 
-          {/* Salary Info and Status Badges */}
-          <div className="flex justify-between items-center">
-            <div className="flex flex-wrap gap-4 text-sm">
-              {applicant.currentSalary && (
-                <span className="text-green-600 font-medium">
-                  Current: ${applicant.currentSalary}
-                </span>
-              )}
-              {applicant.expectedSalary && (
-                <span className="text-blue-600 font-medium">
-                  Expected: ${applicant.expectedSalary}
-                </span>
-              )}
-              {!applicant.currentSalary && !applicant.expectedSalary && (
-                <span className="text-muted-foreground">
-                  No salary information
-                </span>
-              )}
-            </div>
-
-            {/* Status Badges - Moved to bottom right */}
+          {/* Status Badges */}
+          <div className="flex justify-end items-center">
             <div className="flex items-center gap-2">
               {applicant.aiScore && (
                 <Badge
@@ -440,12 +405,10 @@ export function ApplicantsSection({
       const fullName =
         `${applicant.firstName} ${applicant.lastName}`.toLowerCase();
       const email = applicant.email.toLowerCase();
-      const jobTitle = applicant.currentJobTitle?.toLowerCase() || "";
 
       if (
         !fullName.includes(query) &&
-        !email.includes(query) &&
-        !jobTitle.includes(query)
+        !email.includes(query)
       ) {
         return false;
       }

@@ -301,12 +301,7 @@ export interface IApplicant {
   lastName: string;
   city: string;
   state: string;
-  currentSalary?: string;
-  expectedSalary?: string;
-  experienceYears?: string;
-  currentJobTitle?: string;
   currentEmployer?: string;
-  availabilityDate?: Date;
   resume?: string;
   email: string;
   phone?: string;

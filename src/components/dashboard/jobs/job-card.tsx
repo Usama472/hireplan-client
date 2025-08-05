@@ -31,8 +31,10 @@ interface JobCardProps {
 const formatSalary = (job: JobFormDataWithId) => {
   if (!job.payRate) return "Competitive Salary";
   if (job.payRate.type === "fixed") {
+    if (job.payRate.amount == null) return "Competitive Salary";
     return `$${job.payRate.amount.toLocaleString()}`;
   } else {
+    if (job.payRate.min == null || job.payRate.max == null) return "Competitive Salary";
     return `$${job.payRate.min.toLocaleString()} - $${job.payRate.max.toLocaleString()}`;
   }
 };

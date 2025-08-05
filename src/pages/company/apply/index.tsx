@@ -84,11 +84,6 @@ interface JobApplicationFormData {
   lastName: string
   city: string
   state: string
-  currentSalary: string
-  expectedSalary: string
-  experienceYears: string
-  currentJobTitle: string
-  availabilityDate: string
   resume: File | null
   email: string
   phone: string
@@ -121,11 +116,6 @@ const JobApplicationPage: React.FC = () => {
     lastName: '',
     city: '',
     state: '',
-    currentSalary: '',
-    expectedSalary: '',
-    experienceYears: '',
-    currentJobTitle: '',
-    availabilityDate: '',
     resume: null,
     email: '',
     phone: '',
@@ -316,10 +306,6 @@ const JobApplicationPage: React.FC = () => {
       'phone',
       'state',
       'city',
-      'currentJobTitle',
-      'experienceYears',
-      'expectedSalary',
-      'availabilityDate',
     ]
 
     const missingFields = requiredFields.filter(
@@ -827,103 +813,7 @@ const JobApplicationPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Professional Information */}
-                <div className='bg-gradient-to-r from-slate-50 to-gray-50 rounded-lg p-4 border border-slate-200 shadow-sm'>
-                  <h3 className='text-base font-semibold text-gray-900 pb-2 mb-3 border-b border-slate-200 flex items-center'>
-                    <span className='bg-slate-100 text-slate-800 w-7 h-7 rounded-full inline-flex items-center justify-center text-sm mr-3 shadow-sm'>
-                      <Briefcase className='h-4 w-4' />
-                    </span>
-                    Professional Information
-                  </h3>
-                  <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
-                    <div>
-                      <Label
-                        htmlFor='currentJobTitle'
-                        className='text-sm font-medium text-gray-700 mb-1 flex items-center'
-                      >
-                        Current/Previous Job Title{' '}
-                        <span className='text-red-500 ml-0.5'>*</span>
-                      </Label>
-                      <Input
-                        id='currentJobTitle'
-                        name='currentJobTitle'
-                        value={formData.currentJobTitle}
-                        onChange={handleChange}
-                        className='h-10 text-sm rounded-md focus:ring-slate-500 focus:border-slate-500 transition-all bg-white'
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label
-                        htmlFor='experienceYears'
-                        className='text-sm font-medium text-gray-700 mb-1 flex items-center'
-                      >
-                        Years of Experience{' '}
-                        <span className='text-red-500 ml-0.5'>*</span>
-                      </Label>
-                      <Input
-                        id='experienceYears'
-                        name='experienceYears'
-                        type='text'
-                        value={formData.experienceYears}
-                        onChange={handleChange}
-                        className='h-10 text-sm rounded-md focus:ring-slate-500 focus:border-slate-500 transition-all bg-white'
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label
-                        htmlFor='currentSalary'
-                        className='text-sm font-medium text-gray-700 mb-1'
-                      >
-                        Current Salary (USD)
-                      </Label>
-                      <Input
-                        id='currentSalary'
-                        name='currentSalary'
-                        value={formData.currentSalary}
-                        onChange={handleChange}
-                        className='h-10 text-sm rounded-md focus:ring-slate-500 focus:border-slate-500 transition-all bg-white'
-                      />
-                      <p className='text-xs text-gray-500 mt-1'>Optional</p>
-                    </div>
-                    <div>
-                      <Label
-                        htmlFor='expectedSalary'
-                        className='text-sm font-medium text-gray-700 mb-1 flex items-center'
-                      >
-                        Expected Salary (USD){' '}
-                        <span className='text-red-500 ml-0.5'>*</span>
-                      </Label>
-                      <Input
-                        id='expectedSalary'
-                        name='expectedSalary'
-                        value={formData.expectedSalary}
-                        onChange={handleChange}
-                        className='h-10 text-sm rounded-md focus:ring-slate-500 focus:border-slate-500 transition-all bg-white'
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div className='mt-4 max-w-xs'>
-                    <Label
-                      htmlFor='availabilityDate'
-                      className='text-sm font-medium text-gray-700 mb-1 flex items-center'
-                    >
-                      Earliest Available Start Date{' '}
-                      <span className='text-red-500 ml-0.5'>*</span>
-                    </Label>
-                    <Input
-                      id='availabilityDate'
-                      name='availabilityDate'
-                      type='date'
-                      value={formData.availabilityDate}
-                      onChange={handleChange}
-                      className='h-10 text-sm rounded-md focus:ring-slate-500 focus:border-slate-500 transition-all bg-white'
-                      required
-                    />
-                  </div>
-                </div>
+
 
                 {/* Custom Fields */}
                 {formData.customFields.length > 0 && (

@@ -58,10 +58,6 @@ interface Applicant {
   phone?: string
   city?: string
   state?: string
-  experienceYears?: number
-  currentJobTitle?: string
-  currentSalary?: string
-  expectedSalary?: string
   resume?: string
   coverLetter?: string
   createdAt: string
@@ -263,39 +259,7 @@ export function ApplicantDetailModal({
                           </div>
                         )}
 
-                        {/* Experience */}
-                        {applicant.experienceYears && (
-                          <div className='flex items-center gap-3'>
-                            <div className='w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-600'>
-                              <Briefcase className='w-5 h-5' />
-                            </div>
-                            <div>
-                              <p className='text-sm text-muted-foreground'>
-                                Experience
-                              </p>
-                              <p className='font-medium'>
-                                {applicant.experienceYears} years
-                              </p>
-                            </div>
-                          </div>
-                        )}
 
-                        {/* Current Role */}
-                        {applicant.currentJobTitle && (
-                          <div className='flex items-center gap-3'>
-                            <div className='w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-600'>
-                              <BarChart3 className='w-5 h-5' />
-                            </div>
-                            <div>
-                              <p className='text-sm text-muted-foreground'>
-                                Current Role
-                              </p>
-                              <p className='font-medium'>
-                                {applicant.currentJobTitle}
-                              </p>
-                            </div>
-                          </div>
-                        )}
                       </div>
 
                       {/* Right Column - Contact */}
@@ -354,49 +318,7 @@ export function ApplicantDetailModal({
                     </div>
                   </section>
 
-                  <Separator />
 
-                  {/* Salary Information */}
-                  {(applicant.currentSalary || applicant.expectedSalary) && (
-                    <section>
-                      <h3 className='text-lg font-semibold mb-4 flex items-center text-emerald-800'>
-                        <DollarSign className='w-5 h-5 mr-2 text-emerald-600' />
-                        Compensation
-                      </h3>
-
-                      <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                        {applicant.currentSalary && (
-                          <div className='group bg-gradient-to-br from-green-50 to-white p-5 rounded-lg border border-green-100 hover:shadow-md transition-all duration-300'>
-                            <div className='flex items-center gap-3 mb-1'>
-                              <DollarSign className='w-5 h-5 text-green-600 group-hover:scale-110 transition-transform duration-300' />
-                              <p className='text-sm font-medium text-green-700'>
-                                Current Salary
-                              </p>
-                            </div>
-                            <p className='text-3xl font-bold text-green-800 ml-8'>
-                              ${applicant.currentSalary}
-                            </p>
-                          </div>
-                        )}
-
-                        {applicant.expectedSalary && (
-                          <div className='group bg-gradient-to-br from-blue-50 to-white p-5 rounded-lg border border-blue-100 hover:shadow-md transition-all duration-300'>
-                            <div className='flex items-center gap-3 mb-1'>
-                              <DollarSign className='w-5 h-5 text-blue-600 group-hover:scale-110 transition-transform duration-300' />
-                              <p className='text-sm font-medium text-blue-700'>
-                                Expected Salary
-                              </p>
-                            </div>
-                            <p className='text-3xl font-bold text-blue-800 ml-8'>
-                              ${applicant.expectedSalary}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </section>
-                  )}
-
-                  <Separator />
 
                   {/* Documents Section */}
                   <section>
