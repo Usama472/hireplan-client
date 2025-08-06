@@ -4,7 +4,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
 import {
   Select,
   SelectContent,
@@ -13,22 +12,20 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import API from "@/http";
 import { errorResolver } from "@/lib/utils";
-import { City, State } from "country-state-city";
 import {
-  Briefcase,
-  Building2,
   Calendar,
   Download,
   Eye,
-  Filter,
   MapPin,
   Search,
   Star,
-  TrendingUp,
   Users,
+  Clock,
+  UserCheck,
+  X,
+  AlertCircle,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -65,11 +62,6 @@ interface ApplicantsSectionProps {
   jobId: string;
   jobViews?: number;
 }
-
-const stateOptions = State.getStatesOfCountry("US").map((state) => ({
-  value: state.isoCode,
-  label: state.name,
-}));
 
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString("en-US", {
@@ -206,8 +198,6 @@ const ApplicantCard = ({
               </div>
             )}
 
-
-
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Calendar className="w-4 h-4" />
               <span>Applied {formatDate(applicant.createdAt)}</span>
@@ -312,6 +302,8 @@ export function ApplicantsSection({
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [stats, setStats] = useState({
     total: 0,
+    pending: 0,
+    reviewed: 0,
     shortlisted: 0,
     rejected: 0,
   });
@@ -324,10 +316,7 @@ export function ApplicantsSection({
 
   // Filters
   const [searchQuery, setSearchQuery] = useState("");
-  const [stateFilter, setStateFilter] = useState("all");
-  const [cityFilter, setCityFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [activeTab, setActiveTab] = useState("all");
 
   const fetchApplicants = async () => {
     if (!jobId) return;
@@ -372,10 +361,7 @@ export function ApplicantsSection({
 
   const handleClearFilters = () => {
     setSearchQuery("");
-    setStateFilter("all");
-    setCityFilter("all");
     setStatusFilter("all");
-    setActiveTab("all");
   };
 
   const handleStatusUpdate = async (applicantId: string, newStatus: string) => {
@@ -401,56 +387,22 @@ export function ApplicantsSection({
   const filteredApplicants = applicants.filter((applicant) => {
     // Search filter
     if (searchQuery) {
-      const query = searchQuery.toLowerCase();
+      const searchLower = searchQuery.toLowerCase();
       const fullName =
         `${applicant.firstName} ${applicant.lastName}`.toLowerCase();
       const email = applicant.email.toLowerCase();
-
-      if (
-        !fullName.includes(query) &&
-        !email.includes(query)
-      ) {
+      if (!fullName.includes(searchLower) && !email.includes(searchLower)) {
         return false;
       }
     }
 
-    // Tab filter
-    if (activeTab !== "all" && (applicant.status || "pending") !== activeTab) {
-      return false;
-    }
-
-    // State filter
-    if (stateFilter !== "all" && applicant.state !== stateFilter) {
-      return false;
-    }
-
-    // City filter
-    if (cityFilter !== "all" && applicant.city !== cityFilter) {
-      return false;
-    }
-
     // Status filter
-    if (
-      statusFilter !== "all" &&
-      (applicant.status || "pending") !== statusFilter
-    ) {
+    if (statusFilter !== "all" && applicant.status !== statusFilter) {
       return false;
     }
 
     return true;
   });
-
-  const uniqueStates = new Set(applicants.map((a) => a.state).filter(Boolean));
-  const cityOptions =
-    stateFilter !== "all"
-      ? City.getCitiesOfState("US", stateFilter).map((city) => ({
-          value: city.name,
-          label: city.name,
-        }))
-      : [];
-
-  const applicationRate =
-    jobViews && stats.total ? (stats.total / jobViews) * 100 : 0;
 
   if (isLoading) {
     return <ApplicantsLoadingSkeleton />;
@@ -458,238 +410,140 @@ export function ApplicantsSection({
 
   if (error) {
     return (
-      <Card className="border-red-200">
-        <CardContent className="pt-6 text-center">
-          <div className="text-red-500 mb-4">
-            <Users className="w-16 h-16 mx-auto mb-4 text-red-300" />
-            <h3 className="text-xl font-semibold mb-2">
-              Failed to Load Applicants
-            </h3>
-            <p className="text-sm text-red-600 mb-6">{error}</p>
-          </div>
-          <Button
-            onClick={fetchApplicants}
-            variant="outline"
-            className="bg-white"
-          >
-            Try Again
-          </Button>
-        </CardContent>
-      </Card>
+      <div className="text-center py-12">
+        <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          Failed to Load Applicants
+        </h3>
+        <p className="text-gray-600 mb-4">{error}</p>
+        <Button onClick={fetchApplicants} variant="outline">
+          Try Again
+        </Button>
+      </div>
     );
   }
 
   return (
-    <div className="space-y-8">
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatsCard
-          icon={Users}
-          title="Total Applicants"
-          value={stats.total}
-          color="bg-blue-100 text-blue-600"
-        />
+    <div className="space-y-6">
+      {/* Header with Stats */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-200">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900">
+              Applicant Overview
+            </h2>
+            <p className="text-sm text-gray-600 mt-1">
+              Manage and review job applications
+            </p>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <Eye className="w-4 h-4" />
+            <span>{jobViews} job views</span>
+          </div>
+        </div>
 
-        <StatsCard
-          icon={TrendingUp}
-          title="Shortlisted"
-          value={stats.shortlisted}
-          color="bg-purple-100 text-purple-600"
-        />
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <StatsCard
+            icon={Users}
+            title="Total Applicants"
+            value={stats.total}
+            color="bg-blue-100 text-blue-700"
+          />
+          <StatsCard
+            icon={Clock}
+            title="Pending Review"
+            value={stats.pending}
+            color="bg-yellow-100 text-yellow-700"
+          />
+          <StatsCard
+            icon={UserCheck}
+            title="Shortlisted"
+            value={stats.shortlisted}
+            color="bg-green-100 text-green-700"
+          />
+          <StatsCard
+            icon={X}
+            title="Rejected"
+            value={stats.rejected}
+            color="bg-red-100 text-red-700"
+          />
+        </div>
       </div>
 
-      {/* Application Rate */}
-      {jobViews > 0 && (
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="font-semibold text-lg">Application Rate</h3>
-                <p className="text-sm text-muted-foreground">
-                  {stats.total} applications from {jobViews} views
-                </p>
-              </div>
-              <div className="text-right">
-                <div className="text-2xl font-bold text-blue-600">
-                  {applicationRate.toFixed(1)}%
-                </div>
-              </div>
-            </div>
-            <Progress value={applicationRate} className="h-3" />
-          </CardContent>
-        </Card>
-      )}
-
       {/* Filters and Search */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="space-y-4">
-            {/* Search Bar */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+      <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+          <div className="flex flex-col sm:flex-row gap-3 flex-1">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
-                placeholder="Search applicants by name, email, or job title..."
+                placeholder="Search applicants..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
               />
             </div>
-
-            {/* Filter Controls */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Select value={stateFilter} onValueChange={setStateFilter}>
-                <SelectTrigger className="w-full sm:w-48">
-                  <SelectValue placeholder="All States" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All States</SelectItem>
-                  {stateOptions.map((state) => (
-                    <SelectItem key={state.value} value={state.value}>
-                      {state.label}
-                      {uniqueStates.has(state.value) && (
-                        <Badge variant="secondary" className="ml-2 text-xs">
-                          {
-                            applicants.filter((a) => a.state === state.value)
-                              .length
-                          }
-                        </Badge>
-                      )}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              {stateFilter !== "all" && cityOptions.length > 0 && (
-                <Select value={cityFilter} onValueChange={setCityFilter}>
-                  <SelectTrigger className="w-full sm:w-48">
-                    <SelectValue placeholder="All Cities" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Cities</SelectItem>
-                    {cityOptions.map((city) => (
-                      <SelectItem key={city.value} value={city.value}>
-                        {city.label}
-                        <Badge variant="secondary" className="ml-2 text-xs">
-                          {
-                            applicants.filter((a) => a.city === city.value)
-                              .length
-                          }
-                        </Badge>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full sm:w-48">
-                  <SelectValue placeholder="All Statuses" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  {/* <SelectItem value='pending'>
-                    Pending ({stats.pending})
-                  </SelectItem>
-                  <SelectItem value='reviewed'>
-                    Reviewed ({stats.reviewed})
-                  </SelectItem> */}
-                  <SelectItem value="shortlisted">
-                    Shortlisted ({stats.shortlisted})
-                  </SelectItem>
-                  <SelectItem value="rejected">
-                    Rejected ({stats.rejected})
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-
-              {(searchQuery ||
-                stateFilter !== "all" ||
-                cityFilter !== "all" ||
-                statusFilter !== "all") && (
-                <Button
-                  variant="outline"
-                  onClick={handleClearFilters}
-                  className="whitespace-nowrap bg-transparent"
-                >
-                  <Filter className="w-4 h-4 mr-2" />
-                  Clear Filters
-                </Button>
-              )}
-            </div>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full sm:w-40">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="reviewed">Reviewed</SelectItem>
+                <SelectItem value="shortlisted">Shortlisted</SelectItem>
+                <SelectItem value="rejected">Rejected</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-        </CardContent>
-      </Card>
+          <Button
+            variant="outline"
+            onClick={handleClearFilters}
+            className="text-sm"
+          >
+            Clear Filters
+          </Button>
+        </div>
+      </div>
 
-      {/* Status Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="all">All ({stats.total})</TabsTrigger>
-          <TabsTrigger value="shortlisted">
-            Shortlisted ({stats.shortlisted})
-          </TabsTrigger>
-          <TabsTrigger value="rejected">
-            Rejected ({stats.rejected})
-          </TabsTrigger>
-        </TabsList>
+      {/* Applicants List */}
+      <div className="bg-white rounded-lg border border-gray-200">
+        <div className="p-4 border-b border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900">
+            Applicants ({filteredApplicants.length})
+          </h3>
+        </div>
 
-        <TabsContent value={activeTab} className="mt-6">
-          {filteredApplicants.length > 0 ? (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">
-                  Showing {filteredApplicants.length} of {stats.total}{" "}
-                  applicants
-                </p>
-              </div>
+        {filteredApplicants.length === 0 ? (
+          <div className="text-center py-12">
+            <Users className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No applicants found
+            </h3>
+            <p className="text-gray-600">
+              {searchQuery || statusFilter !== "all"
+                ? "Try adjusting your filters"
+                : "No applications have been submitted yet"}
+            </p>
+          </div>
+        ) : (
+          <div className="divide-y divide-gray-200">
+            {filteredApplicants.map((applicant) => (
+              <ApplicantCard
+                key={applicant.id}
+                applicant={applicant}
+                onClick={() => {
+                  setSelectedApplicant(applicant);
+                  setShowDetailModal(true);
+                }}
+              />
+            ))}
+          </div>
+        )}
+      </div>
 
-              <div className="grid gap-4">
-                {filteredApplicants.map((applicant) => (
-                  <ApplicantCard
-                    key={applicant.id}
-                    applicant={applicant}
-                    onClick={() => {
-                      setSelectedApplicant(applicant);
-                      setShowDetailModal(true);
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
-          ) : (
-            <Card>
-              <CardContent className="pt-12 pb-12 text-center">
-                <Users className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">
-                  {searchQuery ||
-                  stateFilter !== "all" ||
-                  cityFilter !== "all" ||
-                  statusFilter !== "all"
-                    ? "No applicants match your filters"
-                    : "No applicants yet"}
-                </h3>
-                <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                  {searchQuery ||
-                  stateFilter !== "all" ||
-                  cityFilter !== "all" ||
-                  statusFilter !== "all"
-                    ? "Try adjusting your search or filters to see more applicants."
-                    : "Once candidates start applying for this position, you'll see their profiles here."}
-                </p>
-                {(searchQuery ||
-                  stateFilter !== "all" ||
-                  cityFilter !== "all" ||
-                  statusFilter !== "all") && (
-                  <Button onClick={handleClearFilters} variant="outline">
-                    Clear All Filters
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-      </Tabs>
-
-      {/* Enhanced Applicant Detail Modal */}
+      {/* Applicant Detail Modal */}
       {selectedApplicant && (
         <ApplicantDetailModal
           applicant={selectedApplicant}

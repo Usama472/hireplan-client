@@ -63,7 +63,9 @@ const rangePaySchema = z.object({
   min: z.number().min(0, "Minimum salary must be greater than 0"),
   max: z.number().min(0, "Maximum salary must be greater than 0"),
   amount: z.number().optional(),
-  period: z.enum(["per-hour", "per-day", "per-week", "per-month", "per-year"]).optional(),
+  period: z
+    .enum(["per-hour", "per-day", "per-week", "per-month", "per-year"])
+    .optional(),
 });
 
 const startingAmountPaySchema = z.object({
@@ -71,7 +73,9 @@ const startingAmountPaySchema = z.object({
   amount: z.number().min(0, "Amount must be greater than 0"),
   min: z.number().optional(),
   max: z.number().optional(),
-  period: z.enum(["per-hour", "per-day", "per-week", "per-month", "per-year"]).optional(),
+  period: z
+    .enum(["per-hour", "per-day", "per-week", "per-month", "per-year"])
+    .optional(),
 });
 
 const maximumAmountPaySchema = z.object({
@@ -79,7 +83,9 @@ const maximumAmountPaySchema = z.object({
   amount: z.number().min(0, "Amount must be greater than 0"),
   min: z.number().optional(),
   max: z.number().optional(),
-  period: z.enum(["per-hour", "per-day", "per-week", "per-month", "per-year"]).optional(),
+  period: z
+    .enum(["per-hour", "per-day", "per-week", "per-month", "per-year"])
+    .optional(),
 });
 
 const exactAmountPaySchema = z.object({
@@ -87,7 +93,9 @@ const exactAmountPaySchema = z.object({
   amount: z.number().min(0, "Amount must be greater than 0"),
   min: z.number().optional(),
   max: z.number().optional(),
-  period: z.enum(["per-hour", "per-day", "per-week", "per-month", "per-year"]).optional(),
+  period: z
+    .enum(["per-hour", "per-day", "per-week", "per-month", "per-year"])
+    .optional(),
 });
 
 // Base union schema without refinement
@@ -141,7 +149,6 @@ const automationSchema = z
       (sum, weight) => sum + weight,
       0
     );
-
     if (totalWeight > 100) {
       ctx.addIssue({
         path: ["scoringWeights"],
@@ -155,15 +162,16 @@ const automationSchema = z
       ctx.addIssue({
         path: ["manualReviewThreshold"],
         code: z.ZodIssueCode.custom,
-        message: "Manual review threshold must be higher than auto reject threshold",
+        message:
+          "Manual review threshold must be higher than auto reject threshold",
       });
     }
-
     if (data.manualReviewThreshold >= data.acceptanceThreshold) {
       ctx.addIssue({
         path: ["acceptanceThreshold"],
         code: z.ZodIssueCode.custom,
-        message: "Acceptance threshold must be higher than manual review threshold",
+        message:
+          "Acceptance threshold must be higher than manual review threshold",
       });
     }
 
@@ -173,7 +181,6 @@ const automationSchema = z
         (sum, category) => sum + (category.weight || 0),
         0
       );
-
       if (totalCategoryWeight > 100) {
         ctx.addIssue({
           path: ["aiRankingCategories"],
@@ -196,23 +203,30 @@ export const jobFormSchema = z
     jobDescription: z
       .string()
       .min(20, "Description should be at least 20 characters")
-      .max(2000, "Description should be no more than 2000 characters"),
+      .max(3500, "Description should be no more than 3500 characters"),
     backgroundScreeningDisclaimer: z.boolean().optional(),
 
     // Step 2: Company & Position Details
     company: z.string().optional(),
-    positionsToHire: z.number().min(1, "At least 1 position is required").max(10, "Maximum 10 positions allowed"),
+    positionsToHire: z
+      .number()
+      .min(1, "At least 1 position is required")
+      .max(10, "Maximum 10 positions allowed"),
     workSetting: z.string().optional(),
-    hiringTimeline: z.enum(["1-3-days", "3-7-days", "1-2-weeks", "2-4-weeks", "more-than-4-weeks"]).optional(),
+    hiringTimeline: z
+      .enum([
+        "1-3-days",
+        "3-7-days",
+        "1-2-weeks",
+        "2-4-weeks",
+        "more-than-4-weeks",
+      ])
+      .optional(),
     payType: z.enum(["salary", "hourly", "commission"]).optional(),
     payRate: payRateSchema,
-    employmentType: z.enum([
-      "full-time",
-      "part-time",
-      "contract",
-      "temporary",
-      "internship",
-    ]).optional(),
+    employmentType: z
+      .enum(["full-time", "part-time", "contract", "temporary", "internship"])
+      .optional(),
 
     // Step 3: Hours, Schedule & Benefits
     hoursPerWeek: hoursPerWeekSchema.optional(),
@@ -220,9 +234,13 @@ export const jobFormSchema = z
     benefits: z.array(z.string()).default([]),
     country: z.string().default("United States"),
     language: z.string().default("English"),
-    jobLocationWorkType: z.enum(["in-person", "fully-remote", "hybrid", "on-the-road"]).optional(),
+    jobLocationWorkType: z
+      .enum(["in-person", "fully-remote", "hybrid", "on-the-road"])
+      .optional(),
     jobLocation: jobLocationSchema.optional(),
     remoteLocationRequirement: remoteLocationRequirementSchema.optional(),
+    hasConsistentStartingLocation: z.boolean().optional(), // Added for 'on-the-road' type
+    operatingArea: z.string().optional(), // Added for 'on-the-road' type when no consistent location
 
     // Step 4: Compliance & Department
     exemptStatus: z.enum(["exempt", "non-exempt", "not-applicable"]).optional(),
@@ -265,7 +283,7 @@ export const jobFormSchema = z
   })
   .superRefine((data, ctx) => {
     // Validate date range
-    if (data.endDate <= data.startDate) {
+    if (data.endDate && data.startDate && data.endDate <= data.startDate) {
       ctx.addIssue({
         path: ["endDate"],
         code: z.ZodIssueCode.custom,
@@ -296,7 +314,6 @@ export const scoringWeightsValidationSchema = scoringWeightsSchema.superRefine(
       (sum, weight) => sum + weight,
       0
     );
-
     if (totalWeight > 100) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,

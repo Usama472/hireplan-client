@@ -1,6 +1,6 @@
-import type { JobFormData } from "@/interfaces";
+import type { JobFormSchema } from "@/lib/validations/forms/job-form-schema";
 
-export const JOB_FORM_DEFAULT_VALUES: JobFormData = {
+export const JOB_FORM_DEFAULT_VALUES: JobFormSchema = {
   // Step 1: Job Ad
   jobTitle: "",
   jobBoardTitle: "",
@@ -8,19 +8,18 @@ export const JOB_FORM_DEFAULT_VALUES: JobFormData = {
   backgroundScreeningDisclaimer: false,
 
   // Step 2: Company & Position Details
-  company: "company-1",
+  company: "", // Assuming this might be a select or dynamic, empty string as default
   positionsToHire: 1,
   workSetting: "",
-  hiringTimeline: "2-4-weeks",
-  payType: "salary",
+  hiringTimeline: "2-4-weeks", // Default to a common timeline
+  payType: "salary", // Default pay type
   payRate: {
-    type: "range",
-    amount: 0,
+    type: "range", // Default to range, but could be any of the discriminated union types
     min: 0,
     max: 0,
-    period: "per-hour",
+    period: "per-year", // Default period
   },
-  employmentType: "full-time",
+  employmentType: "full-time", // Default employment type
 
   // Step 3: Hours, Schedule & Benefits
   hoursPerWeek: {
@@ -33,34 +32,36 @@ export const JOB_FORM_DEFAULT_VALUES: JobFormData = {
   benefits: [],
   country: "United States",
   language: "English",
-  jobLocationWorkType: "in-person",
+  jobLocationWorkType: "in-person", // Default to in-person
   jobLocation: {
     address: "",
     city: "",
     state: "",
     zipCode: "",
-    country: "US",
+    country: "US", // Default country for job location
   },
   remoteLocationRequirement: {
     required: false,
     location: "",
   },
+  hasConsistentStartingLocation: false,
+  operatingArea: "",
 
   // Step 4: Compliance & Department
   exemptStatus: "not-applicable",
-  eeoJobCategory: "administrative-support-workers",
-  department: "engineering",
+  eeoJobCategory: "", // Empty string as default, assuming it's a select
+  department: "", // Empty string as default, assuming it's a select
   customDepartment: "",
 
   // Step 5: Job Qualifications
   requiredQualifications: [],
   preferredQualifications: [],
-  jobRequirements: [],
+  jobRequirements: [], // Legacy field, keeping empty
   customQuestions: [],
 
   // Step 6: Posting Schedule & Budget
   startDate: new Date(),
-  endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+  endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // Default to 30 days from now
   runIndefinitely: false,
   dailyBudget: 0,
   monthlyBudget: 0,
@@ -79,34 +80,50 @@ export const JOB_FORM_DEFAULT_VALUES: JobFormData = {
     manualReviewThreshold: 41,
     autoRejectThreshold: 40,
     scoringWeights: {
-      skillsMatch: 0,
-      experienceRelevance: 0,
-      educationQualifications: 0,
-      culturalJobFit: 0,
+      skillsMatch: 25,
+      experienceRelevance: 25,
+      educationQualifications: 25,
+      culturalJobFit: 25,
     },
     aiRankingCategories: [
       {
         name: "Skills Match",
         weight: 25,
-        dataSource: { qualifications: true, screeningQuestions: true, resume: true },
+        dataSource: {
+          qualifications: true,
+          screeningQuestions: true,
+          resume: true,
+        },
         customQuestions: [],
       },
       {
-        name: "Experience Relevance", 
+        name: "Experience Relevance",
         weight: 25,
-        dataSource: { qualifications: false, screeningQuestions: false, resume: true },
+        dataSource: {
+          qualifications: false,
+          screeningQuestions: false,
+          resume: true,
+        },
         customQuestions: [],
       },
       {
         name: "Education Qualifications",
         weight: 25,
-        dataSource: { qualifications: true, screeningQuestions: true, resume: true },
+        dataSource: {
+          qualifications: true,
+          screeningQuestions: true,
+          resume: true,
+        },
         customQuestions: [],
       },
       {
         name: "Cultural & Job Fit",
         weight: 25,
-        dataSource: { qualifications: false, screeningQuestions: true, resume: false },
+        dataSource: {
+          qualifications: false,
+          screeningQuestions: true,
+          resume: false,
+        },
         customQuestions: [],
       },
     ],
@@ -120,74 +137,113 @@ export const JOB_FORM_DEFAULT_VALUES: JobFormData = {
   educationRequirement: "",
 };
 
-export const JOB_FORM_TEST_DATA: JobFormData = {
+export const JOB_FORM_TEST_DATA: JobFormSchema = {
   // Step 1: Job Ad
   jobTitle: "Senior Full Stack Developer - Remote",
   jobBoardTitle: "Senior Full Stack Developer (React/Node.js)",
-  jobDescription: `We're seeking an experienced Full Stack Developer to join our growing tech team. You'll work on cutting-edge web applications using React, Node.js, and modern cloud technologies.
+  jobDescription: `<h1>Senior Full Stack Developer - Remote</h1>
+<p>We're seeking an experienced Full Stack Developer to join our growing tech team. You'll work on cutting-edge web applications using React, Node.js, and modern cloud technologies.</p>
 
-Key Responsibilities:
-• Develop and maintain web applications using React and Node.js
-• Collaborate with cross-functional teams to define and implement new features
-• Optimize applications for maximum speed and scalability
-• Participate in code reviews and technical discussions
-• Mentor junior developers and contribute to best practices
+<h2>Key Responsibilities</h2>
+<ul>
+  <li>Develop and maintain web applications using React and Node.js</li>
+  <li>Collaborate with cross-functional teams to define and implement new features</li>
+  <li>Optimize applications for maximum speed and scalability</li>
+  <li>Participate in code reviews and technical discussions</li>
+  <li>Mentor junior developers and contribute to best practices</li>
+</ul>
 
-Requirements:
-• 5+ years of experience in full-stack development
-• Strong proficiency in React, Node.js, and TypeScript
-• Experience with PostgreSQL and MongoDB
-• Familiarity with AWS or similar cloud platforms
-• Strong problem-solving skills and attention to detail
+<h2>Requirements</h2>
+<ul>
+  <li>5+ years of experience in full-stack development</li>
+  <li>Strong proficiency in React, Node.js, and TypeScript</li>
+  <li>Experience with PostgreSQL and MongoDB</li>
+  <li>Familiarity with AWS or similar cloud platforms</li>
+  <li>Strong problem-solving skills and attention to detail</li>
+</ul>
 
-We offer competitive compensation, comprehensive benefits, and a collaborative remote-first culture.`,
+<h3>Technical Skills</h3>
+<ol>
+  <li>Frontend: React.js, TypeScript, HTML5, CSS3</li>
+  <li>Backend: Node.js, Express.js, RESTful APIs</li>
+  <li>Database: PostgreSQL, MongoDB, Redis</li>
+  <li>DevOps: AWS, Docker, CI/CD pipelines</li>
+</ol>
+
+<p><strong>Benefits:</strong> We offer competitive compensation, comprehensive benefits, and a collaborative remote-first culture.</p>
+`,
   backgroundScreeningDisclaimer: true,
 
-  // Step 2: Position Details
-  jobStatus: "high",
-  workplaceType: "remote",
-  jobLocation: {
-    address: "123 Tech Street",
-    city: "San Francisco",
-    state: "CA",
-    zipCode: "94105",
-  },
-  employmentType: "full-time",
-  educationRequirement: "Bachelor's degree",
-  department: "Engineering",
-  customDepartment: "",
+  // Step 2: Company & Position Details
+  company: "Acme Corp",
+  positionsToHire: 2,
+  workSetting: "Remote",
+  hiringTimeline: "1-2-weeks",
   payType: "salary",
   payRate: {
     type: "range",
-    amount: 0,
     min: 120000,
     max: 160000,
+    period: "per-year",
   },
-  positionsToHire: 2,
+  employmentType: "full-time",
+
+  // Step 3: Hours, Schedule & Benefits
+  hoursPerWeek: {
+    type: "fixed-hours",
+    amount: 40,
+  },
+  schedule: ["Monday to Friday", "8 hour shift"],
+  benefits: ["Health insurance", "Paid time off", "401(k)"],
+  country: "United States",
+  language: "English",
+  jobLocationWorkType: "fully-remote",
+  jobLocation: {
+    address: "", // Not applicable for fully-remote unless specified
+    city: "",
+    state: "",
+    zipCode: "",
+    country: "US",
+  },
+  remoteLocationRequirement: {
+    required: true,
+    location: "California",
+  },
+  hasConsistentStartingLocation: false,
+  operatingArea: "",
+
+  // Step 4: Compliance & Department
+  exemptStatus: "exempt",
+  eeoJobCategory: "professionals",
+  department: "engineering",
+  customDepartment: "",
+
+  // Step 5: Job Qualifications
+  requiredQualifications: [
+    { text: "5+ years of React.js development experience", score: 100 },
+    { text: "Strong proficiency in Node.js and Express.js", score: 100 },
+  ],
+  preferredQualifications: [
+    { text: "Experience with TypeScript", score: 75 },
+    {
+      text: "Familiarity with cloud platforms (AWS, Azure, or GCP)",
+      score: 50,
+    },
+  ],
   jobRequirements: [
-    "5+ years of React.js development experience",
-    "Strong proficiency in Node.js and Express.js",
-    "Experience with TypeScript and modern JavaScript",
-    "Knowledge of database design (PostgreSQL, MongoDB)",
-    "Familiarity with cloud platforms (AWS, Azure, or GCP)",
-    "Experience with version control systems (Git)",
     "Strong problem-solving and debugging skills",
     "Excellent communication and teamwork abilities",
   ],
-  exemptStatus: "exempt",
-  eeoJobCategory: "professionals",
-
-  // Custom Questions - Sample questions for testing
   customQuestions: [
     {
-      id: "q_1704067200000_boolean",
+      id: "q_1_boolean",
       type: "boolean",
       question:
         "Are you authorized to work in the United States without sponsorship?",
       required: true,
     },
     {
-      id: "q_1704067200001_select",
+      id: "q_2_select",
       type: "select",
       question: "What is your preferred work schedule?",
       required: true,
@@ -195,316 +251,95 @@ We offer competitive compensation, comprehensive benefits, and a collaborative r
         "Full-time (40 hours/week)",
         "Part-time (20-30 hours/week)",
         "Contract/Freelance",
-        "Flexible hours",
       ],
-    },
-    {
-      id: "q_1704067200002_string",
-      type: "string",
-      question:
-        "Please describe your experience with React.js and any notable projects you've worked on.",
-      required: true,
-      placeholder:
-        "Include specific projects, technologies used, and your role in the development process...",
     },
   ],
 
-  // Step 3: Settings & Automation
+  // Step 6: Posting Schedule & Budget
   startDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
   endDate: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000), // 60 days from now
-  customApplicationUrl: "",
+  runIndefinitely: false,
+  dailyBudget: 50,
+  monthlyBudget: 1500,
+  indeedBudget: 30,
+  zipRecruiterBudget: 20,
+  customApplicationUrl: "https://company.com/careers/apply-dev",
   externalApplicationSetup: {
-    customFields: ["Portfolio URL", "GitHub Profile", "LinkedIn Profile"],
-    redirectUrl: "https://company.com/careers/apply",
+    customFields: ["Portfolio URL", "GitHub Profile"],
+    redirectUrl: "https://company.com/careers/external-apply",
   },
+
+  // Step 7: AI Ranking & Automation
   automation: {
-    enabledRules: [
-      "accept-notification",
-      "rejection-notification",
-      "interview-notification",
-    ],
+    enabledRules: ["accept-notification", "rejection-notification"],
     acceptanceThreshold: 85,
+    manualReviewThreshold: 60,
+    autoRejectThreshold: 30,
     scoringWeights: {
       skillsMatch: 40,
       experienceRelevance: 30,
       educationQualifications: 15,
       culturalJobFit: 15,
     },
-  },
-};
-
-// Additional test data with different question types for various scenarios
-export const JOB_FORM_MARKETING_TEST_DATA: JobFormData = {
-  ...JOB_FORM_DEFAULT_VALUES,
-  jobTitle: "Digital Marketing Manager",
-  jobBoardTitle: "Digital Marketing Manager - Growth Focused",
-  jobDescription:
-    "Join our marketing team to drive digital growth and brand awareness...",
-  department: "Marketing",
-  automation: {
-    enabledRules: ["accept-notification"],
-    acceptanceThreshold: 75,
-    scoringWeights: {
-      skillsMatch: 35,
-      experienceRelevance: 35,
-      educationQualifications: 10,
-      culturalJobFit: 20,
-    },
-  },
-  customQuestions: [
-    {
-      id: "q_marketing_1",
-      type: "boolean",
-      question:
-        "Do you have experience with Google Ads and Facebook Ads management?",
-      required: true,
-    },
-    {
-      id: "q_marketing_2",
-      type: "select",
-      question:
-        "Which marketing automation platform are you most familiar with?",
-      required: true,
-      options: [
-        "HubSpot",
-        "Marketo",
-        "Pardot",
-        "Mailchimp",
-        "ActiveCampaign",
-        "Other",
-        "None",
-      ],
-    },
-    {
-      id: "q_marketing_3",
-      type: "string",
-      question:
-        "Describe a successful digital marketing campaign you've managed and its results.",
-      required: true,
-      placeholder:
-        "Include campaign objectives, strategies used, metrics, and outcomes...",
-    },
-  ],
-};
-
-export const JOB_FORM_SALES_TEST_DATA: JobFormData = {
-  ...JOB_FORM_DEFAULT_VALUES,
-  jobTitle: "Senior Sales Representative",
-  jobBoardTitle: "Senior Sales Rep - SaaS Solutions",
-  jobDescription:
-    "Drive revenue growth by selling our innovative SaaS solutions to enterprise clients...",
-  department: "Sales",
-  automation: {
-    enabledRules: ["accept-notification", "interview-notification"],
-    acceptanceThreshold: 80,
-    scoringWeights: {
-      skillsMatch: 25,
-      experienceRelevance: 45,
-      educationQualifications: 5,
-      culturalJobFit: 25,
-    },
-  },
-  customQuestions: [
-    {
-      id: "q_sales_1",
-      type: "boolean",
-      question: "Do you have experience selling B2B SaaS products?",
-      required: true,
-    },
-    {
-      id: "q_sales_2",
-      type: "select",
-      question: "What is your typical sales cycle length?",
-      required: true,
-      options: [
-        "Less than 1 month",
-        "1-3 months",
-        "3-6 months",
-        "6-12 months",
-        "More than 12 months",
-      ],
-    },
-    {
-      id: "q_sales_3",
-      type: "string",
-      question: "What CRM systems have you used, and which do you prefer?",
-      required: false,
-      placeholder: "List CRM platforms and explain your preference...",
-    },
-    {
-      id: "q_sales_4",
-      type: "string",
-      question: "Please provide your LinkedIn profile URL.",
-      required: false,
-      placeholder: "https://linkedin.com/in/your-profile",
-    },
-  ],
-};
-
-// Question templates for common job roles
-export const COMMON_QUESTION_TEMPLATES = {
-  WORK_AUTHORIZATION: {
-    id: "template_work_auth",
-    type: "boolean" as const,
-    question:
-      "Are you authorized to work in the United States without sponsorship?",
-    required: true,
-  },
-  REMOTE_EXPERIENCE: {
-    id: "template_remote_exp",
-    type: "boolean" as const,
-    question:
-      "Do you have experience working remotely or in distributed teams?",
-    required: false,
-  },
-  AVAILABILITY: {
-    id: "template_availability",
-    type: "select" as const,
-    question: "When would you be available to start?",
-    required: true,
-    options: [
-      "Immediately",
-      "Within 2 weeks",
-      "Within 1 month",
-      "More than 1 month",
+    aiRankingCategories: [
+      {
+        name: "Skills Match",
+        weight: 40,
+        dataSource: {
+          qualifications: true,
+          screeningQuestions: true,
+          resume: true,
+        },
+        customQuestions: ["Rate communication skills 1-10"],
+      },
+      {
+        name: "Experience Relevance",
+        weight: 30,
+        dataSource: {
+          qualifications: false,
+          screeningQuestions: false,
+          resume: true,
+        },
+        customQuestions: [],
+      },
+      {
+        name: "Education Qualifications",
+        weight: 15,
+        dataSource: {
+          qualifications: true,
+          screeningQuestions: true,
+          resume: true,
+        },
+        customQuestions: [],
+      },
+      {
+        name: "Cultural & Job Fit",
+        weight: 15,
+        dataSource: {
+          qualifications: false,
+          screeningQuestions: true,
+          resume: false,
+        },
+        customQuestions: [],
+      },
     ],
-  },
-  SALARY_EXPECTATIONS: {
-    id: "template_salary",
-    type: "string" as const,
-    question: "What are your salary expectations for this role?",
-    required: false,
-    placeholder: "e.g., $80,000 - $100,000 annually",
-  },
-  PORTFOLIO_URL: {
-    id: "template_portfolio",
-    type: "string" as const,
-    question:
-      "Please provide a link to your portfolio or relevant work samples.",
-    required: false,
-    placeholder: "https://your-portfolio.com",
-  },
-  EXPERIENCE_SUMMARY: {
-    id: "template_experience",
-    type: "string" as const,
-    question: "Please summarize your relevant experience for this position.",
-    required: true,
-    placeholder:
-      "Describe your background, key skills, and notable achievements...",
-  },
-  PREFERRED_LOCATION: {
-    id: "template_location",
-    type: "select" as const,
-    question: "What is your preferred work location?",
-    required: true,
-    options: [
-      "On-site only",
-      "Remote only",
-      "Hybrid (2-3 days in office)",
-      "Flexible",
+    customRules: [
+      {
+        condition: "Score 41-75%",
+        action: "send-questions",
+        template: "questions-1",
+      },
+      {
+        condition: "Score 76-85%",
+        action: "schedule-phone",
+        template: "interview-2",
+      },
     ],
+    templateId: "technical-role",
   },
-  CONTACT_EMAIL: {
-    id: "template_email",
-    type: "string" as const,
-    question: "Please provide your preferred contact email address.",
-    required: true,
-    placeholder: "your.email@example.com",
-  },
-  PHONE_NUMBER: {
-    id: "template_phone",
-    type: "string" as const,
-    question: "Please provide your phone number for follow-up contact.",
-    required: false,
-    placeholder: "(555) 123-4567",
-  },
-  NOTICE_PERIOD: {
-    id: "template_notice",
-    type: "select" as const,
-    question: "What is your current notice period?",
-    required: true,
-    options: [
-      "Available immediately",
-      "1 week",
-      "2 weeks",
-      "1 month",
-      "2 months",
-      "3+ months",
-    ],
-  },
-} as const;
 
-// Predefined scoring weight presets for different job types
-export const SCORING_WEIGHT_PRESETS = {
-  TECHNICAL_ROLE: {
-    skillsMatch: 45,
-    experienceRelevance: 35,
-    educationQualifications: 10,
-    culturalJobFit: 10,
-  },
-  SALES_ROLE: {
-    skillsMatch: 25,
-    experienceRelevance: 45,
-    educationQualifications: 5,
-    culturalJobFit: 25,
-  },
-  MARKETING_ROLE: {
-    skillsMatch: 35,
-    experienceRelevance: 30,
-    educationQualifications: 15,
-    culturalJobFit: 20,
-  },
-  MANAGEMENT_ROLE: {
-    skillsMatch: 20,
-    experienceRelevance: 40,
-    educationQualifications: 15,
-    culturalJobFit: 25,
-  },
-  ENTRY_LEVEL: {
-    skillsMatch: 30,
-    experienceRelevance: 20,
-    educationQualifications: 25,
-    culturalJobFit: 25,
-  },
-  BALANCED: {
-    skillsMatch: 25,
-    experienceRelevance: 25,
-    educationQualifications: 25,
-    culturalJobFit: 25,
-  },
-} as const;
-
-// Helper function to generate unique IDs for questions
-export const generateQuestionId = (type: string): string => {
-  return `q_${Date.now()}_${type}_${Math.random().toString(36).substr(2, 9)}`;
-};
-
-// Helper function to create a question from template
-export const createQuestionFromTemplate = (
-  template: (typeof COMMON_QUESTION_TEMPLATES)[keyof typeof COMMON_QUESTION_TEMPLATES]
-) => {
-  return {
-    ...template,
-    id: generateQuestionId(template.type),
-  };
-};
-
-// Helper function to apply scoring weight preset
-export const applyScoringWeightPreset = (
-  presetName: keyof typeof SCORING_WEIGHT_PRESETS
-) => {
-  return { ...SCORING_WEIGHT_PRESETS[presetName] };
-};
-
-// Helper function to get recommended acceptance threshold by job level
-export const getRecommendedAcceptanceThreshold = (jobLevel: string): number => {
-  const thresholds = {
-    entry: 60,
-    mid: 70,
-    senior: 80,
-    lead: 85,
-    executive: 90,
-  };
-
-  return thresholds[jobLevel as keyof typeof thresholds] || 70;
+  // Legacy fields
+  jobStatus: "high",
+  workplaceType: "remote",
+  educationRequirement: "Bachelor's degree",
 };

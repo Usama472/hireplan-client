@@ -1,12 +1,11 @@
 'use client'
 
 import { InputField } from '@/components/common/InputField'
+import { TiptapEditor } from '@/components/common/TiptapEditor'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { cn } from '@/lib/utils'
 import { AlertCircle, CheckCircle, Info } from 'lucide-react'
 import { useFormContext } from 'react-hook-form'
 
@@ -46,7 +45,11 @@ export function JobAdStep() {
   }
 
   const getDescriptionValidation = (description: string) => {
-    const length = description.length
+    // Create a temporary div to parse HTML and get text content
+    const tempDiv = document.createElement('div')
+    tempDiv.innerHTML = description
+    const textContent = tempDiv.textContent || ''
+    const length = textContent.length
 
     // Show validation error if it exists in the form state
     if (errors.jobDescription) {
@@ -54,17 +57,20 @@ export function JobAdStep() {
         status: 'error',
         message:
           errors.jobDescription.message?.toString() ||
-          `Invalid description (${length}/20-2000)`,
+          `Invalid description (${length}/700-3500)`,
       }
     }
 
     if (length === 0)
       return { status: 'neutral', message: 'Enter a job description' }
     if (length < 700)
-      return { status: 'warning', message: `Too short (${length}/700-2000)` }
-    if (length > 2000)
-      return { status: 'error', message: `Too long (${length}/700-2000)` }
-    return { status: 'success', message: `Optimal length (${length}/700-2000)` }
+      return { status: 'warning', message: `Too short (${length}/700-3500)` }
+    if (length > 3500)
+      return { status: 'error', message: `Too long (${length}/700-3500)` }
+    return {
+      status: 'success',
+      message: `Optimal length (${length}/700-3500)`,
+    }
   }
 
   const titleValidation = getTitleValidation(jobTitle)
@@ -181,29 +187,12 @@ export function JobAdStep() {
             </CardHeader>
             <CardContent>
               <div className='space-y-3'>
-                <div>
-                  <Textarea
-                    placeholder='Describe the role, responsibilities, work culture, benefits, growth opportunities, and hiring process expectations...'
-                    rows={12}
-                    value={jobDescription}
-                    onChange={(e) => setValue('jobDescription', e.target.value)}
-                    className={cn(
-                      'w-full',
-                      descriptionValidation.status === 'error' &&
-                        'border-red-500',
-                      descriptionValidation.status === 'success' &&
-                        'border-green-500'
-                    )}
-                  />
-                </div>
-                <div className='flex items-center gap-2 text-sm'>
-                  {getStatusIcon(descriptionValidation.status)}
-                  <span
-                    className={getStatusColor(descriptionValidation.status)}
-                  >
-                    {descriptionValidation.message}
-                  </span>
-                </div>
+                <TiptapEditor
+                  name='jobDescription'
+                  placeholder='Describe the role, responsibilities, work culture, benefits, growth opportunities, and hiring process expectations...'
+                  validation={descriptionValidation}
+                  minHeight={400}
+                />
               </div>
             </CardContent>
           </Card>
@@ -332,7 +321,12 @@ export function JobAdStep() {
                         : 'secondary'
                     }
                   >
-                    {jobDescription.length}
+                    {/* Calculate text content length without HTML tags */}
+                    {(() => {
+                      const tempDiv = document.createElement('div')
+                      tempDiv.innerHTML = jobDescription
+                      return tempDiv.textContent?.length || 0
+                    })()}
                   </Badge>
                 </div>
               </div>
