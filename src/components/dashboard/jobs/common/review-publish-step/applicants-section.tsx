@@ -324,28 +324,18 @@ export function ApplicantsSection({
     setError(null);
 
     try {
-      const response: ApplicantsResponse = await API.applicant.getApplicants(
-        jobId
-      );
-      setApplicants(response.applicants || []);
-      setStats(
-        response.stats || {
-          total: response.applicants?.length || 0,
-          pending:
-            response.applicants?.filter(
-              (a) => a.status === "pending" || !a.status
-            ).length || 0,
-          reviewed:
-            response.applicants?.filter((a) => a.status === "reviewed")
-              .length || 0,
-          shortlisted:
-            response.applicants?.filter((a) => a.status === "shortlisted")
-              .length || 0,
-          rejected:
-            response.applicants?.filter((a) => a.status === "rejected")
-              .length || 0,
-        }
-      );
+      const response: any = await API.applicant.getApplicants(jobId);
+      const applicantsData = response.applicants || [];
+      const statsData = response.stats || {
+        total: applicantsData.length,
+        pending: applicantsData.filter((a: Applicant) => a.status === "pending" || !a.status).length,
+        reviewed: applicantsData.filter((a: Applicant) => a.status === "reviewed").length,
+        shortlisted: applicantsData.filter((a: Applicant) => a.status === "shortlisted").length,
+        rejected: applicantsData.filter((a: Applicant) => a.status === "rejected").length,
+      };
+      
+      setApplicants(applicantsData);
+      setStats(statsData);
     } catch (err) {
       const errorMessage = errorResolver(err);
       setError(errorMessage);

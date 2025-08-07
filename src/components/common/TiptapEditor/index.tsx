@@ -20,6 +20,12 @@ interface TiptapEditorProps {
   };
   className?: string;
   minHeight?: number;
+  enableAI?: boolean;
+  aiContext?: {
+    jobTitle?: string;
+    company?: string;
+    requirements?: string[];
+  };
 }
 
 export function TiptapEditor({
@@ -28,6 +34,8 @@ export function TiptapEditor({
   validation,
   className,
   minHeight = 200,
+  enableAI = false,
+  aiContext,
 }: TiptapEditorProps) {
   const { setValue, watch } = useFormContext();
   const content = watch(name) || "";
@@ -80,7 +88,7 @@ export function TiptapEditor({
           "prose-pre:bg-gray-100 prose-pre:p-4 prose-pre:rounded prose-pre:overflow-x-auto"
         ),
       },
-      handleKeyDown: (view, event) => {
+      handleKeyDown: (_view, event) => {
         // Handle keyboard shortcuts
         if (event.ctrlKey || event.metaKey) {
           switch (event.key.toLowerCase()) {
@@ -179,7 +187,15 @@ export function TiptapEditor({
         )}
         style={{ minHeight: `${minHeight}px` }}
       >
-        <Toolbar editor={editor} />
+        <Toolbar 
+          editor={editor} 
+          enableAI={enableAI}
+          aiContext={aiContext}
+          onAIEnhance={(enhancedContent: string) => {
+            editor?.commands.setContent(enhancedContent);
+            setValue(name, enhancedContent);
+          }}
+        />
         <div className="tiptap-editor-content">
           <EditorContent editor={editor} />
         </div>

@@ -192,6 +192,12 @@ export function JobAdStep() {
                   placeholder='Describe the role, responsibilities, work culture, benefits, growth opportunities, and hiring process expectations...'
                   validation={descriptionValidation}
                   minHeight={400}
+                  enableAI={true}
+                  aiContext={{
+                    jobTitle: jobTitle,
+                    company: watch('company'),
+                    requirements: watch('jobRequirements') || [],
+                  }}
                 />
               </div>
             </CardContent>

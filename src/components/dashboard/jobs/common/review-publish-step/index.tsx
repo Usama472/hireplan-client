@@ -162,7 +162,7 @@ export function ReviewPublishStep({
 
       {/* Review Tabs */}
       <div className='bg-white rounded-lg border border-gray-200 shadow-sm'>
-        <Tabs defaultValue='job-ad' className='w-full'>
+        <Tabs defaultValue={mode === 'review' ? 'applicants' : 'job-ad'} className='w-full'>
           <div className='border-b-2 border-gray-200'>
             <TabsList
               className={`grid w-full ${

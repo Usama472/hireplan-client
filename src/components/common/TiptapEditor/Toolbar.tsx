@@ -2,6 +2,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { enhanceJobDescription } from "@/lib/ai";
 import { Editor } from "@tiptap/react";
 import {
   Bold,
@@ -13,16 +14,25 @@ import {
   Heading2,
   Heading3,
   Link,
+  Sparkles,
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
 interface ToolbarProps {
   editor: Editor | null;
+  enableAI?: boolean;
+  aiContext?: {
+    jobTitle?: string;
+    company?: string;
+    requirements?: string[];
+  };
+  onAIEnhance?: (enhancedContent: string) => void;
 }
 
-export function Toolbar({ editor }: ToolbarProps) {
+export function Toolbar({ editor, enableAI, aiContext, onAIEnhance }: ToolbarProps) {
   const [url, setUrl] = useState("");
   const [showLinkInput, setShowLinkInput] = useState(false);
+  const [isEnhancing, setIsEnhancing] = useState(false);
   const linkInputRef = useRef<HTMLDivElement>(null);
 
   // Close link input when clicking outside
@@ -41,6 +51,32 @@ export function Toolbar({ editor }: ToolbarProps) {
   }, []);
 
   if (!editor) return null;
+
+  const handleAIEnhance = async () => {
+    if (!enableAI || !aiContext?.jobTitle || !onAIEnhance) return;
+    
+    const currentContent = editor.getHTML();
+    if (!currentContent || currentContent.trim() === '<p></p>') {
+      alert('Please add some content to enhance');
+      return;
+    }
+
+    setIsEnhancing(true);
+    try {
+      const enhancedContent = await enhanceJobDescription({
+        jobTitle: aiContext.jobTitle,
+        jobDescription: currentContent,
+        company: aiContext.company,
+        requirements: aiContext.requirements,
+      });
+      onAIEnhance(enhancedContent);
+    } catch (error) {
+      console.error('AI enhancement failed:', error);
+      alert('Failed to enhance content. Please try again.');
+    } finally {
+      setIsEnhancing(false);
+    }
+  };
 
   const setLink = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -248,6 +284,25 @@ export function Toolbar({ editor }: ToolbarProps) {
       >
         <Link className="w-4 h-4" />
       </button>
+
+      {enableAI && (
+        <>
+          <div className="border-l mx-1 border-gray-300" />
+          <button
+            type="button"
+            onClick={handleAIEnhance}
+            disabled={isEnhancing}
+            className={cn(
+              "p-2 rounded hover:bg-purple-100 transition-colors duration-200 text-purple-700",
+              isEnhancing && "opacity-50 cursor-not-allowed"
+            )}
+            aria-label="Enhance with AI"
+            title="Enhance with AI"
+          >
+            <Sparkles className={cn("w-4 h-4", isEnhancing && "animate-spin")} />
+          </button>
+        </>
+      )}
 
       {showLinkInput && (
         <div
