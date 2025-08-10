@@ -38,24 +38,8 @@ const qualificationSchema = z.object({
   score: z.number().min(0).max(100).optional().default(0),
 });
 
-// AI ranking category schema
-const aiRankingCategorySchema = z.object({
-  name: z.string().min(1, "Category name is required"),
-  weight: z.number().min(0).max(100).default(0),
-  dataSource: z.object({
-    qualifications: z.boolean().default(false),
-    screeningQuestions: z.boolean().default(false),
-    resume: z.boolean().default(false),
-  }),
-  customQuestions: z.array(z.string()).default([]),
-});
-
-// Custom rule schema
-const customRuleSchema = z.object({
-  condition: z.string().min(1, "Condition is required"),
-  action: z.string().min(1, "Action is required"),
-  template: z.string().min(1, "Template is required"),
-});
+// These schemas are now part of the section-based automation system
+// Old AI ranking and custom rule schemas have been replaced
 
 // Pay rate schemas for different types
 const rangePaySchema = z.object({
@@ -123,72 +107,118 @@ const externalApplicationSetupSchema = z.object({
   redirectUrl: z.string().optional(),
 });
 
-// AI Scoring Weights schema
-const scoringWeightsSchema = z.object({
-  skillsMatch: z.number().min(0).max(100),
-  experienceRelevance: z.number().min(0).max(100),
-  educationQualifications: z.number().min(0).max(100),
-  culturalJobFit: z.number().min(0).max(100),
+// Section threshold schema
+const sectionThresholdSchema = z.object({
+  autoReject: z.number().min(0).max(100).default(40),
+  manualReview: z.number().min(0).max(100).default(75),
 });
 
-// Automation schema with AI scoring
+// Job rule schema for section-based logic
+const jobRuleSchema = z.object({
+  sectionCount: z.string().min(1, "Section count is required"),
+  sectionsCondition: z.string().optional(), // For display purposes
+  status: z.enum(["Pass", "Manual Review", "Fail"]),
+  action: z.enum(["schedule-interview", "send-template", "reject-candidate"]),
+  template: z.string().optional(),
+});
+
+// Section-based automation schema
 const automationSchema = z
   .object({
     enabledRules: z.array(z.string()).default([]),
+    
+    // Section weights (must total 100%)
+    sectionWeights: z.object({
+      requiredQualifications: z.number().min(0).max(100).default(0),
+      preferredQualifications: z.number().min(0).max(100).default(0),
+      preScreeningQuestions: z.number().min(0).max(100).default(0),
+      resume: z.number().min(0).max(100).default(0),
+    }).default({}),
+    
+    // Thresholds for each section
+    sectionThresholds: z.object({
+      requiredQualifications: sectionThresholdSchema.default({}),
+      preferredQualifications: sectionThresholdSchema.default({}),
+      preScreeningQuestions: sectionThresholdSchema.default({}),
+      resume: sectionThresholdSchema.default({}),
+    }).default({}),
+    
+    // Preferred qualifications scoring (individual weights must total 100%)
+    preferredQualScoring: z.record(z.string(), z.number().min(0).max(100)).default({}),
+    
+    // Resume items and their scoring
+    resumeItems: z.array(z.string()).default([]),
+    resumeItemScoring: z.record(z.string(), z.number().min(0).max(100)).default({}),
+    
+    // Pre-screening question auto-fail settings
+    questionAutoFail: z.record(z.string(), z.boolean()).default({}),
+    
+    // Pre-screening question answer criteria
+    questionCriteria: z.record(z.string(), z.object({
+      correctAnswer: z.string().optional(),
+      incorrectAnswer: z.string().optional(),
+      instructions: z.string().optional(),
+    })).default({}),
+    
+    // Job rules for conditional logic
+    jobRules: z.array(jobRuleSchema).default([]),
+    
+    // Legacy fields for backward compatibility
     acceptanceThreshold: z.number().min(0).max(100).default(76),
     manualReviewThreshold: z.number().min(0).max(100).default(41),
     autoRejectThreshold: z.number().min(0).max(100).default(40),
-    scoringWeights: scoringWeightsSchema,
-    aiRankingCategories: z.array(aiRankingCategorySchema).default([]),
-    customRules: z.array(customRuleSchema).default([]),
     templateId: z.string().optional(),
   })
   .superRefine((data, ctx) => {
-    // Validate that scoring weights don't exceed 100% total
-    const totalWeight = Object.values(data.scoringWeights).reduce(
+    // Validate that section weights don't exceed 100% total
+    const totalSectionWeight = Object.values(data.sectionWeights).reduce(
       (sum, weight) => sum + weight,
       0
     );
-    if (totalWeight > 100) {
+    if (totalSectionWeight > 100) {
       ctx.addIssue({
-        path: ["scoringWeights"],
+        path: ["sectionWeights"],
         code: z.ZodIssueCode.custom,
-        message: "Total scoring weights cannot exceed 100%",
+        message: "Total section weights cannot exceed 100%",
       });
     }
 
-    // Validate threshold ordering
-    if (data.autoRejectThreshold >= data.manualReviewThreshold) {
+    // Validate preferred qualifications scoring totals 100%
+    const preferredQualTotal = Object.values(data.preferredQualScoring).reduce(
+      (sum, score) => sum + score,
+      0
+    );
+    if (preferredQualTotal > 0 && preferredQualTotal !== 100) {
       ctx.addIssue({
-        path: ["manualReviewThreshold"],
+        path: ["preferredQualScoring"],
         code: z.ZodIssueCode.custom,
-        message:
-          "Manual review threshold must be higher than auto reject threshold",
-      });
-    }
-    if (data.manualReviewThreshold >= data.acceptanceThreshold) {
-      ctx.addIssue({
-        path: ["acceptanceThreshold"],
-        code: z.ZodIssueCode.custom,
-        message:
-          "Acceptance threshold must be higher than manual review threshold",
+        message: "Preferred qualifications scoring must total 100%",
       });
     }
 
-    // Validate AI ranking categories weights
-    if (data.aiRankingCategories.length > 0) {
-      const totalCategoryWeight = data.aiRankingCategories.reduce(
-        (sum, category) => sum + (category.weight || 0),
-        0
-      );
-      if (totalCategoryWeight > 100) {
+    // Validate resume item scoring totals 100%
+    const resumeItemTotal = Object.values(data.resumeItemScoring).reduce(
+      (sum, score) => sum + score,
+      0
+    );
+    if (resumeItemTotal > 0 && resumeItemTotal !== 100) {
+      ctx.addIssue({
+        path: ["resumeItemScoring"],
+        code: z.ZodIssueCode.custom,
+        message: "Resume item scoring must total 100%",
+      });
+    }
+
+    // Validate section thresholds ordering
+    Object.entries(data.sectionThresholds).forEach(([sectionName, thresholds]) => {
+      if (thresholds.autoReject >= thresholds.manualReview) {
         ctx.addIssue({
-          path: ["aiRankingCategories"],
+          path: ["sectionThresholds", sectionName, "manualReview"],
           code: z.ZodIssueCode.custom,
-          message: "Total AI ranking category weights cannot exceed 100%",
+          message: `${sectionName}: Manual review threshold must be higher than auto reject threshold`,
         });
       }
-    }
+    });
   });
 
 // Complete job form schema
@@ -308,20 +338,23 @@ export const jobFormSchema = z
   });
 
 // Individual validation schemas for specific features
-export const scoringWeightsValidationSchema = scoringWeightsSchema.superRefine(
-  (data, ctx) => {
-    const totalWeight = Object.values(data).reduce(
-      (sum, weight) => sum + weight,
-      0
-    );
-    if (totalWeight > 100) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: `Total weights (${totalWeight}%) cannot exceed 100%`,
-      });
-    }
+export const sectionWeightsValidationSchema = z.object({
+  requiredQualifications: z.number().min(0).max(100).default(0),
+  preferredQualifications: z.number().min(0).max(100).default(0),
+  preScreeningQuestions: z.number().min(0).max(100).default(0),
+  resume: z.number().min(0).max(100).default(0),
+}).superRefine((data, ctx) => {
+  const totalWeight = Object.values(data).reduce(
+    (sum: number, weight: number) => sum + weight,
+    0
+  );
+  if (totalWeight > 100) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `Total section weights (${totalWeight}%) cannot exceed 100%`,
+    });
   }
-);
+});
 
 export const acceptanceThresholdSchema = z
   .number()
@@ -330,17 +363,17 @@ export const acceptanceThresholdSchema = z
 
 // Type inference
 export type JobFormSchema = z.infer<typeof jobFormSchema>;
-export type ScoringWeights = z.infer<typeof scoringWeightsSchema>;
+export type SectionWeights = z.infer<typeof sectionWeightsValidationSchema>;
 export type AutomationSchema = z.infer<typeof automationSchema>;
 
 // Helper validation functions
-export const validateScoringWeights = (weights: ScoringWeights) => {
-  const result = scoringWeightsValidationSchema.safeParse(weights);
+export const validateSectionWeights = (weights: SectionWeights) => {
+  const result = sectionWeightsValidationSchema.safeParse(weights);
   return {
     isValid: result.success,
     errors: result.success ? [] : result.error.issues,
     totalWeight: Object.values(weights).reduce(
-      (sum, weight) => sum + weight,
+      (sum: number, weight: number) => sum + weight,
       0
     ),
   };

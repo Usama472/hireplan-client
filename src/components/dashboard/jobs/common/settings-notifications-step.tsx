@@ -33,6 +33,7 @@ const scoringCriteria = [
 export function SettingsNotificationsStep() {
   const { watch, setValue } = useFormContext();
   const [newCustomField, setNewCustomField] = useState("");
+  const [showAdvancedAutomation, setShowAdvancedAutomation] = useState(false);
 
   const enabledRules = watch("automation.enabledRules") || [];
   const customFields = watch("externalApplicationSetup.customFields") || [];
@@ -198,138 +199,240 @@ export function SettingsNotificationsStep() {
 
         {/* Automation Tab */}
         <TabsContent value="automation" className="space-y-6">
-          {/* Acceptance Threshold */}
-
-          {/* AI Scoring */}
-          <div className="space-y-4">
+          {/* Simple Automation Overview */}
+          <div className="p-4 bg-blue-50 border border-blue-200 rounded-md">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Target className="w-4 h-4 text-gray-600" />
-                <h3 className="font-medium text-gray-900">
-                  AI Scoring Weights
-                </h3>
+              <div className="space-y-1">
+                <h3 className="text-sm font-medium text-blue-900">AI Automation</h3>
+                <p className="text-xs text-blue-700">
+                  {showAdvancedAutomation ? "Advanced settings for fine-tuned control" : "Simple automation with smart defaults"}
+                </p>
               </div>
-              <div className="flex items-center gap-2">
-                <span
-                  className={`text-sm font-medium ${
-                    isValidTotal ? "text-green-600" : "text-red-600"
-                  }`}
-                >
-                  {totalPercentage}%
-                </span>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={resetWeights}
-                >
-                  Reset
-                </Button>
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-blue-700">Simple</span>
+                <Switch
+                  checked={showAdvancedAutomation}
+                  onCheckedChange={setShowAdvancedAutomation}
+                />
+                <span className="text-xs text-blue-700">Advanced</span>
               </div>
             </div>
+          </div>
 
-            <Progress value={Math.min(totalPercentage, 100)} className="h-2" />
+          {!showAdvancedAutomation ? (
+            /* Simple Automation Mode */
+            <div className="space-y-4">
+              {/* Quick Threshold Setting */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-green-600" />
+                  <h3 className="font-medium text-gray-900">
+                    Candidate Auto-Acceptance
+                  </h3>
+                </div>
 
-            {!isValidTotal && (
-              <Alert variant="destructive" className="py-2">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription className="text-sm">
-                  Total cannot exceed 100%
-                </AlertDescription>
-              </Alert>
-            )}
-
-            <div className="grid grid-cols-1 gap-4">
-              {scoringCriteria.map((criteria) => (
-                <div
-                  key={criteria.key}
-                  className="p-4 bg-gray-50 rounded-md space-y-3"
-                >
+                <div className="p-4 bg-green-50 border border-green-200 rounded-md space-y-3">
                   <div className="flex items-center justify-between">
+                    <Label className="text-sm font-medium">
+                      How selective should AI be with candidates?
+                    </Label>
                     <div className="flex items-center gap-2">
-                      <span className="text-lg">{criteria.icon}</span>
-                      <Label className="text-sm font-medium">
-                        {criteria.label}
-                      </Label>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-blue-600 min-w-[3rem] text-right">
-                        {scoringWeights[criteria.key] || 0}%
+                      <span className="text-lg font-semibold text-green-600">
+                        {acceptanceThreshold}%
                       </span>
-                      <Progress
-                        value={scoringWeights[criteria.key] || 0}
-                        className="h-2 w-16"
-                      />
+                      <Badge variant="outline" className="text-xs">
+                        {acceptanceThreshold >= 80
+                          ? "Very Selective"
+                          : acceptanceThreshold >= 60
+                          ? "Selective"
+                          : "Less Selective"}
+                      </Badge>
                     </div>
                   </div>
 
                   <Slider
-                    value={[scoringWeights[criteria.key] || 0]}
-                    onValueChange={(value) =>
-                      updateScoringWeight(criteria.key, value)
-                    }
+                    value={[acceptanceThreshold]}
+                    onValueChange={updateAcceptanceThreshold}
+                    max={95}
+                    min={50}
+                    step={5}
+                    className="w-full"
+                  />
+
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>Less Selective (50%)</span>
+                    <span>Balanced (75%)</span>
+                    <span>Very Selective (95%)</span>
+                  </div>
+
+                  <p className="text-xs text-gray-600">
+                    Candidates scoring {acceptanceThreshold}% or higher will be automatically recommended for the next stage
+                  </p>
+                </div>
+              </div>
+
+              {/* Want more control? */}
+              <div className="p-4 border border-dashed border-gray-300 rounded-md text-center space-y-2">
+                <p className="text-sm text-gray-600">
+                  Need custom scoring weights and detailed automation rules?
+                </p>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setShowAdvancedAutomation(true)}
+                  className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                >
+                  Switch to Advanced Automation
+                </Button>
+              </div>
+            </div>
+          ) : (
+            /* Advanced Automation Mode */
+            <div className="space-y-6">
+              {/* Back to Simple */}
+              <div className="flex justify-end">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setShowAdvancedAutomation(false)}
+                  className="text-gray-600"
+                >
+                  ← Back to Simple Automation
+                </Button>
+              </div>
+
+              {/* AI Scoring */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Target className="w-4 h-4 text-gray-600" />
+                    <h3 className="font-medium text-gray-900">
+                      AI Scoring Weights
+                    </h3>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`text-sm font-medium ${
+                        isValidTotal ? "text-green-600" : "text-red-600"
+                      }`}
+                    >
+                      {totalPercentage}%
+                    </span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={resetWeights}
+                    >
+                      Reset
+                    </Button>
+                  </div>
+                </div>
+
+                <Progress value={Math.min(totalPercentage, 100)} className="h-2" />
+
+                {!isValidTotal && (
+                  <Alert variant="destructive" className="py-2">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertDescription className="text-sm">
+                      Total cannot exceed 100%
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                <div className="grid grid-cols-1 gap-4">
+                  {scoringCriteria.map((criteria) => (
+                    <div
+                      key={criteria.key}
+                      className="p-4 bg-gray-50 rounded-md space-y-3"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg">{criteria.icon}</span>
+                          <Label className="text-sm font-medium">
+                            {criteria.label}
+                          </Label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-blue-600 min-w-[3rem] text-right">
+                            {scoringWeights[criteria.key] || 0}%
+                          </span>
+                          <Progress
+                            value={scoringWeights[criteria.key] || 0}
+                            className="h-2 w-16"
+                          />
+                        </div>
+                      </div>
+
+                      <Slider
+                        value={[scoringWeights[criteria.key] || 0]}
+                        onValueChange={(value) =>
+                          updateScoringWeight(criteria.key, value)
+                        }
+                        max={100}
+                        min={0}
+                        step={5}
+                        className="w-full"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-gray-600" />
+                  <h3 className="font-medium text-gray-900">
+                    Acceptance Threshold
+                  </h3>
+                </div>
+
+                <div className="p-4 bg-gray-50 rounded-md space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm">
+                      Minimum score for auto-acceptance
+                    </Label>
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg font-semibold text-blue-600">
+                        {acceptanceThreshold}%
+                      </span>
+                      <Badge variant="outline" className="text-xs">
+                        {acceptanceThreshold >= 80
+                          ? "High"
+                          : acceptanceThreshold >= 60
+                          ? "Medium"
+                          : "Low"}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <Slider
+                    value={[acceptanceThreshold]}
+                    onValueChange={updateAcceptanceThreshold}
                     max={100}
                     min={0}
                     step={5}
                     className="w-full"
                   />
-                </div>
-              ))}
-            </div>
-          </div>
 
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-gray-600" />
-              <h3 className="font-medium text-gray-900">
-                Acceptance Threshold
-              </h3>
-            </div>
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>0% (Accept all)</span>
+                    <span>50% (Balanced)</span>
+                    <span>100% (Perfect only)</span>
+                  </div>
 
-            <div className="p-4 bg-gray-50 rounded-md space-y-3">
-              <div className="flex items-center justify-between">
-                <Label className="text-sm">
-                  Minimum score for auto-acceptance
-                </Label>
-                <div className="flex items-center gap-2">
-                  <span className="text-lg font-semibold text-blue-600">
-                    {acceptanceThreshold}%
-                  </span>
-                  <Badge variant="outline" className="text-xs">
-                    {acceptanceThreshold >= 80
-                      ? "High"
-                      : acceptanceThreshold >= 60
-                      ? "Medium"
-                      : "Low"}
-                  </Badge>
+                  <p className="text-xs text-gray-600">
+                    Candidates scoring {acceptanceThreshold}% or higher will be
+                    automatically moved to the next stage
+                  </p>
                 </div>
               </div>
-
-              <Slider
-                value={[acceptanceThreshold]}
-                onValueChange={updateAcceptanceThreshold}
-                max={100}
-                min={0}
-                step={5}
-                className="w-full"
-              />
-
-              <div className="flex justify-between text-xs text-gray-500">
-                <span>0% (Accept all)</span>
-                <span>50% (Balanced)</span>
-                <span>100% (Perfect only)</span>
-              </div>
-
-              <p className="text-xs text-gray-600">
-                Candidates scoring {acceptanceThreshold}% or higher will be
-                automatically moved to the next stage
-              </p>
             </div>
-          </div>
+          )}
 
-          {/* Notifications */}
+          {/* Notifications - shown in both modes */}
           <div className="space-y-4">
-            <h3 className="font-medium text-gray-900">Notifications</h3>
+            <h3 className="font-medium text-gray-900">Automated Notifications</h3>
 
             <div className="space-y-3">
               {[

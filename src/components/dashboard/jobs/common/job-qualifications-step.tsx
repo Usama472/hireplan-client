@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Slider } from "@/components/ui/slider";
+
 import { CustomQuestionsBuilder } from "./custom-questions-builder";
 import {
   Plus,
@@ -12,9 +12,7 @@ import {
   CheckCircle,
   Star,
   Info,
-  Target,
   MessageSquare,
-  AlertTriangle,
 } from "lucide-react";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
@@ -31,7 +29,7 @@ export function JobQualificationsStep() {
     if (newRequiredQual.trim()) {
       const newQual = {
         text: newRequiredQual.trim(),
-        score: 100, // Required qualifications default to 100%
+        title: newRequiredQual.trim(), // For backward compatibility
       };
       setValue("requiredQualifications", [...requiredQualifications, newQual]);
       setNewRequiredQual("");
@@ -42,7 +40,7 @@ export function JobQualificationsStep() {
     if (newPreferredQual.trim()) {
       const newQual = {
         text: newPreferredQual.trim(),
-        score: 50, // Preferred qualifications default to 50%
+        title: newPreferredQual.trim(), // For backward compatibility
       };
       setValue("preferredQualifications", [...preferredQualifications, newQual]);
       setNewPreferredQual("");
@@ -57,13 +55,6 @@ export function JobQualificationsStep() {
   const removePreferredQualification = (index: number) => {
     const updated = preferredQualifications.filter((_: any, i: number) => i !== index);
     setValue("preferredQualifications", updated);
-  };
-
-  const updateQualificationScore = (type: string, index: number, score: number[]) => {
-    const qualifications = watch(type) || [];
-    const updated = [...qualifications];
-    updated[index] = { ...updated[index], score: score[0] };
-    setValue(type, updated);
   };
 
   const qualificationTemplates = [
@@ -83,7 +74,7 @@ export function JobQualificationsStep() {
     const currentQuals = watch(type) || [];
     const newQual = {
       text: template,
-      score: type === "requiredQualifications" ? 100 : 50,
+      title: template, // For backward compatibility
     };
     setValue(type, [...currentQuals, newQual]);
   };
@@ -95,7 +86,7 @@ export function JobQualificationsStep() {
           Job Qualifications
         </h2>
         <p className="text-sm text-gray-600 mt-1">
-          Define required and preferred qualifications with scoring for auto-rejection rules
+          Define required and preferred qualifications for this position. Scoring will be configured in the AI Ranking step.
         </p>
       </div>
 
@@ -108,7 +99,7 @@ export function JobQualificationsStep() {
               Required Qualifications
             </CardTitle>
             <p className="text-sm text-gray-500">
-              Must-have qualifications (default 100% score)
+              Must-have qualifications for this position
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -164,9 +155,9 @@ export function JobQualificationsStep() {
               <div className="space-y-3">
                 <Label className="text-sm text-gray-600">Current Requirements</Label>
                 {requiredQualifications.map((qual: any, index: number) => (
-                  <div key={index} className="p-3 bg-red-50 border border-red-200 rounded-md space-y-3">
+                  <div key={index} className="p-3 bg-red-50 border border-red-200 rounded-md">
                     <div className="flex items-start justify-between">
-                      <p className="text-sm font-medium text-red-900 flex-1">{qual.text}</p>
+                      <p className="text-sm font-medium text-red-900 flex-1">{qual.text || qual.title}</p>
                       <Button
                         type="button"
                         variant="ghost"
@@ -176,32 +167,6 @@ export function JobQualificationsStep() {
                       >
                         <X className="w-3 h-3" />
                       </Button>
-                    </div>
-                    
-                    {/* Scoring */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Label className="text-xs text-gray-600">Auto-rejection score</Label>
-                        <div className="flex items-center gap-2">
-                          <Target className="w-3 h-3 text-red-500" />
-                          <span className="text-xs font-semibold text-red-600">
-                            {qual.score || 100}%
-                          </span>
-                        </div>
-                      </div>
-                      <Slider
-                        value={[qual.score || 100]}
-                        onValueChange={(value) => 
-                          updateQualificationScore("requiredQualifications", index, value)
-                        }
-                        max={100}
-                        min={0}
-                        step={5}
-                        className="w-full"
-                      />
-                      <p className="text-xs text-gray-500">
-                        Candidates scoring below {qual.score || 100}% will be auto-rejected
-                      </p>
                     </div>
                   </div>
                 ))}
@@ -224,7 +189,7 @@ export function JobQualificationsStep() {
               Preferred Qualifications
             </CardTitle>
             <p className="text-sm text-gray-500">
-              Nice-to-have qualifications (default 50% score)
+              Nice-to-have qualifications for this position
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -280,9 +245,9 @@ export function JobQualificationsStep() {
               <div className="space-y-3">
                 <Label className="text-sm text-gray-600">Current Preferences</Label>
                 {preferredQualifications.map((qual: any, index: number) => (
-                  <div key={index} className="p-3 bg-green-50 border border-green-200 rounded-md space-y-3">
+                  <div key={index} className="p-3 bg-green-50 border border-green-200 rounded-md">
                     <div className="flex items-start justify-between">
-                      <p className="text-sm font-medium text-green-900 flex-1">{qual.text}</p>
+                      <p className="text-sm font-medium text-green-900 flex-1">{qual.text || qual.title}</p>
                       <Button
                         type="button"
                         variant="ghost"
@@ -292,32 +257,6 @@ export function JobQualificationsStep() {
                       >
                         <X className="w-3 h-3" />
                       </Button>
-                    </div>
-                    
-                    {/* Scoring */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Label className="text-xs text-gray-600">Bonus score weight</Label>
-                        <div className="flex items-center gap-2">
-                          <Star className="w-3 h-3 text-green-500" />
-                          <span className="text-xs font-semibold text-green-600">
-                            {qual.score || 50}%
-                          </span>
-                        </div>
-                      </div>
-                      <Slider
-                        value={[qual.score || 50]}
-                        onValueChange={(value) => 
-                          updateQualificationScore("preferredQualifications", index, value)
-                        }
-                        max={100}
-                        min={0}
-                        step={5}
-                        className="w-full"
-                      />
-                      <p className="text-xs text-gray-500">
-                        Candidates meeting this preference get +{qual.score || 50}% bonus
-                      </p>
                     </div>
                   </div>
                 ))}
@@ -341,25 +280,11 @@ export function JobQualificationsStep() {
             Custom Pre-Screening Questions
           </CardTitle>
           <p className="text-sm text-gray-500">
-            Add up to 5 custom questions with scoring for auto-rejection (moved from old job requirements)
+            Add up to 5 custom questions for pre-screening applicants. Scoring will be configured in the AI Ranking step.
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="p-3 bg-purple-50 border border-purple-200 rounded-md">
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="w-4 h-4 text-purple-600 mt-0.5" />
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-purple-900">
-                  Smart Auto-Rejection Example
-                </p>
-                <p className="text-xs text-purple-700">
-                  <strong>Education Requirement:</strong> High School (25%), Associates (35%), Bachelors (45%), Masters (100%), Doctoral (50%)
-                  <br />
-                  <strong>Rule:</strong> Under 35% = Auto-rejection (saves AI costs)
-                </p>
-              </div>
-            </div>
-          </div>
+
 
           <CustomQuestionsBuilder
             name="customQuestions"
@@ -377,7 +302,7 @@ export function JobQualificationsStep() {
                 <ul className="text-xs text-yellow-800 space-y-1">
                   <li>• <strong>Limit to 5 questions:</strong> Keep applications short and focused</li>
                   <li>• <strong>Use templates:</strong> Import common questions from your settings</li>
-                  <li>• <strong>Score answers:</strong> Set percentage values for auto-rejection rules</li>
+                  <li>• <strong>AI Analysis:</strong> Answers will be analyzed in the AI Ranking step</li>
                   <li>• <strong>Examples:</strong> "Driver's License?", "Work with children?", "Available weekends?"</li>
                 </ul>
               </div>
