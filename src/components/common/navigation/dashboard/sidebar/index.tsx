@@ -1,5 +1,5 @@
-import { Briefcase, LifeBuoy, Send, PlusCircle } from "lucide-react";
-import type * as React from "react";
+import { Briefcase, Calendar, LifeBuoy, PlusCircle, Send } from 'lucide-react'
+import type * as React from 'react'
 
 import {
   Sidebar,
@@ -9,87 +9,92 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar";
-import { APP_NAME, ROUTES } from "@/constants";
-import useAuthSessionContext from "@/lib/context/AuthSessionContext";
-import { useNavigate, useLocation } from "react-router-dom";
-import { NavProjects } from "./nav-projects";
-import { NavUser } from "./nav-user";
+} from '@/components/ui/sidebar'
+import { APP_NAME, ROUTES } from '@/constants'
+import useAuthSessionContext from '@/lib/context/AuthSessionContext'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { NavProjects } from './nav-projects'
+import { NavUser } from './nav-user'
 
 const staticData = {
   navSecondary: [
     {
-      title: "Support",
-      url: "#",
+      title: 'Support',
+      url: '#',
       icon: LifeBuoy,
     },
     {
-      title: "Feedback",
-      url: "#",
+      title: 'Feedback',
+      url: '#',
       icon: Send,
     },
   ],
   projects: [
     {
-      name: "Jobs",
+      name: 'Jobs',
       url: ROUTES.DASHBOARD.MAIN,
       icon: Briefcase,
     },
     {
-      name: "Create Job",
+      name: 'Create Job',
       url: ROUTES.DASHBOARD.CREATE_JOB,
       icon: PlusCircle,
     },
+    {
+      name: 'Availability',
+      url: ROUTES.DASHBOARD.AVAILABILITY,
+      icon: Calendar,
+    },
   ],
-};
+}
 
 export const DashboardSidebar = ({
   ...props
 }: React.ComponentProps<typeof Sidebar>) => {
-  const navigate = useNavigate();
-  const { data: authData } = useAuthSessionContext();
-  const location = useLocation();
+  const navigate = useNavigate()
+  const { data: authData } = useAuthSessionContext()
+  const location = useLocation()
 
   const user = {
     name:
       authData?.user?.firstName && authData?.user?.lastName
         ? `${authData.user.firstName} ${authData.user.lastName}`
-        : authData?.user?.email?.split("@")[0] || "User",
-    email: authData?.user?.email || "user@example.com",
-    avatar: authData?.user?.avatar || "/avatars/default.jpg",
-  };
+        : authData?.user?.email?.split('@')[0] || 'User',
+    email: authData?.user?.email || 'user@example.com',
+    avatar: authData?.user?.avatar || '/avatars/default.jpg',
+  }
 
   return (
     <Sidebar
-      variant="inset"
+      variant='inset'
       {...props}
-      collapsible="icon"
-      className="bg-gray-200"
+      collapsible='icon'
+      className='bg-gray-200'
     >
-      <SidebarHeader className="bg-gray-200">
+      <SidebarHeader className='bg-gray-200'>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <div onClick={() => navigate("/")} className="cursor-pointer">
-                <img src="../../../../../public/logo.png" className="w-8" />
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{APP_NAME}</span>
+            <SidebarMenuButton size='lg' asChild>
+              <div onClick={() => navigate('/')} className='cursor-pointer'>
+                <img src='../../../../../public/logo.png' className='w-8' />
+                <div className='grid flex-1 text-left text-sm leading-tight'>
+                  <span className='truncate font-semibold'>{APP_NAME}</span>
                 </div>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent className="bg-gray-200">
+      <SidebarContent className='bg-gray-200'>
         <NavProjects
-          name="Jobs"
+          name='Jobs'
           projects={staticData.projects}
           currentPath={location.pathname}
         />
       </SidebarContent>
-      <SidebarFooter className="bg-primary rounded-lg">
+      <SidebarFooter className='bg-primary rounded-lg'>
         <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
-  );
-};
+  )
+}

@@ -1,68 +1,69 @@
-import type { EmailData, TeamMember } from "@/interfaces";
-import { CheckSquare, List, Rocket, Type } from "lucide-react";
+import type { EmailData, TeamMember } from '@/interfaces'
+import { CheckSquare, List, Rocket, Type } from 'lucide-react'
 
-import { PlaneTakeoff } from "lucide-react";
+import { PlaneTakeoff } from 'lucide-react'
 
-import { Terminal } from "lucide-react";
+import { Terminal } from 'lucide-react'
 
-export const APP_NAME = "HirePlan";
-export const clientAccessToken = "hireme-client-token";
+export const APP_NAME = 'HirePlan'
+export const clientAccessToken = 'hireme-client-token'
 
 // Texts
-export const LOGIN_TEXT = "Login";
-export const SIGNUP_TEXT = "Signup";
-export const HOME_TEXT = "Home";
-export const DASHBOARD_TEXT = "Dashboard";
-export const TEMPLATES_TEXT = "Templates";
-export const ALL_MAILS_TEXT = "All Mails";
-export const UNASSIGNED_MAILS_TEXT = "Unassigned Mail";
-export const VIEW_MAIL_TEXT = "View Mail";
-export const ALL_TEXT = "All";
-export const UNASSIGNED_TEXT = "Unassigned";
-export const PROFILE_TEXT = "Profile";
-export const COMPOSE_EMAIL_TEXT = "Compose Email";
-export const CONTACT_TEXT = "Contact";
-export const CREATE_JOB = "Create Job";
-export const COMPANY_TEXT = "Company";
+export const LOGIN_TEXT = 'Login'
+export const SIGNUP_TEXT = 'Signup'
+export const HOME_TEXT = 'Home'
+export const DASHBOARD_TEXT = 'Dashboard'
+export const TEMPLATES_TEXT = 'Templates'
+export const EMAIL_SETTINGS_TEXT = 'Email Settings'
+export const CHANNEL_SETTINGS_TEXT = 'Channel Settings'
+export const INTEGRATION_TEXT = 'Integrations'
+export const SETTINGS_TEXT = 'Settings'
+export const FILE_UPLOADS_TEXT = 'File Uploads'
+export const ACCOUNTS_TEXT = 'Accounts'
+export const COMPOSE_EMAIL_TEXT = 'Compose Email'
+export const CONTACT_TEXT = 'Contact'
+export const CREATE_JOB = 'Create Job'
+export const COMPANY_TEXT = 'Company'
+export const AVAILABILITY_TEXT = 'Availability'
 
 // Constants
 export const InfoSectionData = [
   {
     icon: Terminal,
-    color: "text-purple-400",
-    label: "Skills",
-    content: "Building responsive UIs with React, Next.js, and React Native.",
+    color: 'text-purple-400',
+    label: 'Skills',
+    content: 'Building responsive UIs with React, Next.js, and React Native.',
   },
   {
     icon: PlaneTakeoff,
-    color: "text-green-500",
-    label: "Hobbies",
-    content: "Dominating in Tekken or scoring goals in FIFA. ⚽🎮",
+    color: 'text-green-500',
+    label: 'Hobbies',
+    content: 'Dominating in Tekken or scoring goals in FIFA. ⚽🎮',
   },
   {
     icon: Rocket,
-    color: "text-blue-400",
-    label: "Goal",
+    color: 'text-blue-400',
+    label: 'Goal',
     content: "Let's team up and create something amazing together. 🚀",
   },
-];
+]
 
 export const teamMembers: TeamMember[] = [
-  { id: "1", name: "Alice Johnson", email: "alice@company.com" },
-  { id: "2", name: "Bob Smith", email: "bob@company.com" },
-  { id: "3", name: "Carol Davis", email: "carol@company.com" },
-  { id: "4", name: "David Wilson", email: "david@company.com" },
-];
+  { id: '1', name: 'Alice Johnson', email: 'alice@company.com' },
+  { id: '2', name: 'Bob Smith', email: 'bob@company.com' },
+  { id: '3', name: 'Carol Davis', email: 'carol@company.com' },
+  { id: '4', name: 'David Wilson', email: 'david@company.com' },
+]
 
 export const dummyEmails: EmailData[] = [
   {
-    id: "1",
-    sender: "GitHub",
-    senderEmail: "noreply@github.com",
-    recipients: ["you@example.com"],
-    subject: "Your pull request has been merged",
+    id: '1',
+    sender: 'GitHub',
+    senderEmail: 'noreply@github.com',
+    recipients: ['you@example.com'],
+    subject: 'Your pull request has been merged',
     preview:
-      "Congratulations! Your pull request #1234 has been successfully merged into the main branch.",
+      'Congratulations! Your pull request #1234 has been successfully merged into the main branch.',
     body: `<div>
       <p>Hello,</p>
       <p>Congratulations! Your pull request <strong>#1234</strong> has been successfully merged into the main branch.</p>
@@ -70,22 +71,22 @@ export const dummyEmails: EmailData[] = [
       <p>You can view the merged pull request here: <a href="https://github.com/org/repo/pull/1234">https://github.com/org/repo/pull/1234</a></p>
       <p>Best regards,<br>GitHub Team</p>
     </div>`,
-    time: "2:30 PM",
-    date: "May 29, 2025",
+    time: '2:30 PM',
+    date: 'May 29, 2025',
     isRead: false,
     isStarred: true,
     hasAttachment: false,
-    labels: ["work"],
+    labels: ['work'],
     isAssigned: true,
-    assignedTo: "Alice Johnson",
+    assignedTo: 'Alice Johnson',
     isFollowing: false,
   },
   {
-    id: "2",
-    sender: "Sarah Johnson",
-    senderEmail: "sarah.johnson@company.com",
-    recipients: ["you@example.com", "team@company.com"],
-    subject: "Meeting tomorrow at 3 PM",
+    id: '2',
+    sender: 'Sarah Johnson',
+    senderEmail: 'sarah.johnson@company.com',
+    recipients: ['you@example.com', 'team@company.com'],
+    subject: 'Meeting tomorrow at 3 PM',
     preview:
       "Hi! Just wanted to confirm our meeting tomorrow at 3 PM. I'll send the Zoom link shortly.",
     body: `<div>
@@ -96,31 +97,31 @@ export const dummyEmails: EmailData[] = [
       <p>Looking forward to our discussion!</p>
       <p>Best,<br>Sarah</p>
     </div>`,
-    time: "1:45 PM",
-    date: "May 29, 2025",
+    time: '1:45 PM',
+    date: 'May 29, 2025',
     isRead: true,
     isStarred: false,
     hasAttachment: true,
     attachments: [
       {
-        name: "Meeting_Agenda.pdf",
-        size: "245 KB",
-        type: "pdf",
+        name: 'Meeting_Agenda.pdf',
+        size: '245 KB',
+        type: 'pdf',
       },
     ],
-    labels: ["important"],
+    labels: ['important'],
     isAssigned: false,
     isFollowing: true,
-    followUpDate: "May 30, 2025",
+    followUpDate: 'May 30, 2025',
   },
   {
-    id: "3",
-    sender: "Netflix",
-    senderEmail: "info@netflix.com",
-    recipients: ["you@example.com"],
-    subject: "New shows added this week",
+    id: '3',
+    sender: 'Netflix',
+    senderEmail: 'info@netflix.com',
+    recipients: ['you@example.com'],
+    subject: 'New shows added this week',
     preview:
-      "Check out the latest additions to Netflix including exclusive series and movies.",
+      'Check out the latest additions to Netflix including exclusive series and movies.',
     body: `<div>
       <p>Hello,</p>
       <p>We've just added some exciting new titles to Netflix that we think you'll love!</p>
@@ -134,21 +135,21 @@ export const dummyEmails: EmailData[] = [
       <p>Start watching now on any device. As always, we're here to help if you need it.</p>
       <p>Enjoy!<br>Your friends at Netflix</p>
     </div>`,
-    time: "12:15 PM",
-    date: "May 29, 2025",
+    time: '12:15 PM',
+    date: 'May 29, 2025',
     isRead: true,
     isStarred: false,
     hasAttachment: false,
-    labels: ["entertainment"],
+    labels: ['entertainment'],
     isAssigned: false,
     isFollowing: false,
   },
   {
-    id: "4",
-    sender: "John Doe",
-    senderEmail: "john.doe@example.com",
-    recipients: ["you@example.com", "manager@company.com"],
-    subject: "Project update and next steps",
+    id: '4',
+    sender: 'John Doe',
+    senderEmail: 'john.doe@example.com',
+    recipients: ['you@example.com', 'manager@company.com'],
+    subject: 'Project update and next steps',
     preview:
       "Here's the latest update on our project. We've completed phase 1 and are ready to move to phase 2.",
     body: `<div>
@@ -172,37 +173,37 @@ export const dummyEmails: EmailData[] = [
       <p>Please let me know if you have any questions or concerns.</p>
       <p>Best regards,<br>John</p>
     </div>`,
-    time: "11:30 AM",
-    date: "May 29, 2025",
+    time: '11:30 AM',
+    date: 'May 29, 2025',
     isRead: false,
     isStarred: true,
     hasAttachment: true,
     attachments: [
       {
-        name: "Project_Timeline.xlsx",
-        size: "1.2 MB",
-        type: "xlsx",
+        name: 'Project_Timeline.xlsx',
+        size: '1.2 MB',
+        type: 'xlsx',
       },
       {
-        name: "Budget_Report.pdf",
-        size: "890 KB",
-        type: "pdf",
+        name: 'Budget_Report.pdf',
+        size: '890 KB',
+        type: 'pdf',
       },
     ],
-    labels: ["work", "urgent"],
+    labels: ['work', 'urgent'],
     isAssigned: true,
-    assignedTo: "Bob Smith",
+    assignedTo: 'Bob Smith',
     isFollowing: true,
-    followUpDate: "June 1, 2025",
+    followUpDate: 'June 1, 2025',
   },
   {
-    id: "5",
-    sender: "LinkedIn",
-    senderEmail: "messages-noreply@linkedin.com",
-    recipients: ["you@example.com"],
-    subject: "You have 3 new connection requests",
+    id: '5',
+    sender: 'LinkedIn',
+    senderEmail: 'messages-noreply@linkedin.com',
+    recipients: ['you@example.com'],
+    subject: 'You have 3 new connection requests',
     preview:
-      "People are trying to connect with you on LinkedIn. See who wants to add you to their network.",
+      'People are trying to connect with you on LinkedIn. See who wants to add you to their network.',
     body: `<div>
       <p>Hello,</p>
       <p>You have <strong>3 new connection requests</strong> waiting for your response on LinkedIn.</p>
@@ -215,23 +216,23 @@ export const dummyEmails: EmailData[] = [
       <p>Visit LinkedIn to respond to these requests.</p>
       <p>The LinkedIn Team</p>
     </div>`,
-    time: "10:20 AM",
-    date: "May 29, 2025",
+    time: '10:20 AM',
+    date: 'May 29, 2025',
     isRead: true,
     isStarred: false,
     hasAttachment: false,
-    labels: ["social"],
+    labels: ['social'],
     isAssigned: false,
     isFollowing: false,
   },
   {
-    id: "6",
-    sender: "Amazon",
-    senderEmail: "auto-confirm@amazon.com",
-    recipients: ["you@example.com"],
-    subject: "Your order has been shipped",
+    id: '6',
+    sender: 'Amazon',
+    senderEmail: 'auto-confirm@amazon.com',
+    recipients: ['you@example.com'],
+    subject: 'Your order has been shipped',
     preview:
-      "Great news! Your order #123-4567890-1234567 has been shipped and is on its way.",
+      'Great news! Your order #123-4567890-1234567 has been shipped and is on its way.',
     body: `<div>
       <p>Hello,</p>
       <p>Great news! Your order <strong>#123-4567890-1234567</strong> has been shipped and is on its way.</p>
@@ -246,21 +247,21 @@ export const dummyEmails: EmailData[] = [
       <p>You can track your package here: <a href="#">Track Package</a></p>
       <p>Thank you for shopping with Amazon!</p>
     </div>`,
-    time: "9:15 AM",
-    date: "May 29, 2025",
+    time: '9:15 AM',
+    date: 'May 29, 2025',
     isRead: false,
     isStarred: false,
     hasAttachment: false,
-    labels: ["shopping"],
+    labels: ['shopping'],
     isAssigned: false,
     isFollowing: false,
   },
   {
-    id: "7",
-    sender: "Spotify",
-    senderEmail: "no-reply@spotify.com",
-    recipients: ["you@example.com"],
-    subject: "Your weekly music mix is ready",
+    id: '7',
+    sender: 'Spotify',
+    senderEmail: 'no-reply@spotify.com',
+    recipients: ['you@example.com'],
+    subject: 'Your weekly music mix is ready',
     preview:
       "We've created a personalized playlist based on your listening habits. Check it out now!",
     body: `<div>
@@ -277,23 +278,23 @@ export const dummyEmails: EmailData[] = [
       <p>Open Spotify to start listening!</p>
       <p>Enjoy the music,<br>The Spotify Team</p>
     </div>`,
-    time: "8:30 AM",
-    date: "May 29, 2025",
+    time: '8:30 AM',
+    date: 'May 29, 2025',
     isRead: true,
     isStarred: true,
     hasAttachment: false,
-    labels: ["entertainment"],
+    labels: ['entertainment'],
     isAssigned: false,
     isFollowing: false,
   },
   {
-    id: "8",
-    sender: "Bank of America",
-    senderEmail: "alerts@bankofamerica.com",
-    recipients: ["you@example.com"],
-    subject: "Your monthly statement is available",
+    id: '8',
+    sender: 'Bank of America',
+    senderEmail: 'alerts@bankofamerica.com',
+    recipients: ['you@example.com'],
+    subject: 'Your monthly statement is available',
     preview:
-      "Your monthly statement for account ending in 4567 is now available to view online.",
+      'Your monthly statement for account ending in 4567 is now available to view online.',
     body: `<div>
       <p>Dear Valued Customer,</p>
       <p>Your monthly statement for account ending in <strong>4567</strong> is now available to view online.</p>
@@ -309,309 +310,309 @@ export const dummyEmails: EmailData[] = [
       <p>Thank you for banking with Bank of America.</p>
       <p>This is an automated message. Please do not reply.</p>
     </div>`,
-    time: "7:45 AM",
-    date: "May 29, 2025",
+    time: '7:45 AM',
+    date: 'May 29, 2025',
     isRead: false,
     isStarred: false,
     hasAttachment: true,
     attachments: [
       {
-        name: "May_Statement.pdf",
-        size: "1.5 MB",
-        type: "pdf",
+        name: 'May_Statement.pdf',
+        size: '1.5 MB',
+        type: 'pdf',
       },
     ],
-    labels: ["finance", "important"],
+    labels: ['finance', 'important'],
     isAssigned: false,
     isFollowing: false,
   },
-];
+]
 
 export const EXPERIENCE_LEVELS = [
-  { value: "entry", label: "Entry Level", color: "gray" },
-  { value: "mid", label: "Mid Level", color: "blue" },
-  { value: "senior", label: "Senior Level", color: "purple" },
-  { value: "executive", label: "Executive", color: "red" },
-];
+  { value: 'entry', label: 'Entry Level', color: 'gray' },
+  { value: 'mid', label: 'Mid Level', color: 'blue' },
+  { value: 'senior', label: 'Senior Level', color: 'purple' },
+  { value: 'executive', label: 'Executive', color: 'red' },
+]
 
 export const PRIORITY_LEVELS = [
-  { value: "low", label: "Low", color: "gray" },
-  { value: "medium", label: "Medium", color: "blue" },
-  { value: "high", label: "High", color: "orange" },
-  { value: "urgent", label: "Urgent", color: "red" },
-];
+  { value: 'low', label: 'Low', color: 'gray' },
+  { value: 'medium', label: 'Medium', color: 'blue' },
+  { value: 'high', label: 'High', color: 'orange' },
+  { value: 'urgent', label: 'Urgent', color: 'red' },
+]
 
 export const EMPLOYMENT_TYPES = [
-  { value: "full-time", label: "Full-time" },
-  { value: "part-time", label: "Part-time" },
-  { value: "contract", label: "Contract" },
-  { value: "temporary", label: "Temporary" },
-  { value: "internship", label: "Internship" },
-];
+  { value: 'full-time', label: 'Full-time' },
+  { value: 'part-time', label: 'Part-time' },
+  { value: 'contract', label: 'Contract' },
+  { value: 'temporary', label: 'Temporary' },
+  { value: 'internship', label: 'Internship' },
+]
 
 export const JOB_STATUSES = [
-  { value: "low", label: "Low Priority", color: "gray" },
-  { value: "medium", label: "Medium Priority", color: "blue" },
-  { value: "high", label: "High Priority", color: "orange" },
-  { value: "urgent", label: "Urgent", color: "red" },
-];
+  { value: 'low', label: 'Low Priority', color: 'gray' },
+  { value: 'medium', label: 'Medium Priority', color: 'blue' },
+  { value: 'high', label: 'High Priority', color: 'orange' },
+  { value: 'urgent', label: 'Urgent', color: 'red' },
+]
 
 export const EDUCATION_REQUIREMENTS = [
-  { value: "none", label: "No formal education required" },
-  { value: "high-school", label: "High School Diploma or equivalent" },
-  { value: "associate", label: "Associate's Degree" },
-  { value: "bachelor", label: "Bachelor's Degree" },
-  { value: "master", label: "Master's Degree" },
-  { value: "doctorate", label: "Doctorate/PhD" },
-  { value: "trade-school", label: "Trade School Certificate" },
-  { value: "professional", label: "Professional Certification" },
-];
+  { value: 'none', label: 'No formal education required' },
+  { value: 'high-school', label: 'High School Diploma or equivalent' },
+  { value: 'associate', label: "Associate's Degree" },
+  { value: 'bachelor', label: "Bachelor's Degree" },
+  { value: 'master', label: "Master's Degree" },
+  { value: 'doctorate', label: 'Doctorate/PhD' },
+  { value: 'trade-school', label: 'Trade School Certificate' },
+  { value: 'professional', label: 'Professional Certification' },
+]
 
 export const DEPARTMENTS = [
-  "Engineering",
-  "Sales",
-  "Marketing",
-  "Human Resources",
-  "Finance",
-  "Operations",
-  "Customer Success",
-  "Product",
-  "Design",
-  "Legal",
-  "IT",
-  "Administration",
-];
+  'Engineering',
+  'Sales',
+  'Marketing',
+  'Human Resources',
+  'Finance',
+  'Operations',
+  'Customer Success',
+  'Product',
+  'Design',
+  'Legal',
+  'IT',
+  'Administration',
+]
 
 export const EXEMPT_STATUSES = [
-  { value: "exempt", label: "Exempt" },
-  { value: "non-exempt", label: "Non-Exempt" },
-  { value: "not-applicable", label: "Not Applicable" },
-];
+  { value: 'exempt', label: 'Exempt' },
+  { value: 'non-exempt', label: 'Non-Exempt' },
+  { value: 'not-applicable', label: 'Not Applicable' },
+]
 
 export const EEO_JOB_CATEGORIES = [
-  "Executive/Senior Level Officials and Managers",
-  "First/Mid Level Officials and Managers",
-  "Professionals",
-  "Technicians",
-  "Sales Workers",
-  "Administrative Support Workers",
-  "Craft Workers",
-  "Operatives",
-  "Laborers and Helpers",
-  "Service Workers",
-];
+  'Executive/Senior Level Officials and Managers',
+  'First/Mid Level Officials and Managers',
+  'Professionals',
+  'Technicians',
+  'Sales Workers',
+  'Administrative Support Workers',
+  'Craft Workers',
+  'Operatives',
+  'Laborers and Helpers',
+  'Service Workers',
+]
 
 export const JOB_CREATION_STEPS = [
   {
     id: 1,
-    title: "Job Advertisement",
-    description: "Create your job posting content",
+    title: 'Job Advertisement',
+    description: 'Create your job posting content',
   },
   {
     id: 2,
-    title: "Company & Position Details",
-    description: "Company, openings, pay, and job type",
+    title: 'Company & Position Details',
+    description: 'Company, openings, pay, and job type',
   },
   {
     id: 3,
-    title: "Hours, Schedule & Benefits",
-    description: "Work hours, schedule, benefits, and location",
+    title: 'Hours, Schedule & Benefits',
+    description: 'Work hours, schedule, benefits, and location',
   },
   {
     id: 4,
-    title: "Compliance & Department",
-    description: "Exempt status, EEO category, and department",
+    title: 'Compliance & Department',
+    description: 'Exempt status, EEO category, and department',
   },
   {
     id: 5,
-    title: "Job Qualifications",
-    description: "Required and preferred qualifications with scoring",
+    title: 'Job Qualifications',
+    description: 'Required and preferred qualifications with scoring',
   },
   {
     id: 6,
-    title: "Posting Schedule & Budget",
-    description: "Schedule, budget, and advertising settings",
+    title: 'Posting Schedule & Budget',
+    description: 'Schedule, budget, and advertising settings',
   },
   {
     id: 7,
-    title: "AI Ranking & Custom Rules",
-    description: "Advanced AI scoring and automation rules",
+    title: 'AI Ranking & Custom Rules',
+    description: 'Advanced AI scoring and automation rules',
   },
   {
     id: 8,
-    title: "Review & Publish",
-    description: "Final review and publish your job posting",
+    title: 'Review & Publish',
+    description: 'Final review and publish your job posting',
   },
-];
+]
 
 export const JOB_TYPES = [
-  { value: "full-time", label: "Full Time", color: "blue" },
-  { value: "part-time", label: "Part Time", color: "green" },
-  { value: "contract", label: "Contract", color: "purple" },
-  { value: "seasonal", label: "Seasonal", color: "orange" },
-];
+  { value: 'full-time', label: 'Full Time', color: 'blue' },
+  { value: 'part-time', label: 'Part Time', color: 'green' },
+  { value: 'contract', label: 'Contract', color: 'purple' },
+  { value: 'seasonal', label: 'Seasonal', color: 'orange' },
+]
 
 export const WORKPLACE_TYPES = [
-  { value: "onsite", label: "On-site", color: "gray" },
-  { value: "remote", label: "Remote", color: "blue" },
-  { value: "hybrid", label: "Hybrid", color: "purple" },
-];
+  { value: 'onsite', label: 'On-site', color: 'gray' },
+  { value: 'remote', label: 'Remote', color: 'blue' },
+  { value: 'hybrid', label: 'Hybrid', color: 'purple' },
+]
 
 export const JOB_STATUS = [
-  { value: "active", label: "Active", color: "green" },
-  { value: "paused", label: "Paused", color: "yellow" },
-  { value: "closed", label: "Closed", color: "gray" },
-  { value: "draft", label: "Draft", color: "blue" },
-];
+  { value: 'active', label: 'Active', color: 'green' },
+  { value: 'paused', label: 'Paused', color: 'yellow' },
+  { value: 'closed', label: 'Closed', color: 'gray' },
+  { value: 'draft', label: 'Draft', color: 'blue' },
+]
 
 export const JOB_STATUS_PRIORITY = [
-  { value: "low", label: "Low Priority", color: "gray" },
-  { value: "medium", label: "Medium Priority", color: "blue" },
-  { value: "high", label: "High Priority", color: "orange" },
-  { value: "urgent", label: "Urgent", color: "red" },
-];
+  { value: 'low', label: 'Low Priority', color: 'gray' },
+  { value: 'medium', label: 'Medium Priority', color: 'blue' },
+  { value: 'high', label: 'High Priority', color: 'orange' },
+  { value: 'urgent', label: 'Urgent', color: 'red' },
+]
 
 export const PAY_TYPES = [
-  { value: "hourly", label: "Hourly", color: "green" },
-  { value: "salary", label: "Salary", color: "blue" },
-  { value: "base-commission", label: "Base + Commission", color: "purple" },
-  { value: "base-tips", label: "Base + Tips", color: "orange" },
-  { value: "base-bonus", label: "Base + Bonus", color: "indigo" },
-  { value: "commission-only", label: "Commission Only", color: "red" },
-  { value: "other", label: "Other", color: "gray" },
-];
+  { value: 'hourly', label: 'Hourly', color: 'green' },
+  { value: 'salary', label: 'Salary', color: 'blue' },
+  { value: 'base-commission', label: 'Base + Commission', color: 'purple' },
+  { value: 'base-tips', label: 'Base + Tips', color: 'orange' },
+  { value: 'base-bonus', label: 'Base + Bonus', color: 'indigo' },
+  { value: 'commission-only', label: 'Commission Only', color: 'red' },
+  { value: 'other', label: 'Other', color: 'gray' },
+]
 
 export const HIRING_TIMELINE = [
-  { value: "1-3-days", label: "1-3 Days", priority: "urgent" },
-  { value: "3-7-days", label: "3-7 Days", priority: "urgent" },
-  { value: "1-2-weeks", label: "1-2 Weeks", priority: "high" },
-  { value: "2-4-weeks", label: "2-4 Weeks", priority: "medium" },
-  { value: "more-than-4-weeks", label: "More than 4 Weeks", priority: "low" },
-];
+  { value: '1-3-days', label: '1-3 Days', priority: 'urgent' },
+  { value: '3-7-days', label: '3-7 Days', priority: 'urgent' },
+  { value: '1-2-weeks', label: '1-2 Weeks', priority: 'high' },
+  { value: '2-4-weeks', label: '2-4 Weeks', priority: 'medium' },
+  { value: 'more-than-4-weeks', label: 'More than 4 Weeks', priority: 'low' },
+]
 
 export const PAY_RATE_TYPES = [
-  { value: "range", label: "Range" },
-  { value: "starting-amount", label: "Starting Amount" },
-  { value: "maximum-amount", label: "Maximum Amount" },
-  { value: "exact-amount", label: "Exact Amount" },
-];
+  { value: 'range', label: 'Range' },
+  { value: 'starting-amount', label: 'Starting Amount' },
+  { value: 'maximum-amount', label: 'Maximum Amount' },
+  { value: 'exact-amount', label: 'Exact Amount' },
+]
 
 export const PAY_PERIODS = [
-  { value: "per-hour", label: "Per Hour" },
-  { value: "per-day", label: "Per Day" },
-  { value: "per-week", label: "Per Week" },
-  { value: "per-month", label: "Per Month" },
-  { value: "per-year", label: "Per Year" },
-];
+  { value: 'per-hour', label: 'Per Hour' },
+  { value: 'per-day', label: 'Per Day' },
+  { value: 'per-week', label: 'Per Week' },
+  { value: 'per-month', label: 'Per Month' },
+  { value: 'per-year', label: 'Per Year' },
+]
 
 export const HOURS_PER_WEEK_TYPES = [
-  { value: "fixed-hours", label: "Fixed Hours" },
-  { value: "range", label: "Range" },
-  { value: "minimum", label: "Minimum" },
-  { value: "maximum", label: "Maximum" },
-];
+  { value: 'fixed-hours', label: 'Fixed Hours' },
+  { value: 'range', label: 'Range' },
+  { value: 'minimum', label: 'Minimum' },
+  { value: 'maximum', label: 'Maximum' },
+]
 
 export const SCHEDULE_OPTIONS = [
-  "10 hour shift",
-  "12 hour shift", 
-  "4 hour shift",
-  "8 hour shift",
-  "After school",
-  "Choose your own hours",
-  "Day shift",
-  "Evening shift",
-  "Holidays",
-  "Monday to Friday",
-  "Night shift",
-  "No nights",
-  "No weekends",
-  "On call",
-  "Overtime",
-  "Overnight shift",
-  "Weekends as needed",
-  "Weekends only",
-  "Other",
-];
+  '10 hour shift',
+  '12 hour shift',
+  '4 hour shift',
+  '8 hour shift',
+  'After school',
+  'Choose your own hours',
+  'Day shift',
+  'Evening shift',
+  'Holidays',
+  'Monday to Friday',
+  'Night shift',
+  'No nights',
+  'No weekends',
+  'On call',
+  'Overtime',
+  'Overnight shift',
+  'Weekends as needed',
+  'Weekends only',
+  'Other',
+]
 
 export const BENEFIT_OPTIONS = [
-  "401(k)",
-  "401(k) matching",
-  "Dental insurance",
-  "Employee assistance program",
-  "Employee discount",
-  "Flexible schedule",
-  "Flexible spending account",
-  "Health insurance",
-  "Health savings account",
-  "Life insurance",
-  "Paid time off",
-  "Parental leave",
-  "Professional development assistance",
-  "Referral program",
-  "Relocation assistance",
-  "Retirement plan",
-  "Tuition reimbursement",
-  "Vision insurance",
-  "Other",
-];
+  '401(k)',
+  '401(k) matching',
+  'Dental insurance',
+  'Employee assistance program',
+  'Employee discount',
+  'Flexible schedule',
+  'Flexible spending account',
+  'Health insurance',
+  'Health savings account',
+  'Life insurance',
+  'Paid time off',
+  'Parental leave',
+  'Professional development assistance',
+  'Referral program',
+  'Relocation assistance',
+  'Retirement plan',
+  'Tuition reimbursement',
+  'Vision insurance',
+  'Other',
+]
 
 export const JOB_LOCATION_WORK_TYPES = [
-  { value: "in-person", label: "In person" },
-  { value: "fully-remote", label: "Fully Remote" },
-  { value: "hybrid", label: "Hybrid" },
-  { value: "on-the-road", label: "On the road" },
-];
+  { value: 'in-person', label: 'In person' },
+  { value: 'fully-remote', label: 'Fully Remote' },
+  { value: 'hybrid', label: 'Hybrid' },
+  { value: 'on-the-road', label: 'On the road' },
+]
 
 export const COUNTRIES = [
-  "United States",
-  "Canada",
-  "United Kingdom",
-  "Australia",
-  "Germany",
-  "France",
-  "Netherlands",
-  "Spain",
-  "Italy",
-  "Sweden",
-  "Norway",
-  "Denmark",
-  "Other",
-];
+  'United States',
+  'Canada',
+  'United Kingdom',
+  'Australia',
+  'Germany',
+  'France',
+  'Netherlands',
+  'Spain',
+  'Italy',
+  'Sweden',
+  'Norway',
+  'Denmark',
+  'Other',
+]
 
 export const LANGUAGES = [
-  "English",
-  "Spanish",
-  "French",
-  "German",
-  "Portuguese",
-  "Italian",
-  "Dutch",
-  "Swedish",
-  "Norwegian",
-  "Danish",
-  "Other",
-];
+  'English',
+  'Spanish',
+  'French',
+  'German',
+  'Portuguese',
+  'Italian',
+  'Dutch',
+  'Swedish',
+  'Norwegian',
+  'Danish',
+  'Other',
+]
 
 export const QUESTION_TYPE_INFO = {
   boolean: {
-    label: "Yes/No",
+    label: 'Yes/No',
     icon: CheckSquare,
-    color: "bg-emerald-50 border-emerald-200 text-emerald-700",
-    iconColor: "text-emerald-600",
+    color: 'bg-emerald-50 border-emerald-200 text-emerald-700',
+    iconColor: 'text-emerald-600',
   },
   string: {
-    label: "Text Input",
+    label: 'Text Input',
     icon: Type,
-    color: "bg-blue-50 border-blue-200 text-blue-700",
-    iconColor: "text-blue-600",
+    color: 'bg-blue-50 border-blue-200 text-blue-700',
+    iconColor: 'text-blue-600',
   },
   select: {
-    label: "Multiple Choice",
+    label: 'Multiple Choice',
     icon: List,
-    color: "bg-purple-50 border-purple-200 text-purple-700",
-    iconColor: "text-purple-600",
+    color: 'bg-purple-50 border-purple-200 text-purple-700',
+    iconColor: 'text-purple-600',
   },
-};
+}
 
-export * from "./icons";
-export * from "./routes";
+export * from './icons'
+export * from './routes'

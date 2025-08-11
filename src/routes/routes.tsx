@@ -1,5 +1,6 @@
-import ProfilePage from "@/components/dashboard/profile";
+import ProfilePage from '@/components/dashboard/profile'
 import {
+  AVAILABILITY_TEXT,
   COMPANY_TEXT,
   CONTACT_TEXT,
   CREATE_JOB,
@@ -7,26 +8,27 @@ import {
   HOME_TEXT,
   LOGIN_TEXT,
   SIGNUP_TEXT,
-} from "@/constants";
-import { ROUTES } from "@/constants/routes";
-import type { AppRoutesType } from "@/interfaces";
-import CompanyPage from "@/pages/company";
-import JobApplicationPage from "@/pages/company/apply";
-import ContactPage from "@/pages/contact";
-import PrivacyPage from "@/pages/privacy";
-import TermsPage from "@/pages/terms";
-import DashboardPage from "@/pages/dashboard/jobs";
-import CreateJobPage from "@/pages/dashboard/jobs/create";
-import JobDetailPage from "@/pages/dashboard/jobs/view";
+} from '@/constants'
+import { ROUTES } from '@/constants/routes'
+import type { AppRoutesType } from '@/interfaces'
+import CompanyPage from '@/pages/company'
+import JobApplicationPage from '@/pages/company/apply'
+import ContactPage from '@/pages/contact'
+import AvailabilityPage from '@/pages/dashboard/availability'
+import DashboardPage from '@/pages/dashboard/jobs'
+import CreateJobPage from '@/pages/dashboard/jobs/create'
+import JobDetailPage from '@/pages/dashboard/jobs/view'
+import PrivacyPage from '@/pages/privacy'
+import TermsPage from '@/pages/terms'
 
 // Public Pages
-import Home from "@/pages/home";
+import Home from '@/pages/home'
 
 // Auth Pages
-import Login from "@pages/auth/Login";
-import Signup from "@pages/auth/Signup";
-import ForgotPassword from "@pages/auth/ForgotPassword";
-import EditJobPage from "@/pages/dashboard/jobs/edit";
+import EditJobPage from '@/pages/dashboard/jobs/edit'
+import ForgotPassword from '@pages/auth/ForgotPassword'
+import Login from '@pages/auth/Login'
+import Signup from '@pages/auth/Signup'
 
 export const appRoutes: AppRoutesType[] = [
   {
@@ -49,7 +51,7 @@ export const appRoutes: AppRoutesType[] = [
     isPrivate: false,
   },
   {
-    id: "forgot-password",
+    id: 'forgot-password',
     url: ROUTES.FORGOT_PASSWORD,
     element: <ForgotPassword />,
     isPrivate: false,
@@ -67,13 +69,13 @@ export const appRoutes: AppRoutesType[] = [
     isPrivate: false,
   },
   {
-    id: "privacy",
+    id: 'privacy',
     url: ROUTES.PRIVACY,
     element: <PrivacyPage />,
     isPrivate: false,
   },
   {
-    id: "terms",
+    id: 'terms',
     url: ROUTES.TERMS,
     element: <TermsPage />,
     isPrivate: false,
@@ -96,7 +98,12 @@ export const appRoutes: AppRoutesType[] = [
     element: <JobDetailPage />,
     isPrivate: true,
   },
-
+  {
+    id: AVAILABILITY_TEXT,
+    url: ROUTES.DASHBOARD.AVAILABILITY,
+    element: <AvailabilityPage />,
+    isPrivate: true,
+  },
   {
     id: COMPANY_TEXT,
     url: ROUTES.COMPANY,
@@ -104,15 +111,15 @@ export const appRoutes: AppRoutesType[] = [
     isPrivate: false,
   },
   {
-    id: "apply-job",
+    id: 'apply-job',
     url: ROUTES.APPLY_JOB,
     element: <JobApplicationPage />,
     isPrivate: false,
   },
   {
-    id: "edit-job",
+    id: 'edit-job',
     url: ROUTES.DASHBOARD.EDIT_JOB_ID,
     element: <EditJobPage />,
     isPrivate: true,
   },
-];
+]

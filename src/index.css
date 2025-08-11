@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -178,7 +178,7 @@
 }
 
 body {
-  font-family: "Inter", sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 @keyframes spin {
@@ -192,6 +192,19 @@ body {
 
 .animate-spin-slow {
   animation: spin 20s linear infinite;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
 }
 
 @layer base {
@@ -285,4 +298,11 @@ body {
 
 .dark .prose li {
   color: #d1d5db;
+}
+
+/* Add xs screen breakpoint */
+@media (min-width: 475px) {
+  .xs\:inline {
+    display: inline;
+  }
 }
