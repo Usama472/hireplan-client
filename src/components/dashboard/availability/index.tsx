@@ -13,10 +13,11 @@ import type { AvailabilitySettings, BookedSlot } from "@/interfaces";
 import useAuthSessionContext from "@/lib/context/AuthSessionContext";
 import { useToast } from "@/lib/hooks/use-toast";
 import { errorResolver } from "@/lib/utils";
-import { Calendar, CalendarClock, Users } from "lucide-react";
+import { Calendar, CalendarClock, Settings, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AvailabilityOverview } from "./availability-overview";
 import { BookedSlots } from "./booked-slots";
+import { CalendarSettings } from "./calendar-settings";
 import { DateSpecificContainer } from "./date-specific-container";
 import { WeeklyAvailabilityContainer } from "./weekly-availability-container";
 
@@ -206,7 +207,7 @@ export default function AvailabilityManager() {
               </TabsTrigger>
               <TabsTrigger
                 value="booked-slots"
-                className="flex-1 flex items-center justify-center gap-2 h-full px-4 rounded-none border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 data-[state=active]:font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 relative rounded-tr-xl"
+                className="flex-1 flex items-center justify-center gap-2 h-full px-4 rounded-none border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 data-[state=active]:font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 relative"
               >
                 <Users className="h-4 w-4" />
                 <span className="text-sm">Booked Slots</span>
@@ -218,6 +219,14 @@ export default function AvailabilityManager() {
                     {bookedSlots.length}
                   </Badge>
                 )}
+                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gray-100"></div>
+              </TabsTrigger>
+              <TabsTrigger
+                value="calendar-settings"
+                className="flex-1 flex items-center justify-center gap-2 h-full px-4 rounded-none border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 data-[state=active]:font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 relative rounded-tr-xl"
+              >
+                <Settings className="h-4 w-4" />
+                <span className="text-sm">Calendar Settings</span>
                 <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gray-100"></div>
               </TabsTrigger>
             </TabsList>
@@ -266,6 +275,10 @@ export default function AvailabilityManager() {
 
             <TabsContent value="booked-slots" className="mt-0">
               <BookedSlots bookedSlots={bookedSlots} />
+            </TabsContent>
+
+            <TabsContent value="calendar-settings" className="mt-0">
+              <CalendarSettings />
             </TabsContent>
           </div>
         </div>
