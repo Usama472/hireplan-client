@@ -9,6 +9,7 @@ import {
   Brain,
   Briefcase,
   Calendar,
+  CalendarCheck,
   Check,
   CheckCircle,
   Download,
@@ -28,6 +29,7 @@ import {
   ThumbsUp,
   User,
   Users,
+  Video,
   X,
 } from "lucide-react";
 import { useState } from "react";
@@ -62,6 +64,21 @@ interface Applicant {
   aiScore?: number;
   aiEvaluation?: AIEvaluation | null;
   status?: "pending" | "reviewed" | "shortlisted" | "rejected";
+  interviewScheduled?: boolean;
+  interview?: {
+    id: string;
+    applicant: string;
+    job: string;
+    startTime: string;
+    endTime: string;
+    scheduledDate: string;
+    meetingLink: string;
+    timezone: string;
+    meetingSource: string;
+    status: string;
+    createdAt: string;
+    updatedAt: string;
+  };
   // Additional fields for enhanced profile
   linkedin?: string;
   github?: string;
@@ -110,6 +127,18 @@ const formatDate = (dateString: string) => {
     month: "short",
     day: "numeric",
     year: "numeric",
+  });
+};
+
+const formatInterviewTime = (dateString: string, timezone: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: timezone,
   });
 };
 
@@ -380,6 +409,99 @@ export function ApplicantDetailModal({
                       )}
                     </div>
                   </section>
+
+                  {/* Interview Section */}
+                  {applicant.interviewScheduled && applicant.interview && (
+                    <section>
+                      <h3 className="text-lg font-semibold mb-4 flex items-center text-purple-800">
+                        <Video className="w-5 h-5 mr-2 text-purple-600" />
+                        Interview Details
+                      </h3>
+                      <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-6 border border-purple-200">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          {/* Interview Time */}
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
+                                <CalendarCheck className="w-5 h-5" />
+                              </div>
+                              <div>
+                                <p className="text-sm text-muted-foreground">
+                                  Scheduled Time
+                                </p>
+                                <p className="font-medium text-purple-800">
+                                  {formatInterviewTime(
+                                    applicant.interview.scheduledDate,
+                                    applicant.interview.timezone
+                                  )}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                                <Globe className="w-5 h-5" />
+                              </div>
+                              <div>
+                                <p className="text-sm text-muted-foreground">
+                                  Timezone
+                                </p>
+                                <p className="font-medium text-blue-800">
+                                  {applicant.interview.timezone}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Meeting Link */}
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                                <Video className="w-5 h-5" />
+                              </div>
+                              <div>
+                                <p className="text-sm text-muted-foreground">
+                                  Meeting Platform
+                                </p>
+                                <p className="font-medium text-green-800 capitalize">
+                                  {applicant.interview.meetingSource}
+                                </p>
+                              </div>
+                            </div>
+
+                            {applicant.interview.meetingLink && (
+                              <div className="mt-4">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  asChild
+                                  className="w-full bg-white hover:bg-gray-50 border-purple-200 text-purple-700 hover:text-purple-800"
+                                >
+                                  <a
+                                    href={applicant.interview.meetingLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2"
+                                  >
+                                    <ExternalLink className="w-4 h-4" />
+                                    Join Meeting
+                                  </a>
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Status Badge */}
+                        <div className="mt-4 flex justify-end">
+                          <Badge className="bg-purple-100 text-purple-700 border-purple-200">
+                            <CheckCircle className="w-3 h-3 mr-1" />
+                            Interview Scheduled
+                          </Badge>
+                        </div>
+                      </div>
+                    </section>
+                  )}
                 </TabsContent>
 
                 {/* AI Score Tab */}

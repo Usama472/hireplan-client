@@ -15,17 +15,19 @@ import { Skeleton } from "@/components/ui/skeleton";
 import API from "@/http";
 import { errorResolver } from "@/lib/utils";
 import {
+  AlertCircle,
   Calendar,
+  CalendarCheck,
+  Clock,
   Download,
   Eye,
   MapPin,
   Search,
   Star,
-  Users,
-  Clock,
   UserCheck,
+  Users,
+  Video,
   X,
-  AlertCircle,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -44,17 +46,20 @@ interface Applicant {
   createdAt: string;
   aiScore?: number;
   status?: "pending" | "reviewed" | "shortlisted" | "rejected";
-}
-
-interface ApplicantsResponse {
-  applicants: Applicant[];
-  total: number;
-  stats: {
-    total: number;
-    pending: number;
-    reviewed: number;
-    shortlisted: number;
-    rejected: number;
+  interviewScheduled?: boolean;
+  interview?: {
+    id: string;
+    applicant: string;
+    job: string;
+    startTime: string;
+    endTime: string;
+    scheduledDate: string;
+    meetingLink: string;
+    timezone: string;
+    meetingSource: string;
+    status: string;
+    createdAt: string;
+    updatedAt: string;
   };
 }
 
@@ -68,6 +73,18 @@ const formatDate = (dateString: string) => {
     month: "short",
     day: "numeric",
     year: "numeric",
+  });
+};
+
+const formatInterviewTime = (dateString: string, timezone: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: timezone,
   });
 };
 
@@ -202,6 +219,19 @@ const ApplicantCard = ({
               <Calendar className="w-4 h-4" />
               <span>Applied {formatDate(applicant.createdAt)}</span>
             </div>
+
+            {applicant.interviewScheduled && applicant.interview && (
+              <div className="flex items-center gap-2 text-sm text-purple-600 font-medium">
+                <CalendarCheck className="w-4 h-4" />
+                <span>
+                  Interview:{" "}
+                  {formatInterviewTime(
+                    applicant.interview.scheduledDate,
+                    applicant.interview.timezone
+                  )}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Status Badges */}
@@ -224,6 +254,12 @@ const ApplicantCard = ({
               >
                 {applicant.status || "pending"}
               </Badge>
+              {applicant.interviewScheduled && applicant.interview && (
+                <Badge className="text-xs font-medium bg-purple-50 text-purple-700 border-purple-200">
+                  <Video className="w-3 h-3 mr-1" />
+                  Interview Scheduled
+                </Badge>
+              )}
             </div>
           </div>
         </div>
@@ -328,12 +364,20 @@ export function ApplicantsSection({
       const applicantsData = response.applicants || [];
       const statsData = response.stats || {
         total: applicantsData.length,
-        pending: applicantsData.filter((a: Applicant) => a.status === "pending" || !a.status).length,
-        reviewed: applicantsData.filter((a: Applicant) => a.status === "reviewed").length,
-        shortlisted: applicantsData.filter((a: Applicant) => a.status === "shortlisted").length,
-        rejected: applicantsData.filter((a: Applicant) => a.status === "rejected").length,
+        pending: applicantsData.filter(
+          (a: Applicant) => a.status === "pending" || !a.status
+        ).length,
+        reviewed: applicantsData.filter(
+          (a: Applicant) => a.status === "reviewed"
+        ).length,
+        shortlisted: applicantsData.filter(
+          (a: Applicant) => a.status === "shortlisted"
+        ).length,
+        rejected: applicantsData.filter(
+          (a: Applicant) => a.status === "rejected"
+        ).length,
       };
-      
+
       setApplicants(applicantsData);
       setStats(statsData);
     } catch (err) {
