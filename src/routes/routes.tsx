@@ -23,6 +23,8 @@ import TermsPage from '@/pages/terms'
 
 // Public Pages
 import Home from '@/pages/home'
+import ScheduleInterviewPage from '@/pages/schedule-interview'
+import InterviewScheduledPage from '@/pages/interview-scheduled'
 
 // Auth Pages
 import EditJobPage from '@/pages/dashboard/jobs/edit'
@@ -121,5 +123,17 @@ export const appRoutes: AppRoutesType[] = [
     url: ROUTES.DASHBOARD.EDIT_JOB_ID,
     element: <EditJobPage />,
     isPrivate: true,
+  },
+  {
+    id: 'schedule-interview',
+    url: ROUTES.SCHEDULE_INTERVIEW,
+    element: <ScheduleInterviewPage />,
+    isPrivate: false,
+  },
+  {
+    id: 'interview-scheduled',
+    url: ROUTES.INTERVIEW_SCHEDULED,
+    element: <InterviewScheduledPage />,
+    isPrivate: false,
   },
 ]

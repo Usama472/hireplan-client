@@ -22,4 +22,6 @@ export const ROUTES = {
   TERMS: '/terms',
   COMPANY: '/company/:slug',
   APPLY_JOB: '/company/:slug/job/:jobId/apply',
+  SCHEDULE_INTERVIEW: '/schedule-interview/:jobId/:applicantId',
+  INTERVIEW_SCHEDULED: '/interview-scheduled',
 }
