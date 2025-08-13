@@ -2,9 +2,11 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import API from "@/http";
+import useCalenderSettings from "@/lib/hooks/use-calender-settings";
 import { useToast } from "@/lib/hooks/use-toast";
-import { CheckCircle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { CheckCircle, RefreshCw } from "lucide-react";
+import { useState } from "react";
 
 interface CalendarSettingsProps {
   className?: string;
@@ -12,28 +14,17 @@ interface CalendarSettingsProps {
 
 export function CalendarSettings({ className }: CalendarSettingsProps) {
   const { toast } = useToast();
-  const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
-
-  useEffect(() => {
-    const savedConnection = localStorage.getItem("google-calendar-connected");
-    if (savedConnection === "true") {
-      setIsConnected(true);
-    }
-  }, []);
+  const { isMeetingPlatformConnected, platformSettings, isLoading, refresh } =
+    useCalenderSettings();
+  const isConnected = isMeetingPlatformConnected;
 
   const handleConnectGoogleCalendar = async () => {
     setIsConnecting(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      setIsConnected(true);
-      localStorage.setItem("google-calendar-connected", "true");
-
-      toast({
-        type: "success",
-        title: "Google Calendar Connected",
-        description: "Your Google Calendar has been successfully connected.",
-      });
+      const res = await API.google.getGoogleAuth();
+      const googleAuthUrl = res.authUrl;
+      location.href = googleAuthUrl;
     } catch (error) {
       console.error("Failed to connect Google Calendar:", error);
       toast({
@@ -46,23 +37,20 @@ export function CalendarSettings({ className }: CalendarSettingsProps) {
     }
   };
 
-  const handleDisconnectGoogleCalendar = async () => {
+  const handleRefresh = async () => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setIsConnected(false);
-      localStorage.removeItem("google-calendar-connected");
-
+      await refresh();
       toast({
         type: "success",
-        title: "Google Calendar Disconnected",
-        description: "Your Google Calendar has been successfully disconnected.",
+        title: "Settings Refreshed",
+        description: "Calendar settings have been updated successfully.",
       });
     } catch (error) {
-      console.error("Failed to disconnect Google Calendar:", error);
+      console.error("Failed to refresh settings:", error);
       toast({
         type: "error",
-        title: "Disconnection Failed",
-        description: "Failed to disconnect Google Calendar. Please try again.",
+        title: "Refresh Failed",
+        description: "Failed to refresh calendar settings. Please try again.",
       });
     }
   };
@@ -70,9 +58,23 @@ export function CalendarSettings({ className }: CalendarSettingsProps) {
   return (
     <div className={className}>
       <div className="mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">
-          Set which calendars we use to check for busy times
-        </h2>
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-xl font-semibold text-gray-900">
+            Set which calendars we use to check for busy times
+          </h2>
+          <Button
+            onClick={handleRefresh}
+            disabled={isLoading}
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <RefreshCw
+              className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+            />
+            Refresh
+          </Button>
+        </div>
         <p className="text-sm text-gray-600">
           These calendars will be used to prevent double bookings.
         </p>
@@ -88,13 +90,28 @@ export function CalendarSettings({ className }: CalendarSettingsProps) {
                 className="h-8 w-8 object-contain"
               />
             </div>
-            <div>
+            <div className="flex-1">
               <h3 className="font-medium text-gray-900">Google Calendar</h3>
-              <p className="text-sm text-gray-600">Gmail, G Suite</p>
+              {isConnected && platformSettings && (
+                <div className="mt-2 space-y-1">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <p className="text-sm font-medium text-gray-800">
+                      {platformSettings.givenName} {platformSettings.familyName}
+                    </p>
+                  </div>
+                  <p className="text-xs text-gray-500 ml-4">
+                    {platformSettings.email}
+                  </p>
+                </div>
+              )}
+              {!isConnected && (
+                <p className="text-sm text-gray-600 mt-1">Gmail, G Suite</p>
+              )}
             </div>
           </div>
           <div className="flex items-center gap-3">
-            {isConnected && (
+            {isConnected && !isLoading && (
               <Badge
                 variant="secondary"
                 className="bg-green-50 text-green-700 border-green-200"
@@ -103,30 +120,24 @@ export function CalendarSettings({ className }: CalendarSettingsProps) {
                 Connected
               </Badge>
             )}
-            <Button
-              onClick={
-                isConnected
-                  ? handleDisconnectGoogleCalendar
-                  : handleConnectGoogleCalendar
-              }
-              disabled={isConnecting}
-              variant={isConnected ? "outline" : "default"}
-              size="sm"
-              className={
-                isConnected ? "text-red-600 border-red-200 hover:bg-red-50" : ""
-              }
-            >
-              {isConnecting ? (
-                <>
-                  <div className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent mr-2"></div>
-                  Connecting...
-                </>
-              ) : isConnected ? (
-                "Disconnect"
-              ) : (
-                "Connect"
-              )}
-            </Button>
+
+            {!isConnected && !isLoading && (
+              <Button
+                onClick={handleConnectGoogleCalendar}
+                disabled={isConnecting}
+                variant="default"
+                size="sm"
+              >
+                {isConnecting ? (
+                  <>
+                    <div className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent mr-2"></div>
+                    Connecting...
+                  </>
+                ) : (
+                  "Connect"
+                )}
+              </Button>
+            )}
           </div>
         </div>
 

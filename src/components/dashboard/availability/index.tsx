@@ -15,6 +15,7 @@ import { useToast } from "@/lib/hooks/use-toast";
 import { errorResolver } from "@/lib/utils";
 import { Calendar, CalendarClock, Settings, Users } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router";
 import { AvailabilityOverview } from "./availability-overview";
 import { BookedSlots } from "./booked-slots";
 import { CalendarSettings } from "./calendar-settings";
@@ -24,6 +25,8 @@ import { WeeklyAvailabilityContainer } from "./weekly-availability-container";
 export default function AvailabilityManager() {
   const { toast } = useToast();
   const { data, updateUser } = useAuthSessionContext();
+  const [searchParams] = useSearchParams();
+
   const [activeMainTab, setActiveMainTab] = useState<string>("schedule");
   const [activeScheduleTab, setActiveScheduleTab] = useState<string>("weekly");
   const [settings, setSettings] = useState<AvailabilitySettings>(() => {
@@ -42,7 +45,6 @@ export default function AvailabilityManager() {
   const [isLoading, setIsLoading] = useState(false);
   const [isUpdatingTimezone, setIsUpdatingTimezone] = useState(false);
 
-  // Load availability data from server
   const loadAvailabilityData = async () => {
     setIsLoading(true);
     try {
@@ -101,10 +103,36 @@ export default function AvailabilityManager() {
     }
   };
 
-  // Load data on component mount
   useEffect(() => {
     loadAvailabilityData();
   }, []);
+
+  useEffect(() => {
+    const code = searchParams.get("code");
+    const scope = searchParams.get("scope");
+    if (code && scope && scope.includes("calendar")) {
+      API.google
+        .googleAuthCallback(code)
+        .then((response) => {
+          if (response.user && updateUser) {
+            updateUser(response.user as any);
+            toast({
+              type: "success",
+              title: "Google Calendar Connected",
+              description:
+                "Your Google Calendar has been connected successfully",
+            });
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.delete("code");
+            newUrl.searchParams.delete("scope");
+            window.history.replaceState({}, document.title, newUrl.toString());
+          }
+        })
+        .catch((err) => {
+          console.error("Error updating user", err);
+        });
+    }
+  }, [searchParams, toast, updateUser]);
 
   const handleTimezoneChange = async (timezone: string) => {
     setIsUpdatingTimezone(true);
@@ -138,7 +166,6 @@ export default function AvailabilityManager() {
     }
   };
 
-  // Calculate dynamic stats from server data
   const totalAvailableDays = settings.daysAvailability.filter(
     (day) => day.isAvailable
   ).length;

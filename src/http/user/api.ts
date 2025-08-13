@@ -1,11 +1,13 @@
-import { get, put } from '../apiHelper'
+import { get, put } from "../apiHelper";
 
-export const getProfile = () => get('/users/profile')
+export const getProfile = () => get("/users/profile");
 
 export const resetPassword = (data: {
-  currentPassword: string
-  newPassword: string
-}) => put('/users/password', data)
+  currentPassword: string;
+  newPassword: string;
+}) => put("/users/password", data);
 
 export const updateProfile = (data: Record<string, any>) =>
-  put('/users/profile', data)
+  put("/users/profile", data);
+
+export const getCalenderSettings = () => get("/users/calender-settings");
