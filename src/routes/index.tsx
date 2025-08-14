@@ -1,22 +1,23 @@
-import { Fragment } from 'react'
+import { Fragment } from "react";
 import {
   Route,
   createBrowserRouter,
   createRoutesFromElements,
-} from 'react-router-dom'
+} from "react-router-dom";
 
-import { appRoutes } from './routes'
+import { appRoutes } from "./routes";
 
-import CompanyRoute from './CompanyRoute'
-import { PrivateRoute } from './PrivateRoute'
-import PublicRoute from './PublicRoute'
+import CompanyRoute from "./CompanyRoute";
+import InterviewRoute from "./InterviewRoute";
+import { PrivateRoute } from "./PrivateRoute";
+import PublicRoute from "./PublicRoute";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
     <Fragment>
       {appRoutes?.map(({ element, isPrivate, url, id }) => {
         // For company routes, respect the isPrivate flag
-        if (url.startsWith('/company/')) {
+        if (url.startsWith("/company/")) {
           return (
             <Route
               key={id}
@@ -30,7 +31,19 @@ export const router = createBrowserRouter(
                 )
               }
             />
-          )
+          );
+        }
+
+        // For interview scheduling route, use InterviewRoute
+        if (url.startsWith("/interview/schedule/")) {
+          return (
+            <Route
+              key={id}
+              caseSensitive
+              path={url}
+              element={<InterviewRoute>{element}</InterviewRoute>}
+            />
+          );
         }
 
         return (
@@ -46,8 +59,8 @@ export const router = createBrowserRouter(
               )
             }
           />
-        )
+        );
       })}
     </Fragment>
   )
-)
+);

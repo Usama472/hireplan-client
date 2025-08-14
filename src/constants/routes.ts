@@ -1,4 +1,4 @@
-export const DASHBOARD_MAIN_ROUTE = '/dashboard/jobs'
+export const DASHBOARD_MAIN_ROUTE = "/dashboard/jobs";
 
 export const DASHBOARD_ROUTES = {
   MAIN: DASHBOARD_MAIN_ROUTE,
@@ -9,17 +9,18 @@ export const DASHBOARD_ROUTES = {
   VIEW_JOB_ID: `${DASHBOARD_MAIN_ROUTE}/view/:id`,
   PROFILE: `${DASHBOARD_MAIN_ROUTE}/profile`,
   AVAILABILITY: `/dashboard/availability`,
-}
+};
 
 export const ROUTES = {
-  HOME: '/',
-  LOGIN: '/login',
-  SIGNUP: '/signup',
-  FORGOT_PASSWORD: '/forgot-password',
+  HOME: "/",
+  LOGIN: "/login",
+  SIGNUP: "/signup",
+  FORGOT_PASSWORD: "/forgot-password",
   DASHBOARD: DASHBOARD_ROUTES,
-  CONTACT: '/contact',
-  PRIVACY: '/privacy',
-  TERMS: '/terms',
-  COMPANY: '/company/:slug',
-  APPLY_JOB: '/company/:slug/job/:jobId/apply',
-}
+  CONTACT: "/contact",
+  PRIVACY: "/privacy",
+  TERMS: "/terms",
+  COMPANY: "/company/:slug",
+  APPLY_JOB: "/company/:slug/job/:jobId/apply",
+  INTERVIEW_SCHEDULE: "/interview/schedule/:token",
+};
