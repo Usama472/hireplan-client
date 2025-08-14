@@ -5,11 +5,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   defaultAvailabilitySettings,
   defaultDaysAvailability,
-  mockBookedSlots,
   timeZones,
 } from "@/constants/availability-constants";
 import API from "@/http";
-import type { AvailabilitySettings, BookedSlot } from "@/interfaces";
+import type { AvailabilitySettings } from "@/interfaces";
 import useAuthSessionContext from "@/lib/context/AuthSessionContext";
 import { useToast } from "@/lib/hooks/use-toast";
 import { errorResolver } from "@/lib/utils";
@@ -41,9 +40,9 @@ export default function AvailabilityManager() {
     return savedSettings ? JSON.parse(savedSettings) : defaultSettings;
   });
 
-  const [bookedSlots] = useState<BookedSlot[]>(mockBookedSlots);
   const [isLoading, setIsLoading] = useState(false);
   const [isUpdatingTimezone, setIsUpdatingTimezone] = useState(false);
+  const [totalBookedAppointments, setTotalBookedAppointments] = useState(0);
 
   const loadAvailabilityData = async () => {
     setIsLoading(true);
@@ -103,8 +102,25 @@ export default function AvailabilityManager() {
     }
   };
 
+  const loadInterviewsData = async () => {
+    try {
+      const response = await API.interview.getInterviews({
+        page: 1,
+        limit: 1, // We only need the count, not the actual interviews
+      });
+
+      if (response.success) {
+        setTotalBookedAppointments(response.interviews.totalResults);
+      }
+    } catch (error) {
+      console.error("Error loading interviews data:", error);
+      setTotalBookedAppointments(0);
+    }
+  };
+
   useEffect(() => {
     loadAvailabilityData();
+    loadInterviewsData();
   }, []);
 
   useEffect(() => {
@@ -188,8 +204,6 @@ export default function AvailabilityManager() {
     );
   }, 0);
 
-  const totalBookedAppointments = bookedSlots.length;
-
   useEffect(() => {
     if (data?.user?.defaultTimezone) {
       setSettings((prev) => ({
@@ -238,12 +252,12 @@ export default function AvailabilityManager() {
               >
                 <Users className="h-4 w-4" />
                 <span className="text-sm">Booked Slots</span>
-                {bookedSlots.length > 0 && (
+                {totalBookedAppointments > 0 && (
                   <Badge
                     variant="secondary"
                     className="ml-1 h-5 px-2 text-xs bg-blue-50 text-blue-600 border border-blue-200"
                   >
-                    {bookedSlots.length}
+                    {totalBookedAppointments}
                   </Badge>
                 )}
                 <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gray-100"></div>
@@ -301,7 +315,7 @@ export default function AvailabilityManager() {
             </TabsContent>
 
             <TabsContent value="booked-slots" className="mt-0">
-              <BookedSlots bookedSlots={bookedSlots} />
+              <BookedSlots />
             </TabsContent>
 
             <TabsContent value="calendar-settings" className="mt-0">
