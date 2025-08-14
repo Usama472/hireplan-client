@@ -47,6 +47,8 @@ interface Applicant {
   aiScore?: number;
   status?: "pending" | "reviewed" | "shortlisted" | "rejected";
   interviewScheduled?: boolean;
+  invitationSent?: boolean;
+  invitationSentAt?: string;
   interview?: {
     id: string;
     applicant: string;
@@ -85,6 +87,14 @@ const formatInterviewTime = (dateString: string, timezone: string) => {
     hour: "2-digit",
     minute: "2-digit",
     timeZone: timezone,
+  });
+};
+
+const formatInvitationDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
   });
 };
 
@@ -232,6 +242,16 @@ const ApplicantCard = ({
                 </span>
               </div>
             )}
+
+            {applicant.invitationSent && !applicant.interviewScheduled && (
+              <div className="flex items-center gap-2 text-sm text-orange-600 font-medium">
+                <Calendar className="w-4 h-4" />
+                <span>
+                  Invitation sent:{" "}
+                  {formatInvitationDate(applicant.invitationSentAt || "")}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Status Badges */}
@@ -258,6 +278,12 @@ const ApplicantCard = ({
                 <Badge className="text-xs font-medium bg-purple-50 text-purple-700 border-purple-200">
                   <Video className="w-3 h-3 mr-1" />
                   Interview Scheduled
+                </Badge>
+              )}
+              {applicant.invitationSent && !applicant.interviewScheduled && (
+                <Badge className="text-xs font-medium bg-orange-50 text-orange-700 border-orange-200">
+                  <Calendar className="w-3 h-3 mr-1" />
+                  Invited
                 </Badge>
               )}
             </div>

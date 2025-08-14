@@ -12,11 +12,11 @@ import {
   CalendarCheck,
   Check,
   CheckCircle,
+  Clock,
   Download,
   ExternalLink,
   Eye,
   FileText,
-  Flag,
   Globe,
   GraduationCap,
   Linkedin,
@@ -65,6 +65,8 @@ interface Applicant {
   aiEvaluation?: AIEvaluation | null;
   status?: "pending" | "reviewed" | "shortlisted" | "rejected";
   interviewScheduled?: boolean;
+  invitationSent?: boolean;
+  invitationSentAt?: string;
   interview?: {
     id: string;
     applicant: string;
@@ -139,6 +141,14 @@ const formatInterviewTime = (dateString: string, timezone: string) => {
     hour: "2-digit",
     minute: "2-digit",
     timeZone: timezone,
+  });
+};
+
+const formatInvitationDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
   });
 };
 
@@ -502,6 +512,78 @@ export function ApplicantDetailModal({
                       </div>
                     </section>
                   )}
+
+                  {/* Invitation Section */}
+                  {applicant.invitationSent &&
+                    !applicant.interviewScheduled && (
+                      <section>
+                        <h3 className="text-lg font-semibold mb-4 flex items-center text-orange-800">
+                          <Calendar className="w-5 h-5 mr-2 text-orange-600" />
+                          Interview Invitation
+                        </h3>
+                        <div className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-lg p-6 border border-orange-200">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Invitation Details */}
+                            <div className="space-y-3">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600">
+                                  <Calendar className="w-5 h-5" />
+                                </div>
+                                <div>
+                                  <p className="text-sm text-muted-foreground">
+                                    Invitation Sent
+                                  </p>
+                                  <p className="font-medium text-orange-800">
+                                    {formatInvitationDate(
+                                      applicant.invitationSentAt || ""
+                                    )}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
+                                  <Clock className="w-5 h-5" />
+                                </div>
+                                <div>
+                                  <p className="text-sm text-muted-foreground">
+                                    Status
+                                  </p>
+                                  <p className="font-medium text-amber-800">
+                                    Waiting for candidate response
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="space-y-3">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                                  <MessageSquare className="w-5 h-5" />
+                                </div>
+                                <div>
+                                  <p className="text-sm text-muted-foreground">
+                                    Status
+                                  </p>
+                                  <p className="font-medium text-blue-800">
+                                    Waiting for candidate response
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Status Badge */}
+                          <div className="mt-4 flex justify-end">
+                            <Badge className="bg-orange-100 text-orange-700 border-orange-200">
+                              <Calendar className="w-3 h-3 mr-1" />
+                              Invitation Sent
+                            </Badge>
+                          </div>
+                        </div>
+                      </section>
+                    )}
                 </TabsContent>
 
                 {/* AI Score Tab */}
@@ -784,28 +866,6 @@ export function ApplicantDetailModal({
             >
               <CheckCircle className="w-4 h-4 mr-2" />
               Shortlist Candidate
-            </Button>
-            <Button
-              variant="outline"
-              className="flex-1 bg-white hover:bg-gray-50 border-blue-200 transform transition-all duration-200 hover:-translate-y-0.5"
-            >
-              <Calendar className="w-4 h-4 mr-2" />
-              Schedule Interview
-            </Button>
-            <Button
-              variant="outline"
-              className="flex-1 bg-white hover:bg-gray-50 border-indigo-200 transform transition-all duration-200 hover:-translate-y-0.5"
-            >
-              <Mail className="w-4 h-4 mr-2" />
-              Send Message
-            </Button>
-            <Button
-              variant="outline"
-              className="flex-1 bg-white hover:bg-red-50 border-red-200 text-red-600 hover:text-red-700 transform transition-all duration-200 hover:-translate-y-0.5"
-              onClick={() => onStatusUpdate?.(applicant.id, "rejected")}
-            >
-              <Flag className="w-4 h-4 mr-2" />
-              Reject
             </Button>
           </div>
         </div>
