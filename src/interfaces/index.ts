@@ -1,3 +1,4 @@
+import type { DateSpecificFormData } from "@/constants/date-specific-constants";
 import type { JobFormSchema } from "@/lib/validations/forms/job-form-schema";
 import type { ReactNode } from "react";
 
@@ -321,13 +322,20 @@ export interface IApplicant {
 export * from "@/interfaces/enums";
 export * from "@/interfaces/forms";
 
-export type TimeSlot = {
+export interface TimeSlot {
   id: string;
   startTime: string;
   endTime: string;
-};
+  eventTypeId: string;
+  eventType?: EventType;
+}
 
-export type DayAvailability = {
+export interface AvailabilitySettings {
+  timezone: string;
+  daysAvailability: DayAvailability[];
+}
+
+export interface DayAvailability {
   id: string;
   day:
     | "monday"
@@ -339,12 +347,7 @@ export type DayAvailability = {
     | "sunday";
   isAvailable: boolean;
   timeSlots: TimeSlot[];
-};
-
-export type AvailabilitySettings = {
-  timezone: string;
-  daysAvailability: DayAvailability[];
-};
+}
 
 export type BookedSlot = {
   id: string;
@@ -370,4 +373,61 @@ export interface EmailTemplate {
 export interface EmailTemplateVariable {
   key: string;
   title: string;
+}
+
+export interface EventType {
+  id: string;
+  name: string;
+  duration: number; // in minutes
+  color: string;
+  description?: string;
+  isDefault?: boolean;
+}
+
+export interface ScheduleTemplate {
+  id: string;
+  name: string;
+  isDefault: boolean;
+  isActive: boolean;
+  eventTypes: EventType[];
+  weeklyAvailability: AvailabilitySettings;
+  dateSpecificAvailability: DateSpecificFormData;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TemplateManagementState {
+  templates: ScheduleTemplate[];
+  activeTemplateId: string | null;
+  isLoading: boolean;
+  error: string | null;
+}
+
+export interface AvailabilityTemplate {
+  user: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    defaultTimezone: string;
+    id: string;
+  };
+  selectedMeetingPlatform: string;
+  templateName: string;
+  availabilities: any[];
+  eventTypes: EventType[];
+  timezone: string;
+  advancedRules: {
+    sendConfirmationEmail: boolean;
+    sendReminderEmails: boolean;
+  };
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  id: string;
+}
+
+export interface GetAvailabilityTemplatesResponse {
+  status: boolean;
+  availabilities: AvailabilityTemplate[];
+  count: number;
 }
