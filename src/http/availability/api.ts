@@ -1,5 +1,5 @@
 import type { GetAvailabilityTemplatesResponse } from "@/interfaces";
-import { get, post, put } from "../apiHelper";
+import { del, get, post, put } from "../apiHelper";
 
 interface BackendAvailabilitySlot {
   from: string;
@@ -57,4 +57,8 @@ export const updateAvailabilityTemplate = async (
   template: any
 ) => {
   return await put(`/availabilities/templates/${templateId}`, template);
+};
+
+export const deleteAvailabilityTemplate = async (templateId: string) => {
+  return await del(`/availabilities/templates/${templateId}`);
 };

@@ -25,6 +25,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import {
   createAvailabilityTemplate,
+  deleteAvailabilityTemplate,
   getAvailabilityTemplates,
   updateAvailabilityTemplate,
 } from "@/http/availability/api";
@@ -50,6 +51,9 @@ export function ScheduleTemplates({
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isCreateEventTypeDialogOpen, setIsCreateEventTypeDialogOpen] =
     useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [templateToDelete, setTemplateToDelete] =
+    useState<AvailabilityTemplate | null>(null);
   const [newTemplateName, setNewTemplateName] = useState("");
   const [activeTab, setActiveTab] = useState("overview");
   const [currentTimezone, setCurrentTimezone] =
@@ -504,25 +508,8 @@ export function ScheduleTemplates({
                 variant="outline"
                 className="text-xs px-3 py-1 text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
                 onClick={() => {
-                  if (
-                    confirm(
-                      `Are you sure you want to delete "${currentTemplate.templateName}"? This action cannot be undone.`
-                    )
-                  ) {
-                    try {
-                      // This would need to be integrated with the backend API
-                      toast({
-                        title: "Success",
-                        description: `Template "${currentTemplate.templateName}" deleted successfully.`,
-                      });
-                    } catch {
-                      toast({
-                        title: "Error",
-                        description:
-                          "Failed to delete template. Please try again.",
-                      });
-                    }
-                  }
+                  setTemplateToDelete(currentTemplate);
+                  setIsDeleteDialogOpen(true);
                 }}
               >
                 <svg
@@ -971,6 +958,155 @@ export function ScheduleTemplates({
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                <svg
+                  className="w-5 h-5 text-red-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                  />
+                </svg>
+              </div>
+              Delete Template
+            </DialogTitle>
+            <DialogDescription className="text-left">
+              Are you sure you want to delete{" "}
+              <span className="font-semibold text-gray-900">
+                "{templateToDelete?.templateName}"
+              </span>
+              ? This action cannot be undone and will permanently remove all
+              associated settings.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+              <div className="flex items-start gap-3">
+                <svg
+                  className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                  />
+                </svg>
+                <div className="text-sm text-red-800">
+                  <p className="font-medium">This will permanently delete:</p>
+                  <ul className="mt-1 space-y-1 text-xs">
+                    <li>• All event types and configurations</li>
+                    <li>• Weekly and date-specific availability settings</li>
+                    <li>• Advanced rules and email automation</li>
+                    <li>• All associated scheduling data</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteDialogOpen(false)}
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={async () => {
+                if (!templateToDelete) return;
+
+                try {
+                  // Call the backend API to delete the template
+                  const response = await deleteAvailabilityTemplate(
+                    templateToDelete.id
+                  );
+
+                  if (response.status) {
+                    // Remove the deleted template from the templates list
+                    const updatedTemplates = templates.filter(
+                      (t) => t.id !== templateToDelete.id
+                    );
+                    setTemplates(updatedTemplates);
+
+                    // Switch to the default template or first available template
+                    if (updatedTemplates.length > 0) {
+                      const defaultTemplate =
+                        updatedTemplates.find(
+                          (t) => t.templateName === "default"
+                        ) || updatedTemplates[0];
+                      setCurrentTemplate(defaultTemplate);
+                      setCurrentTimezone(defaultTemplate.timezone);
+                      setSendConfirmationEmails(
+                        defaultTemplate.advancedRules.sendConfirmationEmail
+                      );
+                      setSendReminderEmails(
+                        defaultTemplate.advancedRules.sendReminderEmails
+                      );
+                      if (defaultTemplate.eventTypes.length > 0) {
+                        setSelectedEventTypeId(
+                          defaultTemplate.eventTypes[0].id
+                        );
+                      }
+                    }
+
+                    // Close modal and reset state
+                    setIsDeleteDialogOpen(false);
+                    setTemplateToDelete(null);
+
+                    toast({
+                      title: "Success",
+                      description: `Template "${templateToDelete.templateName}" deleted successfully.`,
+                    });
+                  } else {
+                    toast({
+                      title: "Error",
+                      description:
+                        "Failed to delete template. Please try again.",
+                    });
+                  }
+                } catch {
+                  toast({
+                    title: "Error",
+                    description: "Failed to delete template. Please try again.",
+                  });
+                }
+              }}
+              className="flex-1"
+            >
+              <svg
+                className="w-4 h-4 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
+              </svg>
+              Delete Template
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
