@@ -24,6 +24,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  createAvailabilityTemplate,
   getAvailabilityTemplates,
   updateAvailabilityTemplate,
 } from "@/http/availability/api";
@@ -158,15 +159,36 @@ export function ScheduleTemplates({
     }
   };
 
-  const handleCreateTemplate = () => {
-    if (newTemplateName.trim()) {
-      // This would need to be integrated with the backend API
-      // For now, we'll just show a success message
-      setNewTemplateName("");
-      setIsCreateDialogOpen(false);
+  const handleCreateTemplate = async () => {
+    if (!newTemplateName.trim()) return;
+
+    try {
+      const response = await createAvailabilityTemplate(newTemplateName.trim());
+      if (response.status) {
+        // Add the new template to the list
+        setTemplates((prev) => [...prev, response.availability]);
+
+        // Switch to the new template
+        setCurrentTemplate(response.availability);
+
+        // Reset form
+        setNewTemplateName("");
+        setIsCreateDialogOpen(false);
+
+        toast({
+          title: "Success",
+          description: "Template created successfully",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to create template. Please try again.",
+        });
+      }
+    } catch {
       toast({
-        title: "Success",
-        description: "Template created successfully",
+        title: "Error",
+        description: "Failed to create template. Please try again.",
       });
     }
   };
@@ -461,14 +483,14 @@ export function ScheduleTemplates({
                           Default
                         </Badge>
                       )}
-                      {template.isActive && (
+                      {/* {template.isActive && (
                         <Badge
                           variant="secondary"
                           className="text-xs bg-green-100 text-green-700"
                         >
                           Active
                         </Badge>
-                      )}
+                      )} */}
                     </div>
                   </SelectItem>
                 ))}
