@@ -27,10 +27,12 @@ import {
   createAvailabilityTemplate,
   deleteAvailabilityTemplate,
   getAvailabilityTemplates,
+  saveAvailability,
   updateAvailabilityTemplate,
 } from "@/http/availability/api";
 import type { AvailabilityTemplate } from "@/interfaces";
 import { useToast } from "@/lib/hooks/use-toast";
+import { format } from "date-fns";
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { DateSpecificForm } from "./date-specific-form";
@@ -67,11 +69,113 @@ export function ScheduleTemplates({
     try {
       const response = await getAvailabilityTemplates();
       if (response.status) {
-        setTemplates(response.availabilities);
-        if (response.availabilities.length > 0) {
+        // Transform the server data to match form format
+        const transformedTemplates = response.availabilities.map((template) => {
+          // Transform weekly availability
+          const weeklyAvailability = {
+            type: "weekly",
+            daysAvailability: [
+              {
+                id: "monday",
+                day: "monday",
+                isAvailable: false,
+                timeSlots: [],
+              },
+              {
+                id: "tuesday",
+                day: "tuesday",
+                isAvailable: false,
+                timeSlots: [],
+              },
+              {
+                id: "wednesday",
+                day: "wednesday",
+                isAvailable: false,
+                timeSlots: [],
+              },
+              {
+                id: "thursday",
+                day: "thursday",
+                isAvailable: false,
+                timeSlots: [],
+              },
+              {
+                id: "friday",
+                day: "friday",
+                isAvailable: false,
+                timeSlots: [],
+              },
+              {
+                id: "saturday",
+                day: "saturday",
+                isAvailable: false,
+                timeSlots: [],
+              },
+              {
+                id: "sunday",
+                day: "sunday",
+                isAvailable: false,
+                timeSlots: [],
+              },
+            ],
+          };
+
+          // Transform date-specific availability
+          const dateSpecificAvailability: any = {
+            type: "date-specific",
+            dates: [],
+          };
+
+          // Process server availabilities and transform them
+          if (template.availabilities) {
+            template.availabilities.forEach((availability: any) => {
+              if (availability.type === "weekDay") {
+                // Find the day in weekly availability
+                const dayIndex = weeklyAvailability.daysAvailability.findIndex(
+                  (day) => day.day === availability.day
+                );
+                if (dayIndex !== -1) {
+                  weeklyAvailability.daysAvailability[dayIndex].isAvailable =
+                    true;
+                  weeklyAvailability.daysAvailability[dayIndex].timeSlots =
+                    availability.slots.map((slot: any) => ({
+                      id: `${availability.day}-${slot.from}-${slot.to}`,
+                      startTime: slot.from,
+                      endTime: slot.to,
+                      eventTypeId: template.eventTypes?.[0]?.id || "", // Use first event type as default
+                      eventType: template.eventTypes?.[0] || undefined,
+                    }));
+                }
+              } else if (availability.type === "date") {
+                // Add to date-specific availability
+                dateSpecificAvailability.dates.push({
+                  id: availability.date,
+                  date: new Date(availability.date),
+                  isAvailable: true,
+                  timeSlots: availability.slots.map((slot: any) => ({
+                    id: `${availability.date}-${slot.from}-${slot.to}`,
+                    startTime: slot.from,
+                    endTime: slot.to,
+                    eventTypeId: template.eventTypes?.[0]?.id || "", // Use first event type as default
+                    eventType: template.eventTypes?.[0] || undefined,
+                  })),
+                });
+              }
+            });
+          }
+
+          // Create transformed template
+          return {
+            ...template,
+            availabilities: [weeklyAvailability, dateSpecificAvailability],
+          };
+        });
+
+        setTemplates(transformedTemplates);
+        if (transformedTemplates.length > 0) {
           const defaultTemplate =
-            response.availabilities.find((t) => t.templateName === "default") ||
-            response.availabilities[0];
+            transformedTemplates.find((t) => t.templateName === "default") ||
+            transformedTemplates[0];
           setCurrentTemplate(defaultTemplate);
           setCurrentTimezone(defaultTemplate.timezone);
           setSendConfirmationEmails(
@@ -209,43 +313,112 @@ export function ScheduleTemplates({
     try {
       if (!currentTemplate) return;
 
-      // Update the template with new data
-      const updatedTemplate = { ...currentTemplate };
+      // Transform the data to match the expected API payload format
+      let availabilityPayload: Array<{
+        type: "weekDay" | "date";
+        day?: string;
+        date?: string;
+        slots: Array<{
+          from: string;
+          to: string;
+        }>;
+      }> = [];
 
-      // Determine what type of data we're updating
       if (data.daysAvailability) {
         // Weekly availability data
-        updatedTemplate.availabilities = [
-          { ...data, type: "weekly" },
-          ...currentTemplate.availabilities.filter((a) => a.type !== "weekly"),
-        ];
+        const weeklyAvailability = data.daysAvailability
+          .filter((day: any) => day.isAvailable && day.timeSlots.length > 0)
+          .map((day: any) => ({
+            type: "weekDay",
+            day: day.day,
+            slots: day.timeSlots.map((slot: any) => ({
+              from: slot.startTime,
+              to: slot.endTime,
+            })),
+          }));
+
+        availabilityPayload = [...availabilityPayload, ...weeklyAvailability];
       } else if (data.dates) {
         // Date-specific availability data
-        updatedTemplate.availabilities = [
-          ...currentTemplate.availabilities.filter(
-            (a) => a.type !== "date-specific"
-          ),
-          { ...data, type: "date-specific" },
+        const dateSpecificAvailability = data.dates
+          .filter((date: any) => date.timeSlots.length > 0)
+          .map((date: any) => ({
+            type: "date",
+            date: format(date.date, "yyyy-MM-dd"),
+            slots: date.timeSlots.map((slot: any) => ({
+              from: slot.startTime,
+              to: slot.endTime,
+            })),
+          }));
+
+        availabilityPayload = [
+          ...availabilityPayload,
+          ...dateSpecificAvailability,
         ];
       }
 
-      // Update the backend
-      await updateAvailabilityTemplate(templateId, updatedTemplate);
+      // Only save if there are available slots
+      if (availabilityPayload.length > 0) {
+        // Use saveAvailability API for saving slots
+        await saveAvailability(templateId, availabilityPayload);
 
-      // Update local state
-      setCurrentTemplate(updatedTemplate);
-      setTemplates((prev) =>
-        prev.map((t) => (t.id === templateId ? updatedTemplate : t))
-      );
+        // Update the template with the new availability data
+        const updatedTemplate = { ...currentTemplate };
+
+        if (data.daysAvailability) {
+          // Update weekly availability
+          const weeklyAvailability = { ...data, type: "weekly" };
+          const existingWeeklyIndex =
+            updatedTemplate.availabilities?.findIndex(
+              (a) => a.type === "weekly"
+            ) || -1;
+
+          if (existingWeeklyIndex >= 0 && updatedTemplate.availabilities) {
+            updatedTemplate.availabilities[existingWeeklyIndex] =
+              weeklyAvailability;
+          } else {
+            updatedTemplate.availabilities = [
+              ...(updatedTemplate.availabilities || []),
+              weeklyAvailability,
+            ];
+          }
+        } else if (data.dates) {
+          // Update date-specific availability
+          const dateSpecificAvailability = { ...data, type: "date-specific" };
+          const existingDateSpecificIndex =
+            updatedTemplate.availabilities?.findIndex(
+              (a) => a.type === "date-specific"
+            ) || -1;
+
+          if (
+            existingDateSpecificIndex >= 0 &&
+            updatedTemplate.availabilities
+          ) {
+            updatedTemplate.availabilities[existingDateSpecificIndex] =
+              dateSpecificAvailability;
+          } else {
+            updatedTemplate.availabilities = [
+              ...(updatedTemplate.availabilities || []),
+              dateSpecificAvailability,
+            ];
+          }
+        }
+
+        // Update local state
+        setCurrentTemplate(updatedTemplate);
+        setTemplates((prev) =>
+          prev.map((t) => (t.id === templateId ? updatedTemplate : t))
+        );
+      }
 
       toast({
         title: "Success",
-        description: "Template saved successfully",
+        description: "Availability saved successfully",
       });
     } catch {
       toast({
         title: "Error",
-        description: "Failed to save template. Please try again.",
+        description: "Failed to save availability. Please try again.",
       });
     }
   };
@@ -301,11 +474,23 @@ export function ScheduleTemplates({
 
     // Check availabilities array for time slots
     template.availabilities?.forEach((availability: any) => {
-      availability.timeSlots?.forEach((slot: any) => {
-        if (slot.eventTypeId) {
-          usedIds.add(slot.eventTypeId);
-        }
-      });
+      if (availability.type === "weekly" && availability.daysAvailability) {
+        availability.daysAvailability.forEach((day: any) => {
+          day.timeSlots?.forEach((slot: any) => {
+            if (slot.eventTypeId) {
+              usedIds.add(slot.eventTypeId);
+            }
+          });
+        });
+      } else if (availability.type === "date-specific" && availability.dates) {
+        availability.dates.forEach((date: any) => {
+          date.timeSlots?.forEach((slot: any) => {
+            if (slot.eventTypeId) {
+              usedIds.add(slot.eventTypeId);
+            }
+          });
+        });
+      }
     });
 
     return Array.from(usedIds);
@@ -916,8 +1101,59 @@ export function ScheduleTemplates({
               </p>
               {currentTemplate ? (
                 <WeeklyAvailabilityForm
-                  initialData={currentTemplate.availabilities?.[0] || {}}
+                  initialData={
+                    currentTemplate.availabilities?.find(
+                      (a) => a.type === "weekly"
+                    ) || {
+                      type: "weekly",
+                      daysAvailability: [
+                        {
+                          id: "monday",
+                          day: "monday",
+                          isAvailable: false,
+                          timeSlots: [],
+                        },
+                        {
+                          id: "tuesday",
+                          day: "tuesday",
+                          isAvailable: false,
+                          timeSlots: [],
+                        },
+                        {
+                          id: "wednesday",
+                          day: "wednesday",
+                          isAvailable: false,
+                          timeSlots: [],
+                        },
+                        {
+                          id: "thursday",
+                          day: "thursday",
+                          isAvailable: false,
+                          timeSlots: [],
+                        },
+                        {
+                          id: "friday",
+                          day: "friday",
+                          isAvailable: false,
+                          timeSlots: [],
+                        },
+                        {
+                          id: "saturday",
+                          day: "saturday",
+                          isAvailable: false,
+                          timeSlots: [],
+                        },
+                        {
+                          id: "sunday",
+                          day: "sunday",
+                          isAvailable: false,
+                          timeSlots: [],
+                        },
+                      ],
+                    }
+                  }
                   eventTypes={currentTemplate.eventTypes || []}
+                  selectedEventTypeId={selectedEventTypeId}
                   onSave={async (data) =>
                     await handleSaveTemplate(currentTemplate.id, data)
                   }
@@ -942,11 +1178,20 @@ export function ScheduleTemplates({
               </p>
               {currentTemplate ? (
                 <DateSpecificForm
-                  initialData={currentTemplate.availabilities?.[1] || {}}
+                  initialData={
+                    currentTemplate.availabilities?.find(
+                      (a) => a.type === "date-specific"
+                    ) || {
+                      type: "date-specific",
+                      dates: [],
+                    }
+                  }
                   onSave={async (data) =>
                     await handleSaveTemplate(currentTemplate.id, data)
                   }
                   isLoading={false}
+                  eventTypes={currentTemplate.eventTypes || []}
+                  selectedEventTypeId={selectedEventTypeId}
                 />
               ) : (
                 <div className="text-center py-8 text-gray-500">

@@ -1,24 +1,24 @@
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Calendar } from '@/components/ui/calendar'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover'
-import { Switch } from '@/components/ui/switch'
+} from "@/components/ui/popover";
+import { Switch } from "@/components/ui/switch";
 import {
   defaultDateSpecificData,
   type DateSpecificFormData,
-} from '@/constants/date-specific-constants'
-import { useToast } from '@/lib/hooks/use-toast'
-import { cn } from '@/lib/utils'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { format } from 'date-fns'
+} from "@/constants/date-specific-constants";
+import { useToast } from "@/lib/hooks/use-toast";
+import { cn } from "@/lib/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { format } from "date-fns";
 import {
   AlertCircle,
   Calendar as CalendarIcon,
@@ -26,11 +26,11 @@ import {
   Plus,
   Save,
   Trash2,
-} from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { Controller, useFieldArray, useForm } from 'react-hook-form'
-import { v4 as uuidv4 } from 'uuid'
-import { z } from 'zod'
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { v4 as uuidv4 } from "uuid";
+import { z } from "zod";
 
 // Validation schema for time slots
 const timeSlotSchema = z
@@ -38,47 +38,55 @@ const timeSlotSchema = z
     id: z.string(),
     startTime: z
       .string()
-      .regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format'),
+      .regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format"),
     endTime: z
       .string()
-      .regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format'),
+      .regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format"),
   })
   .refine(
     (data) => {
-      const start = new Date(`2000-01-01T${data.startTime}:00`)
-      const end = new Date(`2000-01-01T${data.endTime}:00`)
-      return start < end
+      const start = new Date(`2000-01-01T${data.startTime}:00`);
+      const end = new Date(`2000-01-01T${data.endTime}:00`);
+      return start < end;
     },
     {
-      message: 'End time must be after start time',
-      path: ['endTime'],
+      message: "End time must be after start time",
+      path: ["endTime"],
     }
-  )
+  );
 
 // Validation schema for date-specific settings
 const dateSpecificSchema = z.object({
   date: z.date(),
   isAvailable: z.boolean(),
   timeSlots: z.array(timeSlotSchema),
-})
+});
 
 // Validation schema for the entire form
 const dateSpecificFormSchema = z.object({
   dates: z.array(dateSpecificSchema),
-})
+});
 
 // Default values for date-specific settings
 const getDefaultDateSettings = (date: Date) => ({
   date,
   isAvailable: true,
   timeSlots: [],
-})
+});
 
 interface DateSpecificFormProps {
-  initialData?: DateSpecificFormData
-  onSave?: (data: DateSpecificFormData) => Promise<void>
-  onCancel?: () => void
-  isLoading?: boolean
+  initialData?: DateSpecificFormData;
+  onSave?: (data: DateSpecificFormData) => Promise<void>;
+  onCancel?: () => void;
+  isLoading?: boolean;
+  eventTypes?: Array<{
+    id: string;
+    name: string;
+    duration: number;
+    color: string;
+    description?: string;
+  }>;
+  selectedEventTypeId?: string;
 }
 
 export function DateSpecificForm({
@@ -86,10 +94,12 @@ export function DateSpecificForm({
   onSave,
   onCancel,
   isLoading = false,
+  eventTypes = [],
+  selectedEventTypeId,
 }: DateSpecificFormProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [hasChanges, setHasChanges] = useState(false)
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
 
   const {
     control,
@@ -100,182 +110,217 @@ export function DateSpecificForm({
   } = useForm<DateSpecificFormData>({
     resolver: zodResolver(dateSpecificFormSchema),
     defaultValues: initialData,
-  })
+  });
 
   const { fields, append, remove } = useFieldArray({
     control,
-    name: 'dates',
-  })
+    name: "dates",
+  });
 
-  const watchedDates = watch('dates')
+  const watchedDates = watch("dates");
 
   useEffect(() => {
-    setHasChanges(isDirty)
-  }, [isDirty])
+    setHasChanges(isDirty);
+  }, [isDirty]);
 
   const getOverlappingSlots = (dateIndex: number) => {
-    const date = watchedDates[dateIndex]
-    if (!date || !date.isAvailable) return {}
+    const date = watchedDates[dateIndex];
+    if (!date || !date.isAvailable) return {};
 
-    const overlaps: { [key: string]: string[] } = {}
+    const overlaps: { [key: string]: string[] } = {};
 
     date.timeSlots.forEach((slot, index) => {
-      const slotStart = convertTimeToMinutes(slot.startTime)
-      const slotEnd = convertTimeToMinutes(slot.endTime)
+      const slotStart = convertTimeToMinutes(slot.startTime);
+      const slotEnd = convertTimeToMinutes(slot.endTime);
 
       date.timeSlots.forEach((otherSlot, otherIndex) => {
         if (index !== otherIndex) {
-          const otherStart = convertTimeToMinutes(otherSlot.startTime)
-          const otherEnd = convertTimeToMinutes(otherSlot.endTime)
+          const otherStart = convertTimeToMinutes(otherSlot.startTime);
+          const otherEnd = convertTimeToMinutes(otherSlot.endTime);
 
           if (slotStart <= otherEnd && slotEnd >= otherStart) {
             if (!overlaps[slot.id]) {
-              overlaps[slot.id] = []
+              overlaps[slot.id] = [];
             }
-            overlaps[slot.id].push(otherSlot.id)
+            overlaps[slot.id].push(otherSlot.id);
           }
         }
-      })
-    })
+      });
+    });
 
-    return overlaps
-  }
+    return overlaps;
+  };
 
   const convertTimeToMinutes = (time: string): number => {
-    const [hours, minutes] = time.split(':').map(Number)
-    return hours * 60 + minutes
-  }
+    const [hours, minutes] = time.split(":").map(Number);
+    return hours * 60 + minutes;
+  };
 
   const handleAddDate = () => {
-    if (!selectedDate) return
+    if (!selectedDate) return;
 
     // Check if date already exists
     const dateExists = watchedDates.some(
-      (d) => format(d.date, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')
-    )
+      (d) => format(d.date, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd")
+    );
 
     if (dateExists) {
       toast({
-        title: 'Date already added',
+        title: "Date already added",
         description:
-          'This date is already added. Please select a different date.',
-        type: 'error',
-      })
-      return
+          "This date is already added. Please select a different date.",
+        type: "error",
+      });
+      return;
     }
 
-    const newDateSettings = getDefaultDateSettings(selectedDate)
-    append(newDateSettings)
-    setSelectedDate(undefined)
-  }
+    const newDateSettings = getDefaultDateSettings(selectedDate);
+    append(newDateSettings);
+    setSelectedDate(undefined);
+  };
 
   const handleRemoveDate = (dateIndex: number) => {
-    remove(dateIndex)
-  }
+    remove(dateIndex);
+  };
 
   const handleAddTimeSlot = (dateIndex: number) => {
-    const date = watchedDates[dateIndex]
-    if (!date) return
+    const date = watchedDates[dateIndex];
+    if (!date) return;
 
-    const lastSlot = date.timeSlots[date.timeSlots.length - 1]
-    let startTime = '09:00'
-    let endTime = '10:00'
+    const lastSlot = date.timeSlots[date.timeSlots.length - 1];
+    let startTime = "09:00";
+    let endTime = "10:00";
+
+    // Calculate end time based on selected event type duration
+    const selectedEventType = eventTypes.find(
+      (type) => type.id === selectedEventTypeId
+    );
+    const durationMinutes = selectedEventType?.duration || 60; // Default to 1 hour
 
     if (lastSlot) {
-      const lastEndHour = parseInt(lastSlot.endTime.split(':')[0])
-      const lastEndMinute = parseInt(lastSlot.endTime.split(':')[1])
+      const lastEndHour = parseInt(lastSlot.endTime.split(":")[0]);
+      const lastEndMinute = parseInt(lastSlot.endTime.split(":")[1]);
 
-      let newStartHour = lastEndHour
-      let newStartMinute = lastEndMinute + 30
+      let newStartHour = lastEndHour;
+      let newStartMinute = lastEndMinute + 30;
 
       if (newStartMinute >= 60) {
-        newStartHour += 1
-        newStartMinute = newStartMinute - 60
+        newStartHour += 1;
+        newStartMinute = newStartMinute - 60;
       }
 
-      const newStartHourStr = newStartHour.toString().padStart(2, '0')
-      const newStartMinuteStr = newStartMinute.toString().padStart(2, '0')
+      const newStartHourStr = newStartHour.toString().padStart(2, "0");
+      const newStartMinuteStr = newStartMinute.toString().padStart(2, "0");
 
-      let newEndHour = newStartHour + 1
-      if (newEndHour > 23) newEndHour = 23
-      const newEndHourStr = newEndHour.toString().padStart(2, '0')
+      let newEndHour = newStartHour;
+      let newEndMinute = newStartMinute + durationMinutes;
 
-      startTime = `${newStartHourStr}:${newStartMinuteStr}`
-      endTime = `${newEndHourStr}:${newStartMinuteStr}`
+      if (newEndMinute >= 60) {
+        newEndHour += Math.floor(newEndMinute / 60);
+        newEndMinute = newEndMinute % 60;
+      }
+
+      if (newEndHour > 23) newEndHour = 23;
+      const newEndHourStr = newEndHour.toString().padStart(2, "0");
+      const newEndMinuteStr = newEndMinute.toString().padStart(2, "0");
+
+      startTime = `${newStartHourStr}:${newStartMinuteStr}`;
+      endTime = `${newEndHourStr}:${newEndMinuteStr}`;
+    } else {
+      // First slot - use selected event type duration
+      const startHour = 9;
+      const startMinute = 0;
+
+      let endHour = startHour;
+      let endMinute = startMinute + durationMinutes;
+
+      if (endMinute >= 60) {
+        endHour += Math.floor(endMinute / 60);
+        endMinute = endMinute % 60;
+      }
+
+      if (endHour > 23) endHour = 23;
+
+      startTime = `${startHour.toString().padStart(2, "0")}:${startMinute
+        .toString()
+        .padStart(2, "0")}`;
+      endTime = `${endHour.toString().padStart(2, "0")}:${endMinute
+        .toString()
+        .padStart(2, "0")}`;
     }
 
     const newSlot = {
       id: uuidv4(),
       startTime,
       endTime,
-    }
+    };
 
-    const currentSlots = watchedDates[dateIndex].timeSlots
-    const updatedSlots = [...currentSlots, newSlot]
-    setValue(`dates.${dateIndex}.timeSlots`, updatedSlots)
-  }
+    const currentSlots = watchedDates[dateIndex].timeSlots;
+    const updatedSlots = [...currentSlots, newSlot];
+    setValue(`dates.${dateIndex}.timeSlots`, updatedSlots);
+  };
 
   const handleDeleteTimeSlot = (dateIndex: number, slotIndex: number) => {
-    const date = watchedDates[dateIndex]
-    if (!date) return
+    const date = watchedDates[dateIndex];
+    if (!date) return;
 
     const updatedSlots = date.timeSlots.filter(
       (_, index) => index !== slotIndex
-    )
-    setValue(`dates.${dateIndex}.timeSlots`, updatedSlots)
-  }
+    );
+    setValue(`dates.${dateIndex}.timeSlots`, updatedSlots);
+  };
 
   const onSubmit = async (data: DateSpecificFormData) => {
-    if (isSubmitting) return
+    if (isSubmitting) return;
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     try {
       if (onSave) {
-        await onSave(data)
+        await onSave(data);
       }
-      setHasChanges(false)
+      setHasChanges(false);
     } catch (error) {
-      console.error('Error saving date-specific settings:', error)
+      console.error("Error saving date-specific settings:", error);
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const formatDate = (date: Date) => {
-    return format(date, 'EEEE, MMMM d, yyyy')
-  }
+    return format(date, "EEEE, MMMM d, yyyy");
+  };
 
-  const { toast } = useToast()
+  const { toast } = useToast();
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
-      <div className='flex items-center justify-between'>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <div className="flex items-center justify-between">
         <div></div>
-        <div className='flex gap-2'></div>
+        <div className="flex gap-2"></div>
       </div>
 
-      <Card className='border border-gray-200'>
-        <CardHeader className='pb-3'>
-          <CardTitle className='text-sm'>Add New Date</CardTitle>
+      <Card className="border border-gray-200">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm">Add New Date</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className='flex items-center gap-3'>
+          <div className="flex items-center gap-3">
             <Popover>
               <PopoverTrigger asChild>
                 <Button
-                  variant='outline'
+                  variant="outline"
                   className={cn(
-                    'w-[240px] justify-start text-left font-normal h-8',
-                    !selectedDate && 'text-muted-foreground'
+                    "w-[240px] justify-start text-left font-normal h-8",
+                    !selectedDate && "text-muted-foreground"
                   )}
                 >
-                  <CalendarIcon className='mr-2 h-3 w-3' />
-                  {selectedDate ? formatDate(selectedDate) : 'Pick a date'}
+                  <CalendarIcon className="mr-2 h-3 w-3" />
+                  {selectedDate ? formatDate(selectedDate) : "Pick a date"}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className='w-auto p-0'>
+              <PopoverContent className="w-auto p-0">
                 <Calendar
-                  mode='single'
+                  mode="single"
                   selected={selectedDate}
                   onSelect={setSelectedDate}
                   initialFocus
@@ -284,13 +329,13 @@ export function DateSpecificForm({
               </PopoverContent>
             </Popover>
             <Button
-              type='button'
+              type="button"
               onClick={handleAddDate}
               disabled={!selectedDate}
-              size='sm'
-              className='h-8'
+              size="sm"
+              className="h-8"
             >
-              <Plus className='h-3 w-3 mr-1' />
+              <Plus className="h-3 w-3 mr-1" />
               Add Date
             </Button>
             {/* <Button
@@ -308,42 +353,60 @@ export function DateSpecificForm({
         </CardContent>
       </Card>
 
-      <div className='space-y-3'>
+      {eventTypes && eventTypes.length > 0 && (
+        <div className="mt-2 p-2 bg-white border border-blue-200 rounded text-xs text-blue-800">
+          <strong>Note:</strong> Time slots will automatically use the duration
+          of your selected event type.
+          {selectedEventTypeId && (
+            <span className="block mt-1">
+              <strong>Selected:</strong>{" "}
+              {eventTypes.find((type) => type.id === selectedEventTypeId)
+                ?.name || "Unknown"}
+              (
+              {eventTypes.find((type) => type.id === selectedEventTypeId)
+                ?.duration || 0}{" "}
+              minutes)
+            </span>
+          )}
+        </div>
+      )}
+
+      <div className="space-y-3">
         {fields.map((field, dateIndex) => {
-          const date = watchedDates[dateIndex]
-          const overlappingSlots = getOverlappingSlots(dateIndex)
-          const hasOverlappingSlots = Object.keys(overlappingSlots).length > 0
+          const date = watchedDates[dateIndex];
+          const overlappingSlots = getOverlappingSlots(dateIndex);
+          const hasOverlappingSlots = Object.keys(overlappingSlots).length > 0;
 
           return (
-            <Card key={field.id} className='overflow-hidden'>
-              <CardHeader className='pb-3'>
-                <div className='flex items-center justify-between'>
-                  <div className='flex items-center gap-3'>
+            <Card key={field.id} className="overflow-hidden">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
                     <div
                       className={`w-1.5 h-6 rounded-full transition-colors ${
-                        date?.isAvailable ? 'bg-blue-500' : 'bg-gray-300'
+                        date?.isAvailable ? "bg-blue-500" : "bg-gray-300"
                       }`}
                     />
                     <div>
-                      <CardTitle className='text-base font-semibold'>
+                      <CardTitle className="text-base font-semibold">
                         {formatDate(date.date)}
                       </CardTitle>
-                      <p className='text-xs text-gray-600'>
+                      <p className="text-xs text-gray-600">
                         {date?.isAvailable
                           ? date.timeSlots.length === 0
-                            ? 'Available - add time slots'
+                            ? "Available - add time slots"
                             : `${date.timeSlots.length} slot(s)`
-                          : 'Not available'}
+                          : "Not available"}
                       </p>
                     </div>
                   </div>
 
-                  <div className='flex items-center gap-3'>
+                  <div className="flex items-center gap-3">
                     <Controller
                       control={control}
                       name={`dates.${dateIndex}.isAvailable`}
                       render={({ field }) => (
-                        <div className='flex items-center space-x-2'>
+                        <div className="flex items-center space-x-2">
                           <Switch
                             id={`available-${dateIndex}`}
                             checked={field.value}
@@ -352,7 +415,7 @@ export function DateSpecificForm({
                           />
                           <Label
                             htmlFor={`available-${dateIndex}`}
-                            className='text-xs'
+                            className="text-xs"
                           >
                             Available
                           </Label>
@@ -362,73 +425,73 @@ export function DateSpecificForm({
 
                     {date?.isAvailable && (
                       <Button
-                        type='button'
-                        variant='outline'
-                        size='sm'
+                        type="button"
+                        variant="outline"
+                        size="sm"
                         onClick={() => handleAddTimeSlot(dateIndex)}
                         disabled={isSubmitting}
-                        className='text-xs h-7 px-2'
+                        className="text-xs h-7 px-2"
                       >
-                        <Plus className='h-3 w-3 mr-1' />
+                        <Plus className="h-3 w-3 mr-1" />
                         Add
                       </Button>
                     )}
 
                     <Button
-                      type='button'
-                      variant='ghost'
-                      size='sm'
+                      type="button"
+                      variant="ghost"
+                      size="sm"
                       onClick={() => handleRemoveDate(dateIndex)}
                       disabled={isSubmitting}
-                      className='text-red-600 hover:text-red-700 hover:bg-red-50 h-7 w-7 p-0'
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50 h-7 w-7 p-0"
                     >
-                      <Trash2 className='w-3 h-3' />
+                      <Trash2 className="w-3 h-3" />
                     </Button>
                   </div>
                 </div>
               </CardHeader>
 
               {date?.isAvailable && (
-                <CardContent className='pt-0 pb-3'>
+                <CardContent className="pt-0 pb-3">
                   {hasOverlappingSlots && (
-                    <Alert className='mb-3 border-red-200 bg-red-50 py-2'>
-                      <AlertCircle className='h-3 w-3 text-red-600' />
-                      <AlertDescription className='text-red-700 text-xs'>
+                    <Alert className="mb-3 border-red-200 bg-red-50 py-2">
+                      <AlertCircle className="h-3 w-3 text-red-600" />
+                      <AlertDescription className="text-red-700 text-xs">
                         Overlapping time slots detected. Please adjust to avoid
                         conflicts.
                       </AlertDescription>
                     </Alert>
                   )}
 
-                  <div className='space-y-2'>
+                  <div className="space-y-2">
                     {date.timeSlots.length === 0 ? (
-                      <div className='text-center py-4 border-2 border-dashed border-gray-200 rounded-lg bg-gray-50'>
-                        <Clock className='w-6 h-6 text-gray-400 mx-auto mb-2' />
-                        <p className='text-gray-600 text-sm font-medium mb-1'>
+                      <div className="text-center py-4 border-2 border-dashed border-gray-200 rounded-lg bg-gray-50">
+                        <Clock className="w-6 h-6 text-gray-400 mx-auto mb-2" />
+                        <p className="text-gray-600 text-sm font-medium mb-1">
                           No time slots
                         </p>
-                        <p className='text-gray-500 text-xs mb-3'>
+                        <p className="text-gray-500 text-xs mb-3">
                           Add time slots to make this date bookable
                         </p>
                         <Button
-                          type='button'
-                          variant='outline'
-                          size='sm'
+                          type="button"
+                          variant="outline"
+                          size="sm"
                           onClick={() => handleAddTimeSlot(dateIndex)}
                           disabled={isSubmitting}
-                          className='text-xs h-7'
+                          className="text-xs h-7"
                         >
-                          <Plus className='h-3 w-3 mr-1' />
+                          <Plus className="h-3 w-3 mr-1" />
                           Add First Slot
                         </Button>
                       </div>
                     ) : (
                       date.timeSlots.map((slot, slotIndex) => (
-                        <div key={slot.id} className='relative'>
-                          <div className='flex items-center gap-2 p-2 border border-gray-200 rounded-lg bg-gray-50'>
-                            <div className='flex-1 grid grid-cols-2 gap-2'>
+                        <div key={slot.id} className="relative">
+                          <div className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg bg-gray-50">
+                            <div className="flex-1 grid grid-cols-2 gap-2">
                               <div>
-                                <Label className='text-xs text-gray-600 mb-1 block'>
+                                <Label className="text-xs text-gray-600 mb-1 block">
                                   Start
                                 </Label>
                                 <Controller
@@ -436,16 +499,16 @@ export function DateSpecificForm({
                                   name={`dates.${dateIndex}.timeSlots.${slotIndex}.startTime`}
                                   render={({ field }) => (
                                     <Input
-                                      type='time'
+                                      type="time"
                                       {...field}
-                                      className='h-7 text-xs'
+                                      className="h-7 text-xs"
                                       disabled={isSubmitting}
                                     />
                                   )}
                                 />
                               </div>
                               <div>
-                                <Label className='text-xs text-gray-600 mb-1 block'>
+                                <Label className="text-xs text-gray-600 mb-1 block">
                                   End
                                 </Label>
                                 <Controller
@@ -453,9 +516,9 @@ export function DateSpecificForm({
                                   name={`dates.${dateIndex}.timeSlots.${slotIndex}.endTime`}
                                   render={({ field }) => (
                                     <Input
-                                      type='time'
+                                      type="time"
                                       {...field}
-                                      className='h-7 text-xs'
+                                      className="h-7 text-xs"
                                       disabled={isSubmitting}
                                     />
                                   )}
@@ -463,32 +526,32 @@ export function DateSpecificForm({
                               </div>
                             </div>
 
-                            <div className='flex items-center gap-2'>
-                              <Badge variant='outline' className='text-xs'>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className="text-xs">
                                 {slot.startTime} - {slot.endTime}
                               </Badge>
 
                               <Button
-                                type='button'
-                                variant='ghost'
-                                size='sm'
+                                type="button"
+                                variant="ghost"
+                                size="sm"
                                 onClick={() =>
                                   handleDeleteTimeSlot(dateIndex, slotIndex)
                                 }
                                 disabled={isSubmitting}
-                                className='text-red-600 hover:text-red-700 hover:bg-red-50 h-7 w-7 p-0'
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50 h-7 w-7 p-0"
                               >
-                                <Trash2 className='w-3 h-3' />
+                                <Trash2 className="w-3 h-3" />
                               </Button>
                             </div>
                           </div>
 
                           {overlappingSlots[slot.id] && (
-                            <div className='mt-1 ml-3 p-1 bg-red-50 border-l-2 border-red-200 rounded-r'>
-                              <div className='flex items-center gap-1 text-red-600'>
-                                <AlertCircle className='w-2 h-2' />
-                                <span className='text-xs'>
-                                  Overlaps with{' '}
+                            <div className="mt-1 ml-3 p-1 bg-red-50 border-l-2 border-red-200 rounded-r">
+                              <div className="flex items-center gap-1 text-red-600">
+                                <AlertCircle className="w-2 h-2" />
+                                <span className="text-xs">
+                                  Overlaps with{" "}
                                   {overlappingSlots[slot.id].length} other
                                   slot(s)
                                 </span>
@@ -502,48 +565,48 @@ export function DateSpecificForm({
                 </CardContent>
               )}
             </Card>
-          )
+          );
         })}
       </div>
 
       {fields.length === 0 && (
-        <div className='text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200'>
-          <CalendarIcon className='h-10 w-10 text-gray-400 mx-auto mb-3' />
-          <h3 className='text-base font-medium text-gray-900 mb-1'>
+        <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
+          <CalendarIcon className="h-10 w-10 text-gray-400 mx-auto mb-3" />
+          <h3 className="text-base font-medium text-gray-900 mb-1">
             No dates configured
           </h3>
-          <p className='text-sm text-gray-500 mb-3'>
+          <p className="text-sm text-gray-500 mb-3">
             Select a date above to start configuring time slots
           </p>
         </div>
       )}
 
-      <div className='flex items-center justify-between pt-4 border-t border-gray-200'>
-        <div className='flex items-center gap-2'>
+      <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+        <div className="flex items-center gap-2">
           {hasChanges && (
-            <div className='text-xs text-yellow-600 flex items-center gap-1'>
-              <AlertCircle className='h-3 w-3' />
+            <div className="text-xs text-yellow-600 flex items-center gap-1">
+              <AlertCircle className="h-3 w-3" />
               Unsaved Changes
             </div>
           )}
         </div>
-        <div className='flex gap-2'>
+        <div className="flex gap-2">
           {onCancel && (
             <Button
-              type='button'
-              variant='outline'
+              type="button"
+              variant="outline"
               onClick={onCancel}
-              size='sm'
+              size="sm"
             >
               Cancel
             </Button>
           )}
-          <Button type='submit' disabled={isSubmitting || isLoading} size='sm'>
-            <Save className='h-3 w-3 mr-2' />
-            {isSubmitting ? 'Saving...' : 'Save'}
+          <Button type="submit" disabled={isSubmitting || isLoading} size="sm">
+            <Save className="h-3 w-3 mr-2" />
+            {isSubmitting ? "Saving..." : "Save"}
           </Button>
         </div>
       </div>
     </form>
-  )
+  );
 }

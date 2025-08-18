@@ -71,6 +71,7 @@ type WeeklyAvailabilityFormData = z.infer<typeof weeklyAvailabilitySchema>;
 interface WeeklyAvailabilityFormProps {
   initialData?: AvailabilitySettings;
   eventTypes?: EventType[];
+  selectedEventTypeId?: string;
   onSave?: (data: AvailabilitySettings) => Promise<void>;
   onCancel?: () => void;
   isLoading?: boolean;
@@ -79,12 +80,20 @@ interface WeeklyAvailabilityFormProps {
 export function WeeklyAvailabilityForm({
   initialData = defaultAvailabilitySettings,
   eventTypes = [],
+  selectedEventTypeId,
   onSave,
   onCancel,
   isLoading = false,
 }: WeeklyAvailabilityFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+
+  console.log("WeeklyAvailabilityForm initialData:", initialData);
+  console.log("WeeklyAvailabilityForm eventTypes:", eventTypes);
+  console.log(
+    "WeeklyAvailabilityForm selectedEventTypeId:",
+    selectedEventTypeId
+  );
 
   const {
     control,
@@ -116,12 +125,21 @@ export function WeeklyAvailabilityForm({
   };
 
   const onSubmit = async (data: WeeklyAvailabilityFormData) => {
-    if (!onSave) return;
+    console.log("WeeklyAvailabilityForm onSubmit called with data:", data);
+    console.log("onSave function exists:", !!onSave);
+    console.log("Form errors:", errors);
+
+    if (!onSave) {
+      console.error("onSave function is not provided");
+      return;
+    }
 
     setIsSubmitting(true);
     try {
+      console.log("Calling onSave with data:", data);
       await onSave(data as AvailabilitySettings);
       setHasChanges(false);
+      console.log("Save successful");
     } catch (error) {
       console.error("Error saving weekly availability:", error);
     } finally {
@@ -132,6 +150,15 @@ export function WeeklyAvailabilityForm({
   const handleAddTimeSlot = (dayIndex: number) => {
     const day = watchedValues.daysAvailability[dayIndex];
     if (!day) return;
+
+    // Get the selected event type
+    const selectedEventType = eventTypes.find(
+      (type) => type.id === selectedEventTypeId
+    );
+    if (!selectedEventType) {
+      // Show error or fallback to default duration
+      console.warn("No event type selected, using default 1-hour duration");
+    }
 
     const lastSlot = day.timeSlots[day.timeSlots.length - 1];
     let startTime = "09:00";
@@ -152,33 +179,75 @@ export function WeeklyAvailabilityForm({
       const newStartHourStr = newStartHour.toString().padStart(2, "0");
       const newStartMinuteStr = newStartMinute.toString().padStart(2, "0");
 
-      let newEndHour = newStartHour + 1;
-      if (newEndHour > 23) newEndHour = 23;
+      // Calculate end time based on selected event type duration
+      const durationMinutes = selectedEventType?.duration || 60; // Default to 1 hour
+      let newEndHour = newStartHour;
+      let newEndMinute = newStartMinute + durationMinutes;
+
+      // Handle minute overflow
+      while (newEndMinute >= 60) {
+        newEndHour += 1;
+        newEndMinute -= 60;
+      }
+
+      // Handle hour overflow
+      if (newEndHour > 23) {
+        newEndHour = 23;
+        newEndMinute = 59;
+      }
+
       const newEndHourStr = newEndHour.toString().padStart(2, "0");
+      const newEndMinuteStr = newEndMinute.toString().padStart(2, "0");
 
       startTime = `${newStartHourStr}:${newStartMinuteStr}`;
-      endTime = `${newEndHourStr}:${newStartMinuteStr}`;
+      endTime = `${newEndHourStr}:${newEndMinuteStr}`;
+    } else {
+      // For the first slot, use the selected event type duration
+      const durationMinutes = selectedEventType?.duration || 60;
+      const startHour = 9;
+      const startMinute = 0;
+
+      let endHour = startHour;
+      let endMinute = startMinute + durationMinutes;
+
+      // Handle minute overflow
+      while (endMinute >= 60) {
+        endHour += 1;
+        endMinute -= 60;
+      }
+
+      const startHourStr = startHour.toString().padStart(2, "0");
+      const startMinuteStr = startMinute.toString().padStart(2, "0");
+      const endHourStr = endHour.toString().padStart(2, "0");
+      const endMinuteStr = endMinute.toString().padStart(2, "0");
+
+      startTime = `${startHourStr}:${startMinuteStr}`;
+      endTime = `${endHourStr}:${endMinuteStr}`;
     }
 
     const newSlot: TimeSlot = {
       id: uuidv4(),
       startTime,
       endTime,
-      eventTypeId: eventTypes[0]?.id || "",
-      eventType: eventTypes[0],
+      eventTypeId: selectedEventTypeId || "",
+      eventType: eventTypes.find((type) => type.id === selectedEventTypeId),
     };
 
     const currentSlots = watchedValues.daysAvailability[dayIndex].timeSlots;
-    setValue(`daysAvailability.${dayIndex}.timeSlots`, [
-      ...currentSlots,
-      newSlot,
-    ]);
+    setValue(
+      `daysAvailability.${dayIndex}.timeSlots`,
+      [...currentSlots, newSlot],
+      { shouldDirty: true, shouldTouch: true }
+    );
   };
 
   const handleDeleteTimeSlot = (dayIndex: number, slotIndex: number) => {
     const currentSlots = watchedValues.daysAvailability[dayIndex].timeSlots;
     const updatedSlots = currentSlots.filter((_, index) => index !== slotIndex);
-    setValue(`daysAvailability.${dayIndex}.timeSlots`, updatedSlots);
+    setValue(`daysAvailability.${dayIndex}.timeSlots`, updatedSlots, {
+      shouldDirty: true,
+      shouldTouch: true,
+    });
   };
 
   const formatDayName = (day: string) => {
@@ -208,8 +277,19 @@ export function WeeklyAvailabilityForm({
         </p>
         {eventTypes && eventTypes.length > 0 && (
           <div className="mt-2 p-2 bg-white border border-blue-200 rounded text-xs text-blue-800">
-            <strong>Note:</strong> You can create time slots with any duration.
-            Event types are used for categorization and organization.
+            <strong>Note:</strong> Time slots will automatically use the
+            duration of your selected event type.
+            {selectedEventTypeId && (
+              <span className="block mt-1">
+                <strong>Selected:</strong>{" "}
+                {eventTypes.find((type) => type.id === selectedEventTypeId)
+                  ?.name || "Unknown"}
+                (
+                {eventTypes.find((type) => type.id === selectedEventTypeId)
+                  ?.duration || 0}{" "}
+                minutes)
+              </span>
+            )}
           </div>
         )}
       </div>

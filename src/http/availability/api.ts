@@ -32,9 +32,12 @@ interface GetAvailabilityResponse {
 }
 
 export const saveAvailability = async (
+  templateId: string,
   availability: BackendAvailabilityItem[]
 ) => {
-  return await post("/availabilities/save", { availabilities: availability });
+  return await post(`/availabilities/templates/${templateId}/save`, {
+    availabilities: availability,
+  });
 };
 
 export const getAvailability = async (): Promise<GetAvailabilityResponse> => {
