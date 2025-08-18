@@ -297,9 +297,9 @@ const InterviewSchedulePage = () => {
                 <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 sm:mb-6">
                   {selectedDate
                     ? `Available Times for ${format(
-                        selectedDate,
-                        "EEEE, MMMM do"
-                      )}`
+                      selectedDate,
+                      "EEEE, MMMM do"
+                    )}`
                     : "Select a date to view available times"}
                 </h3>
 

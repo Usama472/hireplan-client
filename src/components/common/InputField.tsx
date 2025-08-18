@@ -35,6 +35,7 @@ import type { InputFieldProps } from "@/interfaces";
 import { INPUT_TYPES } from "@/interfaces";
 import { capitalizeText, cn } from "@/lib/utils";
 import { Textarea } from "@components/ui/textarea";
+import { TiptapEditor } from "./TiptapEditor";
 
 export const InputField = <TFieldValues extends FieldValues = FieldValues>({
   name,
@@ -48,8 +49,20 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
   multiline = false,
   showIsRequired = false,
   description,
-  editorRef,
-}: InputFieldProps<TFieldValues>) => {
+  validation,
+  minHeight,
+  enableAI,
+  aiContext,
+}: InputFieldProps<TFieldValues> & {
+  validation?: { status: string; message: string };
+  minHeight?: number;
+  enableAI?: boolean;
+  aiContext?: {
+    jobTitle?: string;
+    company?: string;
+    requirements?: string[];
+  };
+}) => {
   const { control, formState } = useFormContext();
   const [showPassword, setShowPassword] = useState(false);
   const { errors, dirtyFields } = formState;
@@ -151,10 +164,10 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
                       className={cn(
                         "w-full",
                         fieldError &&
-                          "border-red-500 focus-visible:ring-red-500",
+                        "border-red-500 focus-visible:ring-red-500",
                         isDirty &&
-                          !fieldError &&
-                          "border-blue-300 focus-visible:ring-blue-500"
+                        !fieldError &&
+                        "border-blue-300 focus-visible:ring-blue-500"
                       )}
                     >
                       <SelectValue
@@ -178,25 +191,47 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
               </FormItem>
             );
 
+          // case INPUT_TYPES.EDITOR:
+          //   return (
+          //     <FormItem className={cn(className, " w-full gap-2.5")}>
+          //       {renderFormLabel(label)}
+          //       <FormControl>
+          //         <div className="w-full">
+          //           {editorRef ? (
+          //             <Editor
+          //               value={field.value}
+          //               fieldChange={(value) => {
+          //                 field.onChange(value);
+          //               }}
+          //               editorRef={editorRef}
+          //             />
+          //           ) : (
+          //             <div className="text-red-400">
+          //               Editor ref is not provided
+          //             </div>
+          //           )}
+          //         </div>
+          //       </FormControl>
+          //       <FormMessage />
+          //       <FormDescription className="body-regular mt-2.5 text-light-400">
+          //         {description}
+          //       </FormDescription>
+          //     </FormItem>
+          //   );
           case INPUT_TYPES.EDITOR:
             return (
-              <FormItem className={cn(className, " w-full gap-2.5")}>
+              <FormItem className={cn(className, "w-full gap-2.5")}>
                 {renderFormLabel(label)}
                 <FormControl>
                   <div className="w-full">
-                    {editorRef ? (
-                      <Editor
-                        value={field.value}
-                        fieldChange={(value) => {
-                          field.onChange(value);
-                        }}
-                        editorRef={editorRef}
-                      />
-                    ) : (
-                      <div className="text-red-400">
-                        Editor ref is not provided
-                      </div>
-                    )}
+                    <TiptapEditor
+                      name={name}
+                      placeholder={placeholder}
+                      validation={validation}
+                      minHeight={minHeight}
+                      enableAI={enableAI}
+                      aiContext={aiContext}
+                    />
                   </div>
                 </FormControl>
                 <FormMessage />

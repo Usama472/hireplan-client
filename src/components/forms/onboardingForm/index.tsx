@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
 import { ROUTES } from "@/constants";
 import API from "@/http";
+import { mutateSession } from "@/http/auth/mutateSession";
 import { getErrorMessage } from "@/lib/utils";
 import { fullFormSchema } from "@/lib/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -119,7 +120,7 @@ export default function RecruiterOnboardingForm() {
     setIsSubmitting(true);
 
     try {
-      await API.auth.signup({
+      const response = await API.auth.signup({
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
@@ -137,6 +138,9 @@ export default function RecruiterOnboardingForm() {
         zipCode: formData.zipCode,
         // country: formData.
       });
+
+      const token = response.tokens.accessToken.token
+      mutateSession({ shouldBroadcast: true, accessToken: token })
 
       toast.success("Account created successfully");
       navigate(ROUTES.DASHBOARD.MAIN);

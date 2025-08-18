@@ -16,6 +16,7 @@ export function CompanyInfoStep() {
           name='websiteDomain'
           label='Website Domain'
           placeholder='https://yourcompany.com'
+          showIsRequired
         />
       </div>
 

@@ -168,14 +168,15 @@ export function ApplicantDetailModal({
     setActiveTab(value);
   };
 
+  console.log(applicant);
+
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent className="w-full sm:max-w-4xl overflow-hidden flex flex-col p-0 bg-gradient-to-b from-white to-gray-50">
         {/* Profile Header - with animation */}
         <div
-          className={`relative w-full bg-gradient-to-r from-blue-600 to-purple-700 transition-all duration-700 ease-in-out ${
-            animateHeader ? "h-48" : "h-32"
-          }`}
+          className={`relative w-full bg-gradient-to-r from-blue-600 to-purple-700 transition-all duration-700 ease-in-out ${animateHeader ? "h-48" : "h-32"
+            }`}
         >
           {/* Animated Background Pattern */}
           <div className="absolute inset-0 opacity-10">
@@ -187,9 +188,8 @@ export function ApplicantDetailModal({
             <div className="flex items-center gap-4">
               {/* Avatar with animation */}
               <div
-                className={`relative bg-white rounded-2xl shadow-lg transform transition-all duration-700 ease-in-out ${
-                  animateHeader ? "w-24 h-24 -mb-12" : "w-16 h-16 mb-0"
-                }`}
+                className={`relative bg-white rounded-2xl shadow-lg transform transition-all duration-700 ease-in-out ${animateHeader ? "w-24 h-24 -mb-12" : "w-16 h-16 mb-0"
+                  }`}
               >
                 <div className="absolute inset-1 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-xl">
                   {applicant.firstName[0]}
@@ -860,13 +860,34 @@ export function ApplicantDetailModal({
         {/* Action Buttons */}
         <div className="border-t p-6 bg-white/80 backdrop-blur-sm">
           <div className="flex flex-col sm:flex-row gap-3">
-            <Button
-              className="flex-1 bg-green-600 hover:bg-green-700 transform transition-all duration-200 hover:-translate-y-0.5"
-              onClick={() => onStatusUpdate?.(applicant.id, "shortlisted")}
-            >
-              <CheckCircle className="w-4 h-4 mr-2" />
-              Shortlist Candidate
-            </Button>
+            {!applicant.invitationSent &&
+              !applicant.interviewScheduled &&
+              applicant.status === "pending" ? (
+              <>
+                <Button
+                  className="flex-1 bg-red-600 hover:bg-red-700 transform transition-all duration-200 hover:-translate-y-0.5"
+                  onClick={() => onStatusUpdate?.(applicant.id, "rejected")}
+                >
+                  <X className="w-4 h-4 mr-2" />
+                  Reject Candidate
+                </Button>
+                <Button
+                  className="flex-1 bg-green-600 hover:bg-green-700 transform transition-all duration-200 hover:-translate-y-0.5"
+                  onClick={() => onStatusUpdate?.(applicant.id, "shortlisted")}
+                >
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  Shortlist Candidate
+                </Button>
+              </>
+            ) : (
+              <Button
+                className="flex-1 bg-green-600 hover:bg-green-700 transform transition-all duration-200 hover:-translate-y-0.5"
+                onClick={() => onStatusUpdate?.(applicant.id, "shortlisted")}
+              >
+                <CheckCircle className="w-4 h-4 mr-2" />
+                Shortlist Candidate
+              </Button>
+            )}
           </div>
         </div>
       </SheetContent>

@@ -28,8 +28,13 @@ import Home from "@/pages/home";
 import EditJobPage from "@/pages/dashboard/jobs/edit";
 import InterviewSchedulePage from "@/pages/interview/schedule";
 import ForgotPassword from "@pages/auth/ForgotPassword";
+import ResetPassword from "@pages/auth/ResetPassword";
 import Login from "@pages/auth/Login";
 import Signup from "@pages/auth/Signup";
+import EmailTemplatesPage from "@/pages/dashboard/email-template";
+import CreateEmailTemplatePage from "@/pages/dashboard/email-template/create";
+import EditEmailTemplatePage from "@/pages/dashboard/email-template/edit";
+import GlobalSettingPage from "@/pages/dashboard/global-setting";
 
 export const appRoutes: AppRoutesType[] = [
   {
@@ -57,6 +62,18 @@ export const appRoutes: AppRoutesType[] = [
     element: <ForgotPassword />,
     isPrivate: false,
   },
+  {
+    id: "reset-password",
+    url: ROUTES.RESET_PASSWORD,
+    element: <ResetPassword />,
+    isPrivate: false,
+  },
+  // {
+  //   id: "reset-password",
+  //   url: ROUTES.RESET_PASSWORD_QUERY,
+  //   element: <ResetPassword />,
+  //   isPrivate: false,
+  // },
   {
     id: "interview-schedule",
     url: ROUTES.INTERVIEW_SCHEDULE,
@@ -127,6 +144,30 @@ export const appRoutes: AppRoutesType[] = [
     id: "edit-job",
     url: ROUTES.DASHBOARD.EDIT_JOB_ID,
     element: <EditJobPage />,
+    isPrivate: true,
+  },
+  {
+    id: "email-templates",
+    url: ROUTES.DASHBOARD.EMAIL_TEMPLATES,
+    element: <EmailTemplatesPage />,
+    isPrivate: true,
+  },
+  {
+    id: "create-email-template",
+    url: ROUTES.DASHBOARD.CREATE_EMAIL_TEMPLATE,
+    element: <CreateEmailTemplatePage />,
+    isPrivate: true,
+  },
+  {
+    id: "edit-email-template-id",
+    url: ROUTES.DASHBOARD.EDIT_EMAIL_TEMPLATE_ID,
+    element: <EditEmailTemplatePage />,
+    isPrivate: true,
+  },
+  {
+    id: "global-settings",
+    url: ROUTES.DASHBOARD.GLOBAL_SETTINGS,
+    element: <GlobalSettingPage />,
     isPrivate: true,
   },
 ];

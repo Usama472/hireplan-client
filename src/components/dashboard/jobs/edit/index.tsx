@@ -168,6 +168,8 @@ export default function EditJob() {
 
       const response: JobDetailsResponse = await API.job.getJobDetails(id);
 
+      console.log("JobDetailsResponse", response.job);
+
       if (!response?.job) {
         throw new Error("Job not found");
       }
@@ -233,7 +235,9 @@ export default function EditJob() {
 
     setIsSubmitting(true);
     try {
-      await API.job.updateJob(job.id, data);
+      console.log("data", data);
+      const response = await API.job.updateJob(job.id, data);
+      console.log("response", response);
       toast.success("Job updated successfully!");
       navigate(`${ROUTES.DASHBOARD.MAIN}`);
     } catch (err) {

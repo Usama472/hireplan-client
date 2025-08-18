@@ -5,22 +5,34 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ArrowLeft, Mail } from 'lucide-react'
+import API from '@/http'
+import { errorResolver } from '@/lib/utils'
+import { toast } from 'sonner'
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('')
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitted(true)
-      setIsLoading(false)
-    }, 2000)
+
+    try {
+      const { status, message } = await API.auth.forgotPassword(email)
+      if (status) {
+        setIsSubmitted(true);
+        toast.success(message);
+      } else {
+        toast.error(message);
+      }
+    } catch (err) {
+      const errMessage = errorResolver(err);
+      toast.error(errMessage);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   if (isSubmitted) {
@@ -38,8 +50,8 @@ export default function ForgotPassword() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button 
-                onClick={() => navigate('/login')} 
+              <Button
+                onClick={() => navigate('/login')}
                 className="w-full"
               >
                 Back to Login
@@ -66,7 +78,7 @@ export default function ForgotPassword() {
               Back to Login
             </Button>
             <CardTitle className="text-2xl font-bold text-center">
-              Reset Password
+              Forgot Password
             </CardTitle>
             <CardDescription className="text-center">
               Enter your email address and we'll send you instructions to reset your password.
@@ -109,4 +121,4 @@ export default function ForgotPassword() {
       </div>
     </div>
   )
-} 
+}

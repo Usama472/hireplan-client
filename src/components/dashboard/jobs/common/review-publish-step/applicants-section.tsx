@@ -426,7 +426,7 @@ export function ApplicantsSection({
 
   const handleStatusUpdate = async (applicantId: string, newStatus: string) => {
     try {
-      // await API.job.updateApplicantStatus(applicantId, newStatus)
+      await API.applicant.updateApplicantStatus(jobId, applicantId, newStatus)
       // Update local state
       setApplicants((prev) =>
         prev.map((applicant) =>

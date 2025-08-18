@@ -70,3 +70,21 @@ export const profileFormSchema = z.object({
   paymentPlan: z.enum(["starter", "professional", "enterprise"]),
   allowNotify: z.boolean(),
 });
+
+export const emailTemplateSchema = z.object({
+  name: z
+    .string()
+    .min(1, { message: "Template name is required" })
+    .min(3, { message: "Template name must be at least 3 characters" }),
+  category: z.string().min(1, { message: "Please select a category" }),
+  subject: z
+    .string()
+    .min(1, { message: "Subject line is required" })
+    .min(5, { message: "Subject line must be at least 5 characters" }),
+  body: z
+    .string()
+    .min(1, { message: "Email body is required" })
+    .min(20, { message: "Email body must be at least 20 characters" }),
+  isActive: z.boolean(),
+  description: z.string().optional(),
+});

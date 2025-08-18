@@ -72,6 +72,7 @@ export function PositionDetailsReview({
     return timelineMap[timeline] || timeline;
   };
 
+
   return (
     <div className="space-y-6">
       {/* Company & Position Overview */}
