@@ -1,28 +1,29 @@
 "use client";
 
+import { BookingPageStep } from "@/components/dashboard/jobs/common/booking-page-step";
 import { JobAdStep } from "@/components/dashboard/jobs/common/job-ad-step";
 import { PositionDetailsStep } from "@/components/dashboard/jobs/common/position-details-step";
 import { ReviewPublishStep } from "@/components/dashboard/jobs/common/review-publish-step";
 import { SettingsNotificationsStep } from "@/components/dashboard/jobs/common/settings-notifications-step";
 import { StepNavigation } from "@/components/main/signup/stepNavigation";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ROUTES } from "@/constants";
 import { stepFields } from "@/constants/form-constants";
 import { JOB_FORM_DEFAULT_VALUES } from "@/constants/job-form-defaults";
 import API from "@/http";
+import type { JobFormData } from "@/interfaces";
 import { errorResolver } from "@/lib/utils";
 import {
   jobFormSchema,
   type JobFormSchema,
 } from "@/lib/validations/forms/job-form-schema";
-import type { JobFormData } from "@/interfaces";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, RefreshCw, AlertCircle } from "lucide-react";
-import { useState, useEffect } from "react";
+import { AlertCircle, ArrowLeft, RefreshCw } from "lucide-react";
+import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -48,51 +49,79 @@ const getJobDefaults = (
 ): JobFormSchema => {
   if (!job) return JOB_FORM_DEFAULT_VALUES;
 
+  // Start with the default values to ensure we have all required fields
+  const defaults = { ...JOB_FORM_DEFAULT_VALUES };
+
+  // Override with job data when available
   return {
+    ...defaults,
     // Step 1: Job Ad
-    jobTitle: job.jobTitle || "",
-    jobBoardTitle: job.jobBoardTitle || "",
-    jobDescription: job.jobDescription || "",
-    backgroundScreeningDisclaimer: job.backgroundScreeningDisclaimer || false,
+    jobTitle: job.jobTitle || defaults.jobTitle,
+    jobBoardTitle: job.jobBoardTitle || defaults.jobBoardTitle,
+    jobDescription: job.jobDescription || defaults.jobDescription,
+    backgroundScreeningDisclaimer:
+      job.backgroundScreeningDisclaimer ||
+      defaults.backgroundScreeningDisclaimer,
 
     // Step 2: Position Details
-    jobStatus: job.jobStatus || "medium",
-    workplaceType: job.workplaceType || "onsite",
-    jobLocation: job.jobLocation || {
-      address: "",
-      city: "",
-      state: "",
-      zipCode: "",
-    },
-    employmentType: job.employmentType || "full-time",
-    educationRequirement: job.educationRequirement || "",
-    department: job.department || "",
-    customDepartment: job.customDepartment || "",
-    payType: job.payType || "salary",
-    payRate: job.payRate || {
-      type: "fixed",
-      amount: "",
-      min: "",
-      max: "",
-    },
-    positionsToHire: job.positionsToHire || 1,
-    jobRequirements: job.jobRequirements || [],
-    exemptStatus: job.exemptStatus || "",
-    eeoJobCategory: job.eeoJobCategory || "",
+    jobStatus: job.jobStatus || defaults.jobStatus,
+    workplaceType: job.workplaceType || defaults.workplaceType,
+    jobLocation: job.jobLocation || defaults.jobLocation,
+    employmentType: job.employmentType || defaults.employmentType,
+    educationRequirement:
+      job.educationRequirement || defaults.educationRequirement,
+    department: job.department || defaults.department,
+    customDepartment: job.customDepartment || defaults.customDepartment,
+    payType: job.payType || defaults.payType,
+    payRate: job.payRate || defaults.payRate,
+    positionsToHire: job.positionsToHire || defaults.positionsToHire,
+    jobRequirements: job.jobRequirements || defaults.jobRequirements,
+    exemptStatus: job.exemptStatus || defaults.exemptStatus,
+    eeoJobCategory: job.eeoJobCategory || defaults.eeoJobCategory,
 
-    // Step 3: Settings & Automation
-    startDate: job.startDate || "",
-    endDate: job.endDate || "",
-    customApplicationUrl: job.customApplicationUrl || "",
-    customQuestions: job.customQuestions || [],
-    externalApplicationSetup: job.externalApplicationSetup || {
-      customFields: [],
-      redirectUrl: "",
-    },
-    automation: job.automation || {
-      enabledRules: [],
-      aiRules: [],
-    },
+    // Step 3: Hours, Schedule & Benefits - adding missing required fields
+    hoursPerWeek: job.hoursPerWeek || defaults.hoursPerWeek,
+    schedule: job.schedule || defaults.schedule,
+    benefits: job.benefits || defaults.benefits,
+    country: job.country || defaults.country,
+    language: job.language || defaults.language,
+    jobLocationWorkType:
+      job.jobLocationWorkType || defaults.jobLocationWorkType,
+    remoteLocationRequirement:
+      job.remoteLocationRequirement || defaults.remoteLocationRequirement,
+    hasConsistentStartingLocation:
+      job.hasConsistentStartingLocation ||
+      defaults.hasConsistentStartingLocation,
+    operatingArea: job.operatingArea || defaults.operatingArea,
+
+    // Step 4: Qualifications
+    requiredQualifications:
+      job.requiredQualifications || defaults.requiredQualifications,
+    preferredQualifications:
+      job.preferredQualifications || defaults.preferredQualifications,
+    customQuestions: job.customQuestions || defaults.customQuestions,
+
+    // Step 5: Posting Schedule & Budget
+    startDate: job.startDate || defaults.startDate,
+    endDate: job.endDate || defaults.endDate,
+    runIndefinitely: job.runIndefinitely || defaults.runIndefinitely,
+    dailyBudget: job.dailyBudget || defaults.dailyBudget,
+    monthlyBudget: job.monthlyBudget || defaults.monthlyBudget,
+    indeedBudget: job.indeedBudget || defaults.indeedBudget,
+    zipRecruiterBudget: job.zipRecruiterBudget || defaults.zipRecruiterBudget,
+    customApplicationUrl:
+      job.customApplicationUrl || defaults.customApplicationUrl,
+    externalApplicationSetup:
+      job.externalApplicationSetup || defaults.externalApplicationSetup,
+
+    // Step 6: AI Ranking & Automation
+    automation: job.automation || defaults.automation,
+
+    // Step 7: Email Templates
+    emailTemplates: job.emailTemplates || defaults.emailTemplates,
+
+    // Step 8: Booking Page - updated field name
+    availabilityId: job.availabilityId || "",
   };
 };
 
@@ -209,8 +238,21 @@ export default function EditJob() {
   const handleNext = async () => {
     clearErrors();
 
+    // Skip validation for CustomQuestionsBuilder step
     if (currentStep === 4) {
-      setCurrentStep((prev) => Math.min(prev + 1, 5));
+      setCurrentStep((prev) => Math.min(prev + 1, 6));
+      return;
+    }
+
+    // Special validation for Booking Page step
+    if (currentStep === 5) {
+      const isValid = await trigger("availabilityId", {
+        shouldFocus: true,
+      });
+
+      if (isValid) {
+        setCurrentStep((prev) => Math.min(prev + 1, 6));
+      }
       return;
     }
 
@@ -220,7 +262,7 @@ export default function EditJob() {
     });
 
     if (isStepValid) {
-      setCurrentStep((prev) => Math.min(prev + 1, 5));
+      setCurrentStep((prev) => Math.min(prev + 1, 6));
       clearErrors();
     }
   };
@@ -231,7 +273,16 @@ export default function EditJob() {
   };
 
   const onSubmit = async (data: JobFormSchema) => {
-    if (currentStep !== 5 || !job?.id) return;
+    if (currentStep !== 6 || !job?.id) return;
+
+    // Validate the required availabilityId field
+    const isValid = await trigger("availabilityId");
+    if (!isValid) {
+      toast.error(
+        "Please select an availability template for interview scheduling"
+      );
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -266,6 +317,8 @@ export default function EditJob() {
           />
         );
       case 5:
+        return <BookingPageStep />;
+      case 6:
         return <ReviewPublishStep />;
       default:
         return <JobAdStep />;
@@ -440,12 +493,10 @@ export default function EditJob() {
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
                   {renderCurrentStep()}
                   <StepNavigation
-                    currentStep={currentStep}
-                    totalSteps={5}
                     onNext={handleNext}
                     onPrevious={handlePrevious}
                     isFirstStep={currentStep === 1}
-                    isLastStep={currentStep === 5}
+                    isLastStep={currentStep === 6}
                     isValid={true}
                     isSubmitting={isSubmitting}
                   />

@@ -152,6 +152,7 @@ export type JobFormStepFields = {
   >;
   4: Array<never>;
   5: Array<never>;
+  6: Array<keyof Pick<JobFormData, "availabilityId">>;
 };
 
 // Constants for form options

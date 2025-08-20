@@ -348,6 +348,14 @@ export const jobFormSchema = z
       })
       .optional(),
 
+    // Step 9: Booking Page Selection - renamed to availabilityId and made required
+    availabilityId: z
+      .string({
+        required_error:
+          "Please select an availability template for interview scheduling",
+      })
+      .min(1, "Availability template is required for interview scheduling"),
+
     // Legacy fields (for compatibility)
     jobStatus: z.enum(["low", "medium", "high"]).optional(),
     workplaceType: z.enum(["onsite", "remote", "hybrid"]).optional(),

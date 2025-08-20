@@ -87,4 +87,5 @@ export const stepFields: JobFormStepFields = {
   3: ["startDate", "endDate", "externalApplicationSetup", "automation"],
   4: [],
   5: [],
+  6: ["availabilityId"], // Add validation for the availability step
 };

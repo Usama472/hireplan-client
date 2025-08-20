@@ -79,57 +79,29 @@ export const JOB_FORM_DEFAULT_VALUES: JobFormSchema = {
     acceptanceThreshold: 76,
     manualReviewThreshold: 41,
     autoRejectThreshold: 40,
-    scoringWeights: {
-      skillsMatch: 25,
-      experienceRelevance: 25,
-      educationQualifications: 25,
-      culturalJobFit: 25,
+    sectionWeights: {
+      requiredQualifications: 25,
+      preferredQualifications: 25,
+      preScreeningQuestions: 25,
+      resume: 25,
     },
-    aiRankingCategories: [
-      {
-        name: "Skills Match",
-        weight: 25,
-        dataSource: {
-          qualifications: true,
-          screeningQuestions: true,
-          resume: true,
-        },
-        customQuestions: [],
-      },
-      {
-        name: "Experience Relevance",
-        weight: 25,
-        dataSource: {
-          qualifications: false,
-          screeningQuestions: false,
-          resume: true,
-        },
-        customQuestions: [],
-      },
-      {
-        name: "Education Qualifications",
-        weight: 25,
-        dataSource: {
-          qualifications: true,
-          screeningQuestions: true,
-          resume: true,
-        },
-        customQuestions: [],
-      },
-      {
-        name: "Cultural & Job Fit",
-        weight: 25,
-        dataSource: {
-          qualifications: false,
-          screeningQuestions: true,
-          resume: false,
-        },
-        customQuestions: [],
-      },
-    ],
-    customRules: [],
+    sectionThresholds: {
+      requiredQualifications: { autoReject: 40, manualReview: 75 },
+      preferredQualifications: { autoReject: 40, manualReview: 75 },
+      preScreeningQuestions: { autoReject: 40, manualReview: 75 },
+      resume: { autoReject: 40, manualReview: 75 },
+    },
+    preferredQualScoring: {},
+    resumeItems: [],
+    resumeItemScoring: {},
+    questionAutoFail: {},
+    questionCriteria: {},
+    jobRules: [],
     templateId: "",
   },
+
+  // Step 8: Booking Page Selection - Updated field name
+  availabilityId: "",
 
   // Legacy fields
   jobStatus: "medium",
@@ -275,68 +247,39 @@ export const JOB_FORM_TEST_DATA: JobFormSchema = {
     acceptanceThreshold: 85,
     manualReviewThreshold: 60,
     autoRejectThreshold: 30,
-    scoringWeights: {
-      skillsMatch: 40,
-      experienceRelevance: 30,
-      educationQualifications: 15,
-      culturalJobFit: 15,
+    sectionWeights: {
+      requiredQualifications: 40,
+      preferredQualifications: 30,
+      preScreeningQuestions: 15,
+      resume: 15,
     },
-    aiRankingCategories: [
-      {
-        name: "Skills Match",
-        weight: 40,
-        dataSource: {
-          qualifications: true,
-          screeningQuestions: true,
-          resume: true,
-        },
-        customQuestions: ["Rate communication skills 1-10"],
-      },
-      {
-        name: "Experience Relevance",
-        weight: 30,
-        dataSource: {
-          qualifications: false,
-          screeningQuestions: false,
-          resume: true,
-        },
-        customQuestions: [],
-      },
-      {
-        name: "Education Qualifications",
-        weight: 15,
-        dataSource: {
-          qualifications: true,
-          screeningQuestions: true,
-          resume: true,
-        },
-        customQuestions: [],
-      },
-      {
-        name: "Cultural & Job Fit",
-        weight: 15,
-        dataSource: {
-          qualifications: false,
-          screeningQuestions: true,
-          resume: false,
-        },
-        customQuestions: [],
-      },
-    ],
-    customRules: [
-      {
-        condition: "Score 41-75%",
-        action: "send-questions",
-        template: "questions-1",
-      },
-      {
-        condition: "Score 76-85%",
-        action: "schedule-phone",
-        template: "interview-2",
-      },
-    ],
+    sectionThresholds: {
+      requiredQualifications: { autoReject: 30, manualReview: 60 },
+      preferredQualifications: { autoReject: 30, manualReview: 60 },
+      preScreeningQuestions: { autoReject: 30, manualReview: 60 },
+      resume: { autoReject: 30, manualReview: 60 },
+    },
+    preferredQualScoring: {
+      "Experience with TypeScript": 60,
+      "Familiarity with cloud platforms (AWS, Azure, or GCP)": 40,
+    },
+    resumeItems: ["React", "Node.js", "TypeScript", "AWS"],
+    resumeItemScoring: {
+      React: 30,
+      "Node.js": 30,
+      TypeScript: 20,
+      AWS: 20,
+    },
+    questionAutoFail: {
+      q_1_boolean: true,
+    },
+    questionCriteria: {},
+    jobRules: [],
     templateId: "technical-role",
   },
+
+  // Step 8: Booking Page Selection - Updated field name with test data
+  availabilityId: "template-12345",
 
   // Legacy fields
   jobStatus: "high",
