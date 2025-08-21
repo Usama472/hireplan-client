@@ -13,6 +13,8 @@ import {
   User,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useFormContext } from "react-hook-form";
+import { toast } from "sonner";
 
 interface AvailabilityReviewProps {
   formData: JobFormData;
@@ -22,27 +24,52 @@ export function AvailabilityReview({ formData }: AvailabilityReviewProps) {
   const [template, setTemplate] = useState<AvailabilityTemplate | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { setValue } = useFormContext();
 
   const { availabilityId } = formData;
 
   useEffect(() => {
     const fetchTemplate = async () => {
-      if (!availabilityId) {
-        setTemplate(null);
-        setIsLoading(false);
-        return;
-      }
-
       try {
         setIsLoading(true);
-        // Fetch the specific template by ID
+        setError(null);
+
+        // Fetch all available templates
         const response = await API.availability.getAvailabilityTemplates();
 
-        if (response && response.availabilities) {
+        if (
+          !response ||
+          !response.availabilities ||
+          response.availabilities.length === 0
+        ) {
+          setError("No availability templates found in the system.");
+          setIsLoading(false);
+          return;
+        }
+
+        // If no template ID is selected, select the first available one
+        if (!availabilityId) {
+          const firstTemplate = response.availabilities[0];
+          setValue("availabilityId", firstTemplate.id);
+          setTemplate(firstTemplate);
+          toast.success("Default availability template selected automatically");
+        } else {
+          // Look for the template with the selected ID
           const foundTemplate = response.availabilities.find(
             (t) => t.id === availabilityId
           );
-          setTemplate(foundTemplate || null);
+
+          if (foundTemplate) {
+            setTemplate(foundTemplate);
+          } else {
+            // If selected template doesn't exist, select the first one
+            const firstTemplate = response.availabilities[0];
+            setValue("availabilityId", firstTemplate.id);
+            setTemplate(firstTemplate);
+            toast.success(
+              "Selected template not found. Default template selected automatically"
+            );
+          }
         }
       } catch (err) {
         console.error("Error fetching availability template:", err);
@@ -53,24 +80,13 @@ export function AvailabilityReview({ formData }: AvailabilityReviewProps) {
     };
 
     fetchTemplate();
-  }, [availabilityId]);
+  }, [availabilityId, setValue]);
 
   if (isLoading) {
     return (
       <div className="flex justify-center items-center py-12">
         <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-600"></div>
       </div>
-    );
-  }
-
-  if (!availabilityId) {
-    return (
-      <Alert className="bg-yellow-50 border-yellow-200 text-yellow-800">
-        <AlertDescription>
-          No availability template selected. Please select an availability
-          template to enable interview scheduling.
-        </AlertDescription>
-      </Alert>
     );
   }
 
@@ -84,10 +100,10 @@ export function AvailabilityReview({ formData }: AvailabilityReviewProps) {
 
   if (!template) {
     return (
-      <Alert className="bg-red-50 border-red-200 text-red-800">
+      <Alert className="bg-yellow-50 border-yellow-200 text-yellow-800">
         <AlertDescription>
-          The selected availability template could not be found. It may have
-          been deleted.
+          Loading availability template... Please wait or go back to the Booking
+          Page step to select a template.
         </AlertDescription>
       </Alert>
     );

@@ -72,6 +72,8 @@ const DEFAULT_SETTINGS: GlobalEmailTemplateSettings = {
 
 // Normalize API/global object into our settings shape
 function normalizeSettings(input: any): GlobalEmailTemplateSettings {
+  console.log("🔍 Normalizing input:", input);
+
   // If already in full object shape
   if (
     input?.interviewSchedule?.templateId !== undefined &&
@@ -99,25 +101,37 @@ function normalizeSettings(input: any): GlobalEmailTemplateSettings {
   }
 
   // If simplified id-only shape
-  const scheduleId =
-    input?.interviewScheduleId ?? input?.scheduleId ?? "default";
-  const confirmationId =
-    input?.interviewConfirmationId ?? input?.confirmationId ?? "default";
-  const rejectionId =
-    input?.interviewRejectionId ?? input?.rejectionId ?? "default";
+  const scheduleId = input?.interviewScheduleId ?? "default";
+  const confirmationId = input?.interviewConfirmationId ?? "default";
+  const rejectionId = input?.interviewRejectionId ?? "default";
+
+  console.log("📌 Extracted template IDs:", {
+    scheduleId,
+    confirmationId,
+    rejectionId,
+  });
 
   return {
     interviewSchedule: {
       ...DEFAULT_SETTINGS.interviewSchedule,
-      templateId: scheduleId || "default",
+      customTemplateId: scheduleId !== "default" ? scheduleId : null,
+      customTemplateName:
+        scheduleId !== "default" ? `Template ${scheduleId}` : null,
+      templateId: scheduleId,
     },
     interviewConfirmation: {
       ...DEFAULT_SETTINGS.interviewConfirmation,
-      templateId: confirmationId || "default",
+      customTemplateId: confirmationId !== "default" ? confirmationId : null,
+      customTemplateName:
+        confirmationId !== "default" ? `Template ${confirmationId}` : null,
+      templateId: confirmationId,
     },
     interviewRejection: {
       ...DEFAULT_SETTINGS.interviewRejection,
-      templateId: rejectionId || "default",
+      customTemplateId: rejectionId !== "default" ? rejectionId : null,
+      customTemplateName:
+        rejectionId !== "default" ? `Template ${rejectionId}` : null,
+      templateId: rejectionId,
     },
   };
 }
@@ -143,73 +157,163 @@ export const useGlobalEmailTemplates = () => {
   });
 
   // Load settings from localStorage or use API, else defaults
+  // const loadSettings = useCallback(async () => {
+  //   try {
+  //     setLoading(true);
+
+  //     const savedSettings = localStorage.getItem("globalEmailTemplateSettings");
+
+  //     if (savedSettings) {
+  //       const parsed = JSON.parse(savedSettings);
+
+  //       // Detect simplified shape and reconstruct to full objects
+  //       const hasSimplifiedKeys =
+  //         typeof parsed === "object" &&
+  //         ("interviewScheduleId" in parsed ||
+  //           "interviewConfirmationId" in parsed ||
+  //           "interviewRejectionId" in parsed);
+
+  //       const hasFullObjects =
+  //         parsed?.interviewSchedule &&
+  //         parsed?.interviewConfirmation &&
+  //         parsed?.interviewRejection;
+
+  //       if (hasFullObjects && !hasSimplifiedKeys) {
+  //         setSettings(parsed);
+  //       } else {
+  //         const reconstructed = normalizeSettings(parsed);
+  //         setSettings(reconstructed);
+  //         localStorage.setItem(
+  //           "globalEmailTemplateSettings",
+  //           JSON.stringify(reconstructed)
+  //         );
+  //       }
+  //     } else {
+  //       const apiData = await API.globalSetting.getGlobalSettings();
+  //       console.log("apiData", apiData);
+  //       if (apiData) {
+  //         const normalized = normalizeSettings(apiData);
+  //         setSettings(normalized);
+  //         localStorage.setItem(
+  //           "globalEmailTemplateSettings",
+  //           JSON.stringify(normalized)
+  //         );
+  //       } else {
+  //         setSettings(DEFAULT_SETTINGS);
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error("Error loading settings:", error);
+  //     setSettings(DEFAULT_SETTINGS);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }, []);
+
   const loadSettings = useCallback(async () => {
     try {
       setLoading(true);
+      const apiResponse = await API.globalSetting.getGlobalSettings();
+      console.log("🔄 API Settings Response:", apiResponse);
 
-      const savedSettings = localStorage.getItem("globalEmailTemplateSettings");
-      if (savedSettings) {
-        const parsed = JSON.parse(savedSettings);
+      if (apiResponse?.data?.globalSettings) {
+        const apiData = apiResponse.data.globalSettings;
+        console.log("🔄 Raw API data:", apiData);
 
-        // Detect simplified shape and reconstruct to full objects
-        const hasSimplifiedKeys =
-          typeof parsed === "object" &&
-          ("interviewScheduleId" in parsed ||
-            "interviewConfirmationId" in parsed ||
-            "interviewRejectionId" in parsed);
+        // Get the normalized settings
+        const normalized = normalizeSettings(apiData);
+        console.log("🔄 Normalized settings:", normalized);
 
-        const hasFullObjects =
-          parsed?.interviewSchedule &&
-          parsed?.interviewConfirmation &&
-          parsed?.interviewRejection;
-
-        if (hasFullObjects && !hasSimplifiedKeys) {
-          setSettings(parsed);
-        } else {
-          const reconstructed = normalizeSettings(parsed);
-          setSettings(reconstructed);
-          localStorage.setItem(
-            "globalEmailTemplateSettings",
-            JSON.stringify(reconstructed)
-          );
+        // Try to fetch template names if we have template IDs
+        if (emailTemplatesData && emailTemplatesData.length > 0) {
+          // For each category that has a custom template ID, try to find its name
+          for (const category of [
+            "interviewSchedule",
+            "interviewConfirmation",
+            "interviewRejection",
+          ] as const) {
+            const templateId = normalized[category].customTemplateId;
+            if (templateId) {
+              // Find the template in our available templates
+              const template = emailTemplatesData.find(
+                (t) => t.id === templateId
+              );
+              if (template) {
+                console.log(
+                  `🔍 Found template for ${category}:`,
+                  template.name
+                );
+                normalized[category].customTemplateName = template.name;
+              }
+            }
+          }
         }
+
+        setSettings(normalized);
       } else {
-        const apiData = await API.globalSetting.getGlobalSettings();
-        if (apiData) {
-          const normalized = normalizeSettings(apiData);
-          setSettings(normalized);
-          localStorage.setItem(
-            "globalEmailTemplateSettings",
-            JSON.stringify(normalized)
-          );
-        } else {
-          setSettings(DEFAULT_SETTINGS);
-        }
+        console.log("🔄 No settings found, using defaults");
+        setSettings(DEFAULT_SETTINGS);
       }
     } catch (error) {
-      console.error("Error loading settings:", error);
+      console.error("❌ Error loading settings:", error);
       setSettings(DEFAULT_SETTINGS);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [emailTemplatesData]);
 
   // Save settings to localStorage
+  // const saveSettings = useCallback(
+  //   async (newSettings: GlobalEmailTemplateSettings) => {
+  //     try {
+  //       setSaving(true);
+  //       console.log("New Settings", newSettings);
+  //       let
+  //       // localStorage.setItem(
+  //       //   "globalEmailTemplateSettings",
+  //       //   JSON.stringify(newSettings)
+  //       // );
+  //       const res = await API.globalSetting.updateGlobalSetting(newSettings);
+  //       console.log("API update Response", res);
+  //       setSettings(newSettings);
+
+  //       toast.success("Email template settings saved successfully!");
+  //       return true;
+  //     } catch (error) {
+  //       console.error("Error saving settings:", error);
+  //       toast.error("Failed to save email template settings");
+  //       return false;
+  //     } finally {
+  //       setSaving(false);
+  //     }
+  //   },
+  //   []
+  // );
+
   const saveSettings = useCallback(
     async (newSettings: GlobalEmailTemplateSettings) => {
       try {
         setSaving(true);
 
-        localStorage.setItem(
-          "globalEmailTemplateSettings",
-          JSON.stringify(newSettings)
-        );
-        setSettings(newSettings);
+        // Create a simplified data structure to send to the API
+        const apiData = {
+          interviewScheduleId:
+            newSettings.interviewSchedule.customTemplateId || null,
+          interviewConfirmationId:
+            newSettings.interviewConfirmation.customTemplateId || null,
+          interviewRejectionId:
+            newSettings.interviewRejection.customTemplateId || null,
+        };
+        // Make the API call with the simplified data
+        const response = await API.globalSetting.updateGlobalSetting(apiData);
+        console.log("📥 API Response:", response);
 
+        setSettings(newSettings);
         toast.success("Email template settings saved successfully!");
+
         return true;
       } catch (error) {
-        console.error("Error saving settings:", error);
+        console.error("❌ Error saving settings:", error);
         toast.error("Failed to save email template settings");
         return false;
       } finally {
@@ -226,19 +330,27 @@ export const useGlobalEmailTemplates = () => {
       templateId: string | null,
       templateName: string | null
     ) => {
+      console.log(`Setting custom template for ${type}:`, {
+        templateId,
+        templateName,
+      });
+
       if (templateId === "custom") {
         templateId = null;
       }
 
-      setSettings((prev) => ({
-        ...prev,
-        [type]: {
-          ...prev[type],
+      // Make a deep clone of the current settings to ensure React detects the change
+      setSettings((prev) => {
+        const newSettings = JSON.parse(JSON.stringify(prev));
+        newSettings[type] = {
+          ...newSettings[type],
           customTemplateId: templateId,
           customTemplateName: templateName,
           templateId: templateId || "default",
-        },
-      }));
+        };
+        console.log("Updated settings object:", newSettings);
+        return newSettings;
+      });
     },
     []
   );

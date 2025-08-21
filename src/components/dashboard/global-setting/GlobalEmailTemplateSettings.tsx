@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,6 +9,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Save } from "lucide-react";
+import React, { useEffect, useState } from "react";
 import { GlobalTemplateSelector } from "./GlobalTemplateSelector";
 import { useGlobalEmailTemplates } from "./hooks/useGlobalEmailTemplates";
 
@@ -27,17 +27,28 @@ export const GlobalEmailTemplateSettings: React.FC = () => {
   });
 
   // Synchronize templateModes with actual settings when they load
-  React.useEffect(() => {
+  useEffect(() => {
     if (!loading && settings) {
       const newModes: Record<string, "default" | "custom"> = {};
+
       Object.entries(settings).forEach(([key, template]) => {
-        newModes[key] = template.customTemplateId ? "custom" : "default";
+        // If customTemplateId exists and isn't null/empty, set to custom mode
+        const isCustom = Boolean(template.customTemplateId);
+        newModes[key] = isCustom ? "custom" : "default";
+        console.log(`🔍 Setting ${key} mode:`, {
+          isCustom,
+          customTemplateId: template.customTemplateId,
+          mode: isCustom ? "custom" : "default",
+        });
       });
+
+      console.log("🔄 Updated template modes:", newModes);
       setTemplateModes(newModes);
     }
   }, [loading, settings]);
 
   const handleSave = async () => {
+    console.log("💾 Saving settings:", JSON.stringify(settings, null, 2));
     await saveSettings(settings);
   };
 
@@ -45,13 +56,29 @@ export const GlobalEmailTemplateSettings: React.FC = () => {
     templateKey: string,
     mode: "default" | "custom"
   ) => {
+    console.log(`🔀 Setting ${templateKey} mode to ${mode}`);
     setTemplateModes((prev) => ({ ...prev, [templateKey]: mode }));
 
     if (mode === "default") {
+      console.log(`🔀 Resetting ${templateKey} to default template`);
       setCustomTemplate(templateKey as keyof typeof settings, null, null);
     }
-    // Don't change templateId when switching to custom mode
-    // It should remain as the actual template ID or "default"
+  };
+
+  const handleTemplateSelection = (
+    templateKey: string,
+    templateId: string | null,
+    templateName: string | null
+  ) => {
+    console.log(`📝 Template selected for ${templateKey}:`, {
+      templateId,
+      templateName,
+    });
+    setCustomTemplate(
+      templateKey as keyof typeof settings,
+      templateId,
+      templateName
+    );
   };
 
   if (loading) {
@@ -85,7 +112,7 @@ export const GlobalEmailTemplateSettings: React.FC = () => {
             <Button
               onClick={handleSave}
               disabled={saving}
-              variant="outline"
+              variant="default"
               size="sm"
               className="px-4 py-1.5 text-sm font-medium"
             >
@@ -124,6 +151,15 @@ export const GlobalEmailTemplateSettings: React.FC = () => {
                           </CardTitle>
                           <CardDescription className="text-sm text-slate-500">
                             Choose your preferred template option
+                            {template.customTemplateId ? (
+                              <span className="ml-2 font-medium text-primary">
+                                (Custom: {template.customTemplateName})
+                              </span>
+                            ) : (
+                              <span className="ml-2 font-medium text-slate-500">
+                                (Default)
+                              </span>
+                            )}
                           </CardDescription>
                         </div>
                       </div>
@@ -165,13 +201,9 @@ export const GlobalEmailTemplateSettings: React.FC = () => {
                   <CardContent className="pt-0 pb-6">
                     <GlobalTemplateSelector
                       category={config.category}
-                      selectedTemplateId={template.customTemplateId}
+                      selectedTemplateId={template.customTemplateId || ""}
                       onTemplateSelection={(templateId, templateName) =>
-                        setCustomTemplate(
-                          key as keyof typeof settings,
-                          templateId,
-                          templateName
-                        )
+                        handleTemplateSelection(key, templateId, templateName)
                       }
                     />
                   </CardContent>

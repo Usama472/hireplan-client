@@ -286,8 +286,23 @@ export default function EditJob() {
 
     setIsSubmitting(true);
     try {
-      console.log("data", data);
-      const response = await API.job.updateJob(job.id, data);
+      const { automation, ...rest } = data;
+      const {
+        questionAutoFail,
+        enabledRules,
+        acceptanceThreshold,
+        manualReviewThreshold,
+        questionCriteria,
+        jobRules,
+        ...automationRest
+      } = automation;
+      console.log("automation", automation);
+      const newData = {
+        ...rest,
+        company: job.company,
+        automation: automationRest,
+      };
+      const response = await API.job.updateJob(job.id, newData);
       console.log("response", response);
       toast.success("Job updated successfully!");
       navigate(`${ROUTES.DASHBOARD.MAIN}`);

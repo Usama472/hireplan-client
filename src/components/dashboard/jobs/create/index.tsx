@@ -320,11 +320,54 @@ export default function CreateJob() {
 
     // Special validation for Booking Page step
     if (currentStep === 6) {
+      // Get current availabilityId value
+      const availabilityId = watch("availabilityId");
+
+      // If no template is selected, automatically select the default one
+      if (!availabilityId) {
+        try {
+          // Fetch default availability template
+          const response = await API.availability.getAvailabilityTemplates();
+
+          if (
+            response &&
+            response.availabilities &&
+            response.availabilities.length > 0
+          ) {
+            // Use the first template as default
+            const defaultTemplate = response.availabilities[0];
+            setValue("availabilityId", defaultTemplate.id);
+            toast.success(
+              "Default availability template selected automatically"
+            );
+          } else {
+            toast.error(
+              "No availability templates found. Please create one first."
+            );
+            return;
+          }
+        } catch (error) {
+          console.error("Error fetching availability templates:", error);
+          toast.error(
+            "Failed to select default template. Please select one manually."
+          );
+          return;
+        }
+      }
+
+      // Always validate after potentially setting the default
       const isValid = await trigger("availabilityId", {
         shouldFocus: true,
       });
 
       if (isValid) {
+        // Pre-fetch the template for the review step to ensure it's ready
+        try {
+          await API.availability.getAvailabilityTemplates();
+        } catch (error) {
+          console.error("Error pre-fetching templates for review:", error);
+        }
+
         setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
       }
       return;
@@ -367,8 +410,22 @@ export default function CreateJob() {
     setIsSubmitting(true);
     try {
       console.log("Attempting to create job with data:", data);
-      await API.job.createJob(data);
-      // Clear draft after successful submission
+      const { automation, ...rest } = data;
+      const {
+        questionAutoFail,
+        enabledRules,
+        acceptanceThreshold,
+        manualReviewThreshold,
+        questionCriteria,
+        jobRules,
+        ...automationRest
+      } = automation;
+      console.log("automation", automation);
+      const newData = {
+        ...rest,
+        automation: automationRest,
+      };
+      await API.job.createJob(newData);
       clearDraftFromStorage(userId);
       toast.success("Job created successfully!");
       navigate(ROUTES.DASHBOARD.MAIN);
