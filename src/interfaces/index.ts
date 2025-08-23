@@ -432,3 +432,6 @@ export interface GetAvailabilityTemplatesResponse {
   availabilities: AvailabilityTemplate[];
   count: number;
 }
+
+// Email Chat interfaces
+export * from './email-chat';

@@ -8,6 +8,8 @@ interface StepNavigationProps {
   isLastStep: boolean
   isValid: boolean
   isSubmitting?: boolean
+  currentStep?: number
+  totalSteps?: number
 }
 
 export function StepNavigation({

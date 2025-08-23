@@ -4,6 +4,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { EmailChatWidget } from "@/components/dashboard/applicants/email-chat/EmailChatWidget";
 import {
   AlertCircle,
   Brain,
@@ -244,13 +245,20 @@ export function ApplicantDetailModal({
             onValueChange={handleTabChange}
             className="h-full flex flex-col px-6"
           >
-            <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsList className="grid w-full grid-cols-3 mb-6">
               <TabsTrigger
                 value="overview"
                 className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 transition-all duration-300"
               >
                 <User className="w-4 h-4 mr-2" />
                 Overview
+              </TabsTrigger>
+              <TabsTrigger
+                value="email-chat"
+                className="data-[state=active]:bg-green-50 data-[state=active]:text-green-700 transition-all duration-300"
+              >
+                <Mail className="w-4 h-4 mr-2" />
+                Email Chat
               </TabsTrigger>
               <TabsTrigger
                 value="ai-score"
@@ -584,6 +592,21 @@ export function ApplicantDetailModal({
                         </div>
                       </section>
                     )}
+                </TabsContent>
+
+                {/* Email Chat Tab */}
+                <TabsContent
+                  value="email-chat"
+                  className="mt-0 h-full animate-in slide-in-from-left duration-500"
+                >
+                  <div className="h-full">
+                    <EmailChatWidget
+                      applicantId={applicant.id}
+                      applicantName={`${applicant.firstName} ${applicant.lastName}`}
+                      applicantEmail={applicant.email}
+                      className="h-full"
+                    />
+                  </div>
                 </TabsContent>
 
                 {/* AI Score Tab */}

@@ -6,6 +6,7 @@ import * as companyApi from "./company/api";
 import * as googleApi from "./google/api";
 import * as jobApi from "./job/api";
 import * as userApi from "./user/api";
+import * as emailChatApi from "./email-chat/api";
 import * as emailTemplateApi from "./email-template/api";
 import * as globalSettingApi from "./global-setting/api";
 import * as interviewApi from './interview/api';
@@ -19,9 +20,10 @@ const API = {
   applicant: applicantApi,
   availability: availabilityApi,
   google: googleApi,
+  emailChat: emailChatApi,
   emailTemplate: emailTemplateApi,
   globalSetting: globalSettingApi,
-  interview:interviewApi
+  interview: interviewApi
 };
 
 export default API;
