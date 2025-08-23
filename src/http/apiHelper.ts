@@ -79,3 +79,13 @@ export async function del(
     .delete(url, { ...config })
     .then((response) => response.data)
 }
+
+export async function patch(
+  url: string,
+  data: object = {},
+  config: Record<string, any> = {}
+): Promise<any> {
+  return await axiosApi
+    .patch(url, data, { ...config })
+    .then((response) => response.data)
+}
