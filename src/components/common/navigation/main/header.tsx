@@ -14,6 +14,7 @@ export function Header() {
     { name: "Features", href: "#features" },
     { name: "Pricing", href: "#pricing" },
     { name: "Contact", href: "/contact" },
+    { name: "Privacy Policy", href: "/privacy" },
   ];
 
   const handleNavigation = (href: string) => {
