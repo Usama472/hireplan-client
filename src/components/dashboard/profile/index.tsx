@@ -4,6 +4,7 @@ import { TabContent } from "@/components/common/tabs/tab-content";
 import { CompanyInfoForm } from "@/components/dashboard/profile/company-info-form";
 import { PersonalInfoForm } from "@/components/dashboard/profile/personal-info-form";
 import { SaveChangesBar } from "@/components/dashboard/profile/save-changes-bar";
+import { AccountSettingsForm } from "@/components/dashboard/profile/account-settings-form";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,12 +13,15 @@ import useAuthSessionContext from "@/lib/context/AuthSessionContext";
 import { cn } from "@/lib/utils";
 import { profileFormSchema } from "@/lib/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type { z } from "zod";
 import { ProfileTabs } from "./tabs";
+import { useSearchParams } from "react-router-dom";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import subscriptionAPI from "@/http/subscription/api";
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
@@ -28,8 +32,36 @@ export default function ProfilePage() {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [initialFormData, setInitialFormData] =
     useState<ProfileFormValues | null>(null);
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [showCancelAlert, setShowCancelAlert] = useState(false);
+  const [verifiedSubscription, setVerifiedSubscription] = useState<{
+    hasActiveSubscription: boolean;
+    planId: string | null;
+    planName: string | null;
+    subscriptionStatus: string;
+  } | null>(null);
 
   const { data: authSession, updateUser } = useAuthSessionContext();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Fetch verified subscription status from Stripe
+  const fetchVerifiedSubscription = useCallback(async () => {
+    if (!authSession?.user) return;
+    
+    try {
+      const status = await subscriptionAPI.getVerifiedSubscriptionStatus();
+      setVerifiedSubscription(status);
+    } catch (error) {
+      console.error('Failed to fetch verified subscription status:', error);
+      // Set fallback state
+      setVerifiedSubscription({
+        hasActiveSubscription: false,
+        planId: null,
+        planName: null,
+        subscriptionStatus: 'error'
+      });
+    }
+  }, [authSession?.user]);
 
   const getUserFormData = useCallback((): ProfileFormValues => {
     if (!authSession?.user) {
@@ -105,8 +137,10 @@ export default function ProfilePage() {
       const userData = getUserFormData();
       setInitialFormData(userData);
       reset(userData);
+      // Fetch verified subscription status
+      fetchVerifiedSubscription();
     }
-  }, [authSession, reset, getUserFormData]);
+  }, [authSession, reset, getUserFormData, fetchVerifiedSubscription]);
 
   useEffect(() => {
     if (isSaved) {
@@ -115,6 +149,41 @@ export default function ProfilePage() {
       return () => clearTimeout(timer);
     }
   }, [isSaved]);
+
+  // Handle URL parameters for subscription flow redirects
+  useEffect(() => {
+    const success = searchParams.get('success');
+    const canceled = searchParams.get('canceled');
+    const tab = searchParams.get('tab');
+
+    if (success === 'true') {
+      setShowSuccessAlert(true);
+      toast.success('Payment successful! Your subscription has been updated.');
+      // Refresh subscription status after successful payment
+      fetchVerifiedSubscription();
+      // Set the active tab if specified
+      if (tab) {
+        setActiveTab(tab);
+      }
+      // Clean up URL parameters
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.delete('success');
+      setSearchParams(newSearchParams, { replace: true });
+    }
+
+    if (canceled === 'true') {
+      setShowCancelAlert(true);
+      toast.info('Payment was canceled. You can try again anytime.');
+      // Set the active tab if specified
+      if (tab) {
+        setActiveTab(tab);
+      }
+      // Clean up URL parameters
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.delete('canceled');
+      setSearchParams(newSearchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams, fetchVerifiedSubscription]);
 
   const handleTabChange = useCallback((tabId: string) => {
     setActiveTab(tabId);
@@ -132,7 +201,7 @@ export default function ProfilePage() {
         lastName: data.lastName,
         companyRole: data.companyRole,
         //profileImg: data.profileImg,
-        paymentPlan: data.paymentPlan,
+        // NOTE: paymentPlan changes must go through Stripe checkout, not direct profile update
         company: {
           address: data.company.address,
           city: data.company.city,
@@ -191,9 +260,20 @@ export default function ProfilePage() {
     switch (status) {
       case "active":
         return "bg-green-50 text-green-700 border-green-200";
+      case "trialing":
+        return "bg-blue-50 text-blue-700 border-blue-200";
       case "pending":
+      case "past_due":
         return "bg-yellow-50 text-yellow-700 border-yellow-200";
+      case "canceled":
       case "suspended":
+      case "incomplete":
+      case "incomplete_expired":
+        return "bg-red-50 text-red-700 border-red-200";
+      case "inactive":
+      case "none":
+        return "bg-gray-50 text-gray-700 border-gray-200";
+      case "error":
         return "bg-red-50 text-red-700 border-red-200";
       default:
         return "bg-gray-50 text-gray-700 border-gray-200";
@@ -240,7 +320,12 @@ export default function ProfilePage() {
   const lastName = watch("lastName") || user.lastName || "";
   const email = watch("email") || user.email || "";
   const profileImg = watch("profileImg") || user.profileImg || "";
-  const paymentPlan = watch("paymentPlan") || user.paymentPlan || "starter";
+  
+  // Use verified subscription data if available, otherwise fall back to user data
+  const paymentPlan = verifiedSubscription?.planId || watch("paymentPlan") || user.paymentPlan || "starter";
+  const subscriptionStatus = verifiedSubscription?.hasActiveSubscription ? 
+    verifiedSubscription.subscriptionStatus : 
+    'inactive';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100/50">
@@ -324,10 +409,10 @@ export default function ProfilePage() {
                     <Badge
                       className={cn(
                         "px-3 py-1 text-sm font-medium capitalize border",
-                        getStatusBadgeColor(user.status)
+                        getStatusBadgeColor(subscriptionStatus)
                       )}
                     >
-                      {user.status}
+                      {subscriptionStatus}
                     </Badge>
                   </div>
                 </div>
@@ -335,6 +420,41 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Success/Cancel Alerts */}
+        {showSuccessAlert && (
+          <Alert className="mb-6 border-green-200 bg-green-50">
+            <CheckCircle2 className="h-4 w-4 text-green-600" />
+            <AlertDescription className="text-green-800">
+              <div className="flex items-center justify-between">
+                <span>Payment successful! Your subscription has been updated.</span>
+                <button
+                  onClick={() => setShowSuccessAlert(false)}
+                  className="text-green-600 hover:text-green-800"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {showCancelAlert && (
+          <Alert className="mb-6 border-blue-200 bg-blue-50">
+            <AlertCircle className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-blue-800">
+              <div className="flex items-center justify-between">
+                <span>Payment was canceled. You can try again anytime from the Settings tab.</span>
+                <button
+                  onClick={() => setShowCancelAlert(false)}
+                  className="text-blue-600 hover:text-blue-800"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
 
         <FormProvider {...form}>
           <div className="space-y-8">
@@ -349,9 +469,9 @@ export default function ProfilePage() {
                 <CompanyInfoForm />
               </TabContent>
 
-              {/* <TabContent value='settings' activeTab={activeTab}>
+              <TabContent value='settings' activeTab={activeTab}>
                 <AccountSettingsForm />
-              </TabContent> */}
+              </TabContent>
             </ProfileTabs>
 
             <SaveChangesBar

@@ -9,7 +9,7 @@ export function CTASection() {
   const benefits = [
     { icon: Clock, text: 'Setup in 5 minutes' },
     { icon: Shield, text: 'No credit card required' },
-    { icon: Zap, text: '14-day free trial' }
+    { icon: Zap, text: 'AI-powered matching' }
   ]
 
   return (
@@ -51,7 +51,7 @@ export function CTASection() {
                 onClick={() => navigate('/signup')}
                 className="group bg-white text-blue-600 px-8 py-4 rounded-2xl font-bold text-lg hover:bg-blue-50 transition-all duration-200 shadow-xl hover:shadow-2xl hover:-translate-y-1 flex items-center space-x-2"
               >
-                <span>Start Free Trial</span>
+                <span>Get Started</span>
                 <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </button>
               <button

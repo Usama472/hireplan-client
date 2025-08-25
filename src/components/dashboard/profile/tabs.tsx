@@ -1,7 +1,7 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import { Building2, User } from 'lucide-react'
+import { Building2, User, Settings } from 'lucide-react'
 import type React from 'react'
 
 interface Tab {
@@ -21,11 +21,11 @@ const tabs: Tab[] = [
     label: 'Company Info',
     icon: Building2,
   },
-  // {
-  //   id: "settings",
-  //   label: "Account Settings",
-  //   icon: Settings,
-  // },
+  {
+    id: "settings",
+    label: "Subscription & Billing",
+    icon: Settings,
+  },
 ]
 
 interface ProfileTabsProps {

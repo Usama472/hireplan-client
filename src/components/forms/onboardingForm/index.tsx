@@ -2,7 +2,7 @@
 
 import { CompanyInfoStep } from "@/components/forms/onboardingForm/companyInfoStep";
 import { PersonalInfoStep } from "@/components/forms/onboardingForm/personalInfoStep";
-import { PlanSelectionStep } from "@/components/forms/onboardingForm/planSelectionStep";
+
 import { ReviewSubmitStep } from "@/components/forms/onboardingForm/reviewSubmitStep";
 import { StepIndicator } from "@/components/main/signup/StepIndicator";
 import { StepNavigation } from "@/components/main/signup/stepNavigation";
@@ -11,7 +11,7 @@ import { Form } from "@/components/ui/form";
 import { ROUTES } from "@/constants";
 import API from "@/http";
 import { mutateSession } from "@/http/auth/mutateSession";
-import { getErrorMessage } from "@/lib/utils";
+import { errorResolver } from "@/lib/utils";
 import { fullFormSchema } from "@/lib/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
@@ -72,14 +72,13 @@ export default function RecruiterOnboardingForm() {
       "state",
       "zipCode",
     ],
-    3: ["plan"],
-    4: [],
+    3: [],
   };
 
   const handleNext = async () => {
     clearErrors();
 
-    if (currentStep === 4) {
+    if (currentStep === 3) {
       return;
     }
 
@@ -113,7 +112,7 @@ export default function RecruiterOnboardingForm() {
   };
 
   const onSubmit = async (formData: FormValues) => {
-    if (currentStep !== 4) {
+    if (currentStep !== 3) {
       return;
     }
 
@@ -125,7 +124,6 @@ export default function RecruiterOnboardingForm() {
         lastName: formData.lastName,
         email: formData.email,
         password: formData.password,
-        paymentPlan: formData.plan,
         companyRole: formData.jobTitle,
         jobCategory: formData.jobCategory,
         companyName: formData.companyName,
@@ -145,7 +143,7 @@ export default function RecruiterOnboardingForm() {
       toast.success("Account created successfully");
       navigate(ROUTES.DASHBOARD.MAIN);
     } catch (error) {
-      const errorMessage = getErrorMessage(error);
+      const errorMessage = errorResolver(error);
       toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -159,8 +157,6 @@ export default function RecruiterOnboardingForm() {
       case 2:
         return <CompanyInfoStep />;
       case 3:
-        return <PlanSelectionStep />;
-      case 4:
         return <ReviewSubmitStep />;
       default:
         return <PersonalInfoStep />;
@@ -180,7 +176,7 @@ export default function RecruiterOnboardingForm() {
             <form
               onSubmit={(e) => {
                 console.log("Form submit event triggered");
-                if (currentStep !== 4) {
+                if (currentStep !== 3) {
                   e.preventDefault();
                   console.log("Prevented form submission on non-final step");
                   return;
@@ -193,11 +189,11 @@ export default function RecruiterOnboardingForm() {
 
               <StepNavigation
                 currentStep={currentStep}
-                totalSteps={4}
+                totalSteps={3}
                 onNext={handleNext}
                 onPrevious={handlePrevious}
                 isFirstStep={currentStep === 1}
-                isLastStep={currentStep === 4}
+                isLastStep={currentStep === 3}
                 isValid={true}
                 isSubmitting={isSubmitting}
               />

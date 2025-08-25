@@ -14,15 +14,14 @@ export function CTASection() {
         </h2>
         <p className='text-xl text-blue-100 mb-10 max-w-2xl mx-auto leading-relaxed'>
           Join thousands of companies using HirePlan to find better candidates
-          faster. Start your free trial today and see the difference AI can
-          make.
+          faster. Get started today and see the difference AI can make.
         </p>
 
         {/* Benefits */}
         <div className='flex flex-col sm:flex-row gap-6 justify-center items-center mb-10 text-blue-100'>
           <div className='flex items-center'>
             <CheckCircle className='h-5 w-5 mr-2' />
-            <span>14-day free trial</span>
+            <span>AI-powered matching</span>
           </div>
           <div className='flex items-center'>
             <CheckCircle className='h-5 w-5 mr-2' />
@@ -41,7 +40,7 @@ export function CTASection() {
             asChild
           >
             <Link href='/onboarding'>
-              Start Free Trial
+              Get Started
               <ArrowRight className='ml-2 h-5 w-5' />
             </Link>
           </Button>

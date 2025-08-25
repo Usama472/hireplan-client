@@ -27,9 +27,11 @@ interface PlanCardProps {
   plan: Plan;
   isSelected: boolean;
   onSelect: (planId: string) => void;
+  disabled?: boolean;
+  showUpgrade?: boolean;
 }
 
-export function PlanCard({ plan, isSelected, onSelect }: PlanCardProps) {
+export function PlanCard({ plan, isSelected, onSelect, disabled = false, showUpgrade = true }: PlanCardProps) {
   return (
     <Card
       className={cn(
@@ -86,6 +88,7 @@ export function PlanCard({ plan, isSelected, onSelect }: PlanCardProps) {
 
         <Button
           type="button"
+          disabled={disabled}
           className={cn(
             "w-full transition-all duration-200",
             isSelected
@@ -94,7 +97,7 @@ export function PlanCard({ plan, isSelected, onSelect }: PlanCardProps) {
           )}
           onClick={(e) => {
             e.stopPropagation();
-            onSelect(plan.id);
+            if (!disabled) onSelect(plan.id);
           }}
         >
           {isSelected ? (
@@ -102,6 +105,8 @@ export function PlanCard({ plan, isSelected, onSelect }: PlanCardProps) {
               <Check className="w-4 h-4" />
               Current Plan
             </span>
+          ) : showUpgrade ? (
+            "Upgrade to This Plan"
           ) : (
             "Select Plan"
           )}

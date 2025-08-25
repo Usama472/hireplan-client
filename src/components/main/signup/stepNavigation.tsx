@@ -76,7 +76,7 @@ export function StepNavigation({
           </>
         ) : (
           <>
-            <span>{isLastStep ? 'Submit Job' : 'Continue'}</span>
+            <span>{isLastStep ? 'Create Account' : 'Continue'}</span>
             {!isLastStep && <ChevronRight className='h-4 w-4' />}
           </>
         )}

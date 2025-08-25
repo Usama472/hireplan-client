@@ -28,7 +28,7 @@ export function PricingSection() {
             </span>
           </h2>
           <p className='text-xl text-gray-600 max-w-3xl mx-auto'>
-            Start free, scale as you grow. All plans include our core AI
+            Choose the perfect plan for your needs. All plans include our core AI
             matching technology, bias-free hiring, and 24/7 expert support.
           </p>
         </div>
@@ -88,7 +88,7 @@ export function PricingSection() {
                     })
                   }
                 >
-                  {plan.id === 'enterprise' ? 'Contact Sales' : 'Start Free Trial'}
+                  {plan.id === 'enterprise' ? 'Contact Sales' : 'Get Started'}
                 </Button>
               </CardContent>
             </Card>

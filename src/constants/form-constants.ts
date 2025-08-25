@@ -7,12 +7,7 @@ export const FORM_STEPS = [
     description: "Tell us about yourself",
   },
   { id: 2, title: "Company Information", description: "Your company details" },
-  {
-    id: 3,
-    title: "Choose Your Plan",
-    description: "Select the right plan for you",
-  },
-  { id: 4, title: "Review & Submit", description: "Confirm your information" },
+  { id: 3, title: "Review & Submit", description: "Confirm your information" },
 ];
 
 export const COMPANY_SIZES: SelectOption[] = [

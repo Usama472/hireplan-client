@@ -7,7 +7,7 @@ export const DASHBOARD_ROUTES = {
   EDIT_JOB_ID: `${DASHBOARD_MAIN_ROUTE}/edit/:id`,
   VIEW_JOB: `${DASHBOARD_MAIN_ROUTE}/view`,
   VIEW_JOB_ID: `${DASHBOARD_MAIN_ROUTE}/view/:id`,
-  PROFILE: `${DASHBOARD_MAIN_ROUTE}/profile`,
+  PROFILE: `/dashboard/profile`,
   AVAILABILITY: `/dashboard/availability`,
   EMAIL_TEMPLATES: `/dashboard/email-templates`,
   CREATE_EMAIL_TEMPLATE: `/dashboard/email-templates/create`,

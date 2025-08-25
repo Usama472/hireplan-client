@@ -1,80 +1,77 @@
 'use client'
 
 import { PLANS } from '@/constants/form-constants'
-import { useEffect } from 'react'
-import { useFormContext } from 'react-hook-form'
+import { useState } from 'react'
 import { PlanCard } from './plan-card'
+import subscriptionAPI from '@/http/subscription/api'
+import { toast } from 'sonner'
 
 export function PlanSelection() {
-  const { watch, setValue, formState } = useFormContext()
-  const selectedPlan = watch('paymentPlan')
-  const { defaultValues } = formState
+  const [actionLoading, setActionLoading] = useState<string | null>(null)
 
-  // Ensure we have a default plan selected
-  useEffect(() => {
-    if (!selectedPlan) {
-      // Set the default plan or starter if no default exists
-      setValue('paymentPlan', defaultValues?.paymentPlan || 'starter', {
-        shouldDirty: false,
-      })
+  const handlePlanSelect = async (planId: string) => {
+    const plan = PLANS.find(p => p.id === planId)
+    if (!plan) {
+      toast.error('Plan not found')
+      return
     }
-  }, [selectedPlan, setValue, defaultValues])
 
-  const handlePlanSelect = (planId: string) => {
-    if (planId === selectedPlan) return // No change if same plan selected
-
-    // Mark the field as dirty when changing plans
-    setValue('paymentPlan', planId, {
-      shouldDirty: true,
-      shouldTouch: true,
-      shouldValidate: true,
-    })
+    try {
+      setActionLoading(planId)
+      const successUrl = `${window.location.origin}/dashboard/profile?tab=settings&success=true`
+      const cancelUrl = `${window.location.origin}/dashboard/jobs`
+      
+      const response = await subscriptionAPI.createCheckoutSession({
+        planId,
+        successUrl,
+        cancelUrl,
+      })
+      
+      if (response.url) {
+        window.location.href = response.url
+      } else {
+        throw new Error('No checkout URL received')
+      }
+    } catch (error: any) {
+      toast.error(`Failed to create checkout session: ${error.message || 'Unknown error'}`)
+      setActionLoading(null)
+    }
   }
 
-  // Get the current selected plan details
-  const currentPlan = PLANS.find((p) => p.id === selectedPlan) || PLANS[0]
+function getPriceId(planId: string): string | null {
+  const priceMap: Record<string, string> = {
+    starter: 'price_1234567890abcdef',
+    professional: 'price_0987654321fedcba',
+    enterprise: 'price_abcdef1234567890',
+  }
+  
+  return priceMap[planId] || null
+}
 
   return (
     <div className='space-y-6'>
-      <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+      <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
         {PLANS.map((plan) => (
           <PlanCard
             key={plan.id}
             plan={plan}
-            isSelected={selectedPlan === plan.id}
+            isSelected={false} // No current selection for new users
             onSelect={handlePlanSelect}
+            disabled={actionLoading === plan.id}
+            showUpgrade={true}
           />
         ))}
       </div>
 
-      {/* Current Plan Info */}
+      {/* Plan Selection Info */}
       <div className='bg-blue-50 rounded-lg p-4 border border-blue-200'>
-        <div className='flex items-start justify-between'>
-          <div>
-            <h4 className='font-medium text-blue-900 mb-1'>
-              Current Plan Benefits
-            </h4>
-            <p className='text-sm text-blue-700 mb-3'>
-              You're currently on the {currentPlan.name} plan
-            </p>
-            <ul className='space-y-1'>
-              {currentPlan.features.slice(0, 3).map((feature, index) => (
-                <li
-                  key={index}
-                  className='text-sm text-blue-700 flex items-center gap-2'
-                >
-                  <div className='w-1.5 h-1.5 bg-blue-500 rounded-full' />
-                  {feature}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className='text-right'>
-            <div className='text-2xl font-bold text-blue-900'>
-              {currentPlan.price}
-            </div>
-            <div className='text-sm text-blue-600'>{currentPlan.period}</div>
-          </div>
+        <div className='text-center'>
+          <h4 className='font-medium text-blue-900 mb-1'>
+            Choose Your Plan
+          </h4>
+          <p className='text-sm text-blue-700'>
+            Select a plan to get started with full access to HirePlan features
+          </p>
         </div>
       </div>
     </div>

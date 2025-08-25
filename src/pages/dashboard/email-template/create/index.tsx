@@ -1,9 +1,12 @@
 import { CreateEmailTemplate } from "@/components/dashboard/email-templates/create";
+import { SubscriptionGuard } from '@/components/common/SubscriptionGuard';
 
 const CreateEmailTemplatePage = () => {
   return (
     <div>
-      <CreateEmailTemplate />
+      <SubscriptionGuard requiredPlan="professional">
+        <CreateEmailTemplate />
+      </SubscriptionGuard>
     </div>
   );
 };

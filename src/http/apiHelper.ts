@@ -89,3 +89,15 @@ export async function patch(
     .patch(url, data, { ...config })
     .then((response) => response.data)
 }
+
+// Unified API helper object for consistent imports
+export const apiHelper = {
+  get,
+  post,
+  put,
+  del,
+  patch,
+}
+
+// Alias for backward compatibility and consistency
+export const apiHelperUnAuth = apiHelper

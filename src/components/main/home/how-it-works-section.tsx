@@ -86,10 +86,10 @@ export function HowItWorksSection() {
           <div className="inline-flex items-center space-x-4 bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
             <div className="text-left">
               <p className="font-semibold text-gray-900">Ready to transform your hiring?</p>
-              <p className="text-sm text-gray-600">Start your free trial today - no credit card required</p>
+              <p className="text-sm text-gray-600">Get started today - no credit card required</p>
             </div>
             <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl">
-              Get Started Free
+              Get Started
             </button>
           </div>
         </div>

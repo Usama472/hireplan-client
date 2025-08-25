@@ -43,6 +43,7 @@
     "cm6-theme-basic-dark": "^0.2.0",
     "country-state-city": "^3.2.1",
     "date-fns": "^4.1.0",
+    "dotenv": "^17.2.1",
     "lodash": "^4.17.21",
     "lucide-react": "^0.509.0",
     "motion": "^12.11.0",

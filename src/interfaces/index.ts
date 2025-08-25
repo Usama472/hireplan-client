@@ -274,7 +274,7 @@ export interface RecruiterRegistrationInput {
   lastName: string;
   email: string;
   password: string;
-  paymentPlan: string;
+  paymentPlan?: string; // Optional since subscriptions are handled in settings
   companyRole: string;
   jobCategory: string;
   companyName: string;

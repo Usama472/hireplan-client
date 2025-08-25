@@ -44,7 +44,7 @@ export function HeroSection() {
                 className='bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 text-lg px-8 py-4 h-auto'
                 onClick={() => navigate('/signup')}
               >
-                Start Free Trial
+                Get Started
                 <ArrowRight className='ml-2 h-5 w-5' />
               </Button>
               <Button 
@@ -71,7 +71,7 @@ export function HeroSection() {
 
           {/* Trust Indicators */}
           <p className='text-sm text-gray-500 mb-16'>
-            ✓ No credit card required ✓ 14-day free trial ✓ Setup in 5 minutes
+            ✓ Secure payment ✓ Cancel anytime ✓ Setup in 5 minutes
           </p>
         </div>
 

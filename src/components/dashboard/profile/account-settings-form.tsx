@@ -9,8 +9,12 @@ import {
 } from '@/components/ui/card'
 import { CreditCard } from 'lucide-react'
 import { PlanSelection } from './plan-selection'
+import { SubscriptionManager } from '../subscription/subscription-manager'
+import useAuthSessionContext from '@/lib/context/AuthSessionContext'
 
 export function AccountSettingsForm() {
+  const { data: session } = useAuthSessionContext()
+  
   return (
     <div className='space-y-8'>
       <Card className='border-0 shadow-lg shadow-gray-100/50'>
@@ -19,14 +23,18 @@ export function AccountSettingsForm() {
             <div className='p-2 bg-blue-50 rounded-lg'>
               <CreditCard className='h-5 w-5 text-blue-600' />
             </div>
-            Subscription Plan
+            Subscription & Billing
           </CardTitle>
           <CardDescription className='text-base'>
-            Choose the plan that best fits your needs
+            Manage your subscription, billing, and payment methods
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <PlanSelection />
+          {session?.user?._id ? (
+            <SubscriptionManager userId={session.user._id} />
+          ) : (
+            <PlanSelection />
+          )}
         </CardContent>
       </Card>
     </div>
