@@ -3,6 +3,7 @@ import {
   Calendar,
   LifeBuoy,
   Mail,
+  MessageCircle,
   PlusCircle,
   Send,
   Settings,
@@ -47,6 +48,11 @@ const staticData = {
       name: "Create Job",
       url: ROUTES.DASHBOARD.CREATE_JOB,
       icon: PlusCircle,
+    },
+    {
+      name: "Chats",
+      url: ROUTES.DASHBOARD.CHATS,
+      icon: MessageCircle,
     },
     {
       name: "Scheduler",

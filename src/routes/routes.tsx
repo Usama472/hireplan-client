@@ -35,6 +35,8 @@ import EmailTemplatesPage from "@/pages/dashboard/email-template";
 import CreateEmailTemplatePage from "@/pages/dashboard/email-template/create";
 import EditEmailTemplatePage from "@/pages/dashboard/email-template/edit";
 import GlobalSettingPage from "@/pages/dashboard/global-setting";
+import ChatsPage from "@/pages/dashboard/chats";
+import ConversationPage from "@/pages/dashboard/chats/conversation";
 
 export const appRoutes: AppRoutesType[] = [
   {
@@ -168,6 +170,18 @@ export const appRoutes: AppRoutesType[] = [
     id: "global-settings",
     url: ROUTES.DASHBOARD.GLOBAL_SETTINGS,
     element: <GlobalSettingPage />,
+    isPrivate: true,
+  },
+  {
+    id: "chats",
+    url: ROUTES.DASHBOARD.CHATS,
+    element: <ChatsPage />,
+    isPrivate: true,
+  },
+  {
+    id: "chat-conversation",
+    url: ROUTES.DASHBOARD.CHAT_CONVERSATION,
+    element: <ConversationPage />,
     isPrivate: true,
   },
 ];

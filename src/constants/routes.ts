@@ -9,6 +9,8 @@ export const DASHBOARD_ROUTES = {
   VIEW_JOB_ID: `${DASHBOARD_MAIN_ROUTE}/view/:id`,
   PROFILE: `/dashboard/profile`,
   SCHEDULER: `/dashboard/scheduler`,
+  CHATS: `/dashboard/chats`,
+  CHAT_CONVERSATION: `/dashboard/chats/:conversationId`,
   EMAIL_TEMPLATES: `/dashboard/email-templates`,
   CREATE_EMAIL_TEMPLATE: `/dashboard/email-templates/create`,
   EDIT_EMAIL_TEMPLATE: `/dashboard/email-templates/edit`,
