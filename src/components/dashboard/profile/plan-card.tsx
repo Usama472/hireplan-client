@@ -32,9 +32,10 @@ interface PlanCardProps {
   onCancel?: () => void;
   cancelLoading?: boolean;
   cancelAtPeriodEnd?: boolean;
+  subscriptionStatus?: string;
 }
 
-export function PlanCard({ plan, isSelected, onSelect, disabled = false, showUpgrade = true, onCancel, cancelLoading = false, cancelAtPeriodEnd = false }: PlanCardProps) {
+export function PlanCard({ plan, isSelected, onSelect, disabled = false, showUpgrade = true, onCancel, cancelLoading = false, cancelAtPeriodEnd = false, subscriptionStatus }: PlanCardProps) {
   return (
     <Card
       className={cn(
@@ -103,9 +104,11 @@ export function PlanCard({ plan, isSelected, onSelect, disabled = false, showUpg
             </Button>
             {onCancel && (
               <>
-                {cancelAtPeriodEnd ? (
+                {(cancelAtPeriodEnd || subscriptionStatus === 'canceled') ? (
                   <div className="text-center">
-                    <p className="text-xs text-yellow-600 mb-2">Canceling at period end</p>
+                    <p className="text-xs text-yellow-600 mb-2">
+                      {subscriptionStatus === 'canceled' ? 'Subscription canceled' : 'Canceling at period end'}
+                    </p>
                     <Button
                       type="button"
                       variant="outline"

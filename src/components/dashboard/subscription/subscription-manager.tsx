@@ -107,8 +107,13 @@ export function SubscriptionManager({}: SubscriptionManagerProps) {
       const { url } = await simpleSubscriptionAPI.createPortal(returnUrl)
       
       window.open(url, '_blank')
-    } catch (error) {
-      toast.error('Failed to open billing portal')
+    } catch (error: any) {
+      console.error('Billing portal error:', error)
+      if (error.message?.includes('configuration')) {
+        toast.error('Billing portal is being set up. Please contact support for billing changes.')
+      } else {
+        toast.error('Failed to open billing portal')
+      }
     } finally {
       setActionLoading(null)
     }
@@ -148,7 +153,7 @@ export function SubscriptionManager({}: SubscriptionManagerProps) {
   return (
     <div className="space-y-6">
       {/* Current Subscription Status */}
-      {subscription && (subscription.planId || subscription.hasActiveSubscription) ? (
+      {subscription && (subscription.planId || subscription.hasActiveSubscription || subscription.subscriptionStatus === 'canceled') ? (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -260,9 +265,10 @@ export function SubscriptionManager({}: SubscriptionManagerProps) {
                   onSelect={() => handleUpgrade(plan.id)}
                   disabled={isCurrentPlan || isDowngrade}
                   showUpgrade={!isCurrentPlan && !isDowngrade}
-                  onCancel={isCurrentPlan ? (subscription?.cancelAtPeriodEnd ? handleReactivate : handleCancel) : undefined}
+                  onCancel={isCurrentPlan ? (subscription?.cancelAtPeriodEnd || subscription?.subscriptionStatus === 'canceled' ? handleReactivate : handleCancel) : undefined}
                   cancelLoading={actionLoading === 'cancel' || actionLoading === 'reactivate'}
                   cancelAtPeriodEnd={subscription?.cancelAtPeriodEnd || false}
+                  subscriptionStatus={subscription?.subscriptionStatus}
                 />
               );
             })}

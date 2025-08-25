@@ -1,12 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AlertCircle, Crown, Lock, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import subscriptionAPI from '@/http/subscription/api';
 import useAuthSessionContext from '@/lib/context/AuthSessionContext';
-import { toast } from 'sonner';
 
 interface SubscriptionGuardProps {
   children: React.ReactNode;
@@ -28,41 +26,16 @@ export function SubscriptionGuard({
   fallback,
   showUpgradePrompt = true 
 }: SubscriptionGuardProps) {
-  const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null);
-  const [loading, setLoading] = useState(true);
-  const { data: authSession } = useAuthSessionContext();
+  const { subscription, subscriptionLoading } = useAuthSessionContext();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const checkSubscription = async () => {
-      if (!authSession?.user) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const response = await subscriptionAPI.getVerifiedSubscriptionStatus();
-        setSubscriptionStatus({
-          hasActiveSubscription: response.hasActiveSubscription,
-          subscription: response,
-          currentPlan: response.planId || 'none',
-          verifiedWithStripe: response.verifiedWithStripe
-        });
-      } catch (error) {
-        console.error('Error checking verified subscription:', error);
-        setSubscriptionStatus({
-          hasActiveSubscription: false,
-          subscription: null,
-          currentPlan: 'none',
-          verifiedWithStripe: false
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkSubscription();
-  }, [authSession]);
+  // Convert new subscription format to expected format
+  const subscriptionStatus: SubscriptionStatus | null = subscription ? {
+    hasActiveSubscription: subscription.hasActiveSubscription || false,
+    subscription: subscription,
+    currentPlan: subscription.planId || 'none',
+    verifiedWithStripe: true // Assuming verified since it comes from our API
+  } : null;
 
   const getPlanHierarchy = (plan: string): number => {
     switch (plan) {
@@ -75,7 +48,13 @@ export function SubscriptionGuard({
 
   const hasRequiredAccess = (): boolean => {
     if (!subscriptionStatus) return false;
-    if (!subscriptionStatus.hasActiveSubscription) return false;
+    
+    // Allow access if user has active subscription OR if subscription is just canceled but still in period
+    const hasAccess = subscriptionStatus.hasActiveSubscription || 
+                     (subscription?.subscriptionStatus === 'active') ||
+                     (subscription?.cancelAtPeriodEnd && subscription?.subscriptionStatus !== 'canceled');
+    
+    if (!hasAccess) return false;
     
     const currentPlanLevel = getPlanHierarchy(subscriptionStatus.currentPlan || 'none');
     const requiredPlanLevel = getPlanHierarchy(requiredPlan);
@@ -104,7 +83,7 @@ export function SubscriptionGuard({
     navigate('/dashboard/profile?tab=settings');
   };
 
-  if (loading) {
+  if (subscriptionLoading) {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -202,40 +181,15 @@ export function SubscriptionGuard({
 
 // Hook to check verified subscription status
 export function useSubscriptionStatus() {
-  const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null);
-  const [loading, setLoading] = useState(true);
-  const { data: authSession } = useAuthSessionContext();
+  const { subscription, subscriptionLoading } = useAuthSessionContext();
 
-  useEffect(() => {
-    const checkSubscription = async () => {
-      if (!authSession?.user) {
-        setLoading(false);
-        return;
-      }
+  // Convert new subscription format to expected format
+  const subscriptionStatus: SubscriptionStatus | null = subscription ? {
+    hasActiveSubscription: subscription.hasActiveSubscription || false,
+    subscription: subscription,
+    currentPlan: subscription.planId || 'none',
+    verifiedWithStripe: true // Assuming verified since it comes from our API
+  } : null;
 
-      try {
-        const response = await subscriptionAPI.getVerifiedSubscriptionStatus();
-        setSubscriptionStatus({
-          hasActiveSubscription: response.hasActiveSubscription,
-          subscription: response,
-          currentPlan: response.planId || 'none',
-          verifiedWithStripe: response.verifiedWithStripe
-        });
-      } catch (error) {
-        console.error('Error checking verified subscription:', error);
-        setSubscriptionStatus({
-          hasActiveSubscription: false,
-          subscription: null,
-          currentPlan: 'none',
-          verifiedWithStripe: false
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkSubscription();
-  }, [authSession]);
-
-  return { subscriptionStatus, loading };
+  return { subscriptionStatus, loading: subscriptionLoading };
 }
