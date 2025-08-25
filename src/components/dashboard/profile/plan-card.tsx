@@ -29,9 +29,12 @@ interface PlanCardProps {
   onSelect: (planId: string) => void;
   disabled?: boolean;
   showUpgrade?: boolean;
+  onCancel?: () => void;
+  cancelLoading?: boolean;
+  cancelAtPeriodEnd?: boolean;
 }
 
-export function PlanCard({ plan, isSelected, onSelect, disabled = false, showUpgrade = true }: PlanCardProps) {
+export function PlanCard({ plan, isSelected, onSelect, disabled = false, showUpgrade = true, onCancel, cancelLoading = false, cancelAtPeriodEnd = false }: PlanCardProps) {
   return (
     <Card
       className={cn(
@@ -86,31 +89,71 @@ export function PlanCard({ plan, isSelected, onSelect, disabled = false, showUpg
           ))}
         </ul>
 
-        <Button
-          type="button"
-          disabled={disabled}
-          className={cn(
-            "w-full transition-all duration-200",
-            isSelected
-              ? "bg-blue-600 hover:bg-blue-700 text-white"
-              : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300"
-          )}
-          onClick={(e) => {
-            e.stopPropagation();
-            if (!disabled) onSelect(plan.id);
-          }}
-        >
-          {isSelected ? (
-            <span className="flex items-center gap-2">
-              <Check className="w-4 h-4" />
-              Current Plan
-            </span>
-          ) : showUpgrade ? (
-            "Upgrade to This Plan"
-          ) : (
-            "Select Plan"
-          )}
-        </Button>
+        {isSelected ? (
+          <div className="space-y-2">
+            <Button
+              type="button"
+              disabled={true}
+              className="w-full bg-blue-600 text-white cursor-default"
+            >
+              <span className="flex items-center gap-2">
+                <Check className="w-4 h-4" />
+                Current Plan
+              </span>
+            </Button>
+            {onCancel && (
+              <>
+                {cancelAtPeriodEnd ? (
+                  <div className="text-center">
+                    <p className="text-xs text-yellow-600 mb-2">Canceling at period end</p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="w-full text-xs"
+                      disabled={cancelLoading}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onCancel();
+                      }}
+                    >
+                      {cancelLoading ? 'Reactivating...' : 'Reactivate'}
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="w-full text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                    disabled={cancelLoading}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onCancel();
+                    }}
+                  >
+                    {cancelLoading ? 'Canceling...' : 'Cancel Subscription'}
+                  </Button>
+                )}
+              </>
+            )}
+          </div>
+        ) : (
+          <Button
+            type="button"
+            disabled={disabled}
+            className={cn(
+              "w-full transition-all duration-200",
+              "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300"
+            )}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (!disabled) onSelect(plan.id);
+            }}
+          >
+            {showUpgrade ? "Upgrade to This Plan" : "Select Plan"}
+          </Button>
+        )}
       </CardContent>
     </Card>
   );

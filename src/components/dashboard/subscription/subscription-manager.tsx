@@ -9,23 +9,22 @@ import {
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { CreditCard, ExternalLink, AlertTriangle } from 'lucide-react'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { PLANS } from '@/constants/form-constants'
 import { PlanCard } from '../profile/plan-card'
 import simpleSubscriptionAPI from '@/http/subscription/simple-api'
-import type { SubscriptionStatus } from '@/http/subscription/simple-api'
 import useAuthSessionContext from '@/lib/context/AuthSessionContext'
 
 interface SubscriptionManagerProps {
   userId: string
 }
 
-export function SubscriptionManager({ userId }: SubscriptionManagerProps) {
+export function SubscriptionManager({}: SubscriptionManagerProps) {
   const { subscription: contextSubscription, subscriptionLoading, refreshSubscription } = useAuthSessionContext()
-  const [error, setError] = useState<string | null>(null)
+  const [error] = useState<string | null>(null)
 
   // Use subscription from context
   const subscription = contextSubscription
@@ -261,6 +260,9 @@ export function SubscriptionManager({ userId }: SubscriptionManagerProps) {
                   onSelect={() => handleUpgrade(plan.id)}
                   disabled={isCurrentPlan || isDowngrade}
                   showUpgrade={!isCurrentPlan && !isDowngrade}
+                  onCancel={isCurrentPlan ? (subscription?.cancelAtPeriodEnd ? handleReactivate : handleCancel) : undefined}
+                  cancelLoading={actionLoading === 'cancel' || actionLoading === 'reactivate'}
+                  cancelAtPeriodEnd={subscription?.cancelAtPeriodEnd || false}
                 />
               );
             })}

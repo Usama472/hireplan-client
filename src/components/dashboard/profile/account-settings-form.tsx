@@ -15,6 +15,16 @@ import useAuthSessionContext from '@/lib/context/AuthSessionContext'
 export function AccountSettingsForm() {
   const { data: session } = useAuthSessionContext()
   
+  console.log('🔍 AccountSettingsForm - session:', session);
+  console.log('🔍 AccountSettingsForm - user ID check:', {
+    hasUser: !!session?.user,
+    hasId: !!session?.user?.id,
+    has_id: !!session?.user?._id,
+    userId: session?.user?.id || session?.user?._id
+  });
+  
+  const userId = session?.user?.id || session?.user?._id;
+  
   return (
     <div className='space-y-8'>
       <Card className='border-0 shadow-lg shadow-gray-100/50'>
@@ -30,8 +40,8 @@ export function AccountSettingsForm() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {session?.user?._id ? (
-            <SubscriptionManager userId={session.user._id} />
+          {userId ? (
+            <SubscriptionManager userId={userId} />
           ) : (
             <PlanSelection />
           )}
