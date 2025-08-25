@@ -4,6 +4,7 @@ import type { DefaultLayoutProps } from '@/interfaces'
 import useAuthSessionContext from '@/lib/context/AuthSessionContext'
 import { ScrollToTop } from '@/lib/hooks/ScrollToTop'
 import { SidebarInset, SidebarProvider } from '@components/ui/sidebar'
+import SubscriptionStatusAlert from '@/components/common/SubscriptionStatusAlert'
 
 export const PrivateRoute = ({ children }: DefaultLayoutProps) => {
   const { status } = useAuthSessionContext()
@@ -17,6 +18,7 @@ export const PrivateRoute = ({ children }: DefaultLayoutProps) => {
       <ScrollToTop />
       <DashboardSidebar />
       <SidebarInset>
+        <SubscriptionStatusAlert />
         <div className='md:p-3 overflow-y-auto'>
           <div className='bg-muted/50 overflow-y-auto'>{children}</div>
         </div>

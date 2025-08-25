@@ -1,6 +1,6 @@
 import ProfilePage from "@/components/dashboard/profile";
 import {
-  AVAILABILITY_TEXT,
+  SCHEDULER_TEXT,
   COMPANY_TEXT,
   CONTACT_TEXT,
   CREATE_JOB,
@@ -14,7 +14,7 @@ import type { AppRoutesType } from "@/interfaces";
 import CompanyPage from "@/pages/company";
 import JobApplicationPage from "@/pages/company/apply";
 import ContactPage from "@/pages/contact";
-import AvailabilityPage from "@/pages/dashboard/availability";
+import SchedulerPage from "@/pages/dashboard/scheduler";
 import DashboardPage from "@/pages/dashboard/jobs";
 import CreateJobPage from "@/pages/dashboard/jobs/create";
 import JobDetailPage from "@/pages/dashboard/jobs/view";
@@ -123,9 +123,9 @@ export const appRoutes: AppRoutesType[] = [
     isPrivate: true,
   },
   {
-    id: AVAILABILITY_TEXT,
-    url: ROUTES.DASHBOARD.AVAILABILITY,
-    element: <AvailabilityPage />,
+    id: SCHEDULER_TEXT,
+    url: ROUTES.DASHBOARD.SCHEDULER,
+    element: <SchedulerPage />,
     isPrivate: true,
   },
   {

@@ -1,4 +1,4 @@
-"use client"; // This directive declares an entry point for client-side components [^2].
+"use client";
 
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,7 +12,7 @@ import { BookedSlots } from "./booked-slots";
 import { CalendarSettings } from "./calendar-settings";
 import { ScheduleTemplates } from "./schedule-templates";
 
-export default function AvailabilityManager() {
+export default function SchedulerManager() {
   const { toast } = useToast();
   const { updateUser } = useAuthSessionContext();
   const [searchParams] = useSearchParams();
@@ -70,7 +70,8 @@ export default function AvailabilityManager() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-4">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Availability</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Scheduler</h1>
+        <p className="text-gray-600 mt-1">Manage your interview scheduling templates and settings</p>
       </div>
 
       <Tabs
@@ -86,14 +87,14 @@ export default function AvailabilityManager() {
                 className="flex-1 flex items-center justify-center gap-2 h-full px-4 rounded-none border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 data-[state=active]:font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 relative rounded-tl-xl"
               >
                 <CalendarClock className="h-4 w-4" />
-                <span className="text-sm">Booking Pages</span>
+                <span className="text-sm">Interview Templates</span>
               </TabsTrigger>
               <TabsTrigger
                 value="booked-slots"
                 className="flex-1 flex items-center justify-center gap-2 h-full px-4 rounded-none border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 data-[state=active]:font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 relative"
               >
                 <Users className="h-4 w-4" />
-                <span className="text-sm">Booked Slots</span>
+                <span className="text-sm">Scheduled Interviews</span>
                 {totalBookedAppointments > 0 && (
                   <Badge
                     variant="secondary"

@@ -15,46 +15,27 @@ import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { PLANS } from '@/constants/form-constants'
 import { PlanCard } from '../profile/plan-card'
-import subscriptionAPI from '@/http/subscription/api'
-import type { Subscription } from '@/http/subscription/api'
+import simpleSubscriptionAPI from '@/http/subscription/simple-api'
+import type { SubscriptionStatus } from '@/http/subscription/simple-api'
+import useAuthSessionContext from '@/lib/context/AuthSessionContext'
 
 interface SubscriptionManagerProps {
   userId: string
 }
 
 export function SubscriptionManager({ userId }: SubscriptionManagerProps) {
-  const [subscription, setSubscription] = useState<Subscription | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const { subscription: contextSubscription, subscriptionLoading, refreshSubscription } = useAuthSessionContext()
   const [error, setError] = useState<string | null>(null)
 
+  // Use subscription from context
+  const subscription = contextSubscription
+  const isLoading = subscriptionLoading
+
   const fetchSubscription = async () => {
-    try {
-      setIsLoading(true)
-      setError(null)
-      
-      // Use the new verified subscription status API for accurate data
-      const verifiedStatus = await subscriptionAPI.getVerifiedSubscriptionStatus()
-      
-      if (verifiedStatus.hasActiveSubscription) {
-        // If we have an active subscription, get the full subscription details
-        const data = await subscriptionAPI.getSubscription(userId)
-        setSubscription(data)
-      } else {
-        // No active subscription
-        setSubscription(null)
-      }
-    } catch (err: any) {
-      setError(err.message || 'Failed to load subscription')
-    } finally {
-      setIsLoading(false)
+    if (refreshSubscription) {
+      await refreshSubscription()
     }
   }
-
-  useEffect(() => {
-    if (userId) {
-      fetchSubscription()
-    }
-  }, [userId])
 
   const [actionLoading, setActionLoading] = useState<string | null>(null)
 
@@ -64,9 +45,9 @@ export function SubscriptionManager({ userId }: SubscriptionManagerProps) {
     if (window.confirm('Are you sure you want to cancel your subscription? It will remain active until the end of your billing period.')) {
       try {
         setActionLoading('cancel')
-        await subscriptionAPI.cancelSubscription(subscription._id)
-        toast.success('Subscription updated successfully')
-        await fetchSubscription() // Refresh data
+        await simpleSubscriptionAPI.cancel(true)
+        toast.success('Subscription will be canceled at the end of your billing period')
+        await fetchSubscription()
       } catch (error) {
         toast.error('Failed to cancel subscription')
       } finally {
@@ -80,9 +61,9 @@ export function SubscriptionManager({ userId }: SubscriptionManagerProps) {
     
     try {
       setActionLoading('reactivate')
-      await subscriptionAPI.reactivateSubscription(subscription._id)
+      await simpleSubscriptionAPI.reactivate()
       toast.success('Subscription reactivated successfully')
-      await fetchSubscription() // Refresh data
+      await fetchSubscription()
     } catch (error) {
       toast.error('Failed to reactivate subscription')
     } finally {
@@ -102,12 +83,11 @@ export function SubscriptionManager({ userId }: SubscriptionManagerProps) {
       const successUrl = `${window.location.origin}/dashboard/profile?tab=settings&success=true`
       const cancelUrl = `${window.location.origin}/dashboard/jobs`
       
-      const response = await subscriptionAPI.createCheckoutSession({
-        planId, // Send planId instead of priceId - backend will resolve the priceId
+      const response = await simpleSubscriptionAPI.createCheckout(
+        planId,
         successUrl,
-        cancelUrl,
-        customerId: subscription?.stripeCustomerId
-      })
+        cancelUrl
+      )
       
       if (response.url) {
         window.location.href = response.url
@@ -125,10 +105,7 @@ export function SubscriptionManager({ userId }: SubscriptionManagerProps) {
       setActionLoading('portal')
       const returnUrl = `${window.location.origin}/dashboard/profile?tab=settings`
       
-      const { url } = await subscriptionAPI.createCustomerPortalSession({
-        returnUrl,
-        customerId: subscription?.stripeCustomerId
-      })
+      const { url } = await simpleSubscriptionAPI.createPortal(returnUrl)
       
       window.open(url, '_blank')
     } catch (error) {
@@ -161,10 +138,18 @@ export function SubscriptionManager({ userId }: SubscriptionManagerProps) {
     )
   }
 
+  console.log('🔍 Subscription Manager - subscription object:', subscription);
+  console.log('🔍 Subscription Manager - isLoading:', isLoading);
+  console.log('🔍 Subscription Manager - condition check:', {
+    hasSubscription: !!subscription,
+    hasPlanId: !!subscription?.planId,
+    fullCondition: !!(subscription && subscription.planId)
+  });
+  
   return (
     <div className="space-y-6">
       {/* Current Subscription Status */}
-      {subscription ? (
+      {subscription && (subscription.planId || subscription.hasActiveSubscription) ? (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -180,20 +165,22 @@ export function SubscriptionManager({ userId }: SubscriptionManagerProps) {
               <div>
                 <h3 className="font-semibold text-lg">{subscription.planName} Plan</h3>
                 <p className="text-sm text-gray-600">
-                  Status: <Badge variant={getStatusVariant(subscription.status)}>
-                    {subscription.status}
+                  Status: <Badge variant={getStatusVariant(subscription.subscriptionStatus)}>
+                    {subscription.subscriptionStatus}
                   </Badge>
                 </p>
               </div>
-              <div className="text-right">
-                <p className="text-sm text-gray-600">Current period ends</p>
-                <p className="font-medium">
-                  {format(new Date(subscription.currentPeriodEnd), 'MMM dd, yyyy')}
-                </p>
-              </div>
+              {subscription.currentPeriodEnd && (
+                <div className="text-right">
+                  <p className="text-sm text-gray-600">Current period ends</p>
+                  <p className="font-medium">
+                    {format(new Date(subscription.currentPeriodEnd), 'MMM dd, yyyy')}
+                  </p>
+                </div>
+              )}
             </div>
 
-            {subscription.cancelAtPeriodEnd && (
+            {subscription.cancelAtPeriodEnd && subscription.currentPeriodEnd && (
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                 <div className="flex items-center gap-2 text-yellow-800">
                   <AlertTriangle className="h-4 w-4" />
@@ -259,16 +246,24 @@ export function SubscriptionManager({ userId }: SubscriptionManagerProps) {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {PLANS.map((plan) => (
-              <PlanCard
-                key={plan.id}
-                plan={plan}
-                isSelected={subscription?.planId === plan.id}
-                onSelect={() => handleUpgrade(plan.id)}
-                disabled={subscription?.planId === plan.id}
-                showUpgrade={!subscription || subscription.planId !== plan.id}
-              />
-            ))}
+            {PLANS.map((plan) => {
+              const planOrder = { starter: 1, professional: 2, enterprise: 3 };
+              const currentPlanLevel = planOrder[subscription?.planId as keyof typeof planOrder] || 0;
+              const planLevel = planOrder[plan.id as keyof typeof planOrder] || 0;
+              const isCurrentPlan = subscription?.planId === plan.id;
+              const isDowngrade = planLevel < currentPlanLevel;
+              
+              return (
+                <PlanCard
+                  key={plan.id}
+                  plan={plan}
+                  isSelected={isCurrentPlan}
+                  onSelect={() => handleUpgrade(plan.id)}
+                  disabled={isCurrentPlan || isDowngrade}
+                  showUpgrade={!isCurrentPlan && !isDowngrade}
+                />
+              );
+            })}
           </div>
         </CardContent>
       </Card>
@@ -290,5 +285,6 @@ function getStatusVariant(status: string): 'default' | 'secondary' | 'destructiv
       return 'outline'
   }
 }
+
 
 

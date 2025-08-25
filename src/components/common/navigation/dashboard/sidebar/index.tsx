@@ -49,8 +49,8 @@ const staticData = {
       icon: PlusCircle,
     },
     {
-      name: "Availability",
-      url: ROUTES.DASHBOARD.AVAILABILITY,
+      name: "Scheduler",
+      url: ROUTES.DASHBOARD.SCHEDULER,
       icon: Calendar,
     },
     {

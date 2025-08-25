@@ -24,7 +24,7 @@ export const COMPOSE_EMAIL_TEXT = "Compose Email";
 export const CONTACT_TEXT = "Contact";
 export const CREATE_JOB = "Create Job";
 export const COMPANY_TEXT = "Company";
-export const AVAILABILITY_TEXT = "Availability";
+export const SCHEDULER_TEXT = "Scheduler";
 
 // Constants
 export const InfoSectionData = [

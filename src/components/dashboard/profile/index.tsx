@@ -21,7 +21,7 @@ import type { z } from "zod";
 import { ProfileTabs } from "./tabs";
 import { useSearchParams } from "react-router-dom";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import subscriptionAPI from "@/http/subscription/api";
+
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
@@ -34,34 +34,12 @@ export default function ProfilePage() {
     useState<ProfileFormValues | null>(null);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [showCancelAlert, setShowCancelAlert] = useState(false);
-  const [verifiedSubscription, setVerifiedSubscription] = useState<{
-    hasActiveSubscription: boolean;
-    planId: string | null;
-    planName: string | null;
-    subscriptionStatus: string;
-  } | null>(null);
+  // Remove local subscription state - we'll use the global context instead
 
-  const { data: authSession, updateUser } = useAuthSessionContext();
+  const { data: authSession, updateUser, subscription: verifiedSubscription, refreshSubscription } = useAuthSessionContext();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Fetch verified subscription status from Stripe
-  const fetchVerifiedSubscription = useCallback(async () => {
-    if (!authSession?.user) return;
-    
-    try {
-      const status = await subscriptionAPI.getVerifiedSubscriptionStatus();
-      setVerifiedSubscription(status);
-    } catch (error) {
-      console.error('Failed to fetch verified subscription status:', error);
-      // Set fallback state
-      setVerifiedSubscription({
-        hasActiveSubscription: false,
-        planId: null,
-        planName: null,
-        subscriptionStatus: 'error'
-      });
-    }
-  }, [authSession?.user]);
+  // Use refreshSubscription from context instead of local fetching
 
   const getUserFormData = useCallback((): ProfileFormValues => {
     if (!authSession?.user) {
@@ -137,10 +115,9 @@ export default function ProfilePage() {
       const userData = getUserFormData();
       setInitialFormData(userData);
       reset(userData);
-      // Fetch verified subscription status
-      fetchVerifiedSubscription();
+      // Subscription status is now automatically fetched by AuthSessionContext
     }
-  }, [authSession, reset, getUserFormData, fetchVerifiedSubscription]);
+  }, [authSession, reset, getUserFormData]);
 
   useEffect(() => {
     if (isSaved) {
@@ -160,7 +137,9 @@ export default function ProfilePage() {
       setShowSuccessAlert(true);
       toast.success('Payment successful! Your subscription has been updated.');
       // Refresh subscription status after successful payment
-      fetchVerifiedSubscription();
+      if (refreshSubscription) {
+        refreshSubscription();
+      }
       // Set the active tab if specified
       if (tab) {
         setActiveTab(tab);
@@ -183,7 +162,7 @@ export default function ProfilePage() {
       newSearchParams.delete('canceled');
       setSearchParams(newSearchParams, { replace: true });
     }
-  }, [searchParams, setSearchParams, fetchVerifiedSubscription]);
+  }, [searchParams, setSearchParams, refreshSubscription]);
 
   const handleTabChange = useCallback((tabId: string) => {
     setActiveTab(tabId);
@@ -321,11 +300,18 @@ export default function ProfilePage() {
   const email = watch("email") || user.email || "";
   const profileImg = watch("profileImg") || user.profileImg || "";
   
-  // Use verified subscription data if available, otherwise fall back to user data
+  // Use subscription data if available, otherwise fall back to user data
   const paymentPlan = verifiedSubscription?.planId || watch("paymentPlan") || user.paymentPlan || "starter";
-  const subscriptionStatus = verifiedSubscription?.hasActiveSubscription ? 
-    verifiedSubscription.subscriptionStatus : 
-    'inactive';
+  const subscriptionStatus = verifiedSubscription?.subscriptionStatus || 'none';
+    
+  // Debug logging
+  console.log('🔍 Profile subscription data:', {
+    verifiedSubscription,
+    paymentPlan,
+    subscriptionStatus,
+    userPaymentPlan: user.paymentPlan,
+    watchPaymentPlan: watch("paymentPlan")
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100/50">
