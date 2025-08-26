@@ -1,24 +1,22 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { format, formatDistanceToNow } from 'date-fns';
 import {
   Send,
   Mail,
   MessageCircle,
   RefreshCw,
-  Paperclip,
   Archive,
   MoreHorizontal,
   CheckCircle,
   AlertCircle,
   Clock,
-  User,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { ChatRichTextEditor } from '@/components/dashboard/chats/ChatRichTextEditor';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -35,13 +33,12 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
 import API from '@/http';
 import { useToast } from '@/lib/hooks/use-toast';
-import type { EmailChatConversation, EmailChatMessage } from '@/interfaces';
+import type { EmailChatConversation } from '@/interfaces';
 
 interface EmailChatWidgetProps {
   applicantId: string;
@@ -57,7 +54,6 @@ export function EmailChatWidget({
   applicantName,
   applicantEmail,
   jobId,
-  jobTitle,
   className = '',
 }: EmailChatWidgetProps) {
   const [conversations, setConversations] = useState<EmailChatConversation[]>([]);
@@ -89,14 +85,16 @@ export function EmailChatWidget({
       });
 
       if (response.status) {
-        const applicantConversations = response.data.conversations.filter(
-          (conv: EmailChatConversation) => conv.applicantId === applicantId
-        );
-        setConversations(applicantConversations);
+        // The API should already filter by applicantId, but let's ensure we get the right data structure
+        const conversationsData = response.data.conversations || response.data || [];
+        console.log('🔍 EmailChatWidget conversations loaded for applicant:', applicantId, conversationsData);
+        setConversations(conversationsData);
         
-        if (applicantConversations.length > 0 && !activeConversation) {
-          setActiveConversation(applicantConversations[0]);
+        if (conversationsData.length > 0 && !activeConversation) {
+          setActiveConversation(conversationsData[0]);
         }
+      } else {
+        console.warn('Failed to load conversations:', response);
       }
     } catch (error) {
       console.error('Error loading conversations:', error);
@@ -153,15 +151,63 @@ export function EmailChatWidget({
     }
   };
 
-  const sendReply = async () => {
-    if (!activeConversation || !replyContent.trim()) return;
+  const sendReply = async (attachments?: File[]) => {
+    if (!activeConversation || (!replyContent.trim() && !attachments?.length)) return;
 
     try {
       setIsSending(true);
-      const response = await API.emailChat.sendMessage(activeConversation.conversationId, {
-        htmlContent: `<p>${replyContent.replace(/\n/g, '<br>')}</p>`,
-        textContent: replyContent,
-      });
+      
+      // If there are attachments, upload them first
+      let attachmentUrls: string[] = [];
+      if (attachments?.length) {
+        const formData = new FormData();
+        attachments.forEach((file) => {
+          formData.append(`files`, file);
+        });
+        
+        // Add conversation ID for context
+        formData.append('conversationId', activeConversation.conversationId);
+        
+        try {
+          const uploadResponse = await fetch('/api/v1/chat/upload-attachments', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            },
+            body: formData,
+          });
+          
+          const uploadResult = await uploadResponse.json();
+          if (uploadResult.success) {
+            attachmentUrls = uploadResult.data.urls || [];
+          } else {
+            throw new Error(uploadResult.message || 'Failed to upload attachments');
+          }
+        } catch (uploadError) {
+          toast({
+            title: "Error",
+            description: "Failed to upload attachments. Please try again.",
+          });
+          return;
+        }
+      }
+      
+      // Prepare message data
+      const messageData: any = {
+        htmlContent: replyContent,
+        textContent: replyContent.replace(/<[^>]*>/g, ''), // Strip HTML for text content
+      };
+      
+      if (attachmentUrls.length > 0) {
+        messageData.attachments = attachmentUrls.map((url, index) => ({
+          url,
+          filename: attachments?.[index]?.name || `attachment-${index}`,
+          type: attachments?.[index]?.type || 'application/octet-stream',
+          size: attachments?.[index]?.size || 0
+        }));
+      }
+      
+      const response = await API.emailChat.sendMessage(activeConversation.conversationId, messageData);
 
       if (response.status) {
         // Refresh the conversation to get the new message
@@ -287,11 +333,11 @@ export function EmailChatWidget({
                   
                   <div>
                     <Label htmlFor="message">Message</Label>
-                    <Textarea
-                      id="message"
-                      placeholder="Type your message..."
+                    <ChatRichTextEditor
                       value={newMessageContent}
-                      onChange={(e) => setNewMessageContent(e.target.value)}
+                      onChange={setNewMessageContent}
+                      onSend={() => {}} // Disable send button in new message editor
+                      placeholder="Type your message..."
                       className="min-h-[120px]"
                     />
                   </div>
@@ -443,31 +489,18 @@ export function EmailChatWidget({
                   </div>
                 </ScrollArea>
 
-                {/* Reply Input */}
+                {/* Reply Input - Rich Text Editor */}
                 <div className="mt-3 space-y-2">
-                  <div className="flex gap-2">
-                    <Textarea
-                      placeholder="Type your reply..."
-                      value={replyContent}
-                      onChange={(e) => setReplyContent(e.target.value)}
-                      className="flex-1 min-h-[60px] text-xs resize-none"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-                          sendReply();
-                        }
-                      }}
-                    />
-                    <Button 
-                      onClick={sendReply} 
-                      disabled={isSending || !replyContent.trim()}
-                      size="sm"
-                      className="self-end"
-                    >
-                      <Send className="w-3 h-3" />
-                    </Button>
-                  </div>
+                  <ChatRichTextEditor
+                    value={replyContent}
+                    onChange={setReplyContent}
+                    onSend={sendReply}
+                    sending={isSending}
+                    placeholder="Type your reply... Press Enter to send, Shift+Enter for new line"
+                    className="text-sm"
+                  />
                   <p className="text-xs text-gray-500">
-                    Press Ctrl+Enter to send • From: {activeConversation.alias}
+                    From: {activeConversation.alias}
                   </p>
                 </div>
               </div>

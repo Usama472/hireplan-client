@@ -76,7 +76,7 @@ export const DashboardSidebar = ({
   ...props
 }: React.ComponentProps<typeof Sidebar>) => {
   const navigate = useNavigate();
-  const { data: authData } = useAuthSessionContext();
+  const { data: authData, subscription } = useAuthSessionContext();
   const location = useLocation();
 
   const user = {
@@ -87,6 +87,15 @@ export const DashboardSidebar = ({
     email: authData?.user?.email || "user@example.com",
     avatar: authData?.user?.avatar || "/avatars/default.jpg",
   };
+
+  // Filter navigation items based on subscription
+  const filteredProjects = staticData.projects.filter(project => {
+    // Scheduler requires Professional+ plan
+    if (project.name === "Scheduler") {
+      return subscription?.planId === 'professional' || subscription?.planId === 'enterprise';
+    }
+    return true;
+  });
 
   return (
     <Sidebar
@@ -115,7 +124,7 @@ export const DashboardSidebar = ({
       <SidebarContent className="bg-white px-3 py-4">
         <NavProjects
           name="Navigation"
-          projects={staticData.projects}
+          projects={filteredProjects}
           currentPath={location.pathname}
         />
       </SidebarContent>

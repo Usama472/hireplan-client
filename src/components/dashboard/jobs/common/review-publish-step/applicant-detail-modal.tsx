@@ -34,6 +34,7 @@ import {
   X,
 } from "lucide-react";
 import { useState } from "react";
+import useAuthSessionContext from "@/lib/context/AuthSessionContext";
 
 export interface AIEvaluation {
   skillsMatchScore: number;
@@ -160,6 +161,10 @@ export function ApplicantDetailModal({
   onStatusUpdate,
 }: ApplicantDetailModalProps) {
   const [activeTab, setActiveTab] = useState("overview");
+  const { subscription } = useAuthSessionContext();
+  
+  // Check subscription for AI features
+  const hasProfessionalFeatures = subscription?.planId === 'professional' || subscription?.planId === 'enterprise';
   const [animateHeader, setAnimateHeader] = useState(false);
 
   // Trigger animation on initial render
@@ -215,7 +220,7 @@ export function ApplicantDetailModal({
               >
                 {applicant.status || "pending"}
               </Badge>
-              {applicant.aiEvaluation && (
+              {applicant.aiEvaluation && hasProfessionalFeatures && (
                 <Badge
                   className={`text-xs font-medium ${getRecommendationColor(
                     applicant.aiEvaluation.recommendationLevel
@@ -245,7 +250,7 @@ export function ApplicantDetailModal({
             onValueChange={handleTabChange}
             className="h-full flex flex-col px-6"
           >
-            <TabsList className="grid w-full grid-cols-3 mb-6">
+            <TabsList className={`grid w-full mb-6 ${hasProfessionalFeatures ? 'grid-cols-3' : 'grid-cols-2'}`}>
               <TabsTrigger
                 value="overview"
                 className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 transition-all duration-300"
@@ -260,13 +265,15 @@ export function ApplicantDetailModal({
                 <Mail className="w-4 h-4 mr-2" />
                 Email Chat
               </TabsTrigger>
-              <TabsTrigger
-                value="ai-score"
-                className="data-[state=active]:bg-purple-50 data-[state=active]:text-purple-700 transition-all duration-300"
-              >
-                <Brain className="w-4 h-4 mr-2" />
-                AI Analysis
-              </TabsTrigger>
+              {hasProfessionalFeatures && (
+                <TabsTrigger
+                  value="ai-score"
+                  className="data-[state=active]:bg-purple-50 data-[state=active]:text-purple-700 transition-all duration-300"
+                >
+                  <Brain className="w-4 h-4 mr-2" />
+                  AI Analysis
+                </TabsTrigger>
+              )}
             </TabsList>
 
             <div className="flex-1 min-h-0 relative">
@@ -609,11 +616,12 @@ export function ApplicantDetailModal({
                   </div>
                 </TabsContent>
 
-                {/* AI Score Tab */}
-                <TabsContent
-                  value="ai-score"
-                  className="mt-0 space-y-8 animate-in slide-in-from-right duration-500"
-                >
+                {/* AI Score Tab - Professional+ Only */}
+                {hasProfessionalFeatures && (
+                  <TabsContent
+                    value="ai-score"
+                    className="mt-0 space-y-8 animate-in slide-in-from-right duration-500"
+                  >
                   {applicant.aiEvaluation ? (
                     <>
                       {/* AI Score Header */}
@@ -874,7 +882,8 @@ export function ApplicantDetailModal({
                       </div>
                     </div>
                   )}
-                </TabsContent>
+                  </TabsContent>
+                )}
               </ScrollArea>
             </div>
           </Tabs>

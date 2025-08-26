@@ -40,7 +40,8 @@ export function SMSOptIn() {
     setIsSubmitting(true)
     
     try {
-      // TODO: Implement SMS opt-in API call
+      // TODO: Implement SMS opt-in API call with subscription check
+      // This feature requires Professional+ subscription
       // await API.sms.optIn({ phoneNumber: phoneNumber.replace(/\D/g, '') })
       
       // Simulate API call

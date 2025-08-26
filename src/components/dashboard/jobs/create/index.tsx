@@ -246,10 +246,14 @@ export default function CreateJob() {
     timestamp: number;
   } | null>(null);
   const navigate = useNavigate();
-  // Changed from 6 to 7 to match the number of steps in renderCurrentStep, including the new booking page step
-  const totalSteps = 7;
-  const { data: authSession } = useAuthSessionContext();
+  const { data: authSession, subscription } = useAuthSessionContext();
   const userId = authSession?.user?.id || "anonymous";
+  
+  // Check if user has Professional+ subscription for AI features
+  const hasProfessionalFeatures = subscription?.planId === 'professional' || subscription?.planId === 'enterprise';
+  
+  // Adjust total steps based on subscription - AI step (5) is only for Professional+
+  const totalSteps = hasProfessionalFeatures ? 7 : 6;
 
   // Log for debugging
   console.log("Current step and total steps:", { currentStep, totalSteps });
@@ -306,20 +310,29 @@ export default function CreateJob() {
   const handleNext = async () => {
     clearErrors();
 
-    // Skip validation for steps 5 and 7 (AI Ranking and Review)
-    // But require validation for step 6 (Booking Page)
-    if (currentStep === 5) {
+    // Skip validation for AI Ranking step (5) and Review step (7/6)
+    // But require validation for Booking Page step (6/5)
+    if (currentStep === 5 && hasProfessionalFeatures) {
+      // AI Ranking step - skip validation for Professional+ users
       setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
       return;
     }
 
-    if (currentStep === 7) {
+    if (currentStep === 4 && !hasProfessionalFeatures) {
+      // For non-Professional users, skip AI step (5) and go directly to Booking Page (6->5)
+      setCurrentStep(5); // This will be the Booking Page for non-Professional users
+      return;
+    }
+
+    if ((currentStep === 7 && hasProfessionalFeatures) || (currentStep === 6 && !hasProfessionalFeatures)) {
+      // Review step - skip validation
       setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
       return;
     }
 
-    // Special validation for Booking Page step
-    if (currentStep === 6) {
+    // Special validation for Booking Page step (step 6 for Professional+, step 5 for Starter)
+    const isBookingPageStep = (hasProfessionalFeatures && currentStep === 6) || (!hasProfessionalFeatures && currentStep === 5);
+    if (isBookingPageStep) {
       // Get current availabilityId value
       const availabilityId = watch("availabilityId");
 
@@ -386,7 +399,21 @@ export default function CreateJob() {
 
   const handlePrevious = () => {
     clearErrors();
-    setCurrentStep((prev) => Math.max(prev - 1, 1));
+    
+    // Handle skipping AI step for non-Professional users when going backwards
+    if (currentStep === 5 && !hasProfessionalFeatures) {
+      // For non-Professional users, step 5 is Booking Page, so go back to step 4
+      setCurrentStep(4);
+    } else if (currentStep === 6 && !hasProfessionalFeatures) {
+      // For non-Professional users, step 6 is Review, so go back to step 5 (Booking Page)
+      setCurrentStep(5);
+    } else if (currentStep === 6 && hasProfessionalFeatures) {
+      // For Professional+ users, step 6 is Booking Page, go back to step 5 (AI)
+      setCurrentStep(5);
+    } else {
+      setCurrentStep((prev) => Math.max(prev - 1, 1));
+    }
+    
     // Scroll to top when going to previous step
     window.scrollTo({
       top: 0,
@@ -486,22 +513,28 @@ export default function CreateJob() {
       case 4:
         return <PostingScheduleBudgetStep />;
       case 5:
-        return <AIRankingStep />;
+        if (hasProfessionalFeatures) {
+          return <AIRankingStep />;
+        } else {
+          // For non-Professional users, step 5 is the Booking Page
+          return <BookingPageStep />;
+        }
       case 6:
-        return <BookingPageStep />;
+        if (hasProfessionalFeatures) {
+          return <BookingPageStep />;
+        } else {
+          // For non-Professional users, step 6 is the Review step
+          return (
+            <>
+              <ReviewPublishStep mode="publish" />
+            </>
+          );
+        }
       case 7:
+        // Only for Professional+ users
         return (
           <>
             <ReviewPublishStep mode="publish" />
-            {/* Add a direct submit button on the last step */}
-            {/* <div className='mt-6 text-center'>
-              <Button
-                type='submit'
-                className='bg-green-600 hover:bg-green-700 text-white px-8 py-2 text-lg font-semibold'
-              >
-                Submit Job Application
-              </Button>
-            </div> */}
           </>
         );
       default:

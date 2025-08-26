@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
+import { ChatRichTextEditor } from '@/components/dashboard/chats/ChatRichTextEditor';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
@@ -41,6 +42,7 @@ import {
   CheckCircle
 } from 'lucide-react';
 import { SubscriptionGuard } from '@/components/common/SubscriptionGuard';
+import useAuthSessionContext from '@/lib/context/AuthSessionContext';
 // Layout is provided by PrivateRoute
 import API from '@/http';
 import { format } from 'date-fns';
@@ -122,6 +124,7 @@ interface ChatConversation {
 const ConversationPage: React.FC = () => {
   const { conversationId } = useParams<{ conversationId: string }>();
   const navigate = useNavigate();
+  const { subscription } = useAuthSessionContext();
   const [conversation, setConversation] = useState<ChatConversation | null>(null);
   const [applicantConversations, setApplicantConversations] = useState<ChatConversation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -131,6 +134,9 @@ const ConversationPage: React.FC = () => {
   const [showApplicantModal, setShowApplicantModal] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Check if user has Enterprise plan for AI features
+  const hasEnterpriseFeatures = subscription?.planId === 'enterprise';
 
   useEffect(() => {
     if (conversationId) {
@@ -243,15 +249,60 @@ const ConversationPage: React.FC = () => {
     navigate(`/dashboard/chats/${newConversationId}`);
   };
 
-  const sendReply = async () => {
-    if (!replyContent.trim() || !conversation) return;
+  const sendReply = async (attachments?: File[]) => {
+    if ((!replyContent.trim() && !attachments?.length) || !conversation) return;
 
     try {
       setSending(true);
-      await API.emailChat.sendMessage(conversation.conversationId, {
-        htmlContent: `<p>${replyContent.replace(/\n/g, '<br>')}</p>`,
-        textContent: replyContent,
-      });
+      
+      // If there are attachments, upload them first
+      let attachmentUrls: string[] = [];
+      if (attachments?.length) {
+        const formData = new FormData();
+        attachments.forEach((file) => {
+          formData.append(`files`, file);
+        });
+        
+        // Add conversation ID for context
+        formData.append('conversationId', conversation.conversationId);
+        
+        try {
+          const uploadResponse = await fetch('/api/v1/chat/upload-attachments', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            },
+            body: formData,
+          });
+          
+          const uploadResult = await uploadResponse.json();
+          if (uploadResult.success) {
+            attachmentUrls = uploadResult.data.urls || [];
+          } else {
+            throw new Error(uploadResult.message || 'Failed to upload attachments');
+          }
+        } catch (uploadError) {
+          toast.error('Failed to upload attachments. Please try again.');
+          return;
+        }
+      }
+      
+      // Prepare message data
+      const messageData: any = {
+        htmlContent: replyContent,
+        textContent: replyContent.replace(/<[^>]*>/g, ''), // Strip HTML for text content
+      };
+      
+      if (attachmentUrls.length > 0) {
+        messageData.attachments = attachmentUrls.map((url, index) => ({
+          url,
+          filename: attachments?.[index]?.name || `attachment-${index}`,
+          type: attachments?.[index]?.type || 'application/octet-stream',
+          size: attachments?.[index]?.size || 0
+        }));
+      }
+      
+      await API.emailChat.sendMessage(conversation.conversationId, messageData);
 
       setReplyContent('');
       toast.success('Message sent successfully!');
@@ -266,12 +317,7 @@ const ConversationPage: React.FC = () => {
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendReply();
-    }
-  };
+  // Keyboard handling is now managed by the ChatRichTextEditor component
 
   const handleArchive = async () => {
     if (!conversation) return;
@@ -393,7 +439,7 @@ const ConversationPage: React.FC = () => {
           {/* Chat Header */}
           <div className="bg-white border-b border-gray-200 shadow-sm">
             <div className="flex items-center justify-between px-4 py-3">
-              <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3">
                 <Button 
                   variant="ghost" 
                   size="sm" 
@@ -401,16 +447,16 @@ const ConversationPage: React.FC = () => {
                   className="p-2 hover:bg-gray-100 rounded-full"
                 >
                   <ArrowLeft className="h-5 w-5" />
-                </Button>
+              </Button>
                 <div className="relative">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={undefined} />
+              <Avatar className="h-10 w-10">
+                <AvatarImage src={undefined} />
                     <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-medium">
-                      {getApplicantInitials()}
-                    </AvatarFallback>
-                  </Avatar>
+                  {getApplicantInitials()}
+                </AvatarFallback>
+              </Avatar>
                   <div className="absolute -bottom-0.5 -right-0.5 bg-green-500 border-2 border-white rounded-full w-3 h-3"></div>
-                </div>
+                    </div>
                 <div className="flex-1 min-w-0">
                   <h1 className="text-lg font-semibold text-gray-900 truncate">{getApplicantName()}</h1>
                   <div className="flex items-center gap-2 text-sm text-gray-500">
@@ -421,11 +467,11 @@ const ConversationPage: React.FC = () => {
                       </>
                     )}
                     <span className="text-green-600 font-medium">Online</span>
-                  </div>
                 </div>
               </div>
+            </div>
             
-              <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
                 {/* Applicant Info Button */}
                 <Button 
                   variant="ghost" 
@@ -486,8 +532,8 @@ const ConversationPage: React.FC = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    {conversation.status === 'active' && (
-                      <>
+              {conversation.status === 'active' && (
+                <>
                         <DropdownMenuItem onClick={handleClose} className="gap-2">
                           <X className="h-4 w-4" />
                           Close conversation
@@ -496,8 +542,8 @@ const ConversationPage: React.FC = () => {
                           <Archive className="h-4 w-4" />
                           Archive conversation
                         </DropdownMenuItem>
-                      </>
-                    )}
+                </>
+              )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -507,13 +553,13 @@ const ConversationPage: React.FC = () => {
           {/* Applicant Info Panel */}
           {showApplicantInfo && conversation.applicantId && (
             <div className="bg-blue-50 border-b border-blue-200 px-4 py-3 animate-in slide-in-from-top duration-300">
-              <div className="flex items-start gap-4">
+                <div className="flex items-start gap-4">
                 <Avatar className="h-12 w-12 border-2 border-white shadow-sm">
-                  <AvatarImage src={undefined} />
+                    <AvatarImage src={undefined} />
                   <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-medium">
-                    {getApplicantInitials()}
-                  </AvatarFallback>
-                </Avatar>
+                      {getApplicantInitials()}
+                    </AvatarFallback>
+                  </Avatar>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-gray-900 text-lg mb-1">{getApplicantName()}</h3>
                   
@@ -534,7 +580,7 @@ const ConversationPage: React.FC = () => {
                       <div className="flex items-center gap-2">
                         <MapPin className="h-4 w-4 text-red-500 flex-shrink-0" />
                         <span className="text-gray-700">
-                          {conversation.applicantId.city}{conversation.applicantId.city && conversation.applicantId.state && ', '}{conversation.applicantId.state}
+                        {conversation.applicantId.city}{conversation.applicantId.city && conversation.applicantId.state && ', '}{conversation.applicantId.state}
                         </span>
                       </div>
                     )}
@@ -544,9 +590,9 @@ const ConversationPage: React.FC = () => {
                         <Briefcase className="h-4 w-4 text-purple-500 flex-shrink-0" />
                         <div className="min-w-0">
                           <span className="text-gray-700 font-medium truncate">{conversation.applicantId.jobId.jobTitle}</span>
-                          {conversation.applicantId.jobId.location && (
+                        {conversation.applicantId.jobId.location && (
                             <span className="text-gray-500 ml-1">in {conversation.applicantId.jobId.location}</span>
-                          )}
+                        )}
                         </div>
                       </div>
                     )}
@@ -603,14 +649,14 @@ const ConversationPage: React.FC = () => {
                         <div className={`flex flex-col ${message.direction === 'outbound' ? 'items-end' : 'items-start'}`}>
                           <div
                             className={`px-3 py-2 rounded-2xl shadow-sm ${
-                              message.direction === 'outbound'
+                        message.direction === 'outbound'
                                 ? 'bg-blue-500 text-white rounded-br-sm'
                                 : 'bg-white text-gray-900 border border-gray-200 rounded-bl-sm'
-                            }`}
-                          >
+                      }`}
+                    >
                             <div className="text-sm leading-relaxed whitespace-pre-wrap">
-                              {getMessageContent(message)}
-                            </div>
+                        {getMessageContent(message)}
+                      </div>
                           </div>
                           
                           <div className={`flex items-center gap-1 mt-1 text-xs text-gray-500 ${
@@ -626,46 +672,31 @@ const ConversationPage: React.FC = () => {
                                   </div>
                                 ) : (
                                   <Check className="h-3 w-3 text-gray-400" />
-                                )}
-                              </div>
+                        )}
+                      </div>
                             )}
-                          </div>
-                        </div>
+                    </div>
+                  </div>
                       </div>
                     </div>
                   </div>
                 );
               })}
-              <div ref={messagesEndRef} />
-            </div>
+                <div ref={messagesEndRef} />
+              </div>
           </div>
 
-          {/* Chat Input */}
+          {/* Chat Input - Rich Text Editor */}
           {conversation.status === 'active' && (
-            <div className="bg-white border-t border-gray-200 px-4 py-3">
-              <div className="flex items-end gap-3">
-                <div className="flex-1">
-                  <Textarea
-                    placeholder="Type a message..."
-                    value={replyContent}
-                    onChange={(e) => setReplyContent(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    className="min-h-10 max-h-32 resize-none border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-full px-4 py-2 text-sm"
-                    rows={1}
-                  />
-                </div>
-                <Button
-                  onClick={sendReply}
-                  disabled={!replyContent.trim() || sending}
-                  className="bg-blue-500 hover:bg-blue-600 text-white rounded-full w-10 h-10 p-0 flex items-center justify-center disabled:opacity-50"
-                >
-                  {sending ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  ) : (
-                    <Send className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
+            <div className="bg-white border-t border-gray-200 p-4">
+              <ChatRichTextEditor
+                  value={replyContent}
+                onChange={setReplyContent}
+                onSend={sendReply}
+                sending={sending}
+                placeholder="Type a message... Press Enter to send, Shift+Enter for new line"
+                className="w-full"
+              />
             </div>
           )}
 
@@ -702,7 +733,7 @@ const ConversationPage: React.FC = () => {
                         </h2>
                         <p className="text-blue-100 flex items-center gap-2">
                           <Calendar className="w-3 h-3" />
-                          Applied {conversation.applicantId.createdAt ? formatDate(conversation.applicantId.createdAt) : 'Recently'}
+                          Applied {conversation.applicantId.createdAt ? formatDate(conversation.applicantId.createdAt) : 'Date not available'}
                         </p>
                       </div>
                     </div>
@@ -717,22 +748,22 @@ const ConversationPage: React.FC = () => {
                           {conversation.applicantId.aiEvaluation.recommendationLevel}
                         </Badge>
                       )}
-                      <Button
+                  <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => setShowApplicantModal(false)}
                         className="text-white hover:bg-white/20"
                       >
                         <X className="w-4 h-4" />
-                      </Button>
-                    </div>
+                  </Button>
+                </div>
                   </div>
                 </div>
 
                 {/* Tabs Content */}
                 <div className="flex-1 min-h-0 pt-14">
                   <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col px-6">
-                    <TabsList className="grid w-full grid-cols-3 mb-6">
+                    <TabsList className={`grid w-full mb-6 ${hasEnterpriseFeatures ? 'grid-cols-3' : 'grid-cols-2'}`}>
                       <TabsTrigger value="overview" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700">
                         <User className="w-4 h-4 mr-2" />
                         Overview
@@ -741,10 +772,12 @@ const ConversationPage: React.FC = () => {
                         <FileText className="w-4 h-4 mr-2" />
                         Documents
                       </TabsTrigger>
-                      <TabsTrigger value="ai-score" className="data-[state=active]:bg-purple-50 data-[state=active]:text-purple-700">
-                        <Brain className="w-4 h-4 mr-2" />
-                        AI Analysis
-                      </TabsTrigger>
+                      {hasEnterpriseFeatures && (
+                        <TabsTrigger value="ai-score" className="data-[state=active]:bg-purple-50 data-[state=active]:text-purple-700">
+                          <Brain className="w-4 h-4 mr-2" />
+                          AI Analysis
+                        </TabsTrigger>
+                      )}
                     </TabsList>
 
                     <div className="flex-1 min-h-0 relative">
@@ -920,8 +953,9 @@ const ConversationPage: React.FC = () => {
                           )}
                         </TabsContent>
 
-                        {/* AI Score Tab */}
-                        <TabsContent value="ai-score" className="mt-0 space-y-8">
+                        {/* AI Score Tab - Enterprise Only */}
+                        {hasEnterpriseFeatures && (
+                          <TabsContent value="ai-score" className="mt-0 space-y-8">
                           {conversation.applicantId.aiEvaluation ? (
                             <>
                               {/* AI Score Header */}
@@ -1132,7 +1166,8 @@ const ConversationPage: React.FC = () => {
                               </div>
                             </div>
                           )}
-                        </TabsContent>
+                          </TabsContent>
+                        )}
                       </ScrollArea>
                     </div>
                   </Tabs>

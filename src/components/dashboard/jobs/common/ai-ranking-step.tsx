@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Switch } from "@/components/ui/switch";
+import { SubscriptionGuard } from "@/components/common/SubscriptionGuard";
+import useAuthSessionContext from "@/lib/context/AuthSessionContext";
 
 import {
   Plus,
@@ -31,6 +33,11 @@ import { useFormContext } from "react-hook-form";
 
 export function AIRankingStep() {
   const { watch, setValue } = useFormContext();
+  const { subscription } = useAuthSessionContext();
+  
+  // Check subscription for AI features
+  const hasProfessionalFeatures = subscription?.planId === 'professional' || subscription?.planId === 'enterprise';
+  const hasEnterpriseFeatures = subscription?.planId === 'enterprise';
   
   // Section-based scoring system - get actual qualification data
   const requiredQualifications = watch("requiredQualifications") || [];
@@ -195,6 +202,24 @@ export function AIRankingStep() {
     { value: "rejection-standard", label: "Standard Rejection" },
   ];
 
+  // Show basic AI features to Professional+, advanced features to Enterprise only
+  if (!hasProfessionalFeatures) {
+    return (
+      <SubscriptionGuard requiredPlan="professional" showUpgradePrompt={true}>
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900">
+              AI Ranking & Automation
+            </h2>
+            <p className="text-gray-600 mt-2">
+              Set up automated candidate evaluation and ranking with AI. Upgrade to Professional to access AI ranking features.
+            </p>
+          </div>
+        </div>
+      </SubscriptionGuard>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -203,6 +228,11 @@ export function AIRankingStep() {
         </h2>
         <p className="text-sm text-gray-600 mt-1">
           Configure scoring for each section with Auto Reject, Manual Review, and Pass thresholds.
+          {!hasEnterpriseFeatures && (
+            <span className="block mt-1 text-amber-600 text-sm">
+              💡 Upgrade to Enterprise for automatic evaluation and advanced AI features.
+            </span>
+          )}
         </p>
       </div>
 
