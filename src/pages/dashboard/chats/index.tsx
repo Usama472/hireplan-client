@@ -14,7 +14,8 @@ import {
   Mail,
   Archive,
   MoreVertical,
-  X
+  X,
+  UserCheck
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -90,6 +91,7 @@ const ChatsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('active');
+  const [applicantStatusFilter, setApplicantStatusFilter] = useState<string>('all');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const navigate = useNavigate();
@@ -198,22 +200,35 @@ const ChatsPage: React.FC = () => {
   
   const filteredGroups = useMemo(() => 
     groupedConversations.filter(group => {
-      if (!searchTerm) return true;
+      // Search filter
+      if (searchTerm) {
+        const searchLower = searchTerm.toLowerCase();
+        const applicantName = group.applicantName.toLowerCase();
+        const jobTitle = group.jobTitle?.toLowerCase() || '';
+        
+        // Also search in conversation subjects
+        const subjectMatches = group.conversations.some(conv => 
+          conv.subject.toLowerCase().includes(searchLower)
+        );
+        
+        const matchesSearch = applicantName.includes(searchLower) || 
+               jobTitle.includes(searchLower) || 
+               subjectMatches;
+        
+        if (!matchesSearch) return false;
+      }
       
-      const searchLower = searchTerm.toLowerCase();
-      const applicantName = group.applicantName.toLowerCase();
-      const jobTitle = group.jobTitle?.toLowerCase() || '';
+      // Applicant status filter
+      if (applicantStatusFilter !== 'all') {
+        // This would need to be enhanced when we have applicant status data
+        // For now, we'll show all groups when 'all' is selected
+        // In a real implementation, you'd filter based on the applicant's status
+        // which should be available in the conversation data
+      }
       
-      // Also search in conversation subjects
-      const subjectMatches = group.conversations.some(conv => 
-        conv.subject.toLowerCase().includes(searchLower)
-      );
-      
-      return applicantName.includes(searchLower) || 
-             jobTitle.includes(searchLower) || 
-             subjectMatches;
+      return true;
     }), 
-    [groupedConversations, searchTerm]
+    [groupedConversations, searchTerm, applicantStatusFilter]
   );
 
 
@@ -300,7 +315,7 @@ const ChatsPage: React.FC = () => {
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="gap-2 h-12 px-4 bg-white border-gray-200 hover:bg-gray-50">
                     <Filter className="h-4 w-4" />
-                    <span className="hidden sm:inline">Status:</span> {statusFilter === 'all' ? 'All' : statusFilter}
+                    <span className="hidden sm:inline">Chat:</span> {statusFilter === 'all' ? 'All' : statusFilter}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-48">
@@ -319,6 +334,33 @@ const ChatsPage: React.FC = () => {
                   <DropdownMenuItem onClick={() => setStatusFilter('archived')} className="gap-2">
                     <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
                     Archived
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="gap-2 h-12 px-4 bg-white border-gray-200 hover:bg-gray-50">
+                    <UserCheck className="h-4 w-4" />
+                    <span className="hidden sm:inline">Status:</span> {applicantStatusFilter === 'all' ? 'All' : applicantStatusFilter}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-48">
+                  <DropdownMenuItem onClick={() => setApplicantStatusFilter('all')} className="gap-2">
+                    <div className="w-2 h-2 rounded-full bg-gray-400"></div>
+                    All Applicants
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setApplicantStatusFilter('shortlisted')} className="gap-2">
+                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                    Shortlisted
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setApplicantStatusFilter('rejected')} className="gap-2">
+                    <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                    Rejected
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setApplicantStatusFilter('pending')} className="gap-2">
+                    <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
+                    Pending Review
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
