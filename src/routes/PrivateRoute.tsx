@@ -19,8 +19,8 @@ export const PrivateRoute = ({ children }: DefaultLayoutProps) => {
       <DashboardSidebar />
       <SidebarInset>
         <SubscriptionStatusAlert />
-        <div className='md:p-3 overflow-y-auto'>
-          <div className='bg-muted/50 overflow-y-auto'>{children}</div>
+        <div className='overflow-y-auto min-h-screen bg-white'>
+          {children}
         </div>
       </SidebarInset>
     </SidebarProvider>

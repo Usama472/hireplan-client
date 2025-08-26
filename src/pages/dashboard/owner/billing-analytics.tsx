@@ -306,7 +306,7 @@ export function BillingAnalytics() {
                 </div>
                 <div className="text-right">
                   <div className="text-sm font-medium">
-                    {i === 1 ? '+$79' : i === 2 ? '+$29' : i === 3 ? 'Failed' : i === 4 ? '+$50' : '-$29'}
+                    {i === 1 ? '+$249' : i === 2 ? '+$149' : i === 3 ? 'Failed' : i === 4 ? '+$100' : '-$149'}
                   </div>
                   <div className="text-xs text-gray-500">
                     {i === 1 ? '2 hours ago' : i === 2 ? '4 hours ago' : i === 3 ? '6 hours ago' : i === 4 ? '1 day ago' : '2 days ago'}

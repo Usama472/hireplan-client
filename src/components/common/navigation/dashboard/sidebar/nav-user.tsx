@@ -40,12 +40,12 @@ export function NavUser({
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="cursor-pointer hover:bg-primary/10 transition-colors rounded-lg"
+              className="cursor-pointer hover:bg-gray-100 transition-colors rounded-xl p-3 mx-2"
             >
               <div className="flex items-center gap-3 w-full">
-                <Avatar className="h-9 w-9 rounded-lg border-2 border-white">
+                <Avatar className="h-10 w-10 rounded-xl border-2 border-gray-200">
                   <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg bg-blue-100 text-blue-800 font-medium">
+                  <AvatarFallback className="rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 text-white font-medium">
                     {user.name
                       .split(" ")
                       .map((n) => n[0])
@@ -53,14 +53,14 @@ export function NavUser({
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left leading-tight">
-                  <span className="truncate font-medium text-white">
+                  <span className="truncate font-semibold text-gray-900">
                     {user.name}
                   </span>
-                  <span className="truncate text-xs text-gray-200">
+                  <span className="truncate text-xs text-gray-500">
                     {user.email}
                   </span>
                 </div>
-                <ChevronDown className="size-4 text-gray-100" />
+                <ChevronDown className="size-4 text-gray-400" />
               </div>
             </SidebarMenuButton>
           </DropdownMenuTrigger>

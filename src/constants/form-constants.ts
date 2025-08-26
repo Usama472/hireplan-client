@@ -34,7 +34,7 @@ export const PLANS = [
   {
     id: "starter",
     name: "Starter",
-    price: "$29",
+    price: "$149",
     period: "/month",
     description: "Perfect for small teams getting started",
     features: [
@@ -48,7 +48,7 @@ export const PLANS = [
   {
     id: "professional",
     name: "Professional",
-    price: "$79",
+    price: "$249",
     period: "/month",
     description: "Ideal for growing companies",
     features: [
@@ -59,6 +59,23 @@ export const PLANS = [
       "Custom workflows",
     ],
     popular: true,
+  },
+  {
+    id: "enterprise",
+    name: "Enterprise",
+    price: "$299",
+    period: "/month",
+    description: "For large organizations with advanced needs",
+    features: [
+      "Unlimited candidate profiles",
+      "Advanced AI matching",
+      "Dedicated support",
+      "Unlimited job postings",
+      "Custom workflows",
+      "API access",
+      "White-label options",
+    ],
+    popular: false,
   },
 ];
 

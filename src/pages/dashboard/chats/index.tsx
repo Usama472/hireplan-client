@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -14,7 +14,7 @@ import {
   Mail,
   Archive,
   MoreVertical,
-  MessageSquare
+  X
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -257,179 +257,198 @@ const ChatsPage: React.FC = () => {
 
   return (
     <SubscriptionGuard>
-        <div className="space-y-6">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <MessageCircle className="h-8 w-8 text-blue-600" />
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Chats</h1>
-                <p className="text-gray-600">Manage conversations with applicants</p>
+        <div className="space-y-6 px-6 py-4">
+          {/* Enhanced Header */}
+          <div className="flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50 -mx-6 px-6 py-6 border-b">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-blue-100 rounded-xl">
+                <MessageCircle className="h-6 w-6 text-blue-600" />
               </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Conversations</h1>
+                <p className="text-gray-600 flex items-center gap-2">
+                  Manage all your applicant communications
+                  <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                    {filteredGroups.length} active
+                  </Badge>
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button variant="outline" size="sm" className="gap-2">
+                <Archive className="h-4 w-4" />
+                View Archived
+              </Button>
             </div>
           </div>
 
-          {/* Filters and Search */}
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="flex-1">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                    <Input
-                      placeholder="Search by applicant name, job title, or subject..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" className="gap-2">
-                        <Filter className="h-4 w-4" />
-                        Status: {statusFilter === 'all' ? 'All' : statusFilter}
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem onClick={() => setStatusFilter('all')}>
-                        All Status
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => setStatusFilter('active')}>
-                        Active
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => setStatusFilter('closed')}>
-                        Closed
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => setStatusFilter('archived')}>
-                        Archived
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
+          {/* Enhanced Filters and Search */}
+          <div className="flex flex-col lg:flex-row gap-4 px-2">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                <Input
+                  placeholder="Search conversations by name, job title, or message content..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-12 h-12 bg-white border-gray-200 focus:border-blue-500 focus:ring-blue-500 text-base shadow-sm"
+                />
               </div>
-            </CardContent>
-          </Card>
+            </div>
+            <div className="flex gap-3">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="gap-2 h-12 px-4 bg-white border-gray-200 hover:bg-gray-50">
+                    <Filter className="h-4 w-4" />
+                    <span className="hidden sm:inline">Status:</span> {statusFilter === 'all' ? 'All' : statusFilter}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-48">
+                  <DropdownMenuItem onClick={() => setStatusFilter('all')} className="gap-2">
+                    <div className="w-2 h-2 rounded-full bg-gray-400"></div>
+                    All Conversations
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setStatusFilter('active')} className="gap-2">
+                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                    Active
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setStatusFilter('closed')} className="gap-2">
+                    <div className="w-2 h-2 rounded-full bg-gray-500"></div>
+                    Closed
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setStatusFilter('archived')} className="gap-2">
+                    <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
+                    Archived
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
 
-          {/* Conversations List */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MessageSquare className="h-5 w-5" />
-                Conversations ({filteredGroups.length} applicants)
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              {loading ? (
-                <div className="p-8 text-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                  <p className="mt-2 text-gray-600">Loading conversations...</p>
-                </div>
-              ) : filteredGroups.length === 0 ? (
-                <div className="p-8 text-center">
-                  <MessageCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No conversations found</h3>
-                  <p className="text-gray-600">
-                    {searchTerm ? 'Try adjusting your search criteria.' : 'Start chatting with applicants to see conversations here.'}
+          {/* Enhanced Conversations List */}
+          <div className="space-y-4">
+            {loading ? (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600 text-lg">Loading conversations...</p>
+                </CardContent>
+              </Card>
+            ) : filteredGroups.length === 0 ? (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <div className="bg-gray-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
+                    <MessageCircle className="h-10 w-10 text-gray-400" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">No conversations found</h3>
+                  <p className="text-gray-600 text-base max-w-md mx-auto">
+                    {searchTerm ? 'Try adjusting your search criteria to find conversations.' : 'When applicants start messaging you, their conversations will appear here.'}
                   </p>
-                </div>
-              ) : (
-                <div className="divide-y divide-gray-200">
-                  {filteredGroups.map((group) => {
-                    const lastMessage = getLastMessage(group.latestConversation);
-                    
-                    // Debug logging
-                    console.log('🔍 Group:', group);
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4">
+                {filteredGroups.map((group) => {
+                  const lastMessage = getLastMessage(group.latestConversation);
+                  
+                  return (
+                    <Card
+                      key={group.applicantId}
+                      onClick={() => handleGroupClick(group)}
+                      className="hover:shadow-md cursor-pointer transition-all duration-200 border-l-4 border-l-transparent hover:border-l-blue-500 bg-white"
+                    >
+                      <CardContent className="p-6">
+                        <div className="flex items-start gap-4">
+                          {/* Enhanced Avatar */}
+                          <div className="relative">
+                            <Avatar className="h-14 w-14 border-2 border-white shadow-sm">
+                              <AvatarImage src={undefined} />
+                              <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold text-lg">
+                                {group.applicantInitials}
+                              </AvatarFallback>
+                            </Avatar>
+                            {group.totalUnread > 0 && (
+                              <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold">
+                                {group.totalUnread > 9 ? '9+' : group.totalUnread}
+                              </div>
+                            )}
+                          </div>
 
-                    return (
-                      <div
-                        key={group.applicantId}
-                        onClick={() => handleGroupClick(group)}
-                        className="p-4 hover:bg-gray-50 cursor-pointer transition-colors"
-                      >
-                        <div className="flex items-start gap-3">
-                          {/* Avatar */}
-                          <Avatar className="h-10 w-10">
-                            <AvatarImage src={undefined} />
-                            <AvatarFallback className="bg-blue-100 text-blue-600 font-medium">
-                              {group.applicantInitials}
-                            </AvatarFallback>
-                          </Avatar>
-
-                          {/* Content */}
+                          {/* Enhanced Content */}
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between">
+                            <div className="flex items-start justify-between mb-3">
                               <div className="min-w-0 flex-1">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <h3 className="font-medium text-gray-900 truncate">
+                                <div className="flex items-center gap-3 mb-2">
+                                  <h3 className="font-semibold text-gray-900 text-lg truncate">
                                     {group.applicantName}
                                   </h3>
-                                  {group.conversations.length > 1 && (
-                                    <Badge variant="secondary" className="bg-purple-100 text-purple-800">
-                                      {group.conversations.length} chats
+                                  <div className="flex items-center gap-2">
+                                    {group.conversations.length > 1 && (
+                                      <Badge variant="secondary" className="bg-purple-50 text-purple-700 border-purple-200">
+                                        {group.conversations.length} threads
+                                      </Badge>
+                                    )}
+                                    <Badge className={`${getStatusColor(group.latestConversation.status)} border-0`}>
+                                      {group.latestConversation.status}
                                     </Badge>
-                                  )}
-                                  {group.totalUnread > 0 && (
-                                    <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                                      {group.totalUnread} new
-                                    </Badge>
-                                  )}
-                                  <Badge className={getStatusColor(group.latestConversation.status)}>
-                                    {group.latestConversation.status}
-                                  </Badge>
+                                  </div>
                                 </div>
                                 
-                                <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
+                                <div className="flex items-center gap-6 text-sm text-gray-600 mb-3">
                                   {group.jobTitle ? (
-                                    <div className="flex items-center gap-1">
-                                      <Briefcase className="h-3 w-3" />
-                                      <span className="truncate">{group.jobTitle}</span>
+                                    <div className="flex items-center gap-2">
+                                      <Briefcase className="h-4 w-4 text-blue-500" />
+                                      <span className="font-medium truncate">{group.jobTitle}</span>
                                     </div>
                                   ) : (
-                                    <div className="flex items-center gap-1 text-gray-400">
-                                      <Briefcase className="h-3 w-3" />
-                                      <span className="truncate text-xs">No job linked</span>
+                                    <div className="flex items-center gap-2 text-gray-400">
+                                      <Briefcase className="h-4 w-4" />
+                                      <span className="text-sm italic">No job linked</span>
                                     </div>
                                   )}
-                                  <div className="flex items-center gap-1">
-                                    <Mail className="h-3 w-3" />
-                                    <span className="truncate">{group.latestConversation.subject}</span>
+                                  <div className="flex items-center gap-2">
+                                    <Mail className="h-4 w-4 text-green-500" />
+                                    <span className="truncate font-medium">{group.latestConversation.subject}</span>
                                   </div>
                                 </div>
 
-                                <p className="text-sm text-gray-600 line-clamp-2">
-                                  {lastMessage}
-                                </p>
+                                <div className="bg-gray-50 rounded-lg p-3 border">
+                                  <p className="text-sm text-gray-700 line-clamp-2 leading-relaxed">
+                                    {lastMessage}
+                                  </p>
+                                </div>
                               </div>
 
-                              {/* Actions */}
-                              <div className="flex items-center gap-2 ml-2">
-                                <div className="flex items-center gap-1 text-xs text-gray-500">
-                                  <Clock className="h-3 w-3" />
-                                  <span>
+                              {/* Enhanced Actions */}
+                              <div className="flex items-center gap-3 ml-4">
+                                <div className="flex items-center gap-2 text-sm text-gray-500 bg-gray-50 px-3 py-1 rounded-full">
+                                  <Clock className="h-4 w-4" />
+                                  <span className="font-medium">
                                     {formatDistanceToNow(new Date(group.latestConversation.lastMessageAt), { addSuffix: true })}
                                   </span>
                                 </div>
                                 
                                 <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                      <MoreVertical className="h-4 w-4" />
+                                    <Button variant="ghost" size="sm" className="h-10 w-10 p-0 hover:bg-gray-100 rounded-full">
+                                      <MoreVertical className="h-5 w-5" />
                                     </Button>
                                   </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end">
+                                  <DropdownMenuContent align="end" className="w-48">
                                     {group.latestConversation.status === 'active' && (
                                       <>
                                         <DropdownMenuItem 
                                           onClick={(e) => handleCloseConversation(group.latestConversation.conversationId, e)}
+                                          className="gap-2"
                                         >
+                                          <X className="h-4 w-4" />
                                           Close conversation
                                         </DropdownMenuItem>
                                         <DropdownMenuItem 
                                           onClick={(e) => handleArchiveConversation(group.latestConversation.conversationId, e)}
+                                          className="gap-2"
                                         >
-                                          <Archive className="mr-2 h-4 w-4" />
+                                          <Archive className="h-4 w-4" />
                                           Archive
                                         </DropdownMenuItem>
                                       </>
@@ -440,13 +459,13 @@ const ChatsPage: React.FC = () => {
                             </div>
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </div>
 
           {/* Pagination */}
           {totalPages > 1 && (

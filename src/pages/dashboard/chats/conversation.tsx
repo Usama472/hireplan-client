@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
@@ -16,7 +16,12 @@ import {
   X,
   Check,
   AlertCircle,
-  ChevronDown
+
+  MessageSquare,
+  MoreVertical,
+  Info,
+  Phone,
+  MapPin
 } from 'lucide-react';
 import { SubscriptionGuard } from '@/components/common/SubscriptionGuard';
 // Layout is provided by PrivateRoute
@@ -77,6 +82,7 @@ const ConversationPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [replyContent, setReplyContent] = useState('');
+  const [showApplicantInfo, setShowApplicantInfo] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -244,14 +250,7 @@ const ConversationPage: React.FC = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active': return 'bg-green-100 text-green-800';
-      case 'closed': return 'bg-gray-100 text-gray-800';
-      case 'archived': return 'bg-yellow-100 text-yellow-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
+
 
   const getApplicantName = () => {
     if (!conversation) return 'Unknown';
@@ -305,51 +304,59 @@ const ConversationPage: React.FC = () => {
 
   return (
     <SubscriptionGuard>
-        <div className="space-y-6">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Button variant="outline" size="sm" onClick={() => navigate('/dashboard/chats')}>
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-              <Avatar className="h-10 w-10">
-                <AvatarImage src={undefined} />
-                <AvatarFallback className="bg-blue-100 text-blue-600 font-medium">
-                  {getApplicantInitials()}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">{getApplicantName()}</h1>
-                <div className="flex items-center gap-4 text-sm text-gray-600">
-                  {conversation.applicantId?.jobId && (
-                    <div className="flex items-center gap-1">
-                      <Briefcase className="h-3 w-3" />
-                      <span>{conversation.applicantId.jobId.jobTitle}</span>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-1">
-                    <Mail className="h-3 w-3" />
-                    <span>{conversation.subject}</span>
+        <div className="h-screen flex flex-col bg-white">
+          {/* Chat Header */}
+          <div className="bg-white border-b border-gray-200 shadow-sm">
+            <div className="flex items-center justify-between px-4 py-3">
+              <div className="flex items-center gap-3">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => navigate('/dashboard/chats')} 
+                  className="p-2 hover:bg-gray-100 rounded-full"
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                </Button>
+                <div className="relative">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={undefined} />
+                    <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-medium">
+                      {getApplicantInitials()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="absolute -bottom-0.5 -right-0.5 bg-green-500 border-2 border-white rounded-full w-3 h-3"></div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h1 className="text-lg font-semibold text-gray-900 truncate">{getApplicantName()}</h1>
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    {conversation.applicantId?.jobId && (
+                      <>
+                        <span className="truncate">{conversation.applicantId.jobId.jobTitle}</span>
+                        <span>•</span>
+                      </>
+                    )}
+                    <span className="text-green-600 font-medium">Online</span>
                   </div>
                 </div>
               </div>
-            </div>
             
-            <div className="flex items-center gap-2">
-              {/* Conversation Selector - Debug: Always show */}
-              {true && (
-                <div className="flex items-center gap-2 mr-4">
-                  <span className="text-sm text-gray-600">Conversation:</span>
+              <div className="flex items-center gap-2">
+                {/* Applicant Info Button */}
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setShowApplicantInfo(!showApplicantInfo)}
+                  className={`p-2 hover:bg-gray-100 rounded-full ${showApplicantInfo ? 'bg-blue-100 text-blue-600' : ''}`}
+                >
+                  <Info className="h-5 w-5" />
+                </Button>
+                
+                {/* Thread selector */}
+                {applicantConversations.length > 1 && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm" className="min-w-32">
-                        {applicantConversations.length === 0 
-                          ? "Loading conversations..." 
-                          : applicantConversations.length === 1 
-                          ? "1 conversation" 
-                          : `${applicantConversations.length} conversations`
-                        }
-                        <ChevronDown className="ml-2 h-4 w-4" />
+                      <Button variant="ghost" size="sm" className="p-2 hover:bg-gray-100 rounded-full">
+                        <MessageSquare className="h-5 w-5" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-80">
@@ -357,7 +364,7 @@ const ConversationPage: React.FC = () => {
                         <DropdownMenuItem
                           key={conv.conversationId}
                           onClick={() => switchToConversation(conv.conversationId)}
-                          className={`flex flex-col items-start p-3 ${
+                          className={`flex flex-col items-start p-3 space-y-1 ${
                             conv.conversationId === conversation.conversationId ? 'bg-blue-50' : ''
                           }`}
                         >
@@ -367,157 +374,213 @@ const ConversationPage: React.FC = () => {
                               {conv.status}
                             </Badge>
                           </div>
-                          <div className="text-xs text-gray-500 mt-1">
-                            {format(new Date(conv.lastMessageAt), 'MMM d, yyyy')} • {conv.messages.length} messages
+                          <div className="text-xs text-gray-500">
+                            {format(new Date(conv.lastMessageAt), 'MMM d')} • {conv.messages.length} messages
                           </div>
                         </DropdownMenuItem>
                       ))}
                     </DropdownMenuContent>
                   </DropdownMenu>
-                </div>
-              )}
-              
-              <Badge className={getStatusColor(conversation.status)}>
-                {conversation.status}
-              </Badge>
-              {conversation.status === 'active' && (
-                <>
-                  <Button variant="outline" size="sm" onClick={handleClose}>
-                    <X className="mr-2 h-4 w-4" />
-                    Close
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={handleArchive}>
-                    <Archive className="mr-2 h-4 w-4" />
-                    Archive
-                  </Button>
-                </>
-              )}
+                )}
+                
+                {/* Action menu */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="p-2 hover:bg-gray-100 rounded-full">
+                      <MoreVertical className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {conversation.status === 'active' && (
+                      <>
+                        <DropdownMenuItem onClick={handleClose} className="gap-2">
+                          <X className="h-4 w-4" />
+                          Close conversation
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleArchive} className="gap-2">
+                          <Archive className="h-4 w-4" />
+                          Archive conversation
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
           </div>
 
-          {/* Applicant Info */}
-          {conversation.applicantId && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Applicant Information</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-start gap-4">
-                  <Avatar className="h-16 w-16">
-                    <AvatarImage src={undefined} />
-                    <AvatarFallback className="bg-blue-100 text-blue-600 font-medium text-lg">
-                      {getApplicantInitials()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900">{getApplicantName()}</h3>
-                    <p className="text-gray-600 mb-1">{conversation.applicantId.email}</p>
+          {/* Applicant Info Panel */}
+          {showApplicantInfo && conversation.applicantId && (
+            <div className="bg-blue-50 border-b border-blue-200 px-4 py-3 animate-in slide-in-from-top duration-300">
+              <div className="flex items-start gap-4">
+                <Avatar className="h-12 w-12 border-2 border-white shadow-sm">
+                  <AvatarImage src={undefined} />
+                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-medium">
+                    {getApplicantInitials()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-gray-900 text-lg mb-1">{getApplicantName()}</h3>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                    <div className="flex items-center gap-2">
+                      <Mail className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                      <span className="text-gray-700 truncate">{conversation.applicantId.email}</span>
+                    </div>
+                    
                     {conversation.applicantId.phone && (
-                      <p className="text-gray-600 mb-1">{conversation.applicantId.phone}</p>
-                    )}
-                    {(conversation.applicantId.city || conversation.applicantId.state) && (
-                      <p className="text-gray-600 mb-2">
-                        {conversation.applicantId.city}{conversation.applicantId.city && conversation.applicantId.state && ', '}{conversation.applicantId.state}
-                      </p>
-                    )}
-                    {conversation.applicantId?.jobId && (
-                      <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-                        <Briefcase className="h-4 w-4" />
-                        <span>Applied for: <strong>{conversation.applicantId.jobId.jobTitle}</strong></span>
-                        {conversation.applicantId.jobId.location && (
-                          <span className="text-gray-500">in {conversation.applicantId.jobId.location}</span>
-                        )}
+                      <div className="flex items-center gap-2">
+                        <Phone className="h-4 w-4 text-green-500 flex-shrink-0" />
+                        <span className="text-gray-700">{conversation.applicantId.phone}</span>
                       </div>
                     )}
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
-                      <Clock className="h-4 w-4" />
-                      <span>Last active: {format(new Date(conversation.lastMessageAt), 'MMM dd, yyyy HH:mm')}</span>
+                    
+                    {(conversation.applicantId.city || conversation.applicantId.state) && (
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4 text-red-500 flex-shrink-0" />
+                        <span className="text-gray-700">
+                          {conversation.applicantId.city}{conversation.applicantId.city && conversation.applicantId.state && ', '}{conversation.applicantId.state}
+                        </span>
+                      </div>
+                    )}
+                    
+                    {conversation.applicantId?.jobId && (
+                      <div className="flex items-center gap-2">
+                        <Briefcase className="h-4 w-4 text-purple-500 flex-shrink-0" />
+                        <div className="min-w-0">
+                          <span className="text-gray-700 font-medium truncate">{conversation.applicantId.jobId.jobTitle}</span>
+                          {conversation.applicantId.jobId.location && (
+                            <span className="text-gray-500 ml-1">in {conversation.applicantId.jobId.location}</span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-orange-500 flex-shrink-0" />
+                      <span className="text-gray-700">
+                        Last active: {format(new Date(conversation.lastMessageAt), 'MMM dd, HH:mm')}
+                      </span>
                     </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+                
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setShowApplicantInfo(false)}
+                  className="p-1 hover:bg-blue-200 rounded-full flex-shrink-0"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
           )}
 
-          {/* Messages */}
-          <Card className="flex-1">
-            <CardContent className="p-0">
-              <div className="h-96 overflow-y-auto p-4 space-y-4">
-                {conversation.messages.map((message) => (
-                  <div
-                    key={message._id}
-                    className={`flex ${message.direction === 'outbound' ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div
-                      className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                        message.direction === 'outbound'
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-100 text-gray-900'
-                      }`}
-                    >
-                      <div className="text-sm whitespace-pre-wrap">
-                        {getMessageContent(message)}
+          {/* Messages Area */}
+          <div className="flex-1 bg-gray-50 overflow-hidden">
+            <div className="h-full overflow-y-auto px-4 py-4 space-y-4">
+              {conversation.messages.map((message, index) => {
+                const showTimestamp = index === 0 || 
+                  (new Date(message.timestamp).getTime() - new Date(conversation.messages[index - 1].timestamp).getTime()) > 300000; // 5 minutes
+                
+                return (
+                  <div key={message._id} className="space-y-1">
+                    {showTimestamp && (
+                      <div className="flex justify-center my-4">
+                        <span className="bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full">
+                          {format(new Date(message.timestamp), 'MMM dd, HH:mm')}
+                        </span>
                       </div>
-                      <div
-                        className={`flex items-center gap-1 mt-1 text-xs ${
-                          message.direction === 'outbound'
-                            ? 'text-blue-100'
-                            : 'text-gray-500'
-                        }`}
-                      >
-                        <Clock className="h-3 w-3" />
-                        <span>{format(new Date(message.timestamp), 'MMM dd, HH:mm')}</span>
-                        {message.direction === 'outbound' && message.readReceipt && (
-                          <Check className="h-3 w-3 ml-1" />
+                    )}
+                    
+                    <div className={`flex ${message.direction === 'outbound' ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`flex gap-2 max-w-xs sm:max-w-md ${message.direction === 'outbound' ? 'flex-row-reverse' : 'flex-row'}`}>
+                        {message.direction === 'inbound' && (
+                          <Avatar className="h-7 w-7 flex-shrink-0">
+                            <AvatarImage src={undefined} />
+                            <AvatarFallback className="bg-gray-300 text-gray-600 text-xs">
+                              {getApplicantInitials()}
+                            </AvatarFallback>
+                          </Avatar>
                         )}
+                        
+                        <div className={`flex flex-col ${message.direction === 'outbound' ? 'items-end' : 'items-start'}`}>
+                          <div
+                            className={`px-3 py-2 rounded-2xl shadow-sm ${
+                              message.direction === 'outbound'
+                                ? 'bg-blue-500 text-white rounded-br-sm'
+                                : 'bg-white text-gray-900 border border-gray-200 rounded-bl-sm'
+                            }`}
+                          >
+                            <div className="text-sm leading-relaxed whitespace-pre-wrap">
+                              {getMessageContent(message)}
+                            </div>
+                          </div>
+                          
+                          <div className={`flex items-center gap-1 mt-1 text-xs text-gray-500 ${
+                            message.direction === 'outbound' ? 'flex-row-reverse' : 'flex-row'
+                          }`}>
+                            <span>{format(new Date(message.timestamp), 'HH:mm')}</span>
+                            {message.direction === 'outbound' && (
+                              <div className="flex items-center">
+                                {message.readReceipt ? (
+                                  <div className="flex text-blue-500">
+                                    <Check className="h-3 w-3" />
+                                    <Check className="h-3 w-3 -ml-1" />
+                                  </div>
+                                ) : (
+                                  <Check className="h-3 w-3 text-gray-400" />
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
-                ))}
-                <div ref={messagesEndRef} />
-              </div>
-            </CardContent>
-          </Card>
+                );
+              })}
+              <div ref={messagesEndRef} />
+            </div>
+          </div>
 
-          {/* Reply Box */}
+          {/* Chat Input */}
           {conversation.status === 'active' && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Send Reply</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Textarea
-                  placeholder="Type your message here..."
-                  value={replyContent}
-                  onChange={(e) => setReplyContent(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  className="min-h-24 resize-none"
-                />
-                <div className="flex justify-between items-center">
-                  <p className="text-sm text-gray-600">
-                    Press Enter to send, Shift+Enter for new line
-                  </p>
-                  <Button
-                    onClick={sendReply}
-                    disabled={!replyContent.trim() || sending}
-                    className="gap-2"
-                  >
-                    <Send className="h-4 w-4" />
-                    {sending ? 'Sending...' : 'Send Message'}
-                  </Button>
+            <div className="bg-white border-t border-gray-200 px-4 py-3">
+              <div className="flex items-end gap-3">
+                <div className="flex-1">
+                  <Textarea
+                    placeholder="Type a message..."
+                    value={replyContent}
+                    onChange={(e) => setReplyContent(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    className="min-h-10 max-h-32 resize-none border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-full px-4 py-2 text-sm"
+                    rows={1}
+                  />
                 </div>
-              </CardContent>
-            </Card>
+                <Button
+                  onClick={sendReply}
+                  disabled={!replyContent.trim() || sending}
+                  className="bg-blue-500 hover:bg-blue-600 text-white rounded-full w-10 h-10 p-0 flex items-center justify-center disabled:opacity-50"
+                >
+                  {sending ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+            </div>
           )}
 
           {conversation.status !== 'active' && (
-            <Card>
-              <CardContent className="p-6 text-center">
-                <p className="text-gray-600">
-                  This conversation is {conversation.status}. You cannot send new messages.
-                </p>
-              </CardContent>
-            </Card>
+            <div className="bg-gray-100 border-t border-gray-200 px-4 py-3 text-center">
+              <div className="flex items-center justify-center gap-2 text-gray-600 text-sm">
+                <AlertCircle className="h-4 w-4" />
+                <span>This conversation is {conversation.status}. You cannot send new messages.</span>
+              </div>
+            </div>
           )}
         </div>
     </SubscriptionGuard>

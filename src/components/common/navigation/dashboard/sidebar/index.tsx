@@ -93,30 +93,33 @@ export const DashboardSidebar = ({
       variant="inset"
       {...props}
       collapsible="icon"
-      className="bg-gray-200"
+      className="bg-white border-r border-gray-200"
     >
-      <SidebarHeader className="bg-gray-200">
+      <SidebarHeader className="bg-white border-b border-gray-100 px-6 py-4">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <div onClick={() => navigate("/")} className="cursor-pointer">
-                <img src="../../../../../public/logo.png" className="w-8" />
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{APP_NAME}</span>
+              <div onClick={() => navigate("/")} className="cursor-pointer hover:bg-gray-50 rounded-lg p-2 transition-colors">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">H</span>
+                </div>
+                <div className="grid flex-1 text-left text-sm leading-tight ml-3">
+                  <span className="truncate font-bold text-gray-900 text-base">{APP_NAME}</span>
+                  <span className="text-xs text-gray-500">Recruitment Platform</span>
                 </div>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent className="bg-gray-200">
+      <SidebarContent className="bg-white px-3 py-4">
         <NavProjects
-          name="Jobs"
+          name="Navigation"
           projects={staticData.projects}
           currentPath={location.pathname}
         />
       </SidebarContent>
-      <SidebarFooter className="bg-primary rounded-lg">
+      <SidebarFooter className="bg-white border-t border-gray-100 p-3">
         <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
