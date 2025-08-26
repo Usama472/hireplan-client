@@ -77,9 +77,9 @@ export function PricingSection() {
                 </ul>
 
                 <Button
-                  className={`w-full py-3 text-base font-semibold transition-all duration-200 ${
+                  className={`w-full py-3 text-base font-semibold transition-all duration-200 rounded-xl h-12 shadow-md hover:shadow-lg ${
                     plan.popular
-                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl'
+                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700'
                       : 'bg-gray-900 hover:bg-gray-800'
                   }`}
                   onClick={() =>

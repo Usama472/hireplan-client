@@ -37,6 +37,7 @@ import EditEmailTemplatePage from "@/pages/dashboard/email-template/edit";
 import GlobalSettingPage from "@/pages/dashboard/global-setting";
 import ChatsPage from "@/pages/dashboard/chats";
 import ConversationPage from "@/pages/dashboard/chats/conversation";
+import JobTemplatesPage from "@/pages/dashboard/job-templates";
 
 export const appRoutes: AppRoutesType[] = [
   {
@@ -182,6 +183,12 @@ export const appRoutes: AppRoutesType[] = [
     id: "chat-conversation",
     url: ROUTES.DASHBOARD.CHAT_CONVERSATION,
     element: <ConversationPage />,
+    isPrivate: true,
+  },
+  {
+    id: "job-templates",
+    url: ROUTES.DASHBOARD.JOB_TEMPLATES,
+    element: <JobTemplatesPage />,
     isPrivate: true,
   },
 ];

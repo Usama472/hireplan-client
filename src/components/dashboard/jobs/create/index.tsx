@@ -32,11 +32,14 @@ import {
   type JobFormSchema,
 } from "@/lib/validations/forms/job-form-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Database, FileText, RotateCcw } from "lucide-react";
+import { ArrowLeft, Database, FileText, RotateCcw, Sparkles, Layers } from "lucide-react";
 import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
+import { SaveAsTemplateDialog } from "./SaveAsTemplateDialog";
+import type { JobTemplate } from "@/types/job-template";
+
 
 // Draft Management Constants
 const DRAFT_STORAGE_KEY = "job_creation_draft";
@@ -73,7 +76,7 @@ function ProgressBar({
             variant="ghost"
             size="sm"
             onClick={() => window.history.back()}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 px-3 py-2 rounded-lg transition-all duration-200 font-medium"
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 px-4 py-2 rounded-xl transition-all duration-200 font-medium h-10 shadow-sm hover:shadow-md"
           >
             <ArrowLeft className="w-4 h-4" />
             <span className="hidden sm:inline">Back to Jobs</span>
@@ -218,7 +221,7 @@ function LoadDraftButton({
             variant="outline"
             size="sm"
             onClick={onLoadDraft}
-            className="bg-white border-amber-300 text-amber-700 hover:bg-amber-50 hover:border-amber-400"
+            className="bg-white border-amber-300 text-amber-700 hover:bg-amber-50 hover:border-amber-400 rounded-xl h-10 px-4 font-medium shadow-sm hover:shadow-md transition-all duration-200"
           >
             <RotateCcw className="w-4 h-4 mr-2" />
             Load Draft
@@ -228,7 +231,7 @@ function LoadDraftButton({
             variant="ghost"
             size="sm"
             onClick={onClearDraft}
-            className="text-gray-500 hover:text-red-600 hover:bg-red-50"
+            className="text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-xl h-10 px-4 font-medium shadow-sm hover:shadow-md transition-all duration-200"
           >
             Clear Draft
           </Button>
@@ -241,11 +244,16 @@ function LoadDraftButton({
 export default function CreateJob() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<JobTemplate | null>(null);
   const [draftInfo, setDraftInfo] = useState<{
     step: number;
     timestamp: number;
   } | null>(null);
+  const [showSaveTemplateDialog, setShowSaveTemplateDialog] = useState(false);
+  const [isEditingTemplate, setIsEditingTemplate] = useState(false);
+  const [editingTemplateId, setEditingTemplateId] = useState<string | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const { data: authSession, subscription } = useAuthSessionContext();
   const userId = authSession?.user?.id || "anonymous";
   
@@ -265,14 +273,6 @@ export default function CreateJob() {
   });
 
   const { trigger, clearErrors, setValue, watch, reset } = form;
-
-  // Check for existing draft on component mount
-  useEffect(() => {
-    const draft = loadDraftFromStorage(userId);
-    if (draft) {
-      setDraftInfo({ step: draft.currentStep, timestamp: draft.timestamp });
-    }
-  }, [userId]);
 
   // Auto-save draft on form data changes
   useEffect(() => {
@@ -299,6 +299,128 @@ export default function CreateJob() {
     setDraftInfo(null);
     toast.success("Draft cleared successfully!");
   };
+
+
+
+  // Template handling functions
+  const handleSelectTemplate = (template: JobTemplate) => {
+    setSelectedTemplate(template);
+    
+    // Convert template data to form format
+    const templateFormData: Partial<JobFormSchema> = {
+      jobTitle: template.jobTitle,
+      jobBoardTitle: template.jobBoardTitle || template.jobTitle,
+      jobDescription: template.jobDescription,
+      department: template.department || '',
+      customDepartment: template.customDepartment || '',
+      workplaceType: template.workplaceType as any,
+      employmentType: template.employmentType as any,
+      workSetting: template.workSetting || '',
+      country: template.country || 'US',
+      language: template.language || 'en',
+      hiringTimeline: (template.hiringTimeline as "1-3-days" | "3-7-days" | "1-2-weeks" | "2-4-weeks" | "more-than-4-weeks") || '1-2-weeks',
+      educationRequirement: template.educationRequirement || '',
+      payType: template.payType as any,
+      backgroundScreeningDisclaimer: template.backgroundScreeningDisclaimer || false,
+    };
+
+    // Handle job location
+    if (template.jobLocation) {
+      templateFormData.jobLocation = {
+        address: template.jobLocation.address,
+        city: template.jobLocation.city,
+        state: template.jobLocation.state,
+        country: template.jobLocation.country,
+        zipCode: template.jobLocation.zipCode || '',
+      };
+    }
+
+    // Handle pay rate
+    if (template.payRate) {
+      templateFormData.payRate = template.payRate as any;
+    }
+
+    // Handle qualifications (convert weight to score)
+    if (template.requiredQualifications) {
+      templateFormData.requiredQualifications = template.requiredQualifications.map(q => ({
+        text: q.text,
+        score: q.weight || 1
+      }));
+    }
+    if (template.preferredQualifications) {
+      templateFormData.preferredQualifications = template.preferredQualifications.map(q => ({
+        text: q.text,
+        score: q.weight || 1
+      }));
+    }
+
+    // Handle job requirements
+    if (template.jobRequirements) {
+      templateFormData.jobRequirements = template.jobRequirements;
+    }
+
+    // Handle custom questions
+    if (template.customQuestions) {
+      templateFormData.customQuestions = template.customQuestions as any;
+    }
+
+    // Handle schedule and hours (convert to proper format)
+    if (template.hoursPerWeek) {
+      templateFormData.hoursPerWeek = {
+        type: template.hoursPerWeek.min && template.hoursPerWeek.max ? 'range' : 'fixed-hours',
+        min: template.hoursPerWeek.min,
+        max: template.hoursPerWeek.max,
+      } as any;
+    }
+    if (template.schedule) {
+      templateFormData.schedule = template.schedule;
+    }
+
+    // Handle benefits
+    if (template.benefits) {
+      templateFormData.benefits = template.benefits;
+    }
+
+    // Only apply AI automation settings if user has Professional+ plan and template has them
+    if (hasProfessionalFeatures && (template as any).automation) {
+      templateFormData.automation = (template as any).automation;
+    }
+
+    // Apply template data to form
+    Object.entries(templateFormData).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        setValue(key as keyof JobFormSchema, value as any);
+      }
+    });
+
+    toast.success(`Template "${template.name}" applied successfully!`);
+  };
+
+  // Check for existing draft on component mount and handle template from navigation
+  useEffect(() => {
+    const draft = loadDraftFromStorage(userId);
+    if (draft && !location.state?.editMode) {
+      // Only load draft if we're not in edit mode
+      setDraftInfo({ step: draft.currentStep, timestamp: draft.timestamp });
+    }
+
+    // Check if we came from template selection or edit mode
+    if (location.state?.selectedTemplate) {
+      const template = location.state.selectedTemplate as JobTemplate;
+      const isEditMode = location.state.editMode;
+      
+      if (isEditMode) {
+        setIsEditingTemplate(true);
+        setEditingTemplateId(location.state.templateId);
+      }
+      
+      handleSelectTemplate(template);
+      // Clear the navigation state to prevent re-applying on refresh
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [userId]); // Removed dependencies that cause infinite loops
+
+
 
   const loadTestData = () => {
     Object.keys(JOB_FORM_TEST_DATA).forEach((key) => {
@@ -438,20 +560,35 @@ export default function CreateJob() {
     try {
       console.log("Attempting to create job with data:", data);
       const { automation, ...rest } = data;
-      const {
-        questionAutoFail,
-        enabledRules,
-        acceptanceThreshold,
-        manualReviewThreshold,
-        questionCriteria,
-        jobRules,
-        ...automationRest
-      } = automation;
-      console.log("automation", automation);
+      
+      // Create automation object with required fields
+      const automationData = {
+        enabledRules: automation?.enabledRules || [],
+        sectionWeights: automation?.sectionWeights || {
+          requiredQualifications: 25,
+          preferredQualifications: 15,
+          preScreeningQuestions: 35,
+          resume: 25
+        },
+        sectionThresholds: automation?.sectionThresholds || {
+          requiredQualifications: { autoReject: 30, manualReview: 70 },
+          preferredQualifications: { autoReject: 20, manualReview: 60 },
+          preScreeningQuestions: { autoReject: 40, manualReview: 80 },
+          resume: { autoReject: 30, manualReview: 70 }
+        },
+        acceptanceThreshold: automation?.acceptanceThreshold || 80,
+        manualReviewThreshold: automation?.manualReviewThreshold || 50,
+        questionAutoFail: automation?.questionAutoFail || [],
+        questionCriteria: automation?.questionCriteria || {},
+        jobRules: automation?.jobRules || [],
+        template: automation?.template || null
+      };
+      
       const newData = {
         ...rest,
-        automation: automationRest,
+        automation: automationData,
       };
+      
       await API.job.createJob(newData);
       clearDraftFromStorage(userId);
       toast.success("Job created successfully!");
@@ -547,12 +684,54 @@ export default function CreateJob() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-5">
         <ProgressBar currentStep={currentStep} totalSteps={totalSteps} />
 
-        {/* Load Draft Button */}
-        <LoadDraftButton
-          onLoadDraft={loadDraft}
-          onClearDraft={clearDraft}
-          draftInfo={draftInfo}
-        />
+        {/* Template Status & Actions */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            {selectedTemplate && (
+              <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
+                <Sparkles className="h-4 w-4 text-blue-600" />
+                <span className="text-sm font-medium text-blue-700">
+                  Using template: {selectedTemplate.name}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate(ROUTES.DASHBOARD.JOB_TEMPLATES)}
+                  className="h-6 w-6 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-100"
+                >
+                  <RotateCcw className="h-3 w-3" />
+                </Button>
+              </div>
+            )}
+            
+            <LoadDraftButton
+              onLoadDraft={loadDraft}
+              onClearDraft={clearDraft}
+              draftInfo={draftInfo}
+            />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowSaveTemplateDialog(true)}
+              className="rounded-lg border-green-200 text-green-600 hover:bg-green-50 hover:border-green-300"
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              Save as Template
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate(ROUTES.DASHBOARD.JOB_TEMPLATES, { state: { fromJobCreation: true } })}
+              className="rounded-lg border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300"
+            >
+              <Layers className="h-4 w-4 mr-2" />
+              {selectedTemplate ? 'Change Template' : 'Browse Templates'}
+            </Button>
+          </div>
+        </div>
 
         <Card className="shadow-sm border-0 bg-white p-3">
           <CardContent className="px-8 pt-4 pb-4">
@@ -574,12 +753,49 @@ export default function CreateJob() {
                   isFirstStep={currentStep === 1}
                   isLastStep={currentStep === totalSteps}
                   isValid={true}
+                  finalStepText="Create Job"
                   isSubmitting={isSubmitting}
                 />
               </form>
             </FormProvider>
           </CardContent>
         </Card>
+
+        {/* Save as Template Dialog */}
+        <SaveAsTemplateDialog
+          isOpen={showSaveTemplateDialog}
+          onClose={() => setShowSaveTemplateDialog(false)}
+          formData={form.getValues()}
+          isEditMode={isEditingTemplate}
+          templateId={editingTemplateId || undefined}
+          existingTemplate={selectedTemplate ? {
+            name: selectedTemplate.name,
+            description: selectedTemplate.description,
+            category: selectedTemplate.category,
+            tags: selectedTemplate.tags,
+            isPublic: selectedTemplate.isPublic
+          } : undefined}
+          onSaved={() => {
+            if (isEditingTemplate) {
+              toast.success("Template updated! Changes have been saved.", {
+                action: {
+                  label: "View Templates",
+                  onClick: () => navigate(ROUTES.DASHBOARD.JOB_TEMPLATES)
+                }
+              });
+              // Reset edit mode
+              setIsEditingTemplate(false);
+              setEditingTemplateId(null);
+            } else {
+              toast.success("Template saved! You can now use it when creating new jobs.", {
+                action: {
+                  label: "View Templates",
+                  onClick: () => navigate(ROUTES.DASHBOARD.JOB_TEMPLATES)
+                }
+              });
+            }
+          }}
+        />
       </div>
     </main>
   );

@@ -162,7 +162,7 @@ export function SubscriptionGuard({
             <Button 
               variant="outline" 
               onClick={() => navigate('/dashboard/jobs')}
-              className="flex-1"
+              className="flex-1 rounded-xl h-11 font-medium shadow-sm hover:shadow-md transition-all duration-200 bg-white border-gray-200 hover:bg-gray-50"
             >
               Go Back
             </Button>

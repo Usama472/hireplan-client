@@ -36,7 +36,7 @@ export function CTASection() {
         <div className='flex flex-col sm:flex-row gap-4 justify-center items-center'>
           <Button
             size='lg'
-            className='text-lg px-8 py-4 bg-white text-blue-600 hover:bg-gray-50 shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-200 font-semibold'
+            className='text-lg px-8 py-4 bg-white text-blue-600 hover:bg-gray-50 shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-200 font-semibold rounded-xl h-14'
             asChild
           >
             <Link href='/onboarding'>

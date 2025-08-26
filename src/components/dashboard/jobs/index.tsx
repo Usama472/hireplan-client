@@ -2,6 +2,7 @@
 
 import PaginationButton from "@/components/common/PaginationButton";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ROUTES } from "@/constants";
 import API from "@/http";
@@ -116,45 +117,54 @@ export default function JobsPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <main className="p-6">
-        <div className="w-full">
-          {/* Header Section */}
-          <div className="mb-8">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">
-                  Job Postings
-                </h1>
-                <p className="text-gray-600 mt-1">
-                  Manage and track your job postings and applications
-                </p>
-              </div>
-              <div className="flex space-x-4">
-                <Button
-                  onClick={() => navigate(ROUTES.DASHBOARD.CREATE_JOB)}
-                  className="mt-4 sm:mt-0 bg-blue-600 hover:bg-blue-700"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create Job
-                </Button>
-                <Button
-                  onClick={() => navigate(`/company/${company?.slug}`)}
-                  className="mt-4 sm:mt-0 bg-green-600 hover:bg-green-700"
-                >
-                  Website View
-                </Button>
-              </div>
+      <div className="space-y-6 px-6 py-4">
+        {/* Enhanced Header */}
+        <div className="flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50 -mx-6 px-6 py-6 border-b">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-blue-100 rounded-xl">
+              <Plus className="h-6 w-6 text-blue-600" />
             </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Job Postings</h1>
+              <p className="text-gray-600 flex items-center gap-2">
+                Manage and track your job postings and applications
+                <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                  {jobs.length} active
+                </Badge>
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <Button
+              onClick={() => navigate(ROUTES.DASHBOARD.CREATE_JOB)}
+              className="bg-blue-600 hover:bg-blue-700 text-white gap-2 rounded-xl h-11 px-6 font-medium shadow-sm hover:shadow-md transition-all duration-200"
+            >
+              <Plus className="w-4 h-4" />
+              Create Job
+            </Button>
+            <Button
+              onClick={() => navigate(`/company/${company?.slug}`)}
+              variant="outline"
+              className="bg-white border-gray-200 hover:bg-gray-50 gap-2 rounded-xl h-11 px-6 font-medium shadow-sm hover:shadow-md transition-all duration-200"
+            >
+              Website View
+            </Button>
+          </div>
+        </div>
+
+        <div className="px-2">
+          {/* Search and Controls Section */}
+          <div className="mb-8">
 
             <Tabs
               value={viewMode}
               onValueChange={(value) => setViewMode(value as "grid" | "list")}
             >
-              {/* Search and View Controls */}
+              {/* Enhanced Search and View Controls */}
               <div className="mb-6">
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                   {/* Search Bar */}
-                  <div className="flex-1 max-w-md">
+                  <div className="flex-1 max-w-lg">
                     <SearchBar
                       placeholder="Search jobs by title, company, or location..."
                       onSearch={handleSearch}
@@ -211,19 +221,19 @@ export default function JobsPage() {
 
           {/* Pagination - Only show when not loading and has jobs */}
           {!loading && hasJobs && <PaginationButton {...pageParams} />}
+          </div>
         </div>
-      </main>
 
-      {/* Delete Confirmation Modal */}
-      {jobToDelete && (
-        <DeleteJobModal
-          job={jobToDelete}
-          isOpen={showDeleteModal}
-          onClose={handleCloseDeleteModal}
-          onConfirm={confirmDelete}
-          isDeleting={isDeleting}
-        />
-      )}
-    </div>
+        {/* Delete Confirmation Modal */}
+        {jobToDelete && (
+          <DeleteJobModal
+            job={jobToDelete}
+            isOpen={showDeleteModal}
+            onClose={handleCloseDeleteModal}
+            onConfirm={confirmDelete}
+            isDeleting={isDeleting}
+          />
+        )}
+      </div>
   );
 }

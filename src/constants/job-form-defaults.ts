@@ -25,8 +25,6 @@ export const JOB_FORM_DEFAULT_VALUES: JobFormSchema = {
   hoursPerWeek: {
     type: "fixed-hours",
     amount: 40,
-    min: 0,
-    max: 0,
   },
   schedule: [],
   benefits: [],

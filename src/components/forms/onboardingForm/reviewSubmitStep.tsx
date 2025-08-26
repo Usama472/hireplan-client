@@ -1,6 +1,5 @@
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { COMPANY_SIZES, INDUSTRIES, PLANS } from "@/constants/form-constants";
+import { COMPANY_SIZES, INDUSTRIES } from "@/constants/form-constants";
 import type { FormData } from "@/interfaces";
 import { useFormContext } from "react-hook-form";
 
@@ -8,7 +7,6 @@ export function ReviewSubmitStep() {
   const { watch } = useFormContext<FormData>();
   const formData = watch();
 
-  const selectedPlan = PLANS.find((plan) => plan.id === formData.plan);
   const selectedCompanySize = COMPANY_SIZES.find(
     (size) => size.value === formData.companySize
   );
@@ -87,34 +85,7 @@ export function ReviewSubmitStep() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Selected Plan</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {selectedPlan && (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold">{selectedPlan.name}</h3>
-                  {selectedPlan.popular && (
-                    <Badge variant="secondary">Most Popular</Badge>
-                  )}
-                </div>
-                <div className="flex items-baseline">
-                  <span className="text-2xl font-bold">
-                    {selectedPlan.price}
-                  </span>
-                  <span className="text-gray-500 ml-1">
-                    {selectedPlan.period}
-                  </span>
-                </div>
-                <p className="text-sm text-gray-600">
-                  {selectedPlan.description}
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+
       </div>
     </div>
   );

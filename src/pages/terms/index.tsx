@@ -180,7 +180,7 @@ export default function TermsOfService() {
               <div className="bg-gray-50 p-4 rounded-lg space-y-2">
                 <p className="text-gray-700"><strong>Email:</strong> legal@hireplan.co</p>
                 <p className="text-gray-700"><strong>Support:</strong> support@hireplan.co</p>
-                <p className="text-gray-700"><strong>Address:</strong> HirePlan, Inc., [Your Business Address]</p>
+                {/* <p className="text-gray-700"><strong>Address:</strong> HirePlan, LLC, [Your Business Address]</p> */}
               </div>
             </CardContent>
           </Card>

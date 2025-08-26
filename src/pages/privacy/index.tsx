@@ -34,7 +34,7 @@ export default function PrivacyPolicy() {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-gray-600">
-                HirePlan, Inc. ("HirePlan," "we," "us," or "our") respects your privacy and is committed to protecting it in accordance with applicable laws and using generally-accepted industry practices. For purposes of this Privacy Policy, "Personal Information" means any information relating to an identified or identifiable individual (e.g., name, address, email address, phone number, or employment information).
+                HirePlan, LLC ("HirePlan," "we," "us," or "our") respects your privacy and is committed to protecting it in accordance with applicable laws and using generally-accepted industry practices. For purposes of this Privacy Policy, "Personal Information" means any information relating to an identified or identifiable individual (e.g., name, address, email address, phone number, or employment information).
               </p>
               <p className="text-gray-600">
                 This Privacy Policy explains how HirePlan collects and uses Personal Information of visitors to our website and how our customers use our recruiting and hiring software platform (the "Services") to collect Personal Information from individuals who are job applicants or employees. This Privacy Policy does not apply to our customers, who manage Personal Information they collect through our Services in accordance with their own privacy policies.
@@ -383,7 +383,7 @@ export default function PrivacyPolicy() {
               <div className="bg-gray-50 p-4 rounded-lg space-y-2">
                 <p className="text-gray-700"><strong>Email:</strong> privacy@hireplan.co</p>
                 <p className="text-gray-700"><strong>Support:</strong> support@hireplan.co</p>
-                <p className="text-gray-700"><strong>Address:</strong> HirePlan, Inc., 8 The Green, Suite 15717, Dover, DE 19901</p>
+                <p className="text-gray-700"><strong>Address:</strong> HirePlan, LLC, 8 The Green, Suite 15717, Dover, DE 19901</p>
                 <p className="text-gray-700"><strong>Phone:</strong> [Your Business Phone Number]</p>
               </div>
             </CardContent>

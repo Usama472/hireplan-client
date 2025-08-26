@@ -74,26 +74,38 @@ export default function OwnerDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Owner Dashboard</h1>
-          <p className="text-gray-600 mt-2">
-            Manage users, subscriptions, and monitor platform performance
-          </p>
+    <div className="min-h-screen bg-white">
+      <div className="space-y-6 px-6 py-4">
+        {/* Enhanced Header */}
+        <div className="flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50 -mx-6 px-6 py-6 border-b">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-blue-100 rounded-xl">
+              <Users className="h-6 w-6 text-blue-600" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Owner Dashboard</h1>
+              <p className="text-gray-600">
+                Manage users, subscriptions, and monitor platform performance
+              </p>
+            </div>
+          </div>
         </div>
 
-        {/* Quick Stats */}
+        <div className="max-w-7xl mx-auto px-2">
+
+        {/* Enhanced Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card>
+          <Card className="border-l-4 border-l-blue-500 shadow-sm hover:shadow-md transition-all duration-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-gray-900">Total Users</CardTitle>
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Users className="h-4 w-4 text-blue-600" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats?.totalUsers || 0}</div>
-              <p className="text-xs text-muted-foreground">
+              <div className="text-2xl font-bold text-gray-900">{stats?.totalUsers || 0}</div>
+              <p className="text-xs text-green-600 flex items-center gap-1">
+                <TrendingUp className="h-3 w-3" />
                 +{stats?.growthRate || 0}% from last month
               </p>
             </CardContent>

@@ -184,9 +184,9 @@ export function JobListItem({
       <Card
         onClick={handleCardClick}
         className={cn(
-          "group relative overflow-hidden border border-gray-200 rounded-lg",
+          "group relative overflow-hidden border border-gray-200 rounded-xl border-l-4 border-l-blue-500",
           "bg-white hover:bg-gray-50 transition-all duration-200 ease-out",
-          "hover:shadow-sm hover:border-blue-300",
+          "hover:shadow-lg hover:border-blue-300 hover:border-l-blue-600",
           "active:bg-gray-100 cursor-pointer"
         )}
       >

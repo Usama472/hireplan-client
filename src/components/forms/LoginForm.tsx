@@ -117,7 +117,11 @@ export const LoginForm = () => {
           />
         </div>
 
-        <Button type='submit' className='w-full mt-5' disabled={isLoading}>
+        <Button 
+          type='submit' 
+          className='w-full mt-5 bg-blue-600 hover:bg-blue-700 text-white h-11 rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow-md' 
+          disabled={isLoading}
+        >
           {isLoading ? 'Signing in...' : 'Sign in'}
         </Button>
 

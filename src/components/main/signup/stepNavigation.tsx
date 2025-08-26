@@ -10,6 +10,7 @@ interface StepNavigationProps {
   isSubmitting?: boolean
   currentStep?: number
   totalSteps?: number
+  finalStepText?: string
 }
 
 export function StepNavigation({
@@ -19,6 +20,7 @@ export function StepNavigation({
   isLastStep,
   isValid,
   isSubmitting = false,
+  finalStepText = 'Create Account',
 }: StepNavigationProps) {
   const scrollToTop = () => {
     window.scrollTo({
@@ -76,7 +78,7 @@ export function StepNavigation({
           </>
         ) : (
           <>
-            <span>{isLastStep ? 'Create Account' : 'Continue'}</span>
+            <span>{isLastStep ? finalStepText : 'Continue'}</span>
             {!isLastStep && <ChevronRight className='h-4 w-4' />}
           </>
         )}

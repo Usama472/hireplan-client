@@ -2,11 +2,11 @@ import {
   Briefcase,
   Calendar,
   LifeBuoy,
-  Mail,
   MessageCircle,
   PlusCircle,
   Send,
   Settings,
+  FileText,
 } from "lucide-react";
 import type * as React from "react";
 
@@ -50,6 +50,11 @@ const staticData = {
       icon: PlusCircle,
     },
     {
+      name: "Templates",
+      url: ROUTES.DASHBOARD.JOB_TEMPLATES,
+      icon: FileText,
+    },
+    {
       name: "Chats",
       url: ROUTES.DASHBOARD.CHATS,
       icon: MessageCircle,
@@ -58,11 +63,6 @@ const staticData = {
       name: "Scheduler",
       url: ROUTES.DASHBOARD.SCHEDULER,
       icon: Calendar,
-    },
-    {
-      name: "Email Templates",
-      url: ROUTES.DASHBOARD.EMAIL_TEMPLATES,
-      icon: Mail,
     },
     {
       name: "Settings",

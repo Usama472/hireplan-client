@@ -200,7 +200,7 @@ export function SubscriptionManager({}: SubscriptionManagerProps) {
               <Button
                 onClick={handleManageBilling}
                 variant="outline"
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 rounded-xl h-11 px-6 font-medium shadow-sm hover:shadow-md transition-all duration-200 bg-white border-gray-200 hover:bg-gray-50"
                 disabled={actionLoading === 'portal'}
               >
                 <ExternalLink className="h-4 w-4" />
@@ -211,6 +211,7 @@ export function SubscriptionManager({}: SubscriptionManagerProps) {
                 <Button
                   onClick={handleReactivate}
                   disabled={actionLoading === 'reactivate'}
+                  className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-11 px-6 font-medium shadow-sm hover:shadow-md transition-all duration-200"
                 >
                   {actionLoading === 'reactivate' ? 'Reactivating...' : 'Reactivate Subscription'}
                 </Button>
@@ -219,6 +220,7 @@ export function SubscriptionManager({}: SubscriptionManagerProps) {
                   onClick={handleCancel}
                   variant="outline"
                   disabled={actionLoading === 'cancel'}
+                  className="bg-white border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 rounded-xl h-11 px-6 font-medium shadow-sm hover:shadow-md transition-all duration-200"
                 >
                   {actionLoading === 'cancel' ? 'Canceling...' : 'Cancel Subscription'}
                 </Button>

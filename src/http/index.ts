@@ -5,6 +5,7 @@ import * as availabilityApi from "./availability/api";
 import * as companyApi from "./company/api";
 import * as googleApi from "./google/api";
 import * as jobApi from "./job/api";
+import * as jobTemplateApi from "./job-template/api";
 import * as userApi from "./user/api";
 import * as emailChatApi from "./email-chat/api";
 import * as emailTemplateApi from "./email-template/api";
@@ -15,6 +16,7 @@ const API = {
   auth: authApi,
   user: userApi,
   job: jobApi,
+  jobTemplate: jobTemplateApi,
   company: companyApi,
   attachment: attachmentApi,
   applicant: applicantApi,

@@ -140,8 +140,8 @@ export function JobCard({
 
   return (
     <>
-      <Card className="border border-gray-200 bg-white hover:shadow-md transition-shadow duration-300">
-        <CardContent className="p-5 space-y-5">
+      <Card className="border border-gray-200 bg-white hover:shadow-lg transition-all duration-300 rounded-xl border-l-4 border-l-blue-500 hover:border-l-blue-600">
+        <CardContent className="p-6 space-y-5">
           {/* Header Section */}
           <div className="flex flex-wrap justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2">
@@ -308,7 +308,7 @@ export function JobCard({
           <div className="flex gap-3 pt-5">
             <Button
               variant="outline"
-              className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+              className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-xl h-11 font-medium shadow-sm hover:shadow-md transition-all duration-200"
               onClick={() => onEdit?.(job)}
             >
               <Edit3 className="w-4 h-4 mr-2 text-gray-500" />
@@ -316,7 +316,7 @@ export function JobCard({
             </Button>
             <Button
               onClick={() => onViewDetails?.(job)}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-11 font-medium shadow-sm hover:shadow-md transition-all duration-200"
             >
               View Details
               <ArrowRight className="w-4 h-4 ml-2" />

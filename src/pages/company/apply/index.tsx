@@ -104,9 +104,7 @@ const JobApplicationPage: React.FC = () => {
   const [resumeName, setResumeName] = useState<string>('')
   const [successMessage, setSuccessMessage] = useState<string>('')
   const [usStates, setUSStates] = useState<IState[]>([])
-  const [stateCities, setStateCities] = useState<ICity[]>([])
   const [selectedState, setSelectedState] = useState<string>('')
-  const [selectedCity, setSelectedCity] = useState<string>('')
   const [isDescriptionExpanded, setIsDescriptionExpanded] =
     useState<boolean>(false)
   const [customQuestions, setCustomQuestions] = useState<CustomQuestion[]>([])
@@ -198,9 +196,6 @@ const JobApplicationPage: React.FC = () => {
   const handleStateChange = (value: string) => {
     setSelectedState(value)
 
-    const cities = City.getCitiesOfState('US', value)
-    setStateCities(cities)
-
     const stateName = usStates.find((state) => state.isoCode === value)?.name
     if (stateName) {
       setFormData((prev) => ({
@@ -208,16 +203,7 @@ const JobApplicationPage: React.FC = () => {
         state: stateName,
         city: '',
       }))
-      setSelectedCity('')
     }
-  }
-
-  const handleCityChange = (value: string) => {
-    setSelectedCity(value)
-    setFormData((prev) => ({
-      ...prev,
-      city: value,
-    }))
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -790,25 +776,15 @@ const JobApplicationPage: React.FC = () => {
                       >
                         City <span className='text-red-500 ml-0.5'>*</span>
                       </Label>
-                      <Select
-                        value={selectedCity}
-                        onValueChange={handleCityChange}
-                        disabled={!selectedState}
-                      >
-                        <SelectTrigger
-                          id='city'
-                          className='h-10 text-sm bg-white focus:ring-blue-500 focus:border-blue-500 transition-all'
-                        >
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className='max-h-[220px]'>
-                          {stateCities.map((city) => (
-                            <SelectItem key={city.name} value={city.name}>
-                              {city.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Input
+                        id='city'
+                        name='city'
+                        value={formData.city}
+                        onChange={handleChange}
+                        placeholder='Enter your city'
+                        className='h-10 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 transition-all bg-white'
+                        required
+                      />
                     </div>
                   </div>
                 </div>

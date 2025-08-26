@@ -19,7 +19,7 @@ import {
   X,
   File,
   Image as ImageIcon,
-  Download
+
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -116,7 +116,7 @@ export function ChatRichTextEditor({
           "prose-a:text-blue-600 prose-a:underline hover:prose-a:text-blue-800"
         ),
       },
-      handleKeyDown: (view, event) => {
+      handleKeyDown: (_view, event) => {
         // Handle Enter key for sending
         if (event.key === "Enter" && !event.shiftKey) {
           event.preventDefault();
@@ -516,7 +516,7 @@ export function ChatRichTextEditor({
             onClick={handleSend}
             disabled={sending || disabled || (!value.trim() && attachedFiles.length === 0)}
             size="sm"
-            className="h-8 w-8 p-0 rounded-full bg-blue-600 hover:bg-blue-700"
+            className="h-10 w-10 p-0 rounded-xl bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg transition-all duration-200"
           >
             {sending ? (
               <Loader2 className="h-4 w-4 animate-spin" />

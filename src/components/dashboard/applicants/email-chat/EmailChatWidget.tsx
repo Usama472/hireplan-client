@@ -18,7 +18,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ChatRichTextEditor } from '@/components/dashboard/chats/ChatRichTextEditor';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Dialog,
@@ -251,30 +251,39 @@ export function EmailChatWidget({
   const getPriorityColor = (priority?: string) => {
     switch (priority) {
       case 'urgent':
-        return 'bg-red-100 text-red-800 border-red-200';
+        return 'bg-red-50 text-red-700 border-red-200';
       case 'high':
-        return 'bg-orange-100 text-orange-800 border-orange-200';
+        return 'bg-orange-50 text-orange-700 border-orange-200';
       case 'normal':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
+        return 'bg-blue-50 text-blue-700 border-blue-200';
       case 'low':
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return 'bg-gray-50 text-gray-700 border-gray-200';
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return 'bg-blue-50 text-blue-700 border-blue-200';
     }
   };
 
   if (isLoading) {
     return (
-      <Card className={className}>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm flex items-center gap-2">
-            <Mail className="w-4 h-4" />
-            Email Communications
+      <Card className={`${className} border-l-4 border-l-transparent shadow-sm`}>
+        <CardHeader className="pb-3 bg-gradient-to-r from-blue-50 to-indigo-50 -mx-1 px-4 py-4 border-b">
+          <CardTitle className="text-base flex items-center gap-3 font-semibold text-gray-900">
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <Mail className="w-5 h-5 text-blue-600" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                Email Communications
+              </div>
+              <p className="text-sm text-gray-600 font-normal mt-1">
+                Loading conversations...
+              </p>
+            </div>
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center py-4">
-            <RefreshCw className="w-6 h-6 animate-spin text-blue-600" />
+        <CardContent className="py-8">
+          <div className="flex items-center justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           </div>
         </CardContent>
       </Card>
@@ -282,34 +291,43 @@ export function EmailChatWidget({
   }
 
   return (
-    <Card className={className}>
-      <CardHeader className="pb-3">
+    <Card className={`${className} border-l-4 border-l-transparent hover:border-l-blue-500 transition-all duration-200 shadow-sm hover:shadow-md`}>
+      <CardHeader className="pb-3 bg-gradient-to-r from-blue-50 to-indigo-50 -mx-1 px-4 py-4 border-b">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-sm flex items-center gap-2">
-            <Mail className="w-4 h-4" />
-            Email Communications
-            {conversations.length > 0 && (
-              <Badge variant="outline" className="text-xs">
-                {conversations.length}
-              </Badge>
-            )}
+          <CardTitle className="text-base flex items-center gap-3 font-semibold text-gray-900">
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <Mail className="w-5 h-5 text-blue-600" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                Email Communications
+                {conversations.length > 0 && (
+                  <Badge variant="secondary" className="bg-blue-100 text-blue-700 border-blue-200">
+                    {conversations.length}
+                  </Badge>
+                )}
+              </div>
+              <p className="text-sm text-gray-600 font-normal mt-1">
+                Manage email conversations with {applicantName}
+              </p>
+            </div>
           </CardTitle>
           
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={loadConversations}
-              className="h-7 w-7 p-0"
+              className="h-9 w-9 p-0 bg-white border-gray-200 hover:bg-gray-50 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
             >
-              <RefreshCw className="w-3 h-3" />
+              <RefreshCw className="w-4 h-4" />
             </Button>
             
             <Dialog open={showNewMessage} onOpenChange={setShowNewMessage}>
               <DialogTrigger asChild>
-                <Button size="sm" className="text-xs h-7">
-                  <Send className="w-3 h-3 mr-1" />
-                  Send
+                <Button size="sm" className="h-9 px-4 bg-blue-600 hover:bg-blue-700 text-white gap-2 rounded-xl font-medium shadow-sm hover:shadow-md transition-all duration-200">
+                  <Send className="w-4 h-4" />
+                  Send Email
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-lg">
@@ -342,26 +360,31 @@ export function EmailChatWidget({
                     />
                   </div>
 
-                  <div className="text-xs text-gray-500 bg-blue-50 p-3 rounded">
+                  <div className="text-xs text-gray-500 bg-blue-50 p-3 rounded-lg border border-blue-200">
                     <p><strong>Email will be sent from:</strong> conv_xyz@conv.hireplan.co</p>
                     <p><strong>Recipient:</strong> {applicantEmail}</p>
                   </div>
                 </div>
 
                 <DialogFooter>
-                  <Button variant="outline" onClick={() => setShowNewMessage(false)}>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowNewMessage(false)}
+                    className="bg-white border-gray-200 hover:bg-gray-50 rounded-xl h-11 px-6 font-medium shadow-sm hover:shadow-md transition-all duration-200"
+                  >
                     Cancel
                   </Button>
                   <Button 
                     onClick={createNewConversation} 
                     disabled={isSending || !newMessageSubject.trim() || !newMessageContent.trim()}
+                    className="bg-blue-600 hover:bg-blue-700 text-white gap-2 rounded-xl h-11 px-6 font-medium shadow-sm hover:shadow-md transition-all duration-200"
                   >
                     {isSending ? (
-                      <Clock className="w-4 h-4 mr-2 animate-spin" />
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
                     ) : (
-                      <Send className="w-4 h-4 mr-2" />
+                      <Send className="w-4 h-4" />
                     )}
-                    Send Message
+                    Send Email
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -372,62 +395,75 @@ export function EmailChatWidget({
       
       <CardContent className="pt-0">
         {conversations.length === 0 ? (
-          <div className="text-center py-6">
-            <MessageCircle className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-            <p className="text-sm text-gray-600 mb-3">No email conversations yet</p>
-            <Button size="sm" onClick={() => setShowNewMessage(true)} className="text-xs">
-              <Send className="w-3 h-3 mr-1" />
-              Send Message
+          <div className="text-center py-8">
+            <div className="bg-gray-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+              <MessageCircle className="w-8 h-8 text-gray-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No email conversations yet</h3>
+            <p className="text-gray-600 mb-4 max-w-sm mx-auto">
+              Start a conversation with {applicantName} to discuss their application
+            </p>
+            <Button onClick={() => setShowNewMessage(true)} className="bg-blue-600 hover:bg-blue-700 text-white gap-2 rounded-xl h-11 px-6 font-medium shadow-sm hover:shadow-md transition-all duration-200">
+              <Send className="w-4 h-4" />
+              Send Email
             </Button>
           </div>
         ) : (
           <div className="space-y-3">
             {/* Conversation List */}
-            <div className="space-y-2">
+            <div className="space-y-3">
               {conversations.slice(0, 3).map((conversation) => (
                 <div
                   key={conversation.conversationId}
                   onClick={() => setActiveConversation(conversation)}
-                  className={`p-3 rounded-lg cursor-pointer border transition-colors ${
+                  className={`p-4 rounded-xl cursor-pointer border-2 transition-all duration-200 hover:shadow-md ${
                     activeConversation?.conversationId === conversation.conversationId
-                      ? 'bg-blue-50 border-blue-200'
-                      : 'bg-gray-50 hover:bg-gray-100 border-gray-200'
+                      ? 'bg-blue-50 border-blue-200 shadow-sm'
+                      : 'bg-white hover:bg-gray-50 border-gray-200 hover:border-gray-300'
                   }`}
                 >
-                  <div className="flex items-start justify-between mb-2">
-                    <h4 className="font-medium text-sm text-gray-900 truncate flex-1">
+                  <div className="flex items-start justify-between mb-3">
+                    <h4 className="font-semibold text-base text-gray-900 truncate flex-1">
                       {conversation.subject}
                     </h4>
                     <Badge 
-                      variant="outline" 
-                      className={`text-xs ml-2 ${getPriorityColor(conversation.priority)}`}
+                      className={`text-xs ml-2 border-0 ${getPriorityColor(conversation.priority)}`}
                     >
                       {conversation.priority || 'normal'}
                     </Badge>
                   </div>
                   
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500">
-                      {conversation.messages.length} message{conversation.messages.length !== 1 ? 's' : ''}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      {conversation.lastMessageAt && formatDistanceToNow(new Date(conversation.lastMessageAt), { addSuffix: true })}
-                    </span>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Mail className="w-4 h-4 text-blue-500" />
+                      <span className="font-medium">
+                        {conversation.messages.length} message{conversation.messages.length !== 1 ? 's' : ''}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                      <Clock className="w-3 h-3" />
+                      <span className="font-medium">
+                        {conversation.lastMessageAt && formatDistanceToNow(new Date(conversation.lastMessageAt), { addSuffix: true })}
+                      </span>
+                    </div>
                   </div>
                   
-                  <p className="text-xs text-gray-600 mt-1 truncate">
-                    {conversation.alias}
-                  </p>
+                  <div className="bg-gray-50 rounded-lg p-2 border">
+                    <p className="text-xs text-gray-600 truncate font-medium">
+                      From: {conversation.alias}
+                    </p>
+                  </div>
                 </div>
               ))}
               
               {conversations.length > 3 && (
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
-                  className="w-full text-xs"
+                  className="w-full h-12 text-sm bg-white border-gray-200 hover:bg-gray-50 font-medium rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
                   onClick={() => {/* TODO: Open full chat view */}}
                 >
+                  <MessageCircle className="w-4 h-4 mr-2" />
                   View All {conversations.length} Conversations
                 </Button>
               )}
@@ -435,49 +471,52 @@ export function EmailChatWidget({
 
             {/* Active Conversation Messages */}
             {activeConversation && (
-              <div className="border-t pt-3">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-medium text-sm">Messages</h4>
+              <div className="border-t border-gray-200 pt-4 mt-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="font-semibold text-base text-gray-900 flex items-center gap-2">
+                    <MessageCircle className="w-5 h-5 text-blue-600" />
+                    Messages
+                  </h4>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                        <MoreHorizontal className="w-3 h-3" />
+                      <Button variant="outline" size="sm" className="h-8 w-8 p-0 bg-white border-gray-200 hover:bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition-all duration-200">
+                        <MoreHorizontal className="w-4 h-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                       <DropdownMenuItem onClick={() => API.emailChat.archiveConversation(activeConversation.conversationId)}>
                         <Archive className="w-4 h-4 mr-2" />
-                        Archive
+                        Archive Conversation
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
 
-                <ScrollArea className="h-48 pr-3">
-                  <div className="space-y-3">
+                <ScrollArea className="h-56 pr-3">
+                  <div className="space-y-4">
                     {activeConversation.messages.map((message) => (
                       <div
                         key={message.messageId}
                         className={`flex ${message.direction === 'outbound' ? 'justify-end' : 'justify-start'}`}
                       >
-                        <div className={`max-w-[85%] rounded-lg p-2 text-xs ${
+                        <div className={`max-w-[85%] rounded-xl p-3 text-sm shadow-sm border ${
                           message.direction === 'outbound' 
-                            ? 'bg-blue-500 text-white' 
-                            : 'bg-gray-100 text-gray-900'
+                            ? 'bg-blue-600 text-white border-blue-600' 
+                            : 'bg-white text-gray-900 border-gray-200'
                         }`}>
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="font-medium">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-semibold text-xs">
                               {message.direction === 'outbound' ? 'You' : applicantName}
                             </span>
-                            <div className="flex items-center gap-1">
+                            <div className="flex items-center gap-2">
                               {getDeliveryStatusIcon(message.deliveryStatus)}
-                              <span className="opacity-70">
+                              <span className={`text-xs ${message.direction === 'outbound' ? 'text-blue-100' : 'text-gray-500'}`}>
                                 {format(new Date(message.timestamp), 'HH:mm')}
                               </span>
                             </div>
                           </div>
                           <div 
-                            className="text-xs"
+                            className="text-sm leading-relaxed"
                             dangerouslySetInnerHTML={{ 
                               __html: message.htmlContent || message.textContent?.replace(/\n/g, '<br>') || ''
                             }}
@@ -490,7 +529,11 @@ export function EmailChatWidget({
                 </ScrollArea>
 
                 {/* Reply Input - Rich Text Editor */}
-                <div className="mt-3 space-y-2">
+                <div className="mt-4 space-y-3 border-t border-gray-200 pt-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Send className="w-4 h-4 text-blue-600" />
+                    <span className="text-sm font-medium text-gray-900">Reply</span>
+                  </div>
                   <ChatRichTextEditor
                     value={replyContent}
                     onChange={setReplyContent}
@@ -499,9 +542,9 @@ export function EmailChatWidget({
                     placeholder="Type your reply... Press Enter to send, Shift+Enter for new line"
                     className="text-sm"
                   />
-                  <p className="text-xs text-gray-500">
-                    From: {activeConversation.alias}
-                  </p>
+                  <div className="text-xs text-gray-500 bg-blue-50 p-2 rounded-lg border border-blue-200">
+                    <span className="font-medium">Sending from:</span> {activeConversation.alias}
+                  </div>
                 </div>
               </div>
             )}
