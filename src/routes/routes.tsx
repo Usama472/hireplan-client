@@ -1,12 +1,12 @@
 import ProfilePage from "@/components/dashboard/profile";
 import {
-  SCHEDULER_TEXT,
   COMPANY_TEXT,
   CONTACT_TEXT,
   CREATE_JOB,
   DASHBOARD_TEXT,
   HOME_TEXT,
   LOGIN_TEXT,
+  SCHEDULER_TEXT,
   SIGNUP_TEXT,
 } from "@/constants";
 import { ROUTES } from "@/constants/routes";
@@ -14,10 +14,11 @@ import type { AppRoutesType } from "@/interfaces";
 import CompanyPage from "@/pages/company";
 import JobApplicationPage from "@/pages/company/apply";
 import ContactPage from "@/pages/contact";
-import SchedulerPage from "@/pages/dashboard/scheduler";
 import DashboardPage from "@/pages/dashboard/jobs";
 import CreateJobPage from "@/pages/dashboard/jobs/create";
 import JobDetailPage from "@/pages/dashboard/jobs/view";
+import SchedulerPage from "@/pages/dashboard/scheduler";
+import StaffManagementPage from "@/pages/dashboard/staff-management";
 import PrivacyPage from "@/pages/privacy";
 import TermsPage from "@/pages/terms";
 
@@ -25,19 +26,19 @@ import TermsPage from "@/pages/terms";
 import Home from "@/pages/home";
 
 // Auth Pages
-import EditJobPage from "@/pages/dashboard/jobs/edit";
-import InterviewSchedulePage from "@/pages/interview/schedule";
-import ForgotPassword from "@pages/auth/ForgotPassword";
-import ResetPassword from "@pages/auth/ResetPassword";
-import Login from "@pages/auth/Login";
-import Signup from "@pages/auth/Signup";
+import ChatsPage from "@/pages/dashboard/chats";
+import ConversationPage from "@/pages/dashboard/chats/conversation";
 import EmailTemplatesPage from "@/pages/dashboard/email-template";
 import CreateEmailTemplatePage from "@/pages/dashboard/email-template/create";
 import EditEmailTemplatePage from "@/pages/dashboard/email-template/edit";
 import GlobalSettingPage from "@/pages/dashboard/global-setting";
-import ChatsPage from "@/pages/dashboard/chats";
-import ConversationPage from "@/pages/dashboard/chats/conversation";
 import JobTemplatesPage from "@/pages/dashboard/job-templates";
+import EditJobPage from "@/pages/dashboard/jobs/edit";
+import InterviewSchedulePage from "@/pages/interview/schedule";
+import ForgotPassword from "@pages/auth/ForgotPassword";
+import Login from "@pages/auth/Login";
+import ResetPassword from "@pages/auth/ResetPassword";
+import Signup from "@pages/auth/Signup";
 
 export const appRoutes: AppRoutesType[] = [
   {
@@ -189,6 +190,12 @@ export const appRoutes: AppRoutesType[] = [
     id: "job-templates",
     url: ROUTES.DASHBOARD.JOB_TEMPLATES,
     element: <JobTemplatesPage />,
+    isPrivate: true,
+  },
+  {
+    id: "staff-management",
+    url: ROUTES.DASHBOARD.STAFF_MANAGEMENT,
+    element: <StaffManagementPage />,
     isPrivate: true,
   },
 ];

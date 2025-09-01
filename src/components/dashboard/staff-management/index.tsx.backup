@@ -1,0 +1,550 @@
+"use client";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import API from "@/http";
+import type { RoleResponse } from "@/http/role/api";
+import {
+  AlertTriangle,
+  ChevronLeft,
+  ChevronRight,
+  Grid3X3,
+  List,
+  Plus,
+  Shield,
+  Trash2,
+  UserPlus,
+  Users,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { SearchBar } from "../jobs/search-bar";
+import AddRoleSheet from "./add-role-sheet";
+import type { Role, StaffMember } from "./types";
+
+// Interface for permission item in SHOW_PERMISSIONS
+interface PermissionItem {
+  name: string;
+  code: string;
+  type: string;
+}
+
+export default function StaffManagement() {
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [activeTab, setActiveTab] = useState<"staff" | "roles">("staff");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isAddRoleSheetOpen, setIsAddRoleSheetOpen] = useState(false);
+  const [isCreatingRole, setIsCreatingRole] = useState(false);
+
+  // Role editing state
+  const [editingRole, setEditingRole] = useState<RoleResponse | null>(null);
+  const [isEditingRole, setIsEditingRole] = useState(false);
+
+  // Delete confirmation dialog state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [roleToDelete, setRoleToDelete] = useState<RoleResponse | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Role pagination state
+  const [roleState, setRoleState] = useState<RoleListState>({
+    roles: [],
+    page: 1,
+    limit: 10,
+    totalPages: 0,
+    totalResults: 0,
+    isLoading: false,
+  });
+
+  // Fetch roles when page changes or after create/update/delete operations
+  useEffect(() => {
+    if (activeTab === "roles") {
+      fetchRoles(roleState.page);
+    }
+  }, [activeTab, roleState.page]);
+
+  // Fetch roles from API
+  const fetchRoles = async (page: number = 1) => {
+    setRoleState((prev) => ({ ...prev, isLoading: true }));
+
+    try {
+      const response = await API.role.getRoles(page, roleState.limit);
+      setRoleState({
+        roles: response.roles.results,
+        page: response.roles.page,
+        limit: response.roles.limit,
+        totalPages: response.roles.totalPages,
+        totalResults: response.roles.totalResults,
+        isLoading: false,
+      });
+    } catch (error) {
+      console.error("Failed to fetch roles:", error);
+      toast.error("Failed to load roles. Please try again.");
+      setRoleState((prev) => ({ ...prev, isLoading: false }));
+    }
+  };
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+  };
+
+  const handleCreateNew = () => {
+    if (activeTab === "staff") {
+      toast.info("Staff creation will be implemented soon");
+    } else {
+      // Clear editing state when creating a new role
+      setEditingRole(null);
+      setIsEditingRole(false);
+      setIsAddRoleSheetOpen(true);
+    }
+  };
+
+  const handleAddRole = async (roleData: {
+    name: string;
+    permissions: string[];
+  }) => {
+    setIsCreatingRole(true);
+    try {
+      await API.role.createRole({
+        name: roleData.name,
+        permissions: roleData.permissions,
+      });
+
+      toast.success(`Role with name ${roleData.name} created successfully`, {
+        description: "New role has been added to your organization",
+      });
+      setIsAddRoleSheetOpen(false);
+
+      // Refresh roles list
+      fetchRoles(1);
+    } catch (error) {
+      console.error("Failed to create role:", error);
+      toast.error("Failed to create role. Please try again.");
+    } finally {
+      setIsCreatingRole(false);
+    }
+  };
+
+  // Handle editing a role
+  const handleEditRole = (role: RoleResponse) => {
+    setEditingRole(role);
+    setIsEditingRole(true);
+    setIsAddRoleSheetOpen(true);
+  };
+
+  // Handle updating a role
+  const handleUpdateRole = async (roleData: {
+    name: string;
+    permissions: string[];
+  }) => {
+    if (!editingRole) return;
+
+    setIsCreatingRole(true);
+    try {
+      await API.role.updateRole(editingRole.id, {
+        name: roleData.name,
+        permissions: roleData.permissions,
+      });
+
+      toast.success(`Role "${roleData.name}" updated successfully`);
+      setIsAddRoleSheetOpen(false);
+      setEditingRole(null);
+
+      // Refresh roles list
+      fetchRoles(roleState.page);
+    } catch (error) {
+      console.error("Failed to update role:", error);
+      toast.error("Failed to update role. Please try again.");
+    } finally {
+      setIsCreatingRole(false);
+      setIsEditingRole(false);
+    }
+  };
+
+  // Handle deleting a role
+  const handleDeleteRole = (role: RoleResponse) => {
+    setRoleToDelete(role);
+    setDeleteDialogOpen(true);
+  };
+
+  // Confirm role deletion
+  const confirmDeleteRole = async () => {
+    if (!roleToDelete) return;
+
+    setIsDeleting(true);
+
+    try {
+      await API.role.deleteRole(roleToDelete.id);
+      toast.success(`Role "${roleToDelete.name}" deleted successfully`);
+
+      // Refresh roles list
+      fetchRoles(roleState.page);
+    } catch (error) {
+      console.error("Failed to delete role:", error);
+      toast.error("Failed to delete role. Please try again.");
+    } finally {
+      setIsDeleting(false);
+      setDeleteDialogOpen(false);
+      setRoleToDelete(null);
+    }
+  };
+
+  // Handle page change for role pagination
+  const handlePageChange = (newPage: number) => {
+    setRoleState((prev) => ({ ...prev, page: newPage }));
+  };
+
+  // Placeholder data for staff members
+  const staffMembers: StaffMember[] = [
+    {
+      id: "1",
+      name: "John Doe",
+      email: "john.doe@example.com",
+      role: "HR Manager",
+      status: "active",
+    },
+    {
+      id: "2",
+      name: "Jane Smith",
+      email: "jane.smith@example.com",
+      role: "Recruiter",
+      status: "active",
+    },
+    {
+      id: "3",
+      name: "Robert Johnson",
+      email: "robert@example.com",
+      role: "Hiring Manager",
+      status: "inactive",
+    },
+  ];
+
+  // Placeholder data for roles
+  const roles: Role[] = [
+    {
+      id: "1",
+      name: "HR Manager",
+      permissions: ["j1cr8745", "j2up9321", "j3dl6578"],
+    },
+    { id: "2", name: "Recruiter", permissions: ["j1cr8745", "j2up9321"] },
+    { id: "3", name: "Hiring Manager", permissions: ["j4gt2390", "j2up9321"] },
+  ];
+
+  return (
+    <div className="min-h-full px-6 py-0">
+      <div className="space-y-6">
+        {/* Enhanced Header - Matching Jobs Section Style */}
+        <div className="bg-primary border-b border-primary/20 -mx-6 px-6 py-4 relative overflow-hidden max-h-[80px] mt-0">
+          {/* Subtle Pattern Overlay */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.03)_1px,transparent_0)] bg-[length:20px_20px] opacity-40"></div>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full blur-2xl"></div>
+
+          <div className="relative z-10">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
+                  {activeTab === "staff" ? (
+                    <Users className="h-6 w-6 text-white" />
+                  ) : (
+                    <Shield className="h-6 w-6 text-white" />
+                  )}
+                </div>
+                <div className="flex flex-col">
+                  <h1 className="text-xl font-bold text-white">
+                    {activeTab === "staff"
+                      ? "Staff Management"
+                      : "Role Management"}
+                  </h1>
+                  <p className="text-sm text-white/80 flex items-center gap-3">
+                    {activeTab === "staff"
+                      ? "Manage your team members and assignments"
+                      : "Configure roles and permissions"}
+                    <Badge
+                      variant="secondary"
+                      className="bg-white/20 text-white border-white/20 text-xs"
+                    >
+                      {activeTab === "staff"
+                        ? staffMembers.length
+                        : roles.length}{" "}
+                      total
+                    </Badge>
+                  </p>
+                </div>
+              </div>
+              <Button
+                onClick={handleCreateNew}
+                className="bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white border-none shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-0.5 rounded-lg"
+                size="sm"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                <span>Create {activeTab === "staff" ? "Staff" : "Role"}</span>
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Content container with padding */}
+        <div className="px-1">
+          {/* Tab Navigation */}
+          <div className="mt-2 mb-6">
+            <div className="border-b border-gray-200">
+              <nav className="flex space-x-8">
+                <button
+                  onClick={() => setActiveTab("staff")}
+                  className={`border-b-2 px-1 pb-4 text-sm font-medium ${
+                    activeTab === "staff"
+                      ? "border-primary text-primary"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  }`}
+                >
+                  Staff Members
+                </button>
+                <button
+                  onClick={() => setActiveTab("roles")}
+                  className={`border-b-2 px-1 pb-4 text-sm font-medium ${
+                    activeTab === "roles"
+                      ? "border-primary text-primary"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  }`}
+                >
+                  Roles
+                </button>
+              </nav>
+            </div>
+          </div>
+
+          {/* Search and View Controls */}
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
+            <div className="w-full md:max-w-md">
+              <SearchBar
+                placeholder={`Search ${
+                  activeTab === "staff" ? "staff members" : "roles"
+                }...`}
+                onSearch={handleSearch}
+                searchQuery={searchQuery}
+              />
+            </div>
+
+            {/* View Mode Toggle */}
+            <div className="flex items-center justify-between lg:justify-end">
+              <div className="flex bg-white border border-gray-200 rounded-lg p-1 gap-1">
+                <button
+                  onClick={() => setViewMode("grid")}
+                  className={`p-2 rounded-md transition-all duration-300 ease-in-out ${
+                    viewMode === "grid"
+                      ? "bg-primary text-white"
+                      : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                  }`}
+                >
+                  <Grid3X3 className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode("list")}
+                  className={`p-2 rounded-md transition-all duration-300 ease-in-out ${
+                    viewMode === "list"
+                      ? "bg-primary text-white"
+                      : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                  }`}
+                >
+                  <List className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Content Section */}
+          <div className="mt-8">
+            {activeTab === "staff" ? (
+              viewMode === "grid" ? (
+                <StaffGrid staffMembers={staffMembers} />
+              ) : (
+                <StaffList staffMembers={staffMembers} />
+              )
+            ) : (
+              <div className="space-y-6">
+                {viewMode === "grid" ? (
+                  <RolesGrid
+                    roles={roleState.roles}
+                    onEdit={handleEditRole}
+                    onDelete={handleDeleteRole}
+                    isLoading={roleState.isLoading}
+                  />
+                ) : (
+                  <RolesList
+                    roles={roleState.roles}
+                    onEdit={handleEditRole}
+                    onDelete={handleDeleteRole}
+                    isLoading={roleState.isLoading}
+                  />
+                )}
+
+                {/* Pagination */}
+                {roleState.totalPages > 1 && (
+                  <div className="flex justify-center mt-6">
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          handlePageChange(Math.max(1, roleState.page - 1))
+                        }
+                        disabled={roleState.page === 1 || roleState.isLoading}
+                        className="flex items-center gap-1"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                        Previous
+                      </Button>
+
+                      <div className="flex items-center space-x-1">
+                        {Array.from(
+                          { length: roleState.totalPages },
+                          (_, i) => i + 1
+                        ).map((pageNum) => (
+                          <Button
+                            key={pageNum}
+                            variant={
+                              pageNum === roleState.page ? "default" : "outline"
+                            }
+                            size="sm"
+                            onClick={() => handlePageChange(pageNum)}
+                            disabled={roleState.isLoading}
+                            className={
+                              pageNum === roleState.page
+                                ? "bg-primary text-white"
+                                : ""
+                            }
+                          >
+                            {pageNum}
+                          </Button>
+                        ))}
+                      </div>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          handlePageChange(
+                            Math.min(roleState.totalPages, roleState.page + 1)
+                          )
+                        }
+                        disabled={
+                          roleState.page === roleState.totalPages ||
+                          roleState.isLoading
+                        }
+                        className="flex items-center gap-1"
+                      >
+                        Next
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Empty States */}
+          {staffMembers.length === 0 && activeTab === "staff" && (
+            <div className="text-center p-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+              <UserPlus className="mx-auto h-12 w-12 text-gray-400" />
+              <h3 className="mt-2 text-sm font-medium text-gray-900">
+                No staff members
+              </h3>
+              <p className="mt-1 text-sm text-gray-500">
+                Get started by creating a new staff member.
+              </p>
+              <div className="mt-6">
+                <Button
+                  onClick={handleCreateNew}
+                  className="flex items-center gap-1 mx-auto bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white rounded-lg"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Add Staff Member</span>
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Add/Edit Role Sheet */}
+          <AddRoleSheet
+            open={isAddRoleSheetOpen}
+            onOpenChange={setIsAddRoleSheetOpen}
+            onSubmit={isEditingRole ? handleUpdateRole : handleAddRole}
+            isCreatingRole={isCreatingRole}
+            initialData={
+              editingRole
+                ? {
+                    name: editingRole.name,
+                    permissions: editingRole.permissions,
+                  }
+                : undefined
+            }
+            isEditing={isEditingRole}
+          />
+
+          {/* Delete Confirmation Dialog */}
+          <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center">
+                    <AlertTriangle className="h-5 w-5 text-red-600" />
+                  </div>
+                  <DialogTitle className="text-xl">Delete Role</DialogTitle>
+                </div>
+                <DialogDescription className="pt-3 text-base">
+                  Are you sure you want to delete the role{" "}
+                  <span className="font-semibold text-gray-700">
+                    {roleToDelete?.name}
+                  </span>
+                  ? This action cannot be undone.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="py-2">
+                <p className="text-sm text-gray-500">
+                  Deleting this role will remove all associated permissions.
+                </p>
+              </div>
+              <DialogFooter className="gap-2 sm:justify-end">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setDeleteDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={confirmDeleteRole}
+                  className="bg-red-600 hover:bg-red-700 flex items-center gap-2"
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? (
+                    <>
+                      <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="h-4 w-4" />
+                      Delete Role
+                    </>
+                  )}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+    </div>
+  );
+}

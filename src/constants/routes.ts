@@ -17,6 +17,7 @@ export const DASHBOARD_ROUTES = {
   EDIT_EMAIL_TEMPLATE_ID: `/dashboard/email-templates/edit/:id`,
   JOB_TEMPLATES: `/dashboard/job-templates`,
   GLOBAL_SETTINGS: `/dashboard/global-settings`,
+  STAFF_MANAGEMENT: `/dashboard/staff-management`,
 };
 
 export const ROUTES = {

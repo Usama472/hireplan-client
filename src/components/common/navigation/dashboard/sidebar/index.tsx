@@ -1,12 +1,13 @@
 import {
   Briefcase,
   Calendar,
+  FileText,
   LifeBuoy,
   MessageCircle,
   PlusCircle,
   Send,
   Settings,
-  FileText,
+  Users,
 } from "lucide-react";
 import type * as React from "react";
 
@@ -22,9 +23,9 @@ import {
 import { APP_NAME, ROUTES } from "@/constants";
 import useAuthSessionContext from "@/lib/context/AuthSessionContext";
 import { useLocation, useNavigate } from "react-router-dom";
+import LogoImage from "../../../../../../public/logo.png";
 import { NavProjects } from "./nav-projects";
 import { NavUser } from "./nav-user";
-import LogoImage from "../../../../../../public/logo.png";
 
 const staticData = {
   navSecondary: [
@@ -64,6 +65,11 @@ const staticData = {
       name: "Scheduler",
       url: ROUTES.DASHBOARD.SCHEDULER,
       icon: Calendar,
+    },
+    {
+      name: "Staff",
+      url: ROUTES.DASHBOARD.STAFF_MANAGEMENT,
+      icon: Users,
     },
     {
       name: "Settings",
