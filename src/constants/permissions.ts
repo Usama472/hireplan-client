@@ -13,6 +13,9 @@ export const PERMISSIONS = {
   STAFF_READ: "s2rd9012",
   STAFF_UPDATE: "s3up3456",
   STAFF_DELETE: "s4dl7890",
+  PAYMENT_PERMISSIONS: "p1fj3423",
+  GLOBAL_SETTINGS: "g1gs3423",
+  SCHEDULING_ACCESS: "s1in4567",
 };
 
 export const SHOW_PERMISSIONS = [
@@ -85,5 +88,10 @@ export const SHOW_PERMISSIONS = [
     name: "Allow user to delete staff",
     code: PERMISSIONS.STAFF_DELETE,
     type: "staff",
+  },
+  {
+    name: "Allow user to manage scheduling",
+    code: PERMISSIONS.SCHEDULING_ACCESS,
+    type: "scheduling",
   },
 ];

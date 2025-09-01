@@ -99,3 +99,11 @@ export const updateRole = async (
 export const deleteRole = async (id: string): Promise<{ success: boolean }> => {
   return await del(`/roles/${id}`);
 };
+
+/**
+ * Get all roles without pagination
+ * @returns Promise with all roles
+ */
+export const getAllRoles = async (): Promise<{ roles: RoleResponse[] }> => {
+  return await get("/roles/all");
+};

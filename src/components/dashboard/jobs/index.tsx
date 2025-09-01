@@ -5,12 +5,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { ROUTES } from "@/constants";
+import { PERMISSIONS } from "@/constants/permissions";
 import API from "@/http";
 import type { JobFormDataWithId } from "@/interfaces";
 import useAuthSessionContext from "@/lib/context/AuthSessionContext";
 import { usePaginationQuery } from "@/lib/hooks/usePaginateQuery";
+import usePermission from "@/lib/hooks/usePermission";
 import { errorResolver } from "@/lib/utils";
-import { Plus, Briefcase, Grid3X3, List } from "lucide-react";
+import { Briefcase, Grid3X3, List, Plus } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -33,6 +35,8 @@ interface JobsResponse {
 }
 
 export default function JobsPage() {
+  const { hasPermission } = usePermission();
+  const canCreateJob = hasPermission(PERMISSIONS.JOB_CREATE);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [jobToDelete, setJobToDelete] = useState<JobFormDataWithId | null>(
@@ -147,14 +151,16 @@ export default function JobsPage() {
                 >
                   Website View
                 </Button>
-                <Button
-                  onClick={() => navigate(ROUTES.DASHBOARD.CREATE_JOB)}
-                  variant="secondary"
-                  className="border border-secondary shadow-none "
-                >
-                  <Plus className="w-4 h-4" />
-                  Create Job
-                </Button>
+                {canCreateJob && (
+                  <Button
+                    onClick={() => navigate(ROUTES.DASHBOARD.CREATE_JOB)}
+                    variant="secondary"
+                    className="border border-secondary shadow-none "
+                  >
+                    <Plus className="w-4 h-4" />
+                    Create Job
+                  </Button>
+                )}
               </div>
             </div>
           </div>

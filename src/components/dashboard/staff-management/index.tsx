@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import API from "@/http";
 import type { RoleResponse } from "@/http/role/api";
+import type { CreateStaffPayload, StaffResponse } from "@/http/staff/api";
 import {
   ChevronLeft,
   ChevronRight,
@@ -16,29 +17,51 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { SearchBar } from "../jobs/search-bar";
 import AddRoleSheet from "./add-role-sheet";
+import AddStaffSheet from "./add-staff-sheet";
 import { DeleteRoleDialog } from "./delete-role-dialog";
 import { RolesGrid, RolesList } from "./role-components";
 import { StaffGrid, StaffList } from "./staff-components";
-import type { RoleListState, StaffMember } from "./types";
 
 export default function StaffManagement() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [activeTab, setActiveTab] = useState<"staff" | "roles">("staff");
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Staff state
+  const [isAddStaffSheetOpen, setIsAddStaffSheetOpen] = useState(false);
+  const [isCreatingStaff, setIsCreatingStaff] = useState(false);
+  const [staffState, setStaffState] = useState<{
+    staff: StaffResponse[];
+    page: number;
+    limit: number;
+    totalPages: number;
+    totalResults: number;
+    isLoading: boolean;
+  }>({
+    staff: [],
+    page: 1,
+    limit: 20,
+    totalPages: 0,
+    totalResults: 0,
+    isLoading: false,
+  });
+
+  // Role state
   const [isAddRoleSheetOpen, setIsAddRoleSheetOpen] = useState(false);
   const [isCreatingRole, setIsCreatingRole] = useState(false);
-
-  // Role editing state
   const [editingRole, setEditingRole] = useState<RoleResponse | null>(null);
   const [isEditingRole, setIsEditingRole] = useState(false);
-
-  // Delete confirmation dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [roleToDelete, setRoleToDelete] = useState<RoleResponse | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-
-  // Role pagination state
-  const [roleState, setRoleState] = useState<RoleListState>({
+  const [roleState, setRoleState] = useState<{
+    roles: RoleResponse[];
+    page: number;
+    limit: number;
+    totalPages: number;
+    totalResults: number;
+    isLoading: boolean;
+  }>({
     roles: [],
     page: 1,
     limit: 10,
@@ -51,8 +74,10 @@ export default function StaffManagement() {
   useEffect(() => {
     if (activeTab === "roles") {
       fetchRoles(roleState.page);
+    } else {
+      fetchStaff(staffState.page);
     }
-  }, [activeTab, roleState.page]);
+  }, [activeTab, roleState.page, staffState.page]);
 
   // Also fetch roles when search query changes, with a debounce
   useEffect(() => {
@@ -62,8 +87,39 @@ export default function StaffManagement() {
       }, 300); // 300ms debounce
 
       return () => clearTimeout(handler);
+    } else {
+      const handler = setTimeout(() => {
+        fetchStaff(1); // Reset to first page when searching
+      }, 300); // 300ms debounce
+
+      return () => clearTimeout(handler);
     }
   }, [searchQuery, activeTab]);
+
+  // Fetch staff from API
+  const fetchStaff = async (page: number = 1) => {
+    setStaffState((prev) => ({ ...prev, isLoading: true }));
+
+    try {
+      const response = await API.staff.getStaff(
+        page,
+        staffState.limit,
+        searchQuery
+      );
+      setStaffState({
+        staff: response.users.results,
+        page: response.users.page,
+        limit: response.users.limit,
+        totalPages: response.users.totalPages,
+        totalResults: response.users.totalResults,
+        isLoading: false,
+      });
+    } catch (error) {
+      console.error("Failed to fetch staff:", error);
+      toast.error("Failed to load staff members. Please try again.");
+      setStaffState((prev) => ({ ...prev, isLoading: false }));
+    }
+  };
 
   // Fetch roles from API
   const fetchRoles = async (page: number = 1) => {
@@ -100,12 +156,37 @@ export default function StaffManagement() {
 
   const handleCreateNew = () => {
     if (activeTab === "staff") {
-      toast.info("Staff creation will be implemented soon");
+      setIsAddStaffSheetOpen(true);
     } else {
       // Clear editing state when creating a new role
       setEditingRole(null);
       setIsEditingRole(false);
       setIsAddRoleSheetOpen(true);
+    }
+  };
+
+  const handleAddStaff = async (staffData: CreateStaffPayload) => {
+    setIsCreatingStaff(true);
+
+    try {
+      const response = await API.staff.createStaff(staffData);
+
+      toast.success(
+        `Staff member ${response.firstName} ${response.lastName} created successfully`,
+        {
+          description: "New staff member has been added to your organization",
+        }
+      );
+
+      setIsAddStaffSheetOpen(false);
+
+      // Refresh staff list
+      fetchStaff(1);
+    } catch (error) {
+      console.error("Failed to create staff member:", error);
+      toast.error("Failed to create staff member. Please try again.");
+    } finally {
+      setIsCreatingStaff(false);
     }
   };
 
@@ -204,30 +285,10 @@ export default function StaffManagement() {
     setRoleState((prev) => ({ ...prev, page: newPage }));
   };
 
-  // Placeholder data for staff members
-  const staffMembers: StaffMember[] = [
-    {
-      id: "1",
-      name: "John Doe",
-      email: "john.doe@example.com",
-      role: "HR Manager",
-      status: "active",
-    },
-    {
-      id: "2",
-      name: "Jane Smith",
-      email: "jane.smith@example.com",
-      role: "Recruiter",
-      status: "active",
-    },
-    {
-      id: "3",
-      name: "Robert Johnson",
-      email: "robert@example.com",
-      role: "Hiring Manager",
-      status: "inactive",
-    },
-  ];
+  // Handle page change for staff pagination
+  const handleStaffPageChange = (newPage: number) => {
+    setStaffState((prev) => ({ ...prev, page: newPage }));
+  };
 
   return (
     <div className="min-h-full px-6 py-0">
@@ -313,11 +374,87 @@ export default function StaffManagement() {
           {/* Content Section */}
           <div className="mt-8">
             {activeTab === "staff" ? (
-              viewMode === "grid" ? (
-                <StaffGrid staffMembers={staffMembers} />
-              ) : (
-                <StaffList staffMembers={staffMembers} />
-              )
+              <div className="space-y-6">
+                {viewMode === "grid" ? (
+                  <StaffGrid
+                    staffMembers={staffState.staff}
+                    isLoading={staffState.isLoading}
+                    searchQuery={searchQuery}
+                  />
+                ) : (
+                  <StaffList
+                    staffMembers={staffState.staff}
+                    isLoading={staffState.isLoading}
+                    searchQuery={searchQuery}
+                  />
+                )}
+
+                {/* Pagination */}
+                {staffState.totalPages > 1 && (
+                  <div className="flex justify-center mt-6">
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          handleStaffPageChange(
+                            Math.max(1, staffState.page - 1)
+                          )
+                        }
+                        disabled={staffState.page === 1 || staffState.isLoading}
+                        className="flex items-center gap-1"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                        Previous
+                      </Button>
+
+                      <div className="flex items-center space-x-1">
+                        {Array.from(
+                          { length: staffState.totalPages },
+                          (_, i) => i + 1
+                        ).map((pageNum) => (
+                          <Button
+                            key={pageNum}
+                            variant={
+                              pageNum === staffState.page
+                                ? "default"
+                                : "outline"
+                            }
+                            size="sm"
+                            onClick={() => handleStaffPageChange(pageNum)}
+                            disabled={staffState.isLoading}
+                            className={
+                              pageNum === staffState.page
+                                ? "bg-primary text-white"
+                                : ""
+                            }
+                          >
+                            {pageNum}
+                          </Button>
+                        ))}
+                      </div>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          handleStaffPageChange(
+                            Math.min(staffState.totalPages, staffState.page + 1)
+                          )
+                        }
+                        disabled={
+                          staffState.page === staffState.totalPages ||
+                          staffState.isLoading
+                        }
+                        className="flex items-center gap-1"
+                      >
+                        Next
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
             ) : (
               <div className="space-y-6">
                 {viewMode === "grid" ? (
@@ -420,6 +557,14 @@ export default function StaffManagement() {
             : undefined
         }
         isEditing={isEditingRole}
+      />
+
+      {/* Add Staff Sheet */}
+      <AddStaffSheet
+        open={isAddStaffSheetOpen}
+        onOpenChange={setIsAddStaffSheetOpen}
+        onSubmit={handleAddStaff}
+        isCreatingStaff={isCreatingStaff}
       />
 
       {/* Delete Confirmation Dialog */}

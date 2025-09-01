@@ -1,10 +1,17 @@
 // Staff member interface
 export interface StaffMember {
   id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
+  companyRole: string;
+  jobCategory: string;
   role: string;
   status: string;
+  appRole: {
+    id: string;
+    name: string;
+  };
 }
 
 // Role interface
@@ -14,8 +21,8 @@ export interface Role {
   permissions: string[];
 }
 
-export interface RoleListState {
-  roles: any[]; // Use any[] for generic role array
+export interface StaffListState {
+  staff: StaffMember[];
   page: number;
   limit: number;
   totalPages: number;

@@ -1,8 +1,8 @@
 import {
   Briefcase,
   Calendar,
-  FileText,
   LifeBuoy,
+  Mail,
   MessageCircle,
   PlusCircle,
   Send,
@@ -21,67 +21,31 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { APP_NAME, ROUTES } from "@/constants";
+import { PERMISSIONS } from "@/constants/permissions";
 import useAuthSessionContext from "@/lib/context/AuthSessionContext";
 import { useLocation, useNavigate } from "react-router-dom";
 import LogoImage from "../../../../../../public/logo.png";
 import { NavProjects } from "./nav-projects";
 import { NavUser } from "./nav-user";
 
-const staticData = {
-  navSecondary: [
-    {
-      title: "Support",
-      url: "#",
-      icon: LifeBuoy,
-    },
-    {
-      title: "Feedback",
-      url: "#",
-      icon: Send,
-    },
-  ],
-  projects: [
-    {
-      name: "Jobs",
-      url: ROUTES.DASHBOARD.MAIN,
-      icon: Briefcase,
-    },
-    {
-      name: "Create Job",
-      url: ROUTES.DASHBOARD.CREATE_JOB,
-      icon: PlusCircle,
-    },
-    {
-      name: "Templates",
-      url: ROUTES.DASHBOARD.JOB_TEMPLATES,
-      icon: FileText,
-    },
-    {
-      name: "Chats",
-      url: ROUTES.DASHBOARD.CHATS,
-      icon: MessageCircle,
-    },
-    {
-      name: "Scheduler",
-      url: ROUTES.DASHBOARD.SCHEDULER,
-      icon: Calendar,
-    },
-    {
-      name: "Staff",
-      url: ROUTES.DASHBOARD.STAFF_MANAGEMENT,
-      icon: Users,
-    },
-    {
-      name: "Settings",
-      url: ROUTES.DASHBOARD.GLOBAL_SETTINGS,
-      icon: Settings,
-    },
-  ],
-};
-
 export const DashboardSidebar = ({
   ...props
 }: React.ComponentProps<typeof Sidebar>) => {
+  const staticData = {
+    navSecondary: [
+      {
+        title: "Support",
+        url: "#",
+        icon: LifeBuoy,
+      },
+      {
+        title: "Feedback",
+        url: "#",
+        icon: Send,
+      },
+    ],
+    projects: [],
+  } as any;
   const navigate = useNavigate();
   const { data: authData, subscription } = useAuthSessionContext();
   const location = useLocation();
@@ -94,6 +58,59 @@ export const DashboardSidebar = ({
     email: authData?.user?.email || "user@example.com",
     avatar: authData?.user?.avatar || "/avatars/default.jpg",
   };
+
+  const userPermissions = authData?.user?.appRole?.permissions || [];
+
+  if (userPermissions.includes(PERMISSIONS.JOB_GET)) {
+    staticData.projects.push({
+      name: "Jobs",
+      url: ROUTES.DASHBOARD.MAIN,
+      icon: Briefcase,
+    });
+  }
+  if (userPermissions.includes(PERMISSIONS.JOB_CREATE)) {
+    staticData.projects.push({
+      name: "Create Job",
+      url: ROUTES.DASHBOARD.CREATE_JOB,
+      icon: PlusCircle,
+    });
+  }
+  if (userPermissions.includes(PERMISSIONS.CHAT_ACCESS)) {
+    staticData.projects.push({
+      name: "Chats",
+      url: ROUTES.DASHBOARD.CHATS,
+      icon: MessageCircle,
+    });
+  }
+  if (userPermissions.includes(PERMISSIONS.STAFF_CREATE)) {
+    staticData.projects.push({
+      name: "Staff",
+      url: ROUTES.DASHBOARD.STAFF_MANAGEMENT,
+      icon: Users,
+    });
+  }
+  if (userPermissions.includes(PERMISSIONS.SCHEDULING_ACCESS)) {
+    staticData.projects.push({
+      name: "Scheduling",
+      url: ROUTES.DASHBOARD.SCHEDULER,
+      icon: Calendar,
+    });
+  }
+
+  if (userPermissions.includes(PERMISSIONS.EMAIL_TEMPLATE_CREATE)) {
+    staticData.projects.push({
+      name: "Email Templates",
+      url: ROUTES.DASHBOARD.EMAIL_TEMPLATES,
+      icon: Mail,
+    });
+  }
+  if (userPermissions.includes(PERMISSIONS.GLOBAL_SETTINGS)) {
+    staticData.projects.push({
+      name: "Settings",
+      url: ROUTES.DASHBOARD.GLOBAL_SETTINGS,
+      icon: Settings,
+    });
+  }
 
   // Filter navigation items based on subscription
   const filteredProjects = staticData.projects.filter((project) => {

@@ -11,6 +11,7 @@ import * as interviewApi from "./interview/api";
 import * as jobTemplateApi from "./job-template/api";
 import * as jobApi from "./job/api";
 import * as roleApi from "./role/api";
+import * as staffApi from "./staff/api";
 import * as userApi from "./user/api";
 
 const API = {
@@ -28,6 +29,7 @@ const API = {
   globalSetting: globalSettingApi,
   interview: interviewApi,
   role: roleApi,
+  staff: staffApi,
 };
 
 export default API;
