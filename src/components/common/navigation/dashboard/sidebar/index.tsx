@@ -24,6 +24,7 @@ import useAuthSessionContext from "@/lib/context/AuthSessionContext";
 import { useLocation, useNavigate } from "react-router-dom";
 import { NavProjects } from "./nav-projects";
 import { NavUser } from "./nav-user";
+import LogoImage from "../../../../../../public/logo.png";
 
 const staticData = {
   navSecondary: [
@@ -89,10 +90,13 @@ export const DashboardSidebar = ({
   };
 
   // Filter navigation items based on subscription
-  const filteredProjects = staticData.projects.filter(project => {
+  const filteredProjects = staticData.projects.filter((project) => {
     // Scheduler requires Professional+ plan
     if (project.name === "Scheduler") {
-      return subscription?.planId === 'professional' || subscription?.planId === 'enterprise';
+      return (
+        subscription?.planId === "professional" ||
+        subscription?.planId === "enterprise"
+      );
     }
     return true;
   });
@@ -102,34 +106,58 @@ export const DashboardSidebar = ({
       variant="inset"
       {...props}
       collapsible="icon"
-      className="bg-white border-r border-gray-200"
+      className="bg-primary border-r border-primary/20 relative overflow-hidden p-0"
     >
-      <SidebarHeader className="bg-white border-b border-gray-100 px-6 py-4">
+      {/* Subtle Pattern Overlay */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.03)_1px,transparent_0)] bg-[length:20px_20px] opacity-40"></div>
+
+      <SidebarHeader className="bg-primary border-b border-white/10 px-6 py-4 relative overflow-hidden max-h-[80px] h-full flex flex-col justify-center">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5 opacity-40"></div>
+        <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full blur-2xl"></div>
+
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <div onClick={() => navigate("/")} className="cursor-pointer hover:bg-gray-50 rounded-lg p-2 transition-colors">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">H</span>
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight ml-3">
-                  <span className="truncate font-bold text-gray-900 text-base">{APP_NAME}</span>
-                  <span className="text-xs text-gray-500">Recruitment Platform</span>
+              <div
+                onClick={() => navigate("/")}
+                className="cursor-pointer hover:bg-white/15 rounded-xl p-3 transition-all duration-300 group relative z-10"
+              >
+                <div className="flex items-center gap-4">
+                  <img
+                    src={LogoImage}
+                    alt="Logo"
+                    className="h-9 w-9 object-contain"
+                  />
+                  <div className="flex flex-col min-w-0">
+                    <span className="font-extrabold text-white/70 text-[1.65rem] leading-tight tracking-tight group-hover:text-blue-100 transition-colors truncate drop-shadow-sm">
+                      {APP_NAME}
+                    </span>
+                  </div>
                 </div>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent className="bg-white px-3 py-4">
+
+      <SidebarContent className="bg-primary px-4 py-6 relative z-10">
         <NavProjects
           name="Navigation"
           projects={filteredProjects}
           currentPath={location.pathname}
         />
       </SidebarContent>
-      <SidebarFooter className="bg-white border-t border-gray-100 p-3">
-        <NavUser user={user} />
+
+      <SidebarFooter className="bg-gradient-to-t from-primary/95 to-primary/90 border-t border-white/10 p-3 relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 bg-gradient-to-tl from-white/5 via-transparent to-white/5 opacity-30"></div>
+        <div className="absolute bottom-0 left-0 w-20 h-20 bg-white/5 rounded-full blur-xl"></div>
+
+        <div className="relative z-10">
+          <NavUser user={user} />
+        </div>
       </SidebarFooter>
     </Sidebar>
   );

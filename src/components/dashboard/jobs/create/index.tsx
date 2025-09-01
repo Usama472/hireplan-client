@@ -12,6 +12,7 @@ import { ReviewPublishStep } from "@/components/dashboard/jobs/common/review-pub
 import { StepNavigation } from "@/components/main/signup/stepNavigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
   TooltipContent,
@@ -32,14 +33,13 @@ import {
   type JobFormSchema,
 } from "@/lib/validations/forms/job-form-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Database, FileText, RotateCcw, Sparkles, Layers } from "lucide-react";
+import { Database, FileText, RotateCcw, Sparkles, Layers } from "lucide-react";
 import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { SaveAsTemplateDialog } from "./SaveAsTemplateDialog";
 import type { JobTemplate } from "@/types/job-template";
-
 
 // Draft Management Constants
 const DRAFT_STORAGE_KEY = "job_creation_draft";
@@ -55,61 +55,6 @@ interface DraftData {
   currentStep: number;
   timestamp: number;
   userId: string;
-}
-
-// ✅ Clean Professional Progress Bar
-function ProgressBar({
-  currentStep,
-  totalSteps,
-}: {
-  currentStep: number;
-  totalSteps: number;
-}) {
-  const percentage = Math.round(((currentStep - 1) / (totalSteps - 1)) * 100);
-
-  return (
-    <div className="w-full mb-6">
-      {/* Compact Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-6">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => window.history.back()}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 px-4 py-2 rounded-xl transition-all duration-200 font-medium h-10 shadow-sm hover:shadow-md"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="hidden sm:inline">Back to Jobs</span>
-            <span className="sm:hidden">Back</span>
-          </Button>
-          <div className="flex items-center gap-3">
-            <div className="h-4 w-px bg-gray-200" />
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-              <p className="text-sm font-medium text-gray-700">
-                Step {currentStep} of {totalSteps}
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="text-right">
-          <div className="text-lg font-semibold text-blue-600">
-            {percentage}%
-          </div>
-        </div>
-      </div>
-
-      {/* Progress Bar */}
-      <div className="relative mb-4">
-        <div className="w-full bg-gray-200 rounded-full h-2">
-          <div
-            className="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out"
-            style={{ width: `${percentage}%` }}
-          />
-        </div>
-      </div>
-    </div>
-  );
 }
 
 // Draft Management Functions
@@ -221,7 +166,7 @@ function LoadDraftButton({
             variant="outline"
             size="sm"
             onClick={onLoadDraft}
-            className="bg-white border-amber-300 text-amber-700 hover:bg-amber-50 hover:border-amber-400 rounded-xl h-10 px-4 font-medium shadow-sm hover:shadow-md transition-all duration-200"
+            className="bg-white border-amber-300 text-amber-700 hover:bg-amber-50 hover:border-amber-400 rounded-xl h-10 px-4 font-medium shadow-none transition-all duration-200"
           >
             <RotateCcw className="w-4 h-4 mr-2" />
             Load Draft
@@ -231,7 +176,7 @@ function LoadDraftButton({
             variant="ghost"
             size="sm"
             onClick={onClearDraft}
-            className="text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-xl h-10 px-4 font-medium shadow-sm hover:shadow-md transition-all duration-200"
+            className="text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-xl h-10 px-4 font-medium shadow-none transition-all duration-200"
           >
             Clear Draft
           </Button>
@@ -244,22 +189,28 @@ function LoadDraftButton({
 export default function CreateJob() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<JobTemplate | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<JobTemplate | null>(
+    null
+  );
   const [draftInfo, setDraftInfo] = useState<{
     step: number;
     timestamp: number;
   } | null>(null);
   const [showSaveTemplateDialog, setShowSaveTemplateDialog] = useState(false);
   const [isEditingTemplate, setIsEditingTemplate] = useState(false);
-  const [editingTemplateId, setEditingTemplateId] = useState<string | null>(null);
+  const [editingTemplateId, setEditingTemplateId] = useState<string | null>(
+    null
+  );
   const navigate = useNavigate();
   const location = useLocation();
   const { data: authSession, subscription } = useAuthSessionContext();
   const userId = authSession?.user?.id || "anonymous";
-  
+
   // Check if user has Professional+ subscription for AI features
-  const hasProfessionalFeatures = subscription?.planId === 'professional' || subscription?.planId === 'enterprise';
-  
+  const hasProfessionalFeatures =
+    subscription?.planId === "professional" ||
+    subscription?.planId === "enterprise";
+
   // Adjust total steps based on subscription - AI step (5) is only for Professional+
   const totalSteps = hasProfessionalFeatures ? 7 : 6;
 
@@ -300,28 +251,33 @@ export default function CreateJob() {
     toast.success("Draft cleared successfully!");
   };
 
-
-
   // Template handling functions
   const handleSelectTemplate = (template: JobTemplate) => {
     setSelectedTemplate(template);
-    
+
     // Convert template data to form format
     const templateFormData: Partial<JobFormSchema> = {
       jobTitle: template.jobTitle,
       jobBoardTitle: template.jobBoardTitle || template.jobTitle,
       jobDescription: template.jobDescription,
-      department: template.department || '',
-      customDepartment: template.customDepartment || '',
+      department: template.department || "",
+      customDepartment: template.customDepartment || "",
       workplaceType: template.workplaceType as any,
       employmentType: template.employmentType as any,
-      workSetting: template.workSetting || '',
-      country: template.country || 'US',
-      language: template.language || 'en',
-      hiringTimeline: (template.hiringTimeline as "1-3-days" | "3-7-days" | "1-2-weeks" | "2-4-weeks" | "more-than-4-weeks") || '1-2-weeks',
-      educationRequirement: template.educationRequirement || '',
+      workSetting: template.workSetting || "",
+      country: template.country || "US",
+      language: template.language || "en",
+      hiringTimeline:
+        (template.hiringTimeline as
+          | "1-3-days"
+          | "3-7-days"
+          | "1-2-weeks"
+          | "2-4-weeks"
+          | "more-than-4-weeks") || "1-2-weeks",
+      educationRequirement: template.educationRequirement || "",
       payType: template.payType as any,
-      backgroundScreeningDisclaimer: template.backgroundScreeningDisclaimer || false,
+      backgroundScreeningDisclaimer:
+        template.backgroundScreeningDisclaimer || false,
     };
 
     // Handle job location
@@ -331,7 +287,7 @@ export default function CreateJob() {
         city: template.jobLocation.city,
         state: template.jobLocation.state,
         country: template.jobLocation.country,
-        zipCode: template.jobLocation.zipCode || '',
+        zipCode: template.jobLocation.zipCode || "",
       };
     }
 
@@ -342,16 +298,18 @@ export default function CreateJob() {
 
     // Handle qualifications (convert weight to score)
     if (template.requiredQualifications) {
-      templateFormData.requiredQualifications = template.requiredQualifications.map(q => ({
-        text: q.text,
-        score: q.weight || 1
-      }));
+      templateFormData.requiredQualifications =
+        template.requiredQualifications.map((q) => ({
+          text: q.text,
+          score: q.weight || 1,
+        }));
     }
     if (template.preferredQualifications) {
-      templateFormData.preferredQualifications = template.preferredQualifications.map(q => ({
-        text: q.text,
-        score: q.weight || 1
-      }));
+      templateFormData.preferredQualifications =
+        template.preferredQualifications.map((q) => ({
+          text: q.text,
+          score: q.weight || 1,
+        }));
     }
 
     // Handle job requirements
@@ -367,7 +325,10 @@ export default function CreateJob() {
     // Handle schedule and hours (convert to proper format)
     if (template.hoursPerWeek) {
       templateFormData.hoursPerWeek = {
-        type: template.hoursPerWeek.min && template.hoursPerWeek.max ? 'range' : 'fixed-hours',
+        type:
+          template.hoursPerWeek.min && template.hoursPerWeek.max
+            ? "range"
+            : "fixed-hours",
         min: template.hoursPerWeek.min,
         max: template.hoursPerWeek.max,
       } as any;
@@ -408,19 +369,17 @@ export default function CreateJob() {
     if (location.state?.selectedTemplate) {
       const template = location.state.selectedTemplate as JobTemplate;
       const isEditMode = location.state.editMode;
-      
+
       if (isEditMode) {
         setIsEditingTemplate(true);
         setEditingTemplateId(location.state.templateId);
       }
-      
+
       handleSelectTemplate(template);
       // Clear the navigation state to prevent re-applying on refresh
       navigate(location.pathname, { replace: true, state: {} });
     }
   }, [userId]); // Removed dependencies that cause infinite loops
-
-
 
   const loadTestData = () => {
     Object.keys(JOB_FORM_TEST_DATA).forEach((key) => {
@@ -446,14 +405,19 @@ export default function CreateJob() {
       return;
     }
 
-    if ((currentStep === 7 && hasProfessionalFeatures) || (currentStep === 6 && !hasProfessionalFeatures)) {
+    if (
+      (currentStep === 7 && hasProfessionalFeatures) ||
+      (currentStep === 6 && !hasProfessionalFeatures)
+    ) {
       // Review step - skip validation
       setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
       return;
     }
 
     // Special validation for Booking Page step (step 6 for Professional+, step 5 for Starter)
-    const isBookingPageStep = (hasProfessionalFeatures && currentStep === 6) || (!hasProfessionalFeatures && currentStep === 5);
+    const isBookingPageStep =
+      (hasProfessionalFeatures && currentStep === 6) ||
+      (!hasProfessionalFeatures && currentStep === 5);
     if (isBookingPageStep) {
       // Get current availabilityId value
       const availabilityId = watch("availabilityId");
@@ -521,7 +485,7 @@ export default function CreateJob() {
 
   const handlePrevious = () => {
     clearErrors();
-    
+
     // Handle skipping AI step for non-Professional users when going backwards
     if (currentStep === 5 && !hasProfessionalFeatures) {
       // For non-Professional users, step 5 is Booking Page, so go back to step 4
@@ -535,7 +499,7 @@ export default function CreateJob() {
     } else {
       setCurrentStep((prev) => Math.max(prev - 1, 1));
     }
-    
+
     // Scroll to top when going to previous step
     window.scrollTo({
       top: 0,
@@ -560,7 +524,7 @@ export default function CreateJob() {
     try {
       console.log("Attempting to create job with data:", data);
       const { automation, ...rest } = data;
-      
+
       // Create automation object with required fields
       const automationData = {
         enabledRules: automation?.enabledRules || [],
@@ -568,27 +532,27 @@ export default function CreateJob() {
           requiredQualifications: 25,
           preferredQualifications: 15,
           preScreeningQuestions: 35,
-          resume: 25
+          resume: 25,
         },
         sectionThresholds: automation?.sectionThresholds || {
           requiredQualifications: { autoReject: 30, manualReview: 70 },
           preferredQualifications: { autoReject: 20, manualReview: 60 },
           preScreeningQuestions: { autoReject: 40, manualReview: 80 },
-          resume: { autoReject: 30, manualReview: 70 }
+          resume: { autoReject: 30, manualReview: 70 },
         },
         acceptanceThreshold: automation?.acceptanceThreshold || 80,
         manualReviewThreshold: automation?.manualReviewThreshold || 50,
         questionAutoFail: automation?.questionAutoFail || [],
         questionCriteria: automation?.questionCriteria || {},
         jobRules: automation?.jobRules || [],
-        template: automation?.template || null
+        template: automation?.template || null,
       };
-      
+
       const newData = {
         ...rest,
         automation: automationData,
       };
-      
+
       await API.job.createJob(newData);
       clearDraftFromStorage(userId);
       toast.success("Job created successfully!");
@@ -681,9 +645,83 @@ export default function CreateJob() {
 
   return (
     <main className="pb-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-5">
-        <ProgressBar currentStep={currentStep} totalSteps={totalSteps} />
+      {/* Enhanced Header */}
+      <div className="bg-primary border-b border-primary/20 px-6 py-4 relative overflow-hidden max-h-[80px]">
+        <div className="relative z-10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
+                <FileText className="h-6 w-6 text-white" />
+              </div>
+              <div className="flex flex-col">
+                <h1 className="text-xl font-bold text-white">Create New Job</h1>
+                <p className="text-sm text-white/80 flex items-center gap-3">
+                  Set up your job posting with detailed requirements and
+                  preferences
+                  <Badge
+                    variant="secondary"
+                    className="bg-white/20 text-white border-white/20 text-xs"
+                  >
+                    Step {currentStep} of {totalSteps}
+                  </Badge>
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              {/* Template Action Buttons */}
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowSaveTemplateDialog(true)}
+                  className="bg-white/10 hover:bg-white/20 border-white/30 text-white hover:text-white rounded-xl h-9 px-4 font-medium transition-all duration-200 backdrop-blur-sm"
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  Save as Template
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    navigate(ROUTES.DASHBOARD.JOB_TEMPLATES, {
+                      state: { fromJobCreation: true },
+                    })
+                  }
+                  className="bg-white/10 hover:bg-white/20 border-white/30 text-white hover:text-white rounded-xl h-9 px-4 font-medium transition-all duration-200 backdrop-blur-sm"
+                >
+                  <Layers className="h-4 w-4 mr-2" />
+                  {selectedTemplate ? "Change Template" : "Browse Templates"}
+                </Button>
+              </div>
 
+              <div className="h-8 w-px bg-white/20" />
+
+              {/* Progress Display */}
+              <div className="text-right">
+                <div className="text-2xl font-bold text-white">
+                  {Math.round(((currentStep - 1) / (totalSteps - 1)) * 100)}%
+                </div>
+                <p className="text-sm text-white/80 font-medium">Complete</p>
+              </div>
+              {/* Progress Bar */}
+              <div className="w-32">
+                <div className="w-full bg-white/20 rounded-full h-2">
+                  <div
+                    className="bg-white h-2 rounded-full transition-all duration-300 ease-out"
+                    style={{
+                      width: `${Math.round(
+                        ((currentStep - 1) / (totalSteps - 1)) * 100
+                      )}%`,
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
         {/* Template Status & Actions */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
@@ -703,37 +741,16 @@ export default function CreateJob() {
                 </Button>
               </div>
             )}
-            
+
             <LoadDraftButton
               onLoadDraft={loadDraft}
               onClearDraft={clearDraft}
               draftInfo={draftInfo}
             />
           </div>
-
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowSaveTemplateDialog(true)}
-              className="rounded-lg border-green-200 text-green-600 hover:bg-green-50 hover:border-green-300"
-            >
-              <FileText className="h-4 w-4 mr-2" />
-              Save as Template
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate(ROUTES.DASHBOARD.JOB_TEMPLATES, { state: { fromJobCreation: true } })}
-              className="rounded-lg border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300"
-            >
-              <Layers className="h-4 w-4 mr-2" />
-              {selectedTemplate ? 'Change Template' : 'Browse Templates'}
-            </Button>
-          </div>
         </div>
 
-        <Card className="shadow-sm border-0 bg-white p-3">
+        <Card className="shadow-none border-0 bg-white p-3">
           <CardContent className="px-8 pt-4 pb-4">
             <FormProvider {...form}>
               <form
@@ -768,31 +785,38 @@ export default function CreateJob() {
           formData={form.getValues()}
           isEditMode={isEditingTemplate}
           templateId={editingTemplateId || undefined}
-          existingTemplate={selectedTemplate ? {
-            name: selectedTemplate.name,
-            description: selectedTemplate.description,
-            category: selectedTemplate.category,
-            tags: selectedTemplate.tags,
-            isPublic: selectedTemplate.isPublic
-          } : undefined}
+          existingTemplate={
+            selectedTemplate
+              ? {
+                  name: selectedTemplate.name,
+                  description: selectedTemplate.description,
+                  category: selectedTemplate.category,
+                  tags: selectedTemplate.tags,
+                  isPublic: selectedTemplate.isPublic,
+                }
+              : undefined
+          }
           onSaved={() => {
             if (isEditingTemplate) {
               toast.success("Template updated! Changes have been saved.", {
                 action: {
                   label: "View Templates",
-                  onClick: () => navigate(ROUTES.DASHBOARD.JOB_TEMPLATES)
-                }
+                  onClick: () => navigate(ROUTES.DASHBOARD.JOB_TEMPLATES),
+                },
               });
               // Reset edit mode
               setIsEditingTemplate(false);
               setEditingTemplateId(null);
             } else {
-              toast.success("Template saved! You can now use it when creating new jobs.", {
-                action: {
-                  label: "View Templates",
-                  onClick: () => navigate(ROUTES.DASHBOARD.JOB_TEMPLATES)
+              toast.success(
+                "Template saved! You can now use it when creating new jobs.",
+                {
+                  action: {
+                    label: "View Templates",
+                    onClick: () => navigate(ROUTES.DASHBOARD.JOB_TEMPLATES),
+                  },
                 }
-              });
+              );
             }
           }}
         />

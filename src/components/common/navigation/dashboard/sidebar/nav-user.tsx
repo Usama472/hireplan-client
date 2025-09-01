@@ -17,7 +17,7 @@ import { ROUTES } from "@/constants";
 import API from "@/http";
 import { mutateSession } from "@/http/auth/mutateSession";
 import useAuthSessionContext from "@/lib/context/AuthSessionContext";
-import { ChevronDown, LogOut, User } from "lucide-react";
+import { ChevronDown, LogOut, User, Settings } from "lucide-react";
 import { useNavigate } from "react-router";
 
 export function NavUser({
@@ -40,41 +40,41 @@ export function NavUser({
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="cursor-pointer hover:bg-gray-100 transition-colors rounded-xl p-3 mx-2"
+              className="cursor-pointer rounded-lg p-3 mx-1 group w-full hover:bg-transparent"
             >
               <div className="flex items-center gap-3 w-full">
-                <Avatar className="h-10 w-10 rounded-xl border-2 border-gray-200">
+                <Avatar className="h-9 w-9 rounded-lg">
                   <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 text-white font-medium">
+                  <AvatarFallback className="rounded-lg bg-white/20 text-white font-semibold text-sm">
                     {user.name
                       .split(" ")
                       .map((n) => n[0])
                       .join("")}
                   </AvatarFallback>
                 </Avatar>
-                <div className="grid flex-1 text-left leading-tight">
-                  <span className="truncate font-semibold text-gray-900">
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium text-white truncate">
                     {user.name}
-                  </span>
-                  <span className="truncate text-xs text-gray-500">
+                  </div>
+                  <div className="text-xs text-white/60 truncate">
                     {user.email}
-                  </span>
+                  </div>
                 </div>
-                <ChevronDown className="size-4 text-gray-400" />
+                <ChevronDown className="h-4 w-4 text-white/50 group-hover:text-white/80 transition-all duration-200 flex-shrink-0 group-hover:rotate-180" />
               </div>
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-xl shadow-lg border border-gray-200"
+            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-md border border-white/20 bg-primary shadow-lg"
             side={isMobile ? "bottom" : "right"}
             align="end"
             sideOffset={8}
           >
-            <DropdownMenuLabel className="px-4 py-3 bg-gray-50 border-b border-gray-100">
+            <DropdownMenuLabel className="px-4 py-4 bg-primary/90 border-b border-white/10 rounded-t-md">
               <div className="flex items-center gap-3">
-                <Avatar className="h-10 w-10 rounded-lg border-2 border-white">
+                <Avatar className="h-10 w-10 rounded-lg">
                   <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg bg-blue-100 text-blue-800 font-medium">
+                  <AvatarFallback className="rounded-lg bg-white/20 text-white font-medium">
                     {user.name
                       .split(" ")
                       .map((n) => n[0])
@@ -82,10 +82,10 @@ export function NavUser({
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 leading-tight">
-                  <span className="truncate font-medium text-gray-900">
+                  <span className="truncate font-semibold text-white text-sm">
                     {user.name}
                   </span>
-                  <span className="truncate text-xs text-gray-500">
+                  <span className="truncate text-xs text-white/70">
                     {user.email}
                   </span>
                 </div>
@@ -94,15 +94,29 @@ export function NavUser({
 
             <DropdownMenuGroup className="p-2">
               <DropdownMenuItem
-                className="px-3 py-2.5 rounded-lg hover:bg-blue-50 focus:bg-blue-50 transition-colors cursor-pointer"
+                className="px-3 py-2.5 rounded-md hover:bg-white/10 focus:bg-white/10 transition-colors cursor-pointer group"
                 onClick={() => navigate(ROUTES.DASHBOARD.PROFILE)}
               >
-                <User className="size-4 text-blue-700 mr-3" />
-                <span className="font-medium text-blue-700">My Profile</span>
+                <User className="size-4 text-white/80 mr-3 group-hover:scale-105 transition-transform duration-200" />
+                <span className="font-medium text-white group-hover:text-white/90 transition-colors">
+                  Profile
+                </span>
               </DropdownMenuItem>
 
               <DropdownMenuItem
-                className="px-3 py-2.5 rounded-lg hover:bg-red-50 focus:bg-red-50 transition-colors cursor-pointer text-red-600 font-medium"
+                className="px-3 py-2.5 rounded-md hover:bg-white/10 focus:bg-white/10 transition-colors cursor-pointer group"
+                onClick={() => navigate(ROUTES.DASHBOARD.GLOBAL_SETTINGS)}
+              >
+                <Settings className="size-4 text-white/80 mr-3 group-hover:scale-105 transition-transform duration-200" />
+                <span className="font-medium text-white/80 group-hover:text-white/90 transition-colors">
+                  Settings
+                </span>
+              </DropdownMenuItem>
+
+              <div className="border-t border-white/10 my-2"></div>
+
+              <DropdownMenuItem
+                className="px-3 py-3 rounded-md hover:bg-red-500/20 focus:bg-red-500/20 transition-all duration-200 cursor-pointer group border border-transparent hover:border-red-400/30"
                 onClick={() => {
                   const authToken = data?.accessToken;
                   if (authToken) {
@@ -111,8 +125,14 @@ export function NavUser({
                   mutateSession({ shouldBroadcast: true, accessToken: "" });
                 }}
               >
-                <LogOut className="size-4 mr-3 text-red-500" />
-                <span className="text-red-600">Log out</span>
+                <div className="flex items-center gap-3 w-full">
+                  <div className="p-1.5 rounded-md bg-red-500/20 group-hover:bg-red-500/30 transition-colors">
+                    <LogOut className="size-4 text-red-300 group-hover:text-red-200 transition-colors" />
+                  </div>
+                  <span className="font-medium text-red-200 group-hover:text-white transition-colors">
+                    Sign out
+                  </span>
+                </div>
               </DropdownMenuItem>
             </DropdownMenuGroup>
           </DropdownMenuContent>

@@ -84,8 +84,6 @@ export function ReviewSubmitStep() {
             </div>
           </CardContent>
         </Card>
-
-
       </div>
     </div>
   );

@@ -1,5 +1,4 @@
 import { InputField } from "@/components/common/InputField";
-import { SelectField } from "@/components/common/SelectField";
 import { INPUT_TYPES } from "@/interfaces";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
@@ -122,23 +121,24 @@ export function PersonalInfoStep() {
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 md:gap-6">
-        <SelectField
+        <InputField
           name="jobCategory"
+          type={INPUT_TYPES.SELECT}
           label="Role Category"
           placeholder="Select your role category"
-          options={categoryOptions}
-          onChange={handleCategoryChange}
+          selectOptions={categoryOptions}
           showIsRequired
         />
-        <SelectField
+        <InputField
           name="jobTitle"
+          type={INPUT_TYPES.SELECT}
           label="Job Title"
           placeholder={
             selectedCategory || jobCategory
               ? "Select your specific role"
               : "Select category first"
           }
-          options={titleOptions}
+          selectOptions={titleOptions}
           disabled={!selectedCategory && !jobCategory}
           showIsRequired
         />

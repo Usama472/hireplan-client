@@ -25,7 +25,7 @@ export function NavProjects({
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-3">
+      <SidebarGroupLabel className="text-xs font-medium text-white/60 uppercase tracking-wider mb-4 px-3">
         {name}
       </SidebarGroupLabel>
       <SidebarMenu className="space-y-1">
@@ -37,33 +37,31 @@ export function NavProjects({
               <SidebarMenuButton
                 asChild
                 onClick={() => navigate(item.url)}
-                className="p-0 hover:bg-transparent"
+                className="p-0 hover:bg-transparent focus:bg-transparent active:bg-transparent"
               >
                 <div
-                  className={`group cursor-pointer flex items-center gap-3 px-3 py-2.5 mx-2 rounded-xl transition-all duration-200 ${
-                    isActive
-                      ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/25"
-                      : "hover:bg-gray-100 text-gray-700"
+                  className={`group cursor-pointer flex items-center gap-3 px-3 py-2 mx-1 rounded-md h-10 hover:bg-white/10 hover:text-white ${
+                    isActive ? "bg-white/15 text-white" : "text-white/70"
                   }`}
                 >
                   <item.icon
-                    className={`w-5 h-5 transition-colors ${
+                    className={`w-4 h-4 ${
                       isActive
                         ? "text-white"
-                        : "text-gray-500 group-hover:text-blue-600"
+                        : "text-white/70 group-hover:text-white"
                     }`}
                   />
                   <span
-                    className={`font-medium transition-colors ${
+                    className={`text-sm font-medium flex-1 ${
                       isActive
                         ? "text-white"
-                        : "text-gray-700 group-hover:text-gray-900"
+                        : "text-white/70 group-hover:text-white"
                     }`}
                   >
                     {item.name}
                   </span>
                   {isActive && (
-                    <div className="ml-auto w-2 h-2 bg-white rounded-full opacity-80"></div>
+                    <div className="w-2 h-2 rounded-full bg-blue-400"></div>
                   )}
                 </div>
               </SidebarMenuButton>

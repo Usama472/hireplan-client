@@ -1,17 +1,11 @@
 import type { FC } from "react";
-import { AuthLayout } from "@/components/common/AuthLayout";
+import { LoginLayout } from "@/components/common/LoginLayout";
 import { LoginForm } from "@/components/forms/LoginForm";
 
 const Login: FC = () => (
-  <AuthLayout
-    title="Sign in to your account"
-    footerText="Don't have an account?"
-    footerLinkText="Sign up"
-    footerLinkHref="/signup"
-    showSocial={false}
-  >
+  <LoginLayout>
     <LoginForm />
-  </AuthLayout>
+  </LoginLayout>
 );
 
 export default Login;

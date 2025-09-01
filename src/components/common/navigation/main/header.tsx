@@ -18,23 +18,23 @@ export function Header() {
   ];
 
   const handleNavigation = (href: string) => {
-    if (href.startsWith('#')) {
+    if (href.startsWith("#")) {
       // Handle anchor links
-      if (window.location.pathname !== '/') {
+      if (window.location.pathname !== "/") {
         // If not on home page, navigate to home page with hash
-        navigate('/' + href);
+        navigate("/" + href);
         // Use setTimeout to ensure the navigation completes before scrolling
         setTimeout(() => {
           const element = document.querySelector(href);
           if (element) {
-            element.scrollIntoView({ behavior: 'smooth' });
+            element.scrollIntoView({ behavior: "smooth" });
           }
         }, 100);
       } else {
         // If on home page, scroll to section immediately
         const element = document.querySelector(href);
         if (element) {
-          element.scrollIntoView({ behavior: 'smooth' });
+          element.scrollIntoView({ behavior: "smooth" });
         }
       }
     } else {
@@ -45,7 +45,7 @@ export function Header() {
   };
 
   return (
-    <header className="fixed top-0 w-full bg-white/80 backdrop-blur-md border-b border-gray-100 z-50">
+    <header className="w-full bg-white/80 backdrop-blur-md border-b border-gray-100 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
@@ -85,14 +85,13 @@ export function Header() {
             ) : (
               <>
                 <Button
-                  variant="ghost"
-                  className="text-gray-600 hover:text-gray-900"
+                  variant="outline-primary"
                   onClick={() => navigate("/login")}
                 >
                   Sign In
                 </Button>
                 <Button
-                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg"
+                  variant="secondary"
                   onClick={() => navigate(ROUTES.SIGNUP)}
                 >
                   Get Started
@@ -131,14 +130,14 @@ export function Header() {
               ))}
               <div className="pt-4 space-y-2 border-t border-gray-100 mt-4">
                 <Button
-                  variant="ghost"
+                  variant="outline-primary"
                   className="w-full justify-start"
                   onClick={() => handleNavigation("/login")}
                 >
                   Sign In
                 </Button>
                 <Button
-                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700"
+                  variant="secondary"
                   onClick={() => handleNavigation("/signup")}
                 >
                   Get Started

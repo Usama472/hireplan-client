@@ -37,7 +37,7 @@ export function SearchBar({
           placeholder={placeholder}
           value={searchQuery}
           onChange={(e) => handleSearch(e.target.value)}
-          className="pl-10 pr-10 h-11 bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500 shadow-sm"
+          className="pl-10 pr-10 h-11 bg-white border-none focus:border-blue-500 focus:ring-blue-500 shadow-none"
         />
         {searchQuery && (
           <Button

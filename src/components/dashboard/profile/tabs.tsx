@@ -1,24 +1,24 @@
-'use client'
+"use client";
 
-import { cn } from '@/lib/utils'
-import { Building2, User, Settings } from 'lucide-react'
-import type React from 'react'
+import { cn } from "@/lib/utils";
+import { Building2, User, Settings, Mail, Briefcase, Bell } from "lucide-react";
+import type React from "react";
 
 interface Tab {
-  id: string
-  label: string
-  icon: React.ComponentType<{ className?: string }>
+  id: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
 }
 
-const tabs: Tab[] = [
+const defaultTabs: Tab[] = [
   {
-    id: 'personal',
-    label: 'Personal Info',
+    id: "personal",
+    label: "Personal Info",
     icon: User,
   },
   {
-    id: 'company',
-    label: 'Company Info',
+    id: "company",
+    label: "Company Info",
     icon: Building2,
   },
   {
@@ -26,49 +26,86 @@ const tabs: Tab[] = [
     label: "Subscription & Billing",
     icon: Settings,
   },
-]
+];
+
+const globalSettingsTabs: Tab[] = [
+  {
+    id: "general",
+    label: "Profile",
+    icon: User,
+  },
+  {
+    id: "company",
+    label: "Company",
+    icon: Building2,
+  },
+  {
+    id: "billing",
+    label: "Billing",
+    icon: Settings,
+  },
+  {
+    id: "job-templates",
+    label: "Jobs",
+    icon: Briefcase,
+  },
+  {
+    id: "email-templates",
+    label: "Email",
+    icon: Mail,
+  },
+  {
+    id: "notifications",
+    label: "Notifications",
+    icon: Bell,
+  },
+];
 
 interface ProfileTabsProps {
-  activeTab: string
-  onTabChange: (tabId: string) => void
-  children: React.ReactNode
+  activeTab: string;
+  onTabChange: (tabId: string) => void;
+  children: React.ReactNode;
+  variant?: "profile" | "global-settings";
 }
 
 export function ProfileTabs({
   activeTab,
   onTabChange,
   children,
+  variant = "profile",
 }: ProfileTabsProps) {
+  const tabs = variant === "global-settings" ? globalSettingsTabs : defaultTabs;
+
   return (
-    <div className='w-full'>
+    <div className="w-full">
       {/* Clean Tab Navigation */}
-      <div className='border-b border-gray-200 mb-8'>
-        <nav className='flex space-x-8'>
+      <div className="border-b border-gray-200 mb-8">
+        <nav className="flex space-x-8">
           {tabs.map((tab) => {
-            const isActive = activeTab === tab.id
-            const IconComponent = tab.icon
+            const isActive = activeTab === tab.id;
+            const IconComponent = tab.icon;
 
             return (
               <button
                 key={tab.id}
                 onClick={() => onTabChange(tab.id)}
                 className={cn(
-                  'flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200',
+                  "flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 cursor-pointer",
                   isActive
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? "border-primary text-primary"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 )}
               >
-                <IconComponent className='w-4 h-4' />
+                <IconComponent className="w-4 h-4" />
                 {tab.label}
               </button>
-            )
+            );
           })}
         </nav>
       </div>
 
       {/* Tab Content */}
-      <div className='relative'>{children}</div>
+      <div className="relative">{children}</div>
     </div>
-  )
+  );
 }

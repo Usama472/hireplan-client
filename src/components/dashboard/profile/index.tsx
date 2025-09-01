@@ -7,7 +7,6 @@ import { SaveChangesBar } from "@/components/dashboard/profile/save-changes-bar"
 import { AccountSettingsForm } from "@/components/dashboard/profile/account-settings-form";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import API from "@/http";
 import useAuthSessionContext from "@/lib/context/AuthSessionContext";
 import { cn } from "@/lib/utils";
@@ -22,7 +21,6 @@ import { ProfileTabs } from "./tabs";
 import { useSearchParams } from "react-router-dom";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 export default function ProfilePage() {
@@ -36,7 +34,12 @@ export default function ProfilePage() {
   const [showCancelAlert, setShowCancelAlert] = useState(false);
   // Remove local subscription state - we'll use the global context instead
 
-  const { data: authSession, updateUser, subscription: verifiedSubscription, refreshSubscription } = useAuthSessionContext();
+  const {
+    data: authSession,
+    updateUser,
+    subscription: verifiedSubscription,
+    refreshSubscription,
+  } = useAuthSessionContext();
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Use refreshSubscription from context instead of local fetching
@@ -129,13 +132,13 @@ export default function ProfilePage() {
 
   // Handle URL parameters for subscription flow redirects
   useEffect(() => {
-    const success = searchParams.get('success');
-    const canceled = searchParams.get('canceled');
-    const tab = searchParams.get('tab');
+    const success = searchParams.get("success");
+    const canceled = searchParams.get("canceled");
+    const tab = searchParams.get("tab");
 
-    if (success === 'true') {
+    if (success === "true") {
       setShowSuccessAlert(true);
-      toast.success('Payment successful! Your subscription has been updated.');
+      toast.success("Payment successful! Your subscription has been updated.");
       // Refresh subscription status after successful payment
       if (refreshSubscription) {
         refreshSubscription();
@@ -146,20 +149,20 @@ export default function ProfilePage() {
       }
       // Clean up URL parameters
       const newSearchParams = new URLSearchParams(searchParams);
-      newSearchParams.delete('success');
+      newSearchParams.delete("success");
       setSearchParams(newSearchParams, { replace: true });
     }
 
-    if (canceled === 'true') {
+    if (canceled === "true") {
       setShowCancelAlert(true);
-      toast.info('Payment was canceled. You can try again anytime.');
+      toast.info("Payment was canceled. You can try again anytime.");
       // Set the active tab if specified
       if (tab) {
         setActiveTab(tab);
       }
       // Clean up URL parameters
       const newSearchParams = new URLSearchParams(searchParams);
-      newSearchParams.delete('canceled');
+      newSearchParams.delete("canceled");
       setSearchParams(newSearchParams, { replace: true });
     }
   }, [searchParams, setSearchParams, refreshSubscription]);
@@ -261,32 +264,45 @@ export default function ProfilePage() {
 
   if (!authSession || !initialFormData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100/50">
-        <div className="container mx-auto py-8 px-4 max-w-5xl">
-          <div className="animate-pulse">
-            <div className="mb-10">
-              <div className="flex items-start justify-between mb-6">
-                <div className="space-y-3">
-                  <div className="h-10 bg-gray-200 rounded w-64"></div>
-                  <div className="h-6 bg-gray-200 rounded w-96"></div>
+      <div className="min-h-full">
+        <div className="space-y-6">
+          {/* Loading Header */}
+          <div className="bg-primary border-b border-primary/20 px-6 py-4 relative overflow-hidden max-h-[80px]">
+            <div className="relative z-10">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
+                  <div className="h-6 w-6 bg-white/60 rounded animate-pulse"></div>
                 </div>
-                <div className="h-10 bg-gray-200 rounded w-32"></div>
+                <div className="flex flex-col gap-2">
+                  <div className="h-6 bg-white/60 rounded w-32 animate-pulse"></div>
+                  <div className="h-4 bg-white/40 rounded w-48 animate-pulse"></div>
+                </div>
               </div>
-              <Card className="shadow-lg">
-                <CardContent className="p-8">
-                  <div className="flex items-center gap-6">
-                    <div className="h-20 w-20 bg-gray-200 rounded-full"></div>
-                    <div className="flex-1 space-y-3">
-                      <div className="h-8 bg-gray-200 rounded w-48"></div>
-                      <div className="h-6 bg-gray-200 rounded w-64"></div>
-                      <div className="flex gap-3">
-                        <div className="h-6 bg-gray-200 rounded w-20"></div>
-                        <div className="h-6 bg-gray-200 rounded w-24"></div>
-                      </div>
-                    </div>
+            </div>
+          </div>
+
+          {/* Loading Profile Summary */}
+          <div className="px-6">
+            <div className="bg-white border border-gray-200 rounded-xl p-6 mb-8">
+              <div className="flex items-center gap-6">
+                <div className="h-20 w-20 bg-gray-200 rounded-full animate-pulse"></div>
+                <div className="flex-1 space-y-3">
+                  <div className="h-8 bg-gray-200 rounded w-48 animate-pulse"></div>
+                  <div className="h-6 bg-gray-200 rounded w-64 animate-pulse"></div>
+                  <div className="flex gap-3">
+                    <div className="h-6 bg-gray-200 rounded w-20 animate-pulse"></div>
+                    <div className="h-6 bg-gray-200 rounded w-24 animate-pulse"></div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Loading Content */}
+          <div className="px-6">
+            <div className="space-y-6">
+              <div className="h-64 bg-gray-200 rounded-xl animate-pulse"></div>
+              <div className="h-32 bg-gray-200 rounded-xl animate-pulse"></div>
             </div>
           </div>
         </div>
@@ -299,177 +315,211 @@ export default function ProfilePage() {
   const lastName = watch("lastName") || user.lastName || "";
   const email = watch("email") || user.email || "";
   const profileImg = watch("profileImg") || user.profileImg || "";
-  
+
   // Use subscription data if available, otherwise fall back to user data
-  const paymentPlan = verifiedSubscription?.planId || watch("paymentPlan") || user.paymentPlan || "starter";
-  const subscriptionStatus = verifiedSubscription?.subscriptionStatus || 'none';
-    
+  const paymentPlan =
+    verifiedSubscription?.planId ||
+    watch("paymentPlan") ||
+    user.paymentPlan ||
+    "starter";
+  const subscriptionStatus = verifiedSubscription?.subscriptionStatus || "none";
+
   // Debug logging
-  console.log('🔍 Profile subscription data:', {
+  console.log("🔍 Profile subscription data:", {
     verifiedSubscription,
     paymentPlan,
     subscriptionStatus,
     userPaymentPlan: user.paymentPlan,
-    watchPaymentPlan: watch("paymentPlan")
+    watchPaymentPlan: watch("paymentPlan"),
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100/50">
-      <div className="container mx-auto py-8 px-4 max-w-5xl">
-        {/* Enhanced Header */}
-        <div className="mb-10">
-          <div className="flex items-start justify-between mb-6">
-            <div className="space-y-1">
-              <h1 className="text-4xl font-bold text-gray-900 tracking-tight">
-                Profile Settings
-              </h1>
-              <p className="text-lg text-gray-600">
-                Manage your account information and preferences
-              </p>
-              {lastSaved && (
-                <p className="text-sm text-gray-500 flex items-center gap-1.5">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
-                  Last saved {lastSaved.toLocaleTimeString()}
-                </p>
-              )}
-            </div>
-
-            {/* Status Indicator */}
-            <div
-              className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300",
-                isSaved
-                  ? "bg-green-50 text-green-700 border border-green-200"
-                  : isDirty
-                  ? "bg-amber-50 text-amber-700 border border-amber-200"
-                  : "bg-gray-50 text-gray-600 border border-gray-200"
-              )}
-            >
-              {isSaved ? (
-                <>
-                  <CheckCircle2 className="h-4 w-4" />
-                  All changes saved
-                </>
-              ) : isDirty ? (
-                <>
-                  <AlertCircle className="h-4 w-4" />
-                  {dirtyFieldsCount} unsaved{" "}
-                  {dirtyFieldsCount === 1 ? "change" : "changes"}
-                </>
-              ) : (
-                <>
-                  <CheckCircle2 className="h-4 w-4" />
-                  Up to date
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Enhanced Profile Summary Card */}
-          <Card className="bg-gradient-to-r from-white to-blue-50/30 border-0 shadow-lg shadow-blue-100/50">
-            <CardContent className="p-8">
-              <div className="flex items-center gap-6">
-                <div className="relative">
-                  <Avatar className="h-20 w-20 ring-4 ring-white shadow-xl">
-                    <AvatarImage src={profileImg || "/placeholder.svg"} />
-                    <AvatarFallback className="text-2xl font-bold bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-                      {firstName.charAt(0)}
-                      {lastName.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
+    <div className="min-h-full">
+      <div className="space-y-6">
+        {/* Enhanced Header - Matching Jobs Page Style */}
+        <div className="bg-primary border-b border-primary/20 px-6 py-4 relative overflow-hidden max-h-[80px]">
+          <div className="relative z-10">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
+                  <svg
+                    className="h-6 w-6 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
+                  </svg>
                 </div>
-                <div className="flex-1 space-y-2">
-                  <h2 className="text-2xl font-bold text-gray-900">
-                    {firstName} {lastName}
-                  </h2>
-                  <p className="text-gray-600 text-lg">{email}</p>
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <Badge
-                      className={cn(
-                        "px-3 py-1 text-sm font-medium capitalize border",
-                        getPlanColor(paymentPlan)
-                      )}
-                    >
-                      {paymentPlan} Plan
-                    </Badge>
-                    <Badge
-                      className={cn(
-                        "px-3 py-1 text-sm font-medium capitalize border",
-                        getStatusBadgeColor(subscriptionStatus)
-                      )}
-                    >
-                      {subscriptionStatus}
-                    </Badge>
-                  </div>
+                <div className="flex flex-col">
+                  <h1 className="text-xl font-bold text-white">
+                    Profile Settings
+                  </h1>
+                  <p className="text-sm text-white/80 flex items-center gap-3">
+                    Manage your account information and preferences
+                    {lastSaved && (
+                      <span className="text-xs text-white/60">
+                        Last saved {lastSaved.toLocaleTimeString()}
+                      </span>
+                    )}
+                  </p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+
+              {/* Status Indicator */}
+              <div
+                className={cn(
+                  "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 border",
+                  isSaved
+                    ? "bg-green-500/20 text-green-100 border-green-400/30"
+                    : isDirty
+                    ? "bg-amber-500/20 text-amber-100 border-amber-400/30"
+                    : "bg-white/20 text-white/90 border-white/30"
+                )}
+              >
+                {isSaved ? (
+                  <>
+                    <CheckCircle2 className="h-4 w-4" />
+                    All changes saved
+                  </>
+                ) : isDirty ? (
+                  <>
+                    <AlertCircle className="h-4 w-4" />
+                    {dirtyFieldsCount} unsaved{" "}
+                    {dirtyFieldsCount === 1 ? "change" : "changes"}
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="h-4 w-4" />
+                    Up to date
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Profile Summary Section */}
+        <div className="px-6">
+          <div className="bg-white border border-gray-200 rounded-xl p-6 mb-8">
+            <div className="flex items-center gap-6">
+              <div className="relative">
+                <Avatar className="h-20 w-20 ring-4 ring-white shadow-lg">
+                  <AvatarImage src={profileImg || "/placeholder.svg"} />
+                  <AvatarFallback className="text-2xl font-bold bg-gradient-to-br from-primary to-primary/80 text-white">
+                    {firstName.charAt(0)}
+                    {lastName.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+              <div className="flex-1 space-y-3">
+                <h2 className="text-2xl font-bold text-gray-900">
+                  {firstName} {lastName}
+                </h2>
+                <p className="text-gray-600 text-lg">{email}</p>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <Badge
+                    className={cn(
+                      "px-3 py-1 text-sm font-medium capitalize border",
+                      getPlanColor(paymentPlan)
+                    )}
+                  >
+                    {paymentPlan} Plan
+                  </Badge>
+                  <Badge
+                    className={cn(
+                      "px-3 py-1 text-sm font-medium capitalize border",
+                      getStatusBadgeColor(subscriptionStatus)
+                    )}
+                  >
+                    {subscriptionStatus}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Success/Cancel Alerts */}
         {showSuccessAlert && (
-          <Alert className="mb-6 border-green-200 bg-green-50">
-            <CheckCircle2 className="h-4 w-4 text-green-600" />
-            <AlertDescription className="text-green-800">
-              <div className="flex items-center justify-between">
-                <span>Payment successful! Your subscription has been updated.</span>
-                <button
-                  onClick={() => setShowSuccessAlert(false)}
-                  className="text-green-600 hover:text-green-800"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            </AlertDescription>
-          </Alert>
+          <div className="px-6">
+            <Alert className="mb-6 border-green-200 bg-green-50">
+              <CheckCircle2 className="h-4 w-4 text-green-600" />
+              <AlertDescription className="text-green-800">
+                <div className="flex items-center justify-between">
+                  <span>
+                    Payment successful! Your subscription has been updated.
+                  </span>
+                  <button
+                    onClick={() => setShowSuccessAlert(false)}
+                    className="text-green-600 hover:text-green-800"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              </AlertDescription>
+            </Alert>
+          </div>
         )}
 
         {showCancelAlert && (
-          <Alert className="mb-6 border-blue-200 bg-blue-50">
-            <AlertCircle className="h-4 w-4 text-blue-600" />
-            <AlertDescription className="text-blue-800">
-              <div className="flex items-center justify-between">
-                <span>Payment was canceled. You can try again anytime from the Settings tab.</span>
-                <button
-                  onClick={() => setShowCancelAlert(false)}
-                  className="text-blue-600 hover:text-blue-800"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            </AlertDescription>
-          </Alert>
+          <div className="px-6">
+            <Alert className="mb-6 border-blue-200 bg-blue-50">
+              <AlertCircle className="h-4 w-4 text-blue-600" />
+              <AlertDescription className="text-blue-800">
+                <div className="flex items-center justify-between">
+                  <span>
+                    Payment was canceled. You can try again anytime from the
+                    Settings tab.
+                  </span>
+                  <button
+                    onClick={() => setShowCancelAlert(false)}
+                    className="text-blue-600 hover:text-blue-800"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              </AlertDescription>
+            </Alert>
+          </div>
         )}
 
-        <FormProvider {...form}>
-          <div className="space-y-8">
-            <ProfileTabs activeTab={activeTab} onTabChange={handleTabChange}>
-              <TabContent value="personal" activeTab={activeTab}>
-                <div className="space-y-6">
-                  <PersonalInfoForm />
-                </div>
-              </TabContent>
+        {/* Main Content */}
+        <div className="px-6">
+          <FormProvider {...form}>
+            <div className="space-y-8">
+              <ProfileTabs activeTab={activeTab} onTabChange={handleTabChange}>
+                <TabContent value="personal" activeTab={activeTab}>
+                  <div className="space-y-6">
+                    <PersonalInfoForm />
+                  </div>
+                </TabContent>
 
-              <TabContent value="company" activeTab={activeTab}>
-                <CompanyInfoForm />
-              </TabContent>
+                <TabContent value="company" activeTab={activeTab}>
+                  <CompanyInfoForm />
+                </TabContent>
 
-              <TabContent value='settings' activeTab={activeTab}>
-                <AccountSettingsForm />
-              </TabContent>
-            </ProfileTabs>
+                <TabContent value="settings" activeTab={activeTab}>
+                  <AccountSettingsForm />
+                </TabContent>
+              </ProfileTabs>
 
-            <SaveChangesBar
-              isDirty={isDirty}
-              isLoading={isLoading}
-              isSaved={isSaved}
-              onSubmit={() => handleFormSubmit(getValues())}
-              changedFieldsCount={dirtyFieldsCount}
-              onDiscard={() => reset(initialFormData || undefined)}
-            />
-          </div>
-        </FormProvider>
+              <SaveChangesBar
+                isDirty={isDirty}
+                isLoading={isLoading}
+                isSaved={isSaved}
+                onSubmit={() => handleFormSubmit(getValues())}
+                changedFieldsCount={dirtyFieldsCount}
+                onDiscard={() => reset(initialFormData || undefined)}
+              />
+            </div>
+          </FormProvider>
+        </div>
       </div>
     </div>
   );

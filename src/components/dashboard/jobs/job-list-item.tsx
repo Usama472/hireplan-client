@@ -2,12 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import type { JobFormDataWithId } from "@/interfaces";
 import { cn } from "@/lib/utils";
 import {
@@ -16,10 +10,9 @@ import {
   Calendar,
   Clock,
   DollarSign,
-  Edit,
+  Edit3,
   GraduationCap,
   MapPin,
-  MoreVertical,
   Star,
   Users,
   Zap,
@@ -35,13 +28,34 @@ interface JobListItemProps {
 }
 
 // Helper functions to format data
+const formatText = (
+  text: string | undefined | null,
+  fallback: string = "Unknown"
+) => {
+  if (!text) return fallback;
+  return text.charAt(0).toUpperCase() + text.slice(1);
+};
+
 const formatSalary = (job: JobFormDataWithId) => {
   if (!job.payRate) return "Competitive Salary";
-  if (job.payRate.type === "fixed") {
-    return `$${job.payRate.amount.toLocaleString()}`;
-  } else {
-    return `$${job.payRate.min.toLocaleString()} - $${job.payRate.max.toLocaleString()}`;
+
+  try {
+    const payRate = job.payRate as any;
+
+    if (payRate.type === "fixed" && payRate.amount != null) {
+      return `$${payRate.amount.toLocaleString()}`;
+    } else if (
+      payRate.type === "range" &&
+      payRate.min != null &&
+      payRate.max != null
+    ) {
+      return `$${payRate.min.toLocaleString()} - $${payRate.max.toLocaleString()}`;
+    }
+  } catch (error) {
+    console.warn("Error formatting salary:", error);
   }
+
+  return "Competitive Salary";
 };
 
 const formatSalaryPeriod = (job: JobFormDataWithId) => {
@@ -56,14 +70,6 @@ const formatLocation = (job: JobFormDataWithId) => {
   return "Remote";
 };
 
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-};
-
 const getDaysUntilDeadline = (endDate: Date) => {
   const today = new Date();
   const deadline = new Date(endDate);
@@ -72,33 +78,38 @@ const getDaysUntilDeadline = (endDate: Date) => {
   return diffDays;
 };
 
-// --- Clean & Professional Configs ---
 const getStatusConfig = (status: string) => {
   const configs = {
     active: {
-      bg: "bg-emerald-100",
-      text: "text-emerald-800",
+      bg: "bg-emerald-50",
+      text: "text-emerald-700",
+      border: "border-emerald-200",
       icon: Zap,
+      iconColor: "text-emerald-600",
     },
     draft: {
-      bg: "bg-slate-100",
-      text: "text-slate-800",
-      icon: Edit,
+      bg: "bg-slate-50",
+      text: "text-slate-700",
+      border: "border-slate-200",
+      icon: Edit3,
+      iconColor: "text-slate-600",
     },
     paused: {
-      bg: "bg-amber-100",
-      text: "text-amber-800",
+      bg: "bg-amber-50",
+      text: "text-amber-700",
+      border: "border-amber-200",
       icon: Clock,
+      iconColor: "text-amber-600",
     },
     closed: {
-      bg: "bg-red-100",
-      text: "text-red-800",
+      bg: "bg-red-50",
+      text: "text-red-700",
+      border: "border-red-200",
       icon: Star,
+      iconColor: "text-red-600",
     },
   };
-  return (
-    configs[status?.toLowerCase() as keyof typeof configs] || configs.draft
-  );
+  return configs[status as keyof typeof configs] || configs.draft;
 };
 
 const getPriorityConfig = (priority: string) => {
@@ -106,37 +117,20 @@ const getPriorityConfig = (priority: string) => {
     high: {
       bg: "bg-red-50",
       text: "text-red-700",
+      border: "border-red-200",
     },
     medium: {
       bg: "bg-amber-50",
       text: "text-amber-700",
+      border: "border-amber-200",
     },
     low: {
       bg: "bg-blue-50",
       text: "text-blue-700",
+      border: "border-blue-200",
     },
   };
-  return (
-    configs[priority?.toLowerCase() as keyof typeof configs] || configs.medium
-  );
-};
-
-const getWorkplaceTypeConfig = (type: string) => {
-  const configs = {
-    remote: {
-      bg: "bg-blue-50",
-      text: "text-blue-700",
-    },
-    hybrid: {
-      bg: "bg-purple-50",
-      text: "text-purple-700",
-    },
-    onsite: {
-      bg: "bg-gray-50",
-      text: "text-gray-700",
-    },
-  };
-  return configs[type?.toLowerCase() as keyof typeof configs] || configs.onsite;
+  return configs[priority as keyof typeof configs] || configs.medium;
 };
 
 export function JobListItem({
@@ -147,20 +141,15 @@ export function JobListItem({
 }: JobListItemProps) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const salary = formatSalary(job);
   const salaryPeriod = formatSalaryPeriod(job);
   const location = formatLocation(job);
   const daysLeft = job.endDate ? getDaysUntilDeadline(job.endDate) : null;
-
   const statusConfig = getStatusConfig(job.status || "draft");
   const priorityConfig = job.jobStatus
     ? getPriorityConfig(job.jobStatus)
     : null;
-  const workplaceTypeConfig = getWorkplaceTypeConfig(
-    job.workplaceType || "onsite"
-  );
   const StatusIcon = statusConfig.icon;
 
   const handleDeleteConfirm = async (jobToDelete: JobFormDataWithId) => {
@@ -183,111 +172,159 @@ export function JobListItem({
     <>
       <Card
         onClick={handleCardClick}
-        className={cn(
-          "group relative overflow-hidden border border-gray-200 rounded-xl border-l-4 border-l-blue-500",
-          "bg-white hover:bg-gray-50 transition-all duration-200 ease-out",
-          "hover:shadow-lg hover:border-blue-300 hover:border-l-blue-600",
-          "active:bg-gray-100 cursor-pointer"
-        )}
+        className="group bg-white border border-gray-200 hover:border-primary/20 transition-all duration-200 rounded-lg overflow-hidden cursor-pointer hover:bg-gray-50/50"
       >
-        {/* Status indicator bar */}
+        <CardContent className="p-5">
+          <div className="flex items-start gap-5">
+            {/* Left Section - Main Content */}
+            <div className="flex-1 min-w-0 space-y-3">
+              {/* Header Row */}
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-3 mb-2">
+                    <h3 className="font-semibold text-lg text-gray-900 group-hover:text-primary transition-colors line-clamp-2 leading-tight">
+                      {job.jobTitle || job.jobBoardTitle}
+                    </h3>
 
-        <CardContent className="p-4 pl-5">
-          <div className="flex items-start justify-between gap-4">
-            {/* Main Content Area */}
-            <div className="flex-1 min-w-0 space-y-4">
-              {/* Top Row: Title, Status, Priority */}
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                <h3 className="font-bold text-lg text-gray-900 line-clamp-1 group-hover:text-blue-700 transition-colors">
-                  {job.jobTitle || job.jobBoardTitle}
-                </h3>
-                <div className="flex flex-wrap items-center gap-2">
-                  {/* Status Badge */}
-                  <div
-                    className={cn(
-                      "flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium",
-                      statusConfig.bg,
-                      statusConfig.text
+                    {/* Deadline Badge - Inline with Title */}
+                    {daysLeft !== null && (
+                      <div
+                        className={cn(
+                          "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-xs font-medium flex-shrink-0",
+                          daysLeft <= 7 &&
+                            daysLeft > 0 &&
+                            "bg-amber-50 text-amber-700 border-amber-200",
+                          daysLeft <= 0 &&
+                            "bg-red-50 text-red-700 border-red-200",
+                          daysLeft > 7 &&
+                            "bg-gray-50 text-gray-700 border-gray-200"
+                        )}
+                      >
+                        <Clock
+                          className={cn(
+                            "w-3 h-3",
+                            daysLeft <= 7 && daysLeft > 0 && "text-amber-600",
+                            daysLeft <= 0 && "text-red-600",
+                            daysLeft > 7 && "text-gray-600"
+                          )}
+                        />
+                        <span>
+                          {daysLeft > 0
+                            ? `${daysLeft}d left`
+                            : daysLeft === 0
+                            ? "Today"
+                            : "Expired"}
+                        </span>
+                      </div>
                     )}
-                  >
-                    <StatusIcon className="w-3 h-3" />
-                    <span>
-                      {(job.status || "").charAt(0).toUpperCase() +
-                        (job.status || "").slice(1)}
-                    </span>
                   </div>
 
-                  {/* Priority Badge */}
+                  {/* Location & Workplace Type */}
+                  <div className="flex items-center gap-3 text-sm text-gray-600 mb-3">
+                    <div className="flex items-center">
+                      <MapPin className="w-4 h-4 text-primary mr-1.5" />
+                      <span>{location}</span>
+                    </div>
+                    <div className="h-1 w-1 rounded-full bg-gray-300" />
+                    <span className="font-medium text-gray-700">
+                      {formatText(job.workplaceType, "Remote")}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Status & Priority Badges */}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <div
+                    className={cn(
+                      "px-2.5 py-1 rounded-md border text-xs font-medium",
+                      statusConfig.bg,
+                      statusConfig.text,
+                      statusConfig.border
+                    )}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <StatusIcon
+                        className={cn("w-3 h-3", statusConfig.iconColor)}
+                      />
+                      <span className="capitalize">{job.status}</span>
+                    </div>
+                  </div>
+
                   {priorityConfig && (
                     <div
                       className={cn(
-                        "px-2.5 py-1 rounded-md text-xs font-medium",
+                        "px-2 py-1 rounded-md border text-xs font-medium",
                         priorityConfig.bg,
-                        priorityConfig.text
+                        priorityConfig.text,
+                        priorityConfig.border
                       )}
                     >
-                      {job.jobStatus?.charAt(0).toUpperCase() +
-                        job.jobStatus?.slice(1)}
+                      {formatText(job.jobStatus)}
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* Location & Salary */}
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
-                <div className="flex items-center gap-1.5 text-gray-700">
-                  <MapPin className="w-4 h-4 text-blue-600" />
-                  <span>{location}</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-gray-700">
+              {/* Key Information Row */}
+              <div className="flex items-center gap-6 text-sm">
+                {/* Salary */}
+                <div className="flex items-center gap-2">
                   <DollarSign className="w-4 h-4 text-green-600" />
-                  <span className="font-medium">
-                    {salary}{" "}
-                    <span className="text-gray-500 font-normal">
-                      {salaryPeriod}
-                    </span>
+                  <span className="font-medium text-gray-900">{salary}</span>
+                  <span className="text-gray-500">{salaryPeriod}</span>
+                </div>
+
+                {/* Employment Type */}
+                <div className="flex items-center gap-2">
+                  <Briefcase className="w-4 h-4 text-primary" />
+                  <span className="text-gray-700">
+                    {job.employmentType
+                      ?.replace("-", " ")
+                      .replace(/\b\w/g, (l) => l.toUpperCase())}
+                  </span>
+                </div>
+
+                {/* Positions */}
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-primary" />
+                  <span className="text-gray-700">
+                    {job.positionsToHire || 1} position
+                    {job.positionsToHire !== 1 ? "s" : ""}
+                  </span>
+                </div>
+
+                {/* Applicants */}
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-blue-600" />
+                  <span className="text-gray-700">
+                    {job.applicantsCount || 0} applicant
+                    {job.applicantsCount !== 1 ? "s" : ""}
                   </span>
                 </div>
               </div>
 
-              {/* Employment Details */}
-              <div className="flex flex-wrap items-center gap-2">
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 text-xs font-medium">
-                  <Briefcase className="w-3 h-3" />
-                  <span>
-                    {job.employmentType
-                      ?.replace("-", " ")
-                      .replace(/\b\w/g, (l: string) => l.toUpperCase())}
+              {/* Additional Details Row */}
+              <div className="flex items-center gap-6 text-sm">
+                {/* Posted Date */}
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-gray-500" />
+                  <span className="text-gray-700">
+                    Posted{" "}
+                    {job.createdAt
+                      ? new Date(job.createdAt).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "2-digit",
+                        })
+                      : "N/A"}
                   </span>
                 </div>
 
-                <div
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium"
-                  style={{
-                    backgroundColor: workplaceTypeConfig.bg.replace("/80", ""),
-                    color: workplaceTypeConfig.text,
-                  }}
-                >
-                  <span>
-                    {job.workplaceType?.charAt(0).toUpperCase() +
-                      job.workplaceType?.slice(1)}
-                  </span>
-                </div>
-
-                {job.positionsToHire && job.positionsToHire > 1 && (
-                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-purple-50 text-purple-700 text-xs font-medium">
-                    <Users className="w-3 h-3" />
-                    <span>{job.positionsToHire} positions</span>
-                  </div>
-                )}
-
+                {/* Education Requirement */}
                 {job.educationRequirement && (
-                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-50 text-amber-700 text-xs font-medium">
-                    <GraduationCap className="w-3 h-3" />
-                    <span>
-                      {job.educationRequirement
-                        .replace("-", " ")
-                        .replace(/\b\w/g, (l) => l.toUpperCase())}
+                  <div className="flex items-center gap-2">
+                    <GraduationCap className="w-4 h-4 text-secondary" />
+                    <span className="text-gray-700">
+                      {formatText(job.educationRequirement)}
                     </span>
                   </div>
                 )}
@@ -295,100 +332,53 @@ export function JobListItem({
 
               {/* Job Description Preview */}
               {job.jobDescription && (
-                <div className="text-sm text-gray-600 line-clamp-2 pt-2">
-                  <p>
-                    {job.jobDescription.length > 150
-                      ? job.jobDescription.substring(0, 150) + "..."
+                <div className="pt-1">
+                  <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
+                    {job.jobDescription.length > 120
+                      ? job.jobDescription.substring(0, 120) + "..."
                       : job.jobDescription}
                   </p>
                 </div>
               )}
+            </div>
 
-              {/* Stats and Timeline */}
-              <div className="flex flex-wrap items-center gap-4 pt-3 border-t border-gray-100">
-                {/* Applicants Count */}
-                <div className="flex items-center gap-1.5 text-sm text-gray-700">
-                  <Users className="w-4 h-4 text-blue-500" />
-                  <span className="font-medium">
-                    {job.applicantsCount || 0}
-                  </span>
-                  <span className="text-gray-500">applicants</span>
-                </div>
-
-                {/* Created Date */}
-                <div className="flex items-center gap-1.5 text-sm text-gray-700">
-                  <Calendar className="w-4 h-4 text-gray-500" />
-                  <span className="font-medium">
-                    {formatDate(job.createdAt)}
-                  </span>
-                </div>
-
-                {/* Deadline */}
-                {daysLeft !== null && (
-                  <div className="flex items-center gap-1.5 text-sm">
-                    <Clock
-                      className={cn(
-                        "w-4 h-4",
-                        daysLeft <= 7 && daysLeft > 0 && "text-amber-500",
-                        daysLeft <= 0 && "text-red-500",
-                        daysLeft > 7 && "text-gray-500"
-                      )}
-                    />
-                    <span
-                      className={cn(
-                        "font-medium",
-                        daysLeft <= 7 && daysLeft > 0 && "text-amber-700",
-                        daysLeft <= 0 && "text-red-700",
-                        daysLeft > 7 && "text-gray-700"
-                      )}
-                    >
-                      {daysLeft > 0
-                        ? `${daysLeft}d left`
-                        : daysLeft === 0
-                        ? "Today"
-                        : "Expired"}
-                    </span>
-                  </div>
-                )}
+            {/* Right Section - Actions */}
+            <div className="flex flex-col items-end gap-4 flex-shrink-0">
+              {/* Action Buttons */}
+              <div className="flex flex-col gap-3 w-32">
+                <Button
+                  variant="outline-primary"
+                  size="sm"
+                  className="w-full h-9 font-medium transition-all duration-200 hover:scale-105 active:scale-95"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEdit?.(job);
+                  }}
+                >
+                  <Edit3 className="w-4 h-4 mr-2" />
+                  Edit Job
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onViewDetails?.(job);
+                  }}
+                  variant="secondary"
+                  className="w-full h-9 font-medium transition-all duration-200 hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
+                >
+                  <ArrowRight className="w-4 h-4 mr-2" />
+                  View Details
+                </Button>
               </div>
-            </div>
 
-            {/* Actions Section (Dropdown) */}
-            <div className="flex-shrink-0">
-              <DropdownMenu
-                open={isDropdownOpen}
-                onOpenChange={setIsDropdownOpen}
-              >
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0 text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <MoreVertical className="w-4 h-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-40">
-                  <DropdownMenuItem
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onEdit?.(job);
-                    }}
-                    className="cursor-pointer hover:bg-blue-50 hover:text-blue-700 focus:bg-blue-50 focus:text-blue-700 transition-colors"
-                  >
-                    <Edit className="w-4 h-4 mr-2" /> Edit
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-
-          {/* Hover Indicator */}
-          <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-            <div className="flex items-center gap-1 text-xs text-blue-600 font-medium">
-              Click for details
-              <ArrowRight className="w-3 h-3 ml-1" />
+              {/* Hover Indicator */}
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                <div className="flex items-center gap-1 text-xs text-primary font-medium bg-white/80 backdrop-blur-sm px-2 py-1 rounded-md">
+                  Click for details
+                  <ArrowRight className="w-3 h-3" />
+                </div>
+              </div>
             </div>
           </div>
         </CardContent>

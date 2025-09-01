@@ -6,7 +6,6 @@ import { PersonalInfoStep } from "@/components/forms/onboardingForm/personalInfo
 import { ReviewSubmitStep } from "@/components/forms/onboardingForm/reviewSubmitStep";
 import { StepIndicator } from "@/components/main/signup/StepIndicator";
 import { StepNavigation } from "@/components/main/signup/stepNavigation";
-import { Card, CardContent } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
 import { ROUTES } from "@/constants";
 import API from "@/http";
@@ -14,7 +13,7 @@ import { mutateSession } from "@/http/auth/mutateSession";
 import { errorResolver } from "@/lib/utils";
 import { fullFormSchema } from "@/lib/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -22,12 +21,23 @@ import { z } from "zod";
 
 type FormValues = z.infer<typeof fullFormSchema>;
 
-export default function RecruiterOnboardingForm() {
+interface RecruiterOnboardingFormProps {
+  onStepChange: (step: number) => void;
+}
+
+export default function RecruiterOnboardingForm({
+  onStepChange,
+}: RecruiterOnboardingFormProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const navigate = useNavigate();
+
+  // Notify parent component when step changes
+  useEffect(() => {
+    onStepChange(currentStep);
+  }, [currentStep, onStepChange]);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(fullFormSchema),
@@ -137,8 +147,8 @@ export default function RecruiterOnboardingForm() {
         // country: formData.
       });
 
-      const token = response.tokens.accessToken.token
-      mutateSession({ shouldBroadcast: true, accessToken: token })
+      const token = response.tokens.accessToken.token;
+      mutateSession({ shouldBroadcast: true, accessToken: token });
 
       toast.success("Account created successfully");
       navigate(ROUTES.DASHBOARD.MAIN);
@@ -164,43 +174,41 @@ export default function RecruiterOnboardingForm() {
   };
 
   return (
-    <Card className="shadow-lg">
-      <CardContent className="p-8">
-        <StepIndicator
-          currentStep={currentStep}
-          completedSteps={completedSteps}
-        />
+    <div className="w-full">
+      <StepIndicator
+        currentStep={currentStep}
+        completedSteps={completedSteps}
+      />
 
-        <FormProvider {...form}>
-          <Form {...form}>
-            <form
-              onSubmit={(e) => {
-                console.log("Form submit event triggered");
-                if (currentStep !== 3) {
-                  e.preventDefault();
-                  console.log("Prevented form submission on non-final step");
-                  return;
-                }
-                handleSubmit(onSubmit)(e);
-              }}
-              className="space-y-6"
-            >
-              {renderCurrentStep()}
+      <FormProvider {...form}>
+        <Form {...form}>
+          <form
+            onSubmit={(e) => {
+              console.log("Form submit event triggered");
+              if (currentStep !== 3) {
+                e.preventDefault();
+                console.log("Prevented form submission on non-final step");
+                return;
+              }
+              handleSubmit(onSubmit)(e);
+            }}
+            className="space-y-6"
+          >
+            {renderCurrentStep()}
 
-              <StepNavigation
-                currentStep={currentStep}
-                totalSteps={3}
-                onNext={handleNext}
-                onPrevious={handlePrevious}
-                isFirstStep={currentStep === 1}
-                isLastStep={currentStep === 3}
-                isValid={true}
-                isSubmitting={isSubmitting}
-              />
-            </form>
-          </Form>
-        </FormProvider>
-      </CardContent>
-    </Card>
+            <StepNavigation
+              currentStep={currentStep}
+              totalSteps={3}
+              onNext={handleNext}
+              onPrevious={handlePrevious}
+              isFirstStep={currentStep === 1}
+              isLastStep={currentStep === 3}
+              isValid={true}
+              isSubmitting={isSubmitting}
+            />
+          </form>
+        </Form>
+      </FormProvider>
+    </div>
   );
 }

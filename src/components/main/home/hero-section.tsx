@@ -1,107 +1,330 @@
-import { Button } from '@/components/ui/button'
-import useAuthSessionContext from '@/lib/context/AuthSessionContext'
-import { ArrowRight, Star, TrendingUp, Users, Zap } from 'lucide-react'
-import { useNavigate } from 'react-router'
-
+import { Button } from "@/components/ui/button";
+import {
+  Rocket,
+  Sparkles,
+  ArrowRight,
+  Users,
+  Briefcase,
+  Zap,
+} from "lucide-react";
+import { motion } from "framer-motion";
 
 export function HeroSection() {
-  const navigate = useNavigate()
-  const { status } = useAuthSessionContext()
-  return (
-    <section className='relative pt-20 pb-12 overflow-hidden'>
-      {/* Background Elements */}
-      <div className='absolute inset-0 bg-gradient-to-br from-blue-50/50 via-white to-purple-50/30'></div>
-      <div className='absolute top-20 left-10 w-72 h-72 bg-blue-100 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse'></div>
-      <div className='absolute top-40 right-10 w-72 h-72 bg-purple-100 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse delay-1000'></div>
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+        delayChildren: 0.1,
+      },
+    },
+  };
 
-      <div className='relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-        <div className='text-center max-w-4xl mx-auto'>
+  const cardVariants = {
+    hidden: { opacity: 0, scale: 0.9 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        duration: 0.5,
+        ease: "easeOut",
+      },
+    },
+  };
+
+  const floatVariants = {
+    hidden: { opacity: 0, scale: 0.8 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        duration: 1,
+        ease: "easeOut",
+      },
+    },
+  };
+
+  const trustBadgeVariants = {
+    hidden: { opacity: 0, x: -50 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut",
+      },
+    },
+  };
+
+  const headlineVariants = {
+    hidden: { opacity: 0, y: 50 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.8,
+        ease: "easeOut",
+      },
+    },
+  };
+
+  const subheadlineVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut",
+        delay: 0.2,
+      },
+    },
+  };
+
+  const benefitsVariants = {
+    hidden: { opacity: 0, y: 40 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut",
+        delay: 0.4,
+      },
+    },
+  };
+
+  const ctaVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut",
+        delay: 0.6,
+      },
+    },
+  };
+
+  const trustIndicatorsVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut",
+        delay: 0.8,
+      },
+    },
+  };
+
+  return (
+    <section className="relative pt-16 pb-12 overflow-hidden bg-primary">
+      {/* Background Elements */}
+      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-purple-500/10 via-transparent to-blue-500/10"></div>
+
+      {/* Floating Elements */}
+      <motion.div
+        variants={floatVariants}
+        initial="hidden"
+        animate="visible"
+        className="absolute top-16 left-8 w-56 h-56 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"
+      ></motion.div>
+      <motion.div
+        variants={floatVariants}
+        initial="hidden"
+        animate="visible"
+        transition={{ delay: 0.3 }}
+        className="absolute top-32 right-8 w-80 h-80 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse delay-1000"
+      ></motion.div>
+      <motion.div
+        variants={floatVariants}
+        initial="hidden"
+        animate="visible"
+        transition={{ delay: 0.6 }}
+        className="absolute bottom-16 left-1/2 transform -translate-x-1/2 w-48 h-48 bg-gradient-to-r from-pink-400/20 to-purple-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse delay-500"
+      ></motion.div>
+
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8"
+      >
+        <div className="text-center max-w-3xl mx-auto">
           {/* Trust Badge */}
-          <div className='inline-flex items-center space-x-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-8 border border-blue-100'>
-            <Star className='h-4 w-4 fill-current' />
-            <span>Trusted by 500+ companies worldwide</span>
-          </div>
+          <motion.div
+            variants={trustBadgeVariants}
+            whileHover={{
+              scale: 1.05,
+              y: -3,
+              backgroundColor: "rgba(255, 255, 255, 0.15)",
+              borderColor: "rgba(255, 255, 255, 0.3)",
+            }}
+            whileTap={{ scale: 0.98 }}
+            transition={{
+              duration: 0.3,
+              ease: "easeOut",
+              backgroundColor: { duration: 0.2 },
+              borderColor: { duration: 0.2 },
+            }}
+            className="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-sm text-white/90 px-4 py-2 rounded-full text-sm font-medium mb-6 border border-white/20 shadow-lg cursor-pointer group"
+          >
+            <motion.div
+              whileHover={{ rotate: 360, scale: 1.2 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+            >
+              <Sparkles className="h-4 w-4 text-yellow-400" />
+            </motion.div>
+            <motion.span
+              whileHover={{ color: "rgba(255, 255, 255, 1)" }}
+              transition={{ duration: 0.2 }}
+              className="font-medium"
+            >
+              Trusted by 500+ companies worldwide
+            </motion.span>
+          </motion.div>
 
           {/* Main Headline */}
-          <h1 className='text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 leading-tight mb-6'>
-            Hire the right talent{' '}
-            <span className='bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent'>
-              10x faster
-            </span>
-          </h1>
+          <motion.h1
+            variants={headlineVariants}
+            className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight mb-4 tracking-tight"
+          >
+            Your Ultimate{" "}
+            <span className="bg-gradient-to-r from-secondary to-secondary/80 bg-clip-text text-transparent">
+              Job Search
+            </span>{" "}
+            Companion
+          </motion.h1>
 
           {/* Subheadline */}
-          <p className='text-xl sm:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed mb-10'>
-            AI-powered candidate matching that eliminates 90% of manual
-            screening. Find perfect candidates in minutes, not weeks.
-          </p>
+          <motion.p
+            variants={subheadlineVariants}
+            className="text-base sm:text-lg text-white/80 max-w-2xl mx-auto leading-relaxed mb-8 font-light"
+          >
+            Are you looking for the perfect job or the ideal candidate? Find
+            your dream with{" "}
+            <span className="text-white font-medium">
+              thousands of job postings
+            </span>{" "}
+            across industries.
+          </motion.p>
 
-          {/* CTA Buttons */}
-          {status !== 'authenticated' ? (
-            <div className='flex flex-col sm:flex-row gap-4 justify-center items-center mb-12'>
-              <Button 
-                size='lg' 
-                className='bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 text-lg px-8 py-4 h-auto'
-                onClick={() => navigate('/signup')}
+          {/* Key Benefits Grid */}
+          <motion.div
+            variants={benefitsVariants}
+            className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 max-w-4xl mx-auto"
+          >
+            <motion.div
+              variants={cardVariants}
+              whileHover={{ y: -5 }}
+              className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-6 hover:bg-white/15 hover:border-white/30 transition-all duration-300 group"
+            >
+              <div className="w-14 h-14 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <Briefcase className="h-7 w-7 text-white" />
+              </div>
+              <h3 className="text-white font-semibold text-sm mb-3">
+                Smart Job Matching
+              </h3>
+              <p className="text-white/70 text-xs leading-relaxed">
+                AI-powered algorithms match you with the perfect opportunities
+              </p>
+            </motion.div>
+
+            <motion.div
+              variants={cardVariants}
+              whileHover={{ y: -5 }}
+              transition={{ delay: 0.1 }}
+              className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-6 hover:bg-white/15 hover:border-white/30 transition-all duration-300 group"
+            >
+              <div className="w-14 h-14 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <Users className="h-7 w-7 text-white" />
+              </div>
+              <h3 className="text-white font-semibold text-sm mb-3">
+                Global Reach
+              </h3>
+              <p className="text-white/70 text-xs leading-relaxed">
+                Access opportunities from companies around the world
+              </p>
+            </motion.div>
+
+            <motion.div
+              variants={cardVariants}
+              whileHover={{ y: -5 }}
+              transition={{ delay: 0.2 }}
+              className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-6 hover:bg-white/15 hover:border-white/30 transition-all duration-300 group"
+            >
+              <div className="w-14 h-14 bg-gradient-to-br from-purple-400 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <Zap className="h-7 w-7 text-white" />
+              </div>
+              <h3 className="text-white font-semibold text-sm mb-3">
+                Instant Results
+              </h3>
+              <p className="text-white/70 text-xs leading-relaxed">
+                Get matched and apply to jobs in real-time
+              </p>
+            </motion.div>
+          </motion.div>
+
+          {/* Job Count and CTA Buttons */}
+          <motion.div
+            variants={ctaVariants}
+            className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-10 max-w-3xl mx-auto"
+          >
+            <motion.div
+              whileHover={{ y: -2 }}
+              className="text-white/90 text-sm font-medium bg-white/10 backdrop-blur-sm py-5 px-8 rounded-md border border-white/20 shadow-lg hover:bg-white/15 hover:border-white/30 transition-all duration-300 cursor-pointer group"
+            >
+              <span className="text-xl font-bold text-white mr-2">10,000+</span>
+              Available Jobs
+            </motion.div>
+
+            <motion.div whileHover={{ y: -2 }}>
+              <Button
+                size="lg"
+                variant="secondary"
+                className="h-[56px] px-8 bg-secondary hover:bg-secondary/90 text-white font-semibold group rounded-md shadow-lg hover:shadow-xl hover:shadow-secondary/25 transition-all duration-300"
               >
+                <Rocket className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
                 Get Started
-                <ArrowRight className='ml-2 h-5 w-5' />
+                <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform duration-200" />
               </Button>
-              <Button 
-                variant='outline' 
-                size='lg'
-                className='border-2 border-gray-300 hover:border-gray-400 text-lg px-8 py-4 h-auto'
-                onClick={() => navigate('/contact')}
-              >
-                Watch Demo
-              </Button>
-            </div>
-          ) : (
-            <div className='flex justify-center items-center mb-12'>
-              <Button 
-                size='lg' 
-                className='bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 text-lg px-8 py-4 h-auto'
-                onClick={() => navigate('/dashboard')}
-              >
-                Go to Dashboard
-                <ArrowRight className='ml-2 h-5 w-5' />
-              </Button>
-            </div>
-          )}
+            </motion.div>
+          </motion.div>
 
           {/* Trust Indicators */}
-          <p className='text-sm text-gray-500 mb-16'>
-            ✓ Secure payment ✓ Cancel anytime ✓ Setup in 5 minutes
-          </p>
+          <motion.div
+            variants={trustIndicatorsVariants}
+            className="flex flex-wrap justify-center items-center gap-6 text-sm text-white/60"
+          >
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              className="flex items-center gap-2 group cursor-pointer hover:text-white/80 transition-colors duration-200"
+            >
+              <div className="w-2 h-2 bg-green-400 rounded-full group-hover:scale-125 transition-transform duration-200"></div>
+              <span>Secure & Private</span>
+            </motion.div>
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              className="flex items-center gap-2 group cursor-pointer hover:text-white/80 transition-colors duration-200"
+            >
+              <div className="w-2 h-2 bg-blue-400 rounded-full group-hover:scale-125 transition-transform duration-200"></div>
+              <span>AI-Powered Matching</span>
+            </motion.div>
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              className="flex items-center gap-2 group cursor-pointer hover:text-white/80 transition-colors duration-200"
+            >
+              <div className="w-2 h-2 bg-purple-400 rounded-full group-hover:scale-125 transition-transform duration-200"></div>
+              <span>Instant Results</span>
+            </motion.div>
+          </motion.div>
         </div>
-
-        {/* Stats Section */}
-        <div className='grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto'>
-          <div className='text-center p-6 bg-white/60 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-lg'>
-            <div className='inline-flex items-center justify-center w-12 h-12 bg-blue-100 rounded-xl mb-4'>
-              <TrendingUp className='h-6 w-6 text-blue-600' />
-            </div>
-            <div className='text-3xl font-bold text-gray-900 mb-2'>70%</div>
-            <div className='text-gray-600'>Faster hiring process</div>
-          </div>
-          <div className='text-center p-6 bg-white/60 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-lg'>
-            <div className='inline-flex items-center justify-center w-12 h-12 bg-green-100 rounded-xl mb-4'>
-              <Zap className='h-6 w-6 text-green-600' />
-            </div>
-            <div className='text-3xl font-bold text-gray-900 mb-2'>95%</div>
-            <div className='text-gray-600'>Match accuracy rate</div>
-          </div>
-          <div className='text-center p-6 bg-white/60 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-lg'>
-            <div className='inline-flex items-center justify-center w-12 h-12 bg-purple-100 rounded-xl mb-4'>
-              <Users className='h-6 w-6 text-purple-600' />
-            </div>
-            <div className='text-3xl font-bold text-gray-900 mb-2'>10K+</div>
-            <div className='text-gray-600'>Successful hires</div>
-          </div>
-        </div>
-
-
-      </div>
+      </motion.div>
     </section>
-  )
+  );
 }

@@ -1,33 +1,33 @@
 import React, { useState, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { 
-  Edit, 
-  Copy, 
-  Trash2, 
-  Plus, 
-  Search, 
-  X, 
-  Briefcase, 
-  Users, 
+import {
+  Edit,
+  Copy,
+  Trash2,
+  Plus,
+  Search,
+  X,
+  Briefcase,
+  Users,
   MapPin,
   DollarSign,
   Globe,
   Building,
   ArrowLeft,
-  RotateCcw
+  RotateCcw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
-import { 
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -43,21 +43,19 @@ import type { JobTemplate } from "@/types/job-template";
 import { usePaginationQuery } from "@/lib/hooks/usePaginateQuery";
 import { ROUTES } from "@/constants";
 
-
-
 const workplaceTypeColors = {
   "in-person": "bg-blue-50 text-blue-700 border-blue-200",
-  "remote": "bg-green-50 text-green-700 border-green-200",
-  "hybrid": "bg-purple-50 text-purple-700 border-purple-200",
+  remote: "bg-green-50 text-green-700 border-green-200",
+  hybrid: "bg-purple-50 text-purple-700 border-purple-200",
   "on-the-road": "bg-orange-50 text-orange-700 border-orange-200",
 };
 
 const employmentTypeColors = {
   "full-time": "bg-emerald-50 text-emerald-700 border-emerald-200",
   "part-time": "bg-yellow-50 text-yellow-700 border-yellow-200",
-  "contract": "bg-indigo-50 text-indigo-700 border-indigo-200",
-  "temporary": "bg-pink-50 text-pink-700 border-pink-200",
-  "internship": "bg-cyan-50 text-cyan-700 border-cyan-200",
+  contract: "bg-indigo-50 text-indigo-700 border-indigo-200",
+  temporary: "bg-pink-50 text-pink-700 border-pink-200",
+  internship: "bg-cyan-50 text-cyan-700 border-cyan-200",
 };
 
 interface JobTemplatesListProps {
@@ -71,7 +69,10 @@ export const JobTemplatesList: React.FC<JobTemplatesListProps> = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; template: JobTemplate | null }>({
+  const [deleteDialog, setDeleteDialog] = useState<{
+    open: boolean;
+    template: JobTemplate | null;
+  }>({
     open: false,
     template: null,
   });
@@ -91,7 +92,15 @@ export const JobTemplatesList: React.FC<JobTemplatesListProps> = ({
     fetchFun: API.jobTemplate.getJobTemplates,
     parseResponse: (data: any) => {
       // The API returns the paginated data directly
-      return data || { results: [], limit: 12, page: 1, totalPages: 0, totalResults: 0 };
+      return (
+        data || {
+          results: [],
+          limit: 12,
+          page: 1,
+          totalPages: 0,
+          totalResults: 0,
+        }
+      );
     },
   });
 
@@ -116,11 +125,11 @@ export const JobTemplatesList: React.FC<JobTemplatesListProps> = ({
   const handleEdit = (template: JobTemplate) => {
     // Navigate to job creation page with template data for editing
     navigate(ROUTES.DASHBOARD.CREATE_JOB, {
-      state: { 
+      state: {
         selectedTemplate: template,
         editMode: true,
-        templateId: template.id
-      }
+        templateId: template.id,
+      },
     });
   };
 
@@ -128,17 +137,17 @@ export const JobTemplatesList: React.FC<JobTemplatesListProps> = ({
     try {
       // Increment usage count
       await API.jobTemplate.incrementTemplateUsage(template.id);
-      
+
       if (isSelectionMode && onSelectTemplate) {
         // If we're in selection mode and have a callback, use it
         onSelectTemplate(template);
       } else {
         // Navigate to job creation with template data
         navigate(ROUTES.DASHBOARD.CREATE_JOB, {
-          state: { selectedTemplate: template }
+          state: { selectedTemplate: template },
         });
       }
-      
+
       toast.success(`Template "${template.name}" selected!`);
     } catch (error) {
       console.error("Error selecting template:", error);
@@ -148,7 +157,10 @@ export const JobTemplatesList: React.FC<JobTemplatesListProps> = ({
 
   const handleDuplicate = async (template: JobTemplate) => {
     try {
-      await API.jobTemplate.duplicateJobTemplate(template.id, `${template.name} (Copy)`);
+      await API.jobTemplate.duplicateJobTemplate(
+        template.id,
+        `${template.name} (Copy)`
+      );
       toast.success("Template duplicated successfully!");
       refetch();
     } catch (error) {
@@ -175,18 +187,26 @@ export const JobTemplatesList: React.FC<JobTemplatesListProps> = ({
     return `Used ${count} times`;
   };
 
-  const getPayRateDisplay = (payRate?: JobTemplate['payRate']) => {
+  const getPayRateDisplay = (payRate?: JobTemplate["payRate"]) => {
     if (!payRate) return null;
-    
+
     switch (payRate.type) {
-      case 'fixed':
-        return `$${payRate.amount}${payRate.period ? `/${payRate.period.replace('per-', '')}` : ''}`;
-      case 'range':
-        return `$${payRate.min}-$${payRate.max}${payRate.period ? `/${payRate.period.replace('per-', '')}` : ''}`;
-      case 'starting_at':
-        return `Starting at $${payRate.amount}${payRate.period ? `/${payRate.period.replace('per-', '')}` : ''}`;
-      case 'up_to':
-        return `Up to $${payRate.amount}${payRate.period ? `/${payRate.period.replace('per-', '')}` : ''}`;
+      case "fixed":
+        return `$${payRate.amount}${
+          payRate.period ? `/${payRate.period.replace("per-", "")}` : ""
+        }`;
+      case "range":
+        return `$${payRate.min}-$${payRate.max}${
+          payRate.period ? `/${payRate.period.replace("per-", "")}` : ""
+        }`;
+      case "starting_at":
+        return `Starting at $${payRate.amount}${
+          payRate.period ? `/${payRate.period.replace("per-", "")}` : ""
+        }`;
+      case "up_to":
+        return `Up to $${payRate.amount}${
+          payRate.period ? `/${payRate.period.replace("per-", "")}` : ""
+        }`;
       default:
         return null;
     }
@@ -222,14 +242,19 @@ export const JobTemplatesList: React.FC<JobTemplatesListProps> = ({
 
   if (error) {
     return (
-      <Card className="rounded-xl border-gray-200 shadow-sm">
+      <Card className="rounded-xl border-gray-200 shadow-none">
         <CardContent className="p-12 text-center">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Briefcase className="h-8 w-8 text-red-600" />
           </div>
-          <h3 className="text-xl font-bold text-gray-900 mb-2">Error loading templates</h3>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">
+            Error loading templates
+          </h3>
           <p className="text-gray-600 mb-6">{error as string}</p>
-          <Button onClick={() => refetch()} className="rounded-xl h-11 px-6 font-medium">
+          <Button
+            onClick={() => refetch()}
+            className="rounded-xl h-11 px-6 font-medium"
+          >
             Try Again
           </Button>
         </CardContent>
@@ -246,13 +271,12 @@ export const JobTemplatesList: React.FC<JobTemplatesListProps> = ({
             {isSelectionMode ? "Select a Job Template" : "Job Templates"}
           </h3>
           <p className="text-gray-600 text-sm">
-            {isSelectionMode 
-              ? "Choose a template to start your job posting" 
-              : "Create and manage reusable job templates"
-            }
+            {isSelectionMode
+              ? "Choose a template to start your job posting"
+              : "Create and manage reusable job templates"}
           </p>
         </div>
-        
+
         <div className="flex items-center gap-3">
           {isSelectionMode && (
             <Button
@@ -264,12 +288,12 @@ export const JobTemplatesList: React.FC<JobTemplatesListProps> = ({
               Start from Scratch
             </Button>
           )}
-          
+
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
               onClick={() => {
-                console.log('Refreshing templates...');
+                console.log("Refreshing templates...");
                 refetch();
               }}
               className="rounded-xl h-11 px-4 font-medium shadow-sm hover:shadow-md"
@@ -278,7 +302,7 @@ export const JobTemplatesList: React.FC<JobTemplatesListProps> = ({
             </Button>
             <Button
               onClick={() => navigate(ROUTES.DASHBOARD.CREATE_JOB)}
-              className="rounded-xl h-11 px-6 font-medium shadow-sm hover:shadow-md"
+              variant="secondary"
             >
               <Plus className="h-4 w-4 mr-2" />
               Create Template
@@ -325,7 +349,7 @@ export const JobTemplatesList: React.FC<JobTemplatesListProps> = ({
             </p>
             <Button
               onClick={() => navigate(ROUTES.DASHBOARD.CREATE_JOB)}
-              className="rounded-xl h-11 px-6 font-medium shadow-sm hover:shadow-md"
+              variant="secondary"
             >
               <Plus className="h-4 w-4 mr-2" />
               Create Your First Template
@@ -349,12 +373,20 @@ export const JobTemplatesList: React.FC<JobTemplatesListProps> = ({
                       {template.jobTitle}
                     </p>
                   </div>
-                  
+
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
                         <span className="sr-only">Open menu</span>
-                        <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                        <svg
+                          className="h-4 w-4"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
                           <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
                         </svg>
                       </Button>
@@ -364,12 +396,16 @@ export const JobTemplatesList: React.FC<JobTemplatesListProps> = ({
                         <Edit className="h-4 w-4 mr-2" />
                         Edit
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleDuplicate(template)}>
+                      <DropdownMenuItem
+                        onClick={() => handleDuplicate(template)}
+                      >
                         <Copy className="h-4 w-4 mr-2" />
                         Duplicate
                       </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        onClick={() => setDeleteDialog({ open: true, template })}
+                      <DropdownMenuItem
+                        onClick={() =>
+                          setDeleteDialog({ open: true, template })
+                        }
                         className="text-red-600 focus:text-red-600"
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
@@ -386,14 +422,14 @@ export const JobTemplatesList: React.FC<JobTemplatesListProps> = ({
                   <div className="flex items-center gap-2">
                     <MapPin className="h-3.5 w-3.5 text-gray-400" />
                     <span className="text-gray-600">
-                      {template.jobLocation?.city && template.jobLocation?.state 
+                      {template.jobLocation?.city && template.jobLocation?.state
                         ? `${template.jobLocation.city}, ${template.jobLocation.state}`
-                        : template.workplaceType === 'remote' 
-                        ? 'Remote' 
-                        : 'Location TBD'}
+                        : template.workplaceType === "remote"
+                        ? "Remote"
+                        : "Location TBD"}
                     </span>
                   </div>
-                  
+
                   {template.payRate && (
                     <div className="flex items-center gap-2">
                       <DollarSign className="h-3.5 w-3.5 text-gray-400" />
@@ -402,7 +438,7 @@ export const JobTemplatesList: React.FC<JobTemplatesListProps> = ({
                       </span>
                     </div>
                   )}
-                  
+
                   <div className="flex items-center gap-2">
                     <Users className="h-3.5 w-3.5 text-gray-400" />
                     <span className="text-gray-600 text-xs">
@@ -413,13 +449,21 @@ export const JobTemplatesList: React.FC<JobTemplatesListProps> = ({
 
                 {/* Badges */}
                 <div className="flex flex-wrap gap-2">
-                  <Badge 
-                    className={`text-xs px-2 py-1 border ${workplaceTypeColors[template.workplaceType as keyof typeof workplaceTypeColors] || 'bg-gray-50 text-gray-700 border-gray-200'}`}
+                  <Badge
+                    className={`text-xs px-2 py-1 border ${
+                      workplaceTypeColors[
+                        template.workplaceType as keyof typeof workplaceTypeColors
+                      ] || "bg-gray-50 text-gray-700 border-gray-200"
+                    }`}
                   >
                     {template.workplaceType}
                   </Badge>
-                  <Badge 
-                    className={`text-xs px-2 py-1 border ${employmentTypeColors[template.employmentType as keyof typeof employmentTypeColors] || 'bg-gray-50 text-gray-700 border-gray-200'}`}
+                  <Badge
+                    className={`text-xs px-2 py-1 border ${
+                      employmentTypeColors[
+                        template.employmentType as keyof typeof employmentTypeColors
+                      ] || "bg-gray-50 text-gray-700 border-gray-200"
+                    }`}
                   >
                     {template.employmentType}
                   </Badge>
@@ -432,7 +476,8 @@ export const JobTemplatesList: React.FC<JobTemplatesListProps> = ({
                 </div>
 
                 {/* Category & Tags */}
-                {(template.category || (template.tags && template.tags.length > 0)) && (
+                {(template.category ||
+                  (template.tags && template.tags.length > 0)) && (
                   <div className="space-y-1">
                     {template.category && (
                       <div className="flex items-center gap-1 text-xs text-gray-500">
@@ -441,22 +486,24 @@ export const JobTemplatesList: React.FC<JobTemplatesListProps> = ({
                       </div>
                     )}
                     {template.tags && template.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-1">
-                            {template.tags.slice(0, 3).map((tag: string, index: number) => (
-                              <span 
-                                key={index}
-                                className="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full"
-                              >
-                                {tag}
-                              </span>
-                            ))}
-                            {template.tags.length > 3 && (
-                              <span className="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full">
-                                +{template.tags.length - 3} more
-                              </span>
-                            )}
-                          </div>
+                      <div className="flex flex-wrap gap-1">
+                        {template.tags
+                          .slice(0, 3)
+                          .map((tag: string, index: number) => (
+                            <span
+                              key={index}
+                              className="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        {template.tags.length > 3 && (
+                          <span className="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full">
+                            +{template.tags.length - 3} more
+                          </span>
                         )}
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -477,14 +524,16 @@ export const JobTemplatesList: React.FC<JobTemplatesListProps> = ({
                     variant={isSelectionMode ? "default" : "outline"}
                     size="sm"
                     onClick={() => handleSelectTemplate(template)}
-                    className={`${isSelectionMode ? 'w-full' : 'flex-1'} rounded-lg h-9 ${
-                      isSelectionMode 
-                        ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                        : 'text-blue-600 hover:text-blue-700 border-blue-200 hover:border-blue-300'
+                    className={`${
+                      isSelectionMode ? "w-full" : "flex-1"
+                    } rounded-lg h-9 ${
+                      isSelectionMode
+                        ? "bg-blue-600 hover:bg-blue-700 text-white"
+                        : "text-blue-600 hover:text-blue-700 border-blue-200 hover:border-blue-300"
                     }`}
                   >
                     <Briefcase className="h-3.5 w-3.5 mr-1.5" />
-                    {isSelectionMode ? 'Select Template' : 'Use'}
+                    {isSelectionMode ? "Select Template" : "Use"}
                   </Button>
                 </div>
               </CardContent>
@@ -494,18 +543,24 @@ export const JobTemplatesList: React.FC<JobTemplatesListProps> = ({
       )}
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={deleteDialog.open} onOpenChange={(open) => setDeleteDialog({ ...deleteDialog, open })}>
+      <AlertDialog
+        open={deleteDialog.open}
+        onOpenChange={(open) => setDeleteDialog({ ...deleteDialog, open })}
+      >
         <AlertDialogContent className="rounded-xl">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Template</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{deleteDialog.template?.name}"? This action cannot be undone.
+              Are you sure you want to delete "{deleteDialog.template?.name}"?
+              This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="rounded-lg">Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => deleteDialog.template && handleDelete(deleteDialog.template)}
+              onClick={() =>
+                deleteDialog.template && handleDelete(deleteDialog.template)
+              }
               className="bg-red-600 hover:bg-red-700 rounded-lg"
             >
               Delete

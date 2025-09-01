@@ -1,21 +1,8 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { 
-  Settings, 
-  Mail, 
-  User, 
-  Building, 
-  Bell, 
-  CreditCard,
-  CheckCircle2,
-  AlertCircle,
-  X,
-  Briefcase
-} from "lucide-react";
+import { Settings, Bell, CheckCircle2, AlertCircle, X } from "lucide-react";
 import { GlobalEmailTemplateSettings } from "@/components/dashboard/global-setting/GlobalEmailTemplateSettings";
 import { EmailTemplatesList } from "@/components/dashboard/email-templates";
 import { JobTemplatesList } from "@/components/dashboard/job-templates/JobTemplatesList";
@@ -23,6 +10,7 @@ import { PersonalInfoForm } from "@/components/dashboard/profile/personal-info-f
 import { CompanyInfoForm } from "@/components/dashboard/profile/company-info-form";
 import { AccountSettingsForm } from "@/components/dashboard/profile/account-settings-form";
 import { SaveChangesBar } from "@/components/dashboard/profile/save-changes-bar";
+import { ProfileTabs } from "@/components/dashboard/profile/tabs";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { profileFormSchema } from "@/lib/validations";
@@ -40,11 +28,17 @@ const GlobalSettingPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const [initialFormData, setInitialFormData] = useState<ProfileFormValues | null>(null);
+  const [initialFormData, setInitialFormData] =
+    useState<ProfileFormValues | null>(null);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [showCancelAlert, setShowCancelAlert] = useState(false);
 
-  const { data: authSession, updateUser, subscription: verifiedSubscription, refreshSubscription } = useAuthSessionContext();
+  const {
+    data: authSession,
+    updateUser,
+    subscription: verifiedSubscription,
+    refreshSubscription,
+  } = useAuthSessionContext();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const getUserFormData = useCallback((): ProfileFormValues => {
@@ -89,7 +83,9 @@ const GlobalSettingPage = () => {
         zipCode: user.company?.zipCode || "",
         country: user.company?.country || "",
       },
-      paymentPlan: (user.paymentPlan as "starter" | "professional" | "enterprise") || "starter",
+      paymentPlan:
+        (user.paymentPlan as "starter" | "professional" | "enterprise") ||
+        "starter",
       allowNotify: user.allowNotify ?? true,
     };
   }, [authSession]);
@@ -130,13 +126,13 @@ const GlobalSettingPage = () => {
 
   // Handle URL parameters for subscription flow redirects
   useEffect(() => {
-    const success = searchParams.get('success');
-    const canceled = searchParams.get('canceled');
-    const tab = searchParams.get('tab');
+    const success = searchParams.get("success");
+    const canceled = searchParams.get("canceled");
+    const tab = searchParams.get("tab");
 
-    if (success === 'true') {
+    if (success === "true") {
       setShowSuccessAlert(true);
-      toast.success('Payment successful! Your subscription has been updated.');
+      toast.success("Payment successful! Your subscription has been updated.");
       if (refreshSubscription) {
         refreshSubscription();
       }
@@ -144,18 +140,18 @@ const GlobalSettingPage = () => {
         setActiveTab(tab);
       }
       const newSearchParams = new URLSearchParams(searchParams);
-      newSearchParams.delete('success');
+      newSearchParams.delete("success");
       setSearchParams(newSearchParams, { replace: true });
     }
 
-    if (canceled === 'true') {
+    if (canceled === "true") {
       setShowCancelAlert(true);
-      toast.info('Payment was canceled. You can try again anytime.');
+      toast.info("Payment was canceled. You can try again anytime.");
       if (tab) {
         setActiveTab(tab);
       }
       const newSearchParams = new URLSearchParams(searchParams);
-      newSearchParams.delete('canceled');
+      newSearchParams.delete("canceled");
       setSearchParams(newSearchParams, { replace: true });
     }
   }, [searchParams, setSearchParams, refreshSubscription]);
@@ -224,41 +220,17 @@ const GlobalSettingPage = () => {
     }
   };
 
-  const getStatusBadgeColor = (status?: string) => {
-    switch (status) {
-      case "active":
-        return "bg-green-50 text-green-700 border-green-200";
-      case "trialing":
-        return "bg-blue-50 text-blue-700 border-blue-200";
-      case "pending":
-      case "past_due":
-        return "bg-yellow-50 text-yellow-700 border-yellow-200";
-      case "canceled":
-      case "suspended":
-      case "incomplete":
-      case "incomplete_expired":
-        return "bg-red-50 text-red-700 border-red-200";
-      case "inactive":
-      case "none":
-        return "bg-gray-50 text-gray-700 border-gray-200";
-      case "error":
-        return "bg-red-50 text-red-700 border-red-200";
-      default:
-        return "bg-gray-50 text-gray-700 border-gray-200";
-    }
-  };
-
   if (!authSession || !initialFormData) {
     return (
-      <div className="min-h-screen bg-white">
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
+      <div className="min-h-screen bg-gray-50">
+        <div className="bg-primary border-b border-primary/20">
           <div className="max-w-7xl mx-auto px-6 py-8">
             <div className="animate-pulse">
               <div className="flex items-center gap-4">
-                <div className="h-12 w-12 bg-gray-200 rounded-xl"></div>
+                <div className="h-12 w-12 bg-white/20 rounded-xl"></div>
                 <div>
-                  <div className="h-8 bg-gray-200 rounded w-32 mb-2"></div>
-                  <div className="h-4 bg-gray-200 rounded w-64"></div>
+                  <div className="h-8 bg-white/20 rounded w-32 mb-2"></div>
+                  <div className="h-4 bg-white/20 rounded w-64"></div>
                 </div>
               </div>
             </div>
@@ -273,115 +245,155 @@ const GlobalSettingPage = () => {
   const lastName = watch("lastName") || user.lastName || "";
   const email = watch("email") || user.email || "";
   const profileImg = watch("profileImg") || user.profileImg || "";
-  
-  const paymentPlan = verifiedSubscription?.planId || watch("paymentPlan") || user.paymentPlan || "starter";
-  const subscriptionStatus = verifiedSubscription?.subscriptionStatus || 'none';
+
+  const paymentPlan =
+    verifiedSubscription?.planId ||
+    watch("paymentPlan") ||
+    user.paymentPlan ||
+    "starter";
+  const subscriptionStatus = verifiedSubscription?.subscriptionStatus || "none";
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="flex items-start justify-between mb-6">
+    <div className="min-h-screen">
+      {/* Enhanced Header - Matching Job Page Style */}
+      <div className="bg-primary border-b border-primary/20 px-6 py-4 relative overflow-hidden max-h-[80px]">
+        <div className="relative z-10">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500/20 to-indigo-500/20 text-blue-600 shadow-md">
-                <Settings className="h-7 w-7" />
+              <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
+                <Settings className="h-6 w-6 text-white" />
               </div>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-                <p className="text-gray-600 mt-1">Manage your account and application preferences</p>
-                {lastSaved && (
-                  <p className="text-sm text-gray-500 flex items-center gap-1.5 mt-1">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
-                    Last saved {lastSaved.toLocaleTimeString()}
-                  </p>
-                )}
+              <div className="flex flex-col">
+                <h1 className="text-xl font-bold text-white">
+                  Account Settings
+                </h1>
+                <p className="text-sm text-white/80 flex items-center gap-3">
+                  Manage your profile, company, and application preferences
+                  <Badge
+                    variant="secondary"
+                    className="bg-white/20 text-white border-white/20 text-xs"
+                  >
+                    {isDirty ? `${dirtyFieldsCount} unsaved` : "All saved"}
+                  </Badge>
+                </p>
               </div>
             </div>
-
-            {/* Status Indicator */}
-            <div
-              className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300",
-                isSaved
-                  ? "bg-green-50 text-green-700 border border-green-200"
-                  : isDirty
-                  ? "bg-amber-50 text-amber-700 border border-amber-200"
-                  : "bg-gray-50 text-gray-600 border border-gray-200"
-              )}
-            >
-              {isSaved ? (
-                <>
-                  <CheckCircle2 className="h-4 w-4" />
-                  All changes saved
-                </>
-              ) : isDirty ? (
-                <>
-                  <AlertCircle className="h-4 w-4" />
-                  {dirtyFieldsCount} unsaved{" "}
-                  {dirtyFieldsCount === 1 ? "change" : "changes"}
-                </>
-              ) : (
-                <>
-                  <CheckCircle2 className="h-4 w-4" />
-                  Up to date
-                </>
+            <div className="flex items-center gap-3">
+              {lastSaved && (
+                <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20">
+                  <CheckCircle2 className="h-4 w-4 text-green-300" />
+                  <span className="text-sm text-white/90 font-medium">
+                    Saved {lastSaved.toLocaleTimeString()}
+                  </span>
+                </div>
               )}
             </div>
           </div>
+        </div>
+      </div>
 
-          {/* Profile Summary Card */}
-          <Card className="bg-gradient-to-r from-white to-blue-50/30 border-0 shadow-lg shadow-blue-100/50">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-6">
-                <div className="relative">
-                  <Avatar className="h-16 w-16 ring-4 ring-white shadow-lg">
-                    <AvatarImage src={profileImg || "/placeholder.svg"} />
-                    <AvatarFallback className="text-xl font-bold bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-                      {firstName.charAt(0)}
-                      {lastName.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                </div>
-                <div className="flex-1 space-y-2">
-                  <h2 className="text-xl font-bold text-gray-900">
-                    {firstName} {lastName}
-                  </h2>
-                  <p className="text-gray-600">{email}</p>
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <Badge
-                      className={cn(
-                        "px-3 py-1 text-sm font-medium capitalize border",
-                        getPlanColor(paymentPlan)
-                      )}
-                    >
-                      {paymentPlan} Plan
-                    </Badge>
-                    <Badge
-                      className={cn(
-                        "px-3 py-1 text-sm font-medium capitalize border",
-                        getStatusBadgeColor(subscriptionStatus)
-                      )}
-                    >
-                      {subscriptionStatus}
-                    </Badge>
+      {/* Compact Professional Profile Summary */}
+      <div className="px-6 pt-7 max-w-7xl mx-auto">
+        <div className="bg-white border border-gray-200 rounded-xl p-5 mb-6">
+          <div className="flex items-center justify-between">
+            {/* Left Side - Profile Info */}
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <Avatar className="h-20 w-20 ring-2 ring-primary/20 shadow-none">
+                  <AvatarImage src={profileImg || "/placeholder.svg"} />
+                  <AvatarFallback className="text-lg font-semibold bg-gradient-to-br from-primary to-primary/80 text-white shadow-sm border-2 border-white">
+                    {firstName.charAt(0)}
+                    {lastName.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+                {/* Active Indicator */}
+                <div className="absolute -bottom-0 -right-0 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></div>
+              </div>
+              <div className="space-y-1.5">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  {firstName} {lastName}
+                </h2>
+                <p className="text-gray-600 text-sm">{email}</p>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 px-2 py-0.5 bg-emerald-50 border border-emerald-200 rounded-full">
+                    <div className="w-1 h-1 bg-emerald-500 rounded-full"></div>
+                    <span className="text-xs font-medium text-emerald-700">
+                      Verified
+                    </span>
                   </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+
+            {/* Right Side - Compact Plan Info */}
+            <div className="flex items-center gap-4">
+              {/* Plan Badge */}
+              <div className="text-center">
+                <div
+                  className={cn(
+                    "inline-flex items-center gap-2 px-4 py-2 rounded-lg border font-semibold text-sm capitalize",
+                    getPlanColor(paymentPlan)
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "w-2 h-2 rounded-full",
+                      paymentPlan === "starter"
+                        ? "bg-blue-500"
+                        : paymentPlan === "professional"
+                        ? "bg-purple-500"
+                        : paymentPlan === "enterprise"
+                        ? "bg-amber-500"
+                        : "bg-gray-500"
+                    )}
+                  ></div>
+                  {paymentPlan}
+                </div>
+              </div>
+
+              {/* Status */}
+              <div className="flex flex-col items-end">
+                <div
+                  className={cn(
+                    "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium",
+                    subscriptionStatus === "active"
+                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                      : subscriptionStatus === "none"
+                      ? "bg-gray-50 text-gray-600 border border-gray-200"
+                      : "bg-amber-50 text-amber-700 border border-amber-200"
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "w-1.5 h-1.5 rounded-full",
+                      subscriptionStatus === "active"
+                        ? "bg-emerald-500"
+                        : subscriptionStatus === "none"
+                        ? "bg-gray-400"
+                        : "bg-amber-500"
+                    )}
+                  ></div>
+                  {subscriptionStatus === "none"
+                    ? "No subscription"
+                    : subscriptionStatus}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-6 pb-8">
         {/* Success/Cancel Alerts */}
         {showSuccessAlert && (
           <Alert className="mb-6 border-green-200 bg-green-50">
             <CheckCircle2 className="h-4 w-4 text-green-600" />
             <AlertDescription className="text-green-800">
               <div className="flex items-center justify-between">
-                <span>Payment successful! Your subscription has been updated.</span>
+                <span>
+                  Payment successful! Your subscription has been updated.
+                </span>
                 <button
                   onClick={() => setShowSuccessAlert(false)}
                   className="text-green-600 hover:text-green-800"
@@ -398,7 +410,10 @@ const GlobalSettingPage = () => {
             <AlertCircle className="h-4 w-4 text-blue-600" />
             <AlertDescription className="text-blue-800">
               <div className="flex items-center justify-between">
-                <span>Payment was canceled. You can try again anytime from the Billing tab.</span>
+                <span>
+                  Payment was canceled. You can try again anytime from the
+                  Billing tab.
+                </span>
                 <button
                   onClick={() => setShowCancelAlert(false)}
                   className="text-blue-600 hover:text-blue-800"
@@ -411,129 +426,93 @@ const GlobalSettingPage = () => {
         )}
 
         <FormProvider {...form}>
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-            <TabsList className="grid w-full grid-cols-6 lg:w-fit lg:grid-cols-6 bg-gray-100 p-1 rounded-xl h-12">
-              <TabsTrigger 
-                value="general" 
-                className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm"
-              >
-                <User className="h-4 w-4" />
-                <span className="hidden sm:inline">Profile</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="company" 
-                className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm"
-              >
-                <Building className="h-4 w-4" />
-                <span className="hidden sm:inline">Company</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="billing" 
-                className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm"
-              >
-                <CreditCard className="h-4 w-4" />
-                <span className="hidden sm:inline">Billing</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="job-templates" 
-                className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm"
-              >
-                <Briefcase className="h-4 w-4" />
-                <span className="hidden sm:inline">Jobs</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="email-templates" 
-                className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm"
-              >
-                <Mail className="h-4 w-4" />
-                <span className="hidden sm:inline">Email</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="notifications" 
-                className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm"
-              >
-                <Bell className="h-4 w-4" />
-                <span className="hidden sm:inline">Notifications</span>
-              </TabsTrigger>
-            </TabsList>
+          <ProfileTabs
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            variant="global-settings"
+          >
+            {activeTab === "general" && (
+              <div className="space-y-6">
+                <PersonalInfoForm />
+              </div>
+            )}
 
-            <TabsContent value="general" className="space-y-6">
-              <PersonalInfoForm />
-            </TabsContent>
+            {activeTab === "company" && (
+              <div className="space-y-6">
+                <CompanyInfoForm />
+              </div>
+            )}
 
-            <TabsContent value="company" className="space-y-6">
-              <CompanyInfoForm />
-            </TabsContent>
+            {activeTab === "billing" && (
+              <div className="space-y-6">
+                <AccountSettingsForm />
+              </div>
+            )}
 
-            <TabsContent value="billing" className="space-y-6">
-              <AccountSettingsForm />
-            </TabsContent>
+            {activeTab === "job-templates" && (
+              <div className="space-y-6">
+                <JobTemplatesList />
+              </div>
+            )}
 
-            <TabsContent value="job-templates" className="space-y-6">
-              <Card className="rounded-xl border-gray-200 shadow-sm">
-                <CardContent className="p-6">
-                  <JobTemplatesList />
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="email-templates" className="space-y-6">
+            {activeTab === "email-templates" && (
               <div className="space-y-8">
                 {/* Email Template Configuration */}
-                <Card className="rounded-xl border-gray-200 shadow-sm">
-                  <CardContent className="p-6">
-                    <div className="space-y-6">
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-1">Global Template Settings</h3>
-                        <p className="text-gray-600 text-sm">Configure default email templates for system-generated communications</p>
-                      </div>
-                      <GlobalEmailTemplateSettings />
-                    </div>
-                  </CardContent>
-                </Card>
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                      Global Template Settings
+                    </h3>
+                    <p className="text-gray-600 text-sm">
+                      Configure default email templates for system-generated
+                      communications
+                    </p>
+                  </div>
+                  <GlobalEmailTemplateSettings />
+                </div>
 
                 {/* Email Templates Management */}
-                <Card className="rounded-xl border-gray-200 shadow-sm">
-                  <CardContent className="p-6">
-                    <div className="space-y-6">
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-1">Template Library</h3>
-                        <p className="text-gray-600 text-sm">Create and manage custom email templates</p>
-                      </div>
-                      <EmailTemplatesList />
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="notifications" className="space-y-6">
-              <Card className="rounded-xl border-gray-200 shadow-sm">
-                <CardContent className="p-6">
-                  <div className="space-y-6">
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-1">Notification Preferences</h3>
-                      <p className="text-gray-600 text-sm">Configure how and when you receive notifications</p>
-                    </div>
-                    
-                    <div className="text-center py-12 text-gray-500">
-                      <Bell className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                      <p>Notification settings coming soon</p>
-                    </div>
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                      Template Library
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      Create and manage custom email templates
+                    </p>
                   </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
+                  <EmailTemplatesList />
+                </div>
+              </div>
+            )}
 
-            <SaveChangesBar
-              isDirty={isDirty}
-              isLoading={isLoading}
-              isSaved={isSaved}
-              onSubmit={() => handleFormSubmit(getValues())}
-              changedFieldsCount={dirtyFieldsCount}
-              onDiscard={() => reset(initialFormData || undefined)}
-            />
-          </Tabs>
+            {activeTab === "notifications" && (
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                    Notification Preferences
+                  </h3>
+                  <p className="text-gray-600 text-sm">
+                    Configure how and when you receive notifications
+                  </p>
+                </div>
+
+                <div className="text-center py-12 text-gray-500">
+                  <Bell className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                  <p>Notification settings coming soon</p>
+                </div>
+              </div>
+            )}
+          </ProfileTabs>
+
+          <SaveChangesBar
+            isDirty={isDirty}
+            isLoading={isLoading}
+            isSaved={isSaved}
+            onSubmit={() => handleFormSubmit(getValues())}
+            changedFieldsCount={dirtyFieldsCount}
+            onDiscard={() => reset(initialFormData || undefined)}
+          />
         </FormProvider>
       </div>
     </div>
