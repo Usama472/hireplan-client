@@ -915,10 +915,6 @@ export function ScheduleTemplates({
             <Copy className="w-3 h-3 mr-1" />
             New Template
           </Button>
-          <Button onClick={() => setIsAddHoursDialogOpen(true)}>
-            <Plus className="w-4 h-4 mr-1" />
-            Hours
-          </Button>
         </div>
       </div>
 
@@ -1150,11 +1146,20 @@ export function ScheduleTemplates({
 
         {/* Date specific hours - right side */}
         <div className="p-4">
-          <div className="flex items-center mb-2">
+          <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2 text-gray-700">
               <Calendar className="w-4 h-4" />
               <h3 className="font-medium">Date-specific hours</h3>
             </div>
+            <Button
+              size="sm"
+              className="rounded-full h-8 px-3 bg-blue-600 hover:bg-blue-700 text-white"
+              onClick={() => setIsAddHoursDialogOpen(true)}
+              title="Add Date-Specific Hours"
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Hours
+            </Button>
           </div>
           <p className="text-sm text-gray-500 mb-4">
             Adjust hours for specific days
