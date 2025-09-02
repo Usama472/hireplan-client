@@ -194,11 +194,10 @@ export function HeroSection() {
             variants={headlineVariants}
             className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight mb-4 tracking-tight"
           >
-            Your Ultimate{" "}
-            <span className="bg-gradient-to-r from-secondary to-secondary/80 bg-clip-text text-transparent">
-              Job Search
-            </span>{" "}
-            Companion
+            Hire the right talent{" "}
+            <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+              10x faster
+            </span>
           </motion.h1>
 
           {/* Subheadline */}
@@ -206,12 +205,11 @@ export function HeroSection() {
             variants={subheadlineVariants}
             className="text-base sm:text-lg text-white/80 max-w-2xl mx-auto leading-relaxed mb-8 font-light"
           >
-            Are you looking for the perfect job or the ideal candidate? Find
-            your dream with{" "}
+            AI-powered candidate matching that eliminates 90% of manual screening. 
+            Find perfect candidates in{" "}
             <span className="text-white font-medium">
-              thousands of job postings
-            </span>{" "}
-            across industries.
+              minutes, not weeks
+            </span>.
           </motion.p>
 
           {/* Key Benefits Grid */}
@@ -241,7 +239,7 @@ export function HeroSection() {
               transition={{ delay: 0.1 }}
               className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-6 hover:bg-white/15 hover:border-white/30 transition-all duration-300 group"
             >
-              <div className="w-14 h-14 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+              <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
                 <Users className="h-7 w-7 text-white" />
               </div>
               <h3 className="text-white font-semibold text-sm mb-3">
@@ -305,22 +303,22 @@ export function HeroSection() {
               whileHover={{ scale: 1.1 }}
               className="flex items-center gap-2 group cursor-pointer hover:text-white/80 transition-colors duration-200"
             >
-              <div className="w-2 h-2 bg-green-400 rounded-full group-hover:scale-125 transition-transform duration-200"></div>
-              <span>Secure & Private</span>
+              <div className="w-2 h-2 bg-purple-400 rounded-full group-hover:scale-125 transition-transform duration-200"></div>
+              <span>Secure payment</span>
             </motion.div>
             <motion.div
               whileHover={{ scale: 1.1 }}
               className="flex items-center gap-2 group cursor-pointer hover:text-white/80 transition-colors duration-200"
             >
               <div className="w-2 h-2 bg-blue-400 rounded-full group-hover:scale-125 transition-transform duration-200"></div>
-              <span>AI-Powered Matching</span>
+              <span>Cancel anytime</span>
             </motion.div>
             <motion.div
               whileHover={{ scale: 1.1 }}
               className="flex items-center gap-2 group cursor-pointer hover:text-white/80 transition-colors duration-200"
             >
               <div className="w-2 h-2 bg-purple-400 rounded-full group-hover:scale-125 transition-transform duration-200"></div>
-              <span>Instant Results</span>
+              <span>Setup in 5 minutes</span>
             </motion.div>
           </motion.div>
         </div>

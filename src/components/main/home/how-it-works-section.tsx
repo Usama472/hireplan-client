@@ -129,47 +129,47 @@ export function HowItWorksSection() {
 
   const features = [
     {
-      title: "#1 Quality Job",
+      title: "#1 Quality Candidates",
       description:
-        "Access thousands of high-quality job postings from top-tier companies across all industries and experience levels.",
+        "Access thousands of high-quality candidate profiles from top-tier professionals across all industries and experience levels.",
     },
     {
-      title: "Top Companies",
+      title: "Enterprise Ready",
       description:
-        "Connect with Fortune 500 companies, innovative startups, and leading organizations actively seeking talent.",
+        "Trusted by Fortune 500 companies, innovative startups, and leading organizations for their recruitment needs.",
     },
     {
-      title: "International Jobs",
+      title: "Multi-Board Distribution",
       description:
-        "Explore global opportunities with remote positions and international companies looking for skilled professionals.",
+        "Distribute your job postings across multiple job boards and platforms to maximize candidate reach and visibility.",
     },
     {
       title: "No Extra Charges",
       description:
-        "Complete access to all features with transparent pricing - no hidden fees or surprise charges ever.",
+        "Complete access to all ATS features with transparent pricing - no hidden fees or surprise charges ever.",
     },
   ];
 
   const platformFeatures = [
     {
-      title: "Smart Job Matching",
+      title: "Smart Candidate Matching",
       description:
-        "AI-powered algorithms that understand your skills and preferences to find the perfect job opportunities.",
+        "AI-powered algorithms that understand job requirements and candidate profiles to find the perfect matches.",
     },
     {
-      title: "Resume Builder",
+      title: "Resume Parsing & Analysis",
       description:
-        "Professional resume templates and tools to showcase your experience and stand out to employers.",
+        "Automatically extract and analyze candidate information from resumes with advanced AI technology.",
     },
     {
-      title: "Company Insights",
+      title: "Hiring Pipeline Management",
       description:
-        "Detailed company profiles, reviews, and culture information to help you make informed decisions.",
+        "Streamlined workflow management from initial application to final hiring decision with full visibility.",
     },
     {
-      title: "Application Tracking",
+      title: "Applicant Tracking System",
       description:
-        "Monitor your job applications, interview status, and follow-up reminders all in one place.",
+        "Complete ATS functionality to manage candidates, interviews, communications, and hiring decisions in one place.",
     },
   ];
 
@@ -214,22 +214,22 @@ export function HowItWorksSection() {
               variants={titleVariants}
               className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900 mb-2 sm:mb-3 leading-tight"
             >
-              Trusted &amp; Popular
+              Trusted &amp; Reliable
             </motion.h2>
             <motion.h3
               variants={titleVariants}
               transition={{ delay: 0.1 }}
               className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-800 mb-4 sm:mb-6"
             >
-              Job Portal
+              Hiring Platform
             </motion.h3>
             <motion.p
               variants={descriptionVariants}
               className="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed"
             >
-              Join millions of job seekers who trust our platform to find their
-              next career opportunity. Our AI-powered matching system and
-              comprehensive job database make job hunting efficient and
+              Join hundreds of companies who trust our platform to streamline their
+              hiring process. Our AI-powered matching system and
+              comprehensive candidate database make recruitment efficient and
               effective.
             </motion.p>
             <motion.div
@@ -249,7 +249,7 @@ export function HowItWorksSection() {
                     transition={{ duration: 0.3, ease: "easeOut" }}
                     className="mt-1 flex-shrink-0"
                   >
-                    <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
+                    <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500" />
                   </motion.div>
                   <div>
                     <h4 className="text-sm sm:text-base font-semibold text-gray-900 mb-1 sm:mb-2 group-hover:text-blue-600 transition-colors duration-200">
@@ -284,23 +284,23 @@ export function HowItWorksSection() {
               variants={titleVariants}
               className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900 mb-2 sm:mb-3 leading-tight"
             >
-              Advanced Job Search
+              Advanced Hiring
             </motion.h2>
             <motion.h3
               variants={titleVariants}
               transition={{ delay: 0.1 }}
               className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-800 mb-4 sm:mb-6"
             >
-              Platform
+              Management System
             </motion.h3>
             <motion.p
               variants={descriptionVariants}
               className="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed"
             >
-              Experience the next generation of job searching with our
-              intelligent platform. From AI-powered matching to comprehensive
-              application tracking, we provide everything you need for a
-              successful job search journey.
+              Experience the next generation of hiring with our
+              intelligent ATS platform. From AI-powered candidate matching to comprehensive
+              application management, we provide everything you need for a
+              successful recruitment process.
             </motion.p>
             <motion.div
               variants={containerVariants}
@@ -319,7 +319,7 @@ export function HowItWorksSection() {
                     transition={{ duration: 0.3, ease: "easeOut" }}
                     className="mt-1 flex-shrink-0"
                   >
-                    <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
+                    <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500" />
                   </motion.div>
                   <div>
                     <h4 className="text-sm sm:text-base font-semibold text-gray-900 mb-1 sm:mb-2 group-hover:text-blue-600 transition-colors duration-200">

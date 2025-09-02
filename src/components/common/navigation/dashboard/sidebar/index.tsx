@@ -129,12 +129,12 @@ export const DashboardSidebar = ({
       variant="inset"
       {...props}
       collapsible="icon"
-      className="bg-primary border-r border-primary/20 relative overflow-hidden p-0"
+      className="bg-white border-r border-gray-200 relative overflow-hidden p-0"
     >
       {/* Subtle Pattern Overlay */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.03)_1px,transparent_0)] bg-[length:20px_20px] opacity-40"></div>
 
-      <SidebarHeader className="bg-primary border-b border-white/10 px-6 py-4 relative overflow-hidden max-h-[80px] h-full flex flex-col justify-center">
+      <SidebarHeader className="bg-white border-b border-gray-100 px-6 py-4 relative overflow-hidden max-h-[80px] h-full flex flex-col justify-center">
         {/* Background Pattern */}
         <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5 opacity-40"></div>
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl"></div>
@@ -145,7 +145,7 @@ export const DashboardSidebar = ({
             <SidebarMenuButton size="lg" asChild>
               <div
                 onClick={() => navigate("/")}
-                className="cursor-pointer hover:bg-white/15 rounded-xl p-3 transition-all duration-300 group relative z-10"
+                className="cursor-pointer hover:bg-gray-50 rounded-xl p-3 transition-all duration-300 group relative z-10"
               >
                 <div className="flex items-center gap-4">
                   <img
@@ -154,7 +154,7 @@ export const DashboardSidebar = ({
                     className="h-9 w-9 object-contain"
                   />
                   <div className="flex flex-col min-w-0">
-                    <span className="font-extrabold text-white/70 text-[1.65rem] leading-tight tracking-tight group-hover:text-blue-100 transition-colors truncate drop-shadow-sm">
+                    <span className="font-extrabold text-gray-900 text-[1.65rem] leading-tight tracking-tight group-hover:text-blue-600 transition-colors truncate drop-shadow-sm">
                       {APP_NAME}
                     </span>
                   </div>
@@ -165,7 +165,7 @@ export const DashboardSidebar = ({
         </SidebarMenu>
       </SidebarHeader>
 
-      <SidebarContent className="bg-primary px-4 py-6 relative z-10">
+      <SidebarContent className="bg-white px-4 py-6 relative z-10">
         <NavProjects
           name="Navigation"
           projects={filteredProjects}
@@ -173,7 +173,7 @@ export const DashboardSidebar = ({
         />
       </SidebarContent>
 
-      <SidebarFooter className="bg-gradient-to-t from-primary/95 to-primary/90 border-t border-white/10 p-3 relative overflow-hidden">
+      <SidebarFooter className="bg-white border-t border-gray-100 p-3 relative overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 bg-gradient-to-tl from-white/5 via-transparent to-white/5 opacity-30"></div>
         <div className="absolute bottom-0 left-0 w-20 h-20 bg-white/5 rounded-full blur-xl"></div>

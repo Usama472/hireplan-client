@@ -134,7 +134,7 @@ export default function AddRoleSheet({
       case "chat":
         return <MessageSquare className="h-4 w-4 text-violet-500" />;
       case "company":
-        return <Building2 className="h-4 w-4 text-emerald-500" />;
+        return <Building2 className="h-4 w-4 text-purple-500" />;
       default:
         return <Tag className="h-4 w-4 text-gray-500" />;
     }
@@ -192,7 +192,7 @@ export default function AddRoleSheet({
       case "chat":
         return "bg-violet-50";
       case "company":
-        return "bg-emerald-50";
+        return "bg-purple-50";
       default:
         return "bg-gray-50";
     }
@@ -412,7 +412,7 @@ export default function AddRoleSheet({
           <SheetFooter className="pt-4 border-t mt-4 flex justify-center">
             <Button
               type="submit"
-              className="bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white gap-2 px-6 sm:px-8 py-2 h-11 w-full sm:w-auto"
+              className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white gap-2 px-6 sm:px-8 py-2 h-11 w-full sm:w-auto"
               disabled={
                 roleName.trim() === "" || isSubmitting || isCreatingRole
               }

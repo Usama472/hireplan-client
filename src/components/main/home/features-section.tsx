@@ -97,8 +97,8 @@ export function FeaturesSection() {
       title: "Lightning Fast Screening",
       description:
         "Reduce screening time from hours to minutes. Our AI processes hundreds of candidates instantly.",
-      color: "green",
-      gradient: "from-green-500 to-emerald-500",
+      color: "purple",
+      gradient: "from-purple-500 to-pink-500",
     },
     {
       icon: Target,
@@ -167,7 +167,7 @@ export function FeaturesSection() {
             className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 tracking-tight leading-tight"
           >
             Everything you need to hire{" "}
-            <span className="bg-gradient-to-r from-secondary to-secondary/80 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
               smarter
             </span>
             , not harder

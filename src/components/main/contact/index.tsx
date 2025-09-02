@@ -82,9 +82,9 @@ export default function ContactPage() {
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
         <main className="pt-16 pb-8">
           <div className="max-w-2xl mx-auto px-4 text-center">
-            <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-8 border border-green-200/60">
-              <div className="w-16 h-16 bg-gradient-to-br from-green-50 to-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6 border border-green-200">
-                <CheckCircle className="w-8 h-8 text-green-600" />
+            <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-8 border border-purple-200/60">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-50 to-purple-50 rounded-full flex items-center justify-center mx-auto mb-6 border border-purple-200">
+                <CheckCircle className="w-8 h-8 text-purple-600" />
               </div>
               <h1 className="text-2xl font-bold text-gray-900 mb-4">
                 Message Sent Successfully!
@@ -159,8 +159,8 @@ export default function ContactPage() {
 
                 <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 border border-gray-200/60 hover:border-gray-300/60 transition-all duration-300 group">
                   <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg flex items-center justify-center flex-shrink-0 border border-green-200 group-hover:scale-110 transition-transform duration-200">
-                      <Phone className="w-6 h-6 text-green-600" />
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg flex items-center justify-center flex-shrink-0 border border-purple-200 group-hover:scale-110 transition-transform duration-200">
+                      <Phone className="w-6 h-6 text-purple-600" />
                     </div>
                     <div>
                       <h3 className="font-medium text-gray-900 mb-2 text-base">
@@ -171,7 +171,7 @@ export default function ContactPage() {
                       </p>
                       <a
                         href="tel:+1-555-123-4567"
-                        className="text-green-600 hover:text-green-700 font-medium transition-colors duration-200 text-sm"
+                        className="text-purple-600 hover:text-purple-700 font-medium transition-colors duration-200 text-sm"
                       >
                         +1 (555) 123-4567
                       </a>
@@ -429,8 +429,8 @@ export default function ContactPage() {
             </div>
 
             <div className="bg-white/95 backdrop-blur-sm rounded-xl p-6 border border-white/30 hover:border-white/50 transition-all duration-300 group">
-              <div className="w-12 h-12 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg flex items-center justify-center mb-4 border border-green-200 group-hover:scale-110 transition-transform duration-200">
-                <Users className="w-6 h-6 text-green-600" />
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg flex items-center justify-center mb-4 border border-purple-200 group-hover:scale-110 transition-transform duration-200">
+                <Users className="w-6 h-6 text-purple-600" />
               </div>
               <h3 className="font-medium text-gray-900 mb-3 text-lg">
                 What's included in the free trial?

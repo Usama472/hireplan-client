@@ -293,12 +293,12 @@ export default function StaffManagement() {
   return (
     <div className="min-h-full px-6 py-0">
       <div className="space-y-6">
-        <div className="bg-primary border-b border-primary/20 -mx-6 px-6 py-4 relative overflow-hidden max-h-[80px] mt-0">
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100 -mx-6 px-6 py-4 relative overflow-hidden max-h-[80px] mt-0">
           <div className="flex flex-col">
-            <h1 className="text-2xl font-semibold text-white mb-1">
+            <h1 className="text-2xl font-semibold text-black mb-1">
               Staff Management
             </h1>
-            <p className="text-white/80 text-sm">
+            <p className="text-black text-sm">
               Manage your staff members and role permissions
             </p>
           </div>
@@ -363,7 +363,7 @@ export default function StaffManagement() {
               />
               <Button
                 onClick={handleCreateNew}
-                className="bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white gap-1"
+                className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white gap-1"
               >
                 <Plus className="h-4 w-4" />
                 <span>Add {activeTab === "staff" ? "Staff" : "Role"}</span>

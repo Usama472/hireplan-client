@@ -3,27 +3,27 @@ import { TrendingUp, Users, Clock, Target } from 'lucide-react'
 export function StatsSection() {
   const stats = [
     {
-      icon: TrendingUp,
-      value: '95%',
-      label: 'Match Accuracy',
-      description: 'AI-powered candidate matching precision'
-    },
-    {
       icon: Clock,
       value: '70%',
-      label: 'Faster Hiring',
-      description: 'Reduce time-to-hire with automation'
+      label: 'Faster hiring process',
+      description: 'Reduce screening time with AI automation'
+    },
+    {
+      icon: TrendingUp,
+      value: '95%',
+      label: 'Match accuracy rate',
+      description: 'AI-powered candidate matching precision'
     },
     {
       icon: Users,
       value: '10K+',
-      label: 'Successful Hires',
+      label: 'Successful hires',
       description: 'Candidates placed through our platform'
     },
     {
       icon: Target,
       value: '500+',
-      label: 'Companies Trust Us',
+      label: 'Companies worldwide',
       description: 'From startups to Fortune 500s'
     }
   ]

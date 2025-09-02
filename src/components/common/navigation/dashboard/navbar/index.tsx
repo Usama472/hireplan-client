@@ -44,9 +44,9 @@ export const Navbar = () => {
       <div className='flex items-center gap-2 sm:gap-4 ml-auto sm:ml-0'>
         <button
           type='button'
-          className='p-1.5 sm:p-2 hover:bg-gray-100 dark:hover:bg-[#1F1F23] rounded-full transition-colors'
+          className='p-1.5 sm:p-2 hover:bg-gradient-to-r hover:from-blue-500/10 hover:to-purple-500/10 rounded-full transition-all duration-200 group'
         >
-          <Bell className='h-4 w-4 sm:h-5 sm:w-5 text-gray-600 dark:text-gray-300' />
+          <Bell className='h-4 w-4 sm:h-5 sm:w-5 text-gray-600 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-purple-400 transition-colors' />
         </button>
 
         <DropdownMenu>
@@ -56,7 +56,7 @@ export const Navbar = () => {
               alt='User avatar'
               width={28}
               height={28}
-              className='rounded-full ring-2 ring-gray-200 dark:ring-[#2B2B30] sm:w-8 sm:h-8 cursor-pointer'
+              className='rounded-full ring-2 ring-blue-200 dark:ring-purple-400/30 sm:w-8 sm:h-8 cursor-pointer hover:ring-blue-300 dark:hover:ring-purple-400/50 transition-all duration-200'
             />
           </DropdownMenuTrigger>
           <DropdownMenuContent

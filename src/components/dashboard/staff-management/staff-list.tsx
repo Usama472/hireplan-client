@@ -22,8 +22,8 @@ export function StaffList({ staffMembers }: StaffListProps) {
   const getStatusStyles = (status: string) => {
     if (status === "active") {
       return {
-        bg: "bg-green-50",
-        text: "text-green-700",
+        bg: "bg-purple-50",
+        text: "text-purple-700",
         icon: UserCheck,
       };
     } else {

@@ -646,21 +646,21 @@ export default function CreateJob() {
   return (
     <main className="pb-16">
       {/* Enhanced Header */}
-      <div className="bg-primary border-b border-primary/20 px-6 py-4 relative overflow-hidden max-h-[80px]">
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100 px-6 py-4 relative overflow-hidden max-h-[80px]">
         <div className="relative z-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
-                <FileText className="h-6 w-6 text-white" />
+              <div className="p-3 bg-blue-100 rounded-xl">
+                <FileText className="h-6 w-6 text-blue-600" />
               </div>
               <div className="flex flex-col">
-                <h1 className="text-xl font-bold text-white">Create New Job</h1>
-                <p className="text-sm text-white/80 flex items-center gap-3">
+                <h1 className="text-2xl font-bold text-black">Create New Job</h1>
+                <p className="text-black flex items-center gap-2">
                   Set up your job posting with detailed requirements and
                   preferences
                   <Badge
                     variant="secondary"
-                    className="bg-white/20 text-white border-white/20 text-xs"
+                    className="bg-blue-100 text-blue-700 text-xs"
                   >
                     Step {currentStep} of {totalSteps}
                   </Badge>
@@ -674,7 +674,7 @@ export default function CreateJob() {
                   variant="outline"
                   size="sm"
                   onClick={() => setShowSaveTemplateDialog(true)}
-                  className="bg-white/10 hover:bg-white/20 border-white/30 text-white hover:text-white rounded-xl h-9 px-4 font-medium transition-all duration-200 backdrop-blur-sm"
+                  className="bg-white hover:bg-blue-50 border-blue-200 text-blue-600 hover:text-blue-700 rounded-xl h-9 px-4 font-medium transition-all duration-200 shadow-sm"
                 >
                   <FileText className="h-4 w-4 mr-2" />
                   Save as Template
@@ -687,27 +687,27 @@ export default function CreateJob() {
                       state: { fromJobCreation: true },
                     })
                   }
-                  className="bg-white/10 hover:bg-white/20 border-white/30 text-white hover:text-white rounded-xl h-9 px-4 font-medium transition-all duration-200 backdrop-blur-sm"
+                  className="bg-white hover:bg-blue-50 border-blue-200 text-blue-600 hover:text-blue-700 rounded-xl h-9 px-4 font-medium transition-all duration-200 shadow-sm"
                 >
                   <Layers className="h-4 w-4 mr-2" />
                   {selectedTemplate ? "Change Template" : "Browse Templates"}
                 </Button>
               </div>
 
-              <div className="h-8 w-px bg-white/20" />
+              <div className="h-8 w-px bg-blue-200" />
 
               {/* Progress Display */}
               <div className="text-right">
-                <div className="text-2xl font-bold text-white">
+                <div className="text-2xl font-bold text-black">
                   {Math.round(((currentStep - 1) / (totalSteps - 1)) * 100)}%
                 </div>
-                <p className="text-sm text-white/80 font-medium">Complete</p>
+                <p className="text-sm text-gray-600 font-medium">Complete</p>
               </div>
               {/* Progress Bar */}
               <div className="w-32">
-                <div className="w-full bg-white/20 rounded-full h-2">
+                <div className="w-full bg-blue-200 rounded-full h-2">
                   <div
-                    className="bg-white h-2 rounded-full transition-all duration-300 ease-out"
+                    className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full transition-all duration-300 ease-out"
                     style={{
                       width: `${Math.round(
                         ((currentStep - 1) / (totalSteps - 1)) * 100

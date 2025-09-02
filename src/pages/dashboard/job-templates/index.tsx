@@ -18,16 +18,16 @@ const JobTemplatesPage: React.FC = () => {
   return (
     <div className="min-h-screen">
       {/* Enhanced Header */}
-      <div className="bg-primary border-b border-primary/20 px-6 py-4 relative overflow-hidden max-h-[80px]">
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100 px-6 py-4 relative overflow-hidden max-h-[80px]">
         <div className="relative z-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
-                <FileText className="h-6 w-6 text-white" />
+              <div className="p-3 bg-blue-100 rounded-xl">
+                <FileText className="h-6 w-6 text-blue-600" />
               </div>
               <div className="flex flex-col">
-                <h1 className="text-xl font-bold text-white">Job Templates</h1>
-                <p className="text-sm text-white/80 flex items-center gap-3">
+                <h1 className="text-2xl font-bold text-black">Job Templates</h1>
+                <p className="text-black flex items-center gap-2">
                   Create, manage, and use job templates to streamline your
                   hiring process
                 </p>
@@ -38,8 +38,7 @@ const JobTemplatesPage: React.FC = () => {
               {/* Create Job Button */}
               <Button
                 onClick={() => navigate(ROUTES.DASHBOARD.CREATE_JOB)}
-                variant="secondary"
-                className="bg-white/20 hover:bg-white/30 text-white border border-white/20 gap-2 px-5 font-medium backdrop-blur-sm transition-all duration-200 text-sm"
+                className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200 gap-2 px-5 font-medium"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Create Job from Template

@@ -71,21 +71,21 @@ export default function AvailabilityManager() {
     <div className="min-h-full">
       <div className="space-y-0">
         {/* Enhanced Header - Matching Jobs/Staff Management Style */}
-        <div className="bg-primary border-b border-primary/20 px-6 py-4 relative overflow-hidden max-h-[80px]">
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100 px-6 py-4 relative overflow-hidden max-h-[80px]">
           <div className="relative z-10">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
-                  <CalendarDays className="h-6 w-6 text-white" />
+                <div className="p-3 bg-blue-100 rounded-xl">
+                  <CalendarDays className="h-6 w-6 text-blue-600" />
                 </div>
                 <div className="flex flex-col">
-                  <h1 className="text-xl font-bold text-white">Availability</h1>
-                  <p className="text-sm text-white/80 flex items-center gap-3">
+                  <h1 className="text-2xl font-bold text-black">Availability</h1>
+                  <p className="text-black flex items-center gap-2">
                     Manage your booking pages and calendar availability
                     {totalBookedAppointments > 0 && (
                       <Badge
                         variant="secondary"
-                        className="bg-white/20 text-white border-white/20 text-xs"
+                        className="bg-blue-100 text-blue-700 text-xs"
                       >
                         {totalBookedAppointments} booked
                       </Badge>

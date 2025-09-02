@@ -134,7 +134,7 @@ export function PricingSection() {
             className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-4 tracking-tight leading-tight"
           >
             Plans that grow{" "}
-            <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
               with your business
             </span>
           </motion.h2>
@@ -214,7 +214,7 @@ export function PricingSection() {
                           transition={{ duration: 0.3, ease: "easeOut" }}
                           className="flex-shrink-0 mr-3 mt-1"
                         >
-                          <Check className="h-4 w-4 text-green-500" />
+                          <Check className="h-4 w-4 text-purple-500" />
                         </motion.div>
                         <span className="text-sm text-gray-700">{feature}</span>
                       </motion.li>
@@ -265,13 +265,13 @@ export function PricingSection() {
             <motion.div
               whileHover={{ scale: 1.05, y: -2 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className="inline-flex items-center space-x-2 bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 px-5 py-2.5 rounded-full text-sm font-medium mb-6 border border-green-200/60 cursor-pointer"
+              className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-50 to-purple-50 text-purple-700 px-5 py-2.5 rounded-full text-sm font-medium mb-6 border border-purple-200/60 cursor-pointer"
             >
               <motion.div
                 whileHover={{ rotate: 360, scale: 1.2 }}
                 transition={{ duration: 0.6, ease: "easeOut" }}
               >
-                <Zap className="h-4 w-4 text-green-600" />
+                <Zap className="h-4 w-4 text-purple-600" />
               </motion.div>
               <span>Enterprise Solutions</span>
             </motion.div>

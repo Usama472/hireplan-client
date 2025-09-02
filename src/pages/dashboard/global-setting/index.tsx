@@ -256,22 +256,22 @@ const GlobalSettingPage = () => {
   return (
     <div className="min-h-screen">
       {/* Enhanced Header - Matching Job Page Style */}
-      <div className="bg-primary border-b border-primary/20 px-6 py-4 relative overflow-hidden max-h-[80px]">
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100 px-6 py-4 relative overflow-hidden max-h-[80px]">
         <div className="relative z-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
-                <Settings className="h-6 w-6 text-white" />
+              <div className="p-3 bg-blue-100 rounded-xl">
+                <Settings className="h-6 w-6 text-blue-600" />
               </div>
               <div className="flex flex-col">
-                <h1 className="text-xl font-bold text-white">
+                <h1 className="text-2xl font-bold text-black">
                   Account Settings
                 </h1>
-                <p className="text-sm text-white/80 flex items-center gap-3">
+                <p className="text-black flex items-center gap-2">
                   Manage your profile, company, and application preferences
                   <Badge
                     variant="secondary"
-                    className="bg-white/20 text-white border-white/20 text-xs"
+                    className="bg-blue-100 text-blue-700 text-xs"
                   >
                     {isDirty ? `${dirtyFieldsCount} unsaved` : "All saved"}
                   </Badge>
@@ -280,9 +280,9 @@ const GlobalSettingPage = () => {
             </div>
             <div className="flex items-center gap-3">
               {lastSaved && (
-                <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20">
-                  <CheckCircle2 className="h-4 w-4 text-green-300" />
-                  <span className="text-sm text-white/90 font-medium">
+                <div className="flex items-center gap-2 bg-white hover:bg-blue-50 rounded-lg px-3 py-2 border border-blue-200 shadow-sm">
+                  <CheckCircle2 className="h-4 w-4 text-blue-600" />
+                  <span className="text-sm text-blue-700 font-medium">
                     Saved {lastSaved.toLocaleTimeString()}
                   </span>
                 </div>
@@ -307,7 +307,7 @@ const GlobalSettingPage = () => {
                   </AvatarFallback>
                 </Avatar>
                 {/* Active Indicator */}
-                <div className="absolute -bottom-0 -right-0 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></div>
+                <div className="absolute -bottom-0 -right-0 w-4 h-4 bg-purple-500 border-2 border-white rounded-full"></div>
               </div>
               <div className="space-y-1.5">
                 <h2 className="text-xl font-semibold text-gray-900">
@@ -315,9 +315,9 @@ const GlobalSettingPage = () => {
                 </h2>
                 <p className="text-gray-600 text-sm">{email}</p>
                 <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1 px-2 py-0.5 bg-emerald-50 border border-emerald-200 rounded-full">
-                    <div className="w-1 h-1 bg-emerald-500 rounded-full"></div>
-                    <span className="text-xs font-medium text-emerald-700">
+                  <div className="flex items-center gap-1 px-2 py-0.5 bg-purple-50 border border-purple-200 rounded-full">
+                    <div className="w-1 h-1 bg-purple-500 rounded-full"></div>
+                    <span className="text-xs font-medium text-purple-700">
                       Verified
                     </span>
                   </div>
@@ -357,7 +357,7 @@ const GlobalSettingPage = () => {
                   className={cn(
                     "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium",
                     subscriptionStatus === "active"
-                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                      ? "bg-purple-50 text-purple-700 border border-purple-200"
                       : subscriptionStatus === "none"
                       ? "bg-gray-50 text-gray-600 border border-gray-200"
                       : "bg-amber-50 text-amber-700 border border-amber-200"
@@ -367,7 +367,7 @@ const GlobalSettingPage = () => {
                     className={cn(
                       "w-1.5 h-1.5 rounded-full",
                       subscriptionStatus === "active"
-                        ? "bg-emerald-500"
+                        ? "bg-purple-500"
                         : subscriptionStatus === "none"
                         ? "bg-gray-400"
                         : "bg-amber-500"
@@ -387,16 +387,16 @@ const GlobalSettingPage = () => {
       <div className="max-w-7xl mx-auto px-6 pb-8">
         {/* Success/Cancel Alerts */}
         {showSuccessAlert && (
-          <Alert className="mb-6 border-green-200 bg-green-50">
-            <CheckCircle2 className="h-4 w-4 text-green-600" />
-            <AlertDescription className="text-green-800">
+          <Alert className="mb-6 border-purple-200 bg-purple-50">
+            <CheckCircle2 className="h-4 w-4 text-purple-600" />
+            <AlertDescription className="text-purple-800">
               <div className="flex items-center justify-between">
                 <span>
                   Payment successful! Your subscription has been updated.
                 </span>
                 <button
                   onClick={() => setShowSuccessAlert(false)}
-                  className="text-green-600 hover:text-green-800"
+                  className="text-purple-600 hover:text-purple-800"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -433,33 +433,41 @@ const GlobalSettingPage = () => {
           >
             {activeTab === "general" && (
               <div className="space-y-6">
-                <PersonalInfoForm />
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                  <PersonalInfoForm />
+                </div>
               </div>
             )}
 
             {activeTab === "company" && (
               <div className="space-y-6">
-                <CompanyInfoForm />
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                  <CompanyInfoForm />
+                </div>
               </div>
             )}
 
             {activeTab === "billing" && (
               <div className="space-y-6">
-                <AccountSettingsForm />
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                  <AccountSettingsForm />
+                </div>
               </div>
             )}
 
             {activeTab === "job-templates" && (
               <div className="space-y-6">
-                <JobTemplatesList />
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                  <JobTemplatesList />
+                </div>
               </div>
             )}
 
             {activeTab === "email-templates" && (
-              <div className="space-y-8">
+              <div className="space-y-6">
                 {/* Email Template Configuration */}
-                <div className="space-y-6">
-                  <div>
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                  <div className="mb-6">
                     <h3 className="text-lg font-semibold text-gray-900 mb-1">
                       Global Template Settings
                     </h3>
@@ -472,8 +480,8 @@ const GlobalSettingPage = () => {
                 </div>
 
                 {/* Email Templates Management */}
-                <div className="space-y-6">
-                  <div>
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                  <div className="mb-6">
                     <h3 className="text-lg font-semibold text-gray-900 mb-1">
                       Template Library
                     </h3>
@@ -488,18 +496,20 @@ const GlobalSettingPage = () => {
 
             {activeTab === "notifications" && (
               <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                    Notification Preferences
-                  </h3>
-                  <p className="text-gray-600 text-sm">
-                    Configure how and when you receive notifications
-                  </p>
-                </div>
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                  <div className="mb-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                      Notification Preferences
+                    </h3>
+                    <p className="text-gray-600 text-sm">
+                      Configure how and when you receive notifications
+                    </p>
+                  </div>
 
-                <div className="text-center py-12 text-gray-500">
-                  <Bell className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                  <p>Notification settings coming soon</p>
+                  <div className="text-center py-12 text-gray-500">
+                    <Bell className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                    <p>Notification settings coming soon</p>
+                  </div>
                 </div>
               </div>
             )}

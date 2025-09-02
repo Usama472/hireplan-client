@@ -59,18 +59,18 @@ export function SMSOptIn() {
 
   if (isSubmitted) {
     return (
-      <Card className="w-full max-w-md mx-auto bg-white/95 backdrop-blur-sm border-2 border-green-200/60">
+      <Card className="w-full max-w-md mx-auto bg-white/95 backdrop-blur-sm border-2 border-purple-200/60">
         <CardContent className="p-8 text-center">
-          <div className="w-16 h-16 bg-gradient-to-br from-green-50 to-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6 border border-green-200">
-            <CheckCircle className="w-8 h-8 text-green-600" />
+          <div className="w-16 h-16 bg-gradient-to-br from-blue-50 to-purple-50 rounded-full flex items-center justify-center mx-auto mb-6 border border-purple-200">
+            <CheckCircle className="w-8 h-8 text-purple-600" />
           </div>
-          <h3 className="text-xl font-bold text-green-800 mb-3">
+          <h3 className="text-xl font-bold text-purple-800 mb-3">
             Successfully Subscribed!
           </h3>
           <p className="text-gray-600 mb-4 leading-relaxed">
             You'll receive updates about new job opportunities and hiring tips.
           </p>
-          <div className="inline-flex items-center space-x-2 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm border border-green-200">
+          <div className="inline-flex items-center space-x-2 bg-purple-50 text-purple-700 px-4 py-2 rounded-full text-sm border border-purple-200">
             <Shield className="w-4 h-4" />
             <span>Secure & Private</span>
           </div>
@@ -148,7 +148,7 @@ export function SMSOptIn() {
       <div className="mt-8 text-center">
         <div className="flex flex-wrap justify-center items-center gap-6 text-sm text-white/80">
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-green-300 rounded-full"></div>
+            <div className="w-2 h-2 bg-purple-300 rounded-full"></div>
             <span>Secure & Private</span>
           </div>
           <div className="flex items-center gap-2">

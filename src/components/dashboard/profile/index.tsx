@@ -267,7 +267,7 @@ export default function ProfilePage() {
       <div className="min-h-full">
         <div className="space-y-6">
           {/* Loading Header */}
-          <div className="bg-primary border-b border-primary/20 px-6 py-4 relative overflow-hidden max-h-[80px]">
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100 px-6 py-4 relative overflow-hidden max-h-[80px]">
             <div className="relative z-10">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
@@ -337,13 +337,13 @@ export default function ProfilePage() {
     <div className="min-h-full">
       <div className="space-y-6">
         {/* Enhanced Header - Matching Jobs Page Style */}
-        <div className="bg-primary border-b border-primary/20 px-6 py-4 relative overflow-hidden max-h-[80px]">
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100 px-6 py-4 relative overflow-hidden max-h-[80px]">
           <div className="relative z-10">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
+                <div className="p-3 bg-blue-100 rounded-xl">
                   <svg
-                    className="h-6 w-6 text-white"
+                    className="h-6 w-6 text-blue-600"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -357,13 +357,13 @@ export default function ProfilePage() {
                   </svg>
                 </div>
                 <div className="flex flex-col">
-                  <h1 className="text-xl font-bold text-white">
+                  <h1 className="text-2xl font-bold text-gray-900">
                     Profile Settings
                   </h1>
-                  <p className="text-sm text-white/80 flex items-center gap-3">
+                  <p className="text-gray-600 flex items-center gap-2">
                     Manage your account information and preferences
                     {lastSaved && (
-                      <span className="text-xs text-white/60">
+                      <span className="text-xs text-gray-500">
                         Last saved {lastSaved.toLocaleTimeString()}
                       </span>
                     )}
