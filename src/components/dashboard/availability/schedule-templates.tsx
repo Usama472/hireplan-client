@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { type DateSpecificFormData } from "@/constants/date-specific-constants";
 import {
   createAvailabilityTemplate,
   deleteAvailabilityTemplate,
@@ -51,10 +52,10 @@ interface DayAvailability {
 }
 
 interface DateSpecificSettings {
+  id: string; // Changed from 'id' to 'id' to match original
   date: Date;
   isAvailable: boolean;
   timeSlots: TimeSlot[];
-  id?: string; // Make id optional to fix the error
 }
 
 interface ScheduleTemplatesProps {
@@ -795,6 +796,71 @@ export function ScheduleTemplates({
     }
   };
 
+  // Function to check if a date already exists in date-specific availability data
+  const getExistingDateEntry = (date: Date) => {
+    const dateSpecificData = getDateSpecificAvailabilityData();
+    if (!dateSpecificData?.dates) return null;
+
+    // Format the date to YYYY-MM-DD for comparison
+    const dateStr = format(date, "yyyy-MM-dd");
+
+    // Find if this date already exists in our data
+    return dateSpecificData.dates.find((d: DateSpecificSettings) => {
+      const existingDateStr = format(d.date, "yyyy-MM-dd");
+      return existingDateStr === dateStr;
+    });
+  };
+
+  // Function to prepare date-specific form data based on selected date
+  const prepareDateSpecificFormData = (): DateSpecificFormData | undefined => {
+    if (!selectedDate) return undefined;
+
+    // Check if the date already exists
+    const existingDate = getExistingDateEntry(selectedDate);
+
+    // Prepare initial data for the form
+    const initialData: DateSpecificFormData = {
+      dates: existingDate
+        ? // If the date exists, use its data
+          [existingDate]
+        : // Otherwise create a new entry
+          [
+            {
+              date: selectedDate,
+              isAvailable: true,
+              timeSlots: [],
+            },
+          ],
+    };
+
+    return initialData;
+  };
+
+  // Function to merge updated date slots with existing dates
+  const mergeDateSpecificData = (updatedData: DateSpecificFormData) => {
+    if (!currentTemplate || !selectedDate) return updatedData;
+
+    const dateSpecificData = getDateSpecificAvailabilityData();
+    if (!dateSpecificData?.dates?.length) return updatedData;
+
+    // Format the selected date to YYYY-MM-DD for comparison
+    const selectedDateStr = format(selectedDate, "yyyy-MM-dd");
+
+    // Get all dates except the one being updated
+    const otherDates = dateSpecificData.dates.filter(
+      (d: DateSpecificSettings) => {
+        const existingDateStr = format(d.date, "yyyy-MM-dd");
+        return existingDateStr !== selectedDateStr;
+      }
+    );
+
+    // Combine other dates with the updated date
+    return {
+      ...dateSpecificData,
+      dates: [...otherDates, ...updatedData.dates],
+    };
+  };
+
   return (
     <div className="space-y-6">
       {/* Header with template selection */}
@@ -1240,19 +1306,13 @@ export function ScheduleTemplates({
 
               {selectedDate && (
                 <DateSpecificForm
-                  initialData={{
-                    type: "date-specific",
-                    dates: [
-                      {
-                        date: selectedDate,
-                        isAvailable: true,
-                        timeSlots: [],
-                      },
-                    ],
-                  }}
+                  key={format(selectedDate, "yyyy-MM-dd")} // Add key prop to force re-render when date changes
+                  initialData={prepareDateSpecificFormData()}
                   duration={currentTemplate.duration}
                   onSave={async (data) => {
-                    await handleSaveTemplate(currentTemplate.id, data);
+                    // Merge the updated date with existing dates
+                    const mergedData = mergeDateSpecificData(data);
+                    await handleSaveTemplate(currentTemplate.id, mergedData);
                     setIsAddHoursDialogOpen(false);
                     setSelectedDate(undefined);
                   }}
