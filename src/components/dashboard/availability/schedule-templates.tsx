@@ -25,6 +25,7 @@ import {
   deleteAvailabilityTemplate,
   getAvailabilityTemplates,
   saveAvailability,
+  updateAvailabilityTemplate,
 } from "@/http/availability/api";
 import type { AvailabilityTemplate } from "@/interfaces";
 import { useToast } from "@/lib/hooks/use-toast";
@@ -80,7 +81,39 @@ export function ScheduleTemplates({
   const [newTemplateName, setNewTemplateName] = useState("");
   const [templateDuration, setTemplateDuration] = useState(30);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [currentTimezone, setCurrentTimezone] =
+    useState<string>("America/New_York");
   const { toast } = useToast();
+
+  // Add handleTimezoneChange function
+  const handleTimezoneChange = async (newTimezone: string) => {
+    if (!currentTemplate) return;
+
+    try {
+      // Update the template with the new timezone
+      const updatedTemplate = { ...currentTemplate, timezone: newTimezone };
+
+      // Update the backend
+      await updateAvailabilityTemplate(currentTemplate.id, updatedTemplate);
+
+      // Update local state
+      setCurrentTimezone(newTimezone);
+      setCurrentTemplate(updatedTemplate);
+      setTemplates((prev) =>
+        prev.map((t) => (t.id === currentTemplate.id ? updatedTemplate : t))
+      );
+
+      toast({
+        title: "Timezone Updated",
+        description: `Timezone changed to ${newTimezone}`,
+      });
+    } catch {
+      toast({
+        title: "Error",
+        description: "Failed to update timezone. Please try again.",
+      });
+    }
+  };
 
   // Time options for dropdown
   const timeOptions = useMemo(() => {
@@ -223,6 +256,11 @@ export function ScheduleTemplates({
   useEffect(() => {
     if (currentTemplate?.duration) {
       setTemplateDuration(currentTemplate.duration);
+    }
+
+    // Set timezone from template if available
+    if (currentTemplate?.timezone) {
+      setCurrentTimezone(currentTemplate.timezone);
     }
   }, [currentTemplate]);
 
@@ -534,7 +572,7 @@ export function ScheduleTemplates({
         updatedTemplate.availabilities[availabilityIndex] = updatedData;
         setCurrentTemplate(updatedTemplate);
       }
-    } catch (_) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to add time slot. Please try again.",
@@ -581,7 +619,7 @@ export function ScheduleTemplates({
         updatedTemplate.availabilities[availabilityIndex] = updatedData;
         setCurrentTemplate(updatedTemplate);
       }
-    } catch (_) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to update availability. Please try again.",
@@ -648,7 +686,7 @@ export function ScheduleTemplates({
 
       // Close the dropdown
       setIsTimeDropdownOpen({ type: null });
-    } catch (_) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to update time slot. Please try again.",
@@ -696,7 +734,7 @@ export function ScheduleTemplates({
         updatedTemplate.availabilities[availabilityIndex] = updatedData;
         setCurrentTemplate(updatedTemplate);
       }
-    } catch (_) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to delete time slot. Please try again.",
@@ -749,7 +787,7 @@ export function ScheduleTemplates({
         updatedTemplate.availabilities[availabilityIndex] = updatedData;
         setCurrentTemplate(updatedTemplate);
       }
-    } catch (_) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to delete time slot. Please try again.",
@@ -1108,6 +1146,73 @@ export function ScheduleTemplates({
         </div>
       </div>
 
+      {/* Timezone selector at bottom */}
+      <div className="mt-6 pt-4 border-t border-gray-200">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <svg
+              className="w-4 h-4 text-gray-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span className="text-sm font-medium text-gray-700">Timezone</span>
+          </div>
+          <div className="flex items-center gap-3 w-80">
+            <Select
+              value={currentTimezone}
+              onValueChange={handleTimezoneChange}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select timezone" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="America/New_York">
+                  Eastern Time (ET) - America/New_York
+                </SelectItem>
+                <SelectItem value="America/Chicago">
+                  Central Time (CT) - America/Chicago
+                </SelectItem>
+                <SelectItem value="America/Denver">
+                  Mountain Time (MT) - America/Denver
+                </SelectItem>
+                <SelectItem value="America/Los_Angeles">
+                  Pacific Time (PT) - America/Los_Angeles
+                </SelectItem>
+                <SelectItem value="Europe/London">
+                  Greenwich Mean Time (GMT) - Europe/London
+                </SelectItem>
+                <SelectItem value="Europe/Paris">
+                  Central European Time (CET) - Europe/Paris
+                </SelectItem>
+                <SelectItem value="Asia/Dubai">
+                  Gulf Standard Time (GST) - Asia/Dubai
+                </SelectItem>
+                <SelectItem value="Asia/Kolkata">
+                  India Standard Time (IST) - Asia/Kolkata
+                </SelectItem>
+                <SelectItem value="Asia/Shanghai">
+                  China Standard Time (CST) - Asia/Shanghai
+                </SelectItem>
+                <SelectItem value="Asia/Tokyo">
+                  Japan Standard Time (JST) - Asia/Tokyo
+                </SelectItem>
+                <SelectItem value="Australia/Sydney">
+                  Australian Eastern Time (AET) - Australia/Sydney
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+
       {/* Add Hours Dialog */}
       <Dialog
         open={isAddHoursDialogOpen}
@@ -1139,7 +1244,6 @@ export function ScheduleTemplates({
                     type: "date-specific",
                     dates: [
                       {
-                        id: format(selectedDate, "yyyy-MM-dd"),
                         date: selectedDate,
                         isAvailable: true,
                         timeSlots: [],
