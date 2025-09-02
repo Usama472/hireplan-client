@@ -415,7 +415,7 @@ export interface AvailabilityTemplate {
   selectedMeetingPlatform: string;
   templateName: string;
   availabilities: any[];
-  eventTypes: EventType[];
+  duration: number;
   timezone: string;
   advancedRules: {
     sendConfirmationEmail: boolean;
@@ -434,4 +434,4 @@ export interface GetAvailabilityTemplatesResponse {
 }
 
 // Email Chat interfaces
-export * from './email-chat';
+export * from "./email-chat";

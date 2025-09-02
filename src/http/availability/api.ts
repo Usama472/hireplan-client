@@ -45,9 +45,10 @@ export const getAvailability = async (): Promise<GetAvailabilityResponse> => {
 };
 
 export const createAvailabilityTemplate = async (
-  templateName: string
+  templateName: string,
+  duration: number
 ): Promise<{ status: boolean; availability: any }> => {
-  return await post("/availabilities/templates", { templateName });
+  return await post("/availabilities/templates", { templateName, duration });
 };
 
 export const getAvailabilityTemplates =
