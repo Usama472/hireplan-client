@@ -2,6 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import {
   Dialog,
   DialogContent,
@@ -9,7 +10,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,22 +20,41 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   createAvailabilityTemplate,
   deleteAvailabilityTemplate,
   getAvailabilityTemplates,
   saveAvailability,
-  updateAvailabilityTemplate,
 } from "@/http/availability/api";
 import type { AvailabilityTemplate } from "@/interfaces";
 import { useToast } from "@/lib/hooks/use-toast";
 import { format } from "date-fns";
-import { Plus } from "lucide-react";
-import { useEffect, useState } from "react";
+import { AlertCircle, Calendar, Clock, Copy, Plus, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { DateSpecificForm } from "./date-specific-form";
-import { WeeklyAvailabilityForm } from "./weekly-availability-form";
+
+// Add interface for TimeSlot and Day to fix type errors
+interface TimeSlot {
+  id: string;
+  startTime: string;
+  endTime: string;
+  eventTypeId?: string;
+  eventType?: any;
+}
+
+interface DayAvailability {
+  id: string;
+  day: string;
+  isAvailable: boolean;
+  timeSlots: TimeSlot[];
+}
+
+interface DateSpecificSettings {
+  date: Date;
+  isAvailable: boolean;
+  timeSlots: TimeSlot[];
+  id?: string; // Make id optional to fix the error
+}
 
 interface ScheduleTemplatesProps {
   onTemplateChange?: (template: any) => void;
@@ -47,20 +66,34 @@ export function ScheduleTemplates({
   const [templates, setTemplates] = useState<AvailabilityTemplate[]>([]);
   const [currentTemplate, setCurrentTemplate] =
     useState<AvailabilityTemplate | null>(null);
-  const [selectedEventTypeId, setSelectedEventTypeId] = useState<string>("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isAddHoursDialogOpen, setIsAddHoursDialogOpen] = useState(false);
+  const [isTimeDropdownOpen, setIsTimeDropdownOpen] = useState<{
+    dayId?: string;
+    slotId?: string;
+    type: "start" | "end" | null;
+  }>({ type: null });
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [templateToDelete, setTemplateToDelete] =
     useState<AvailabilityTemplate | null>(null);
   const [newTemplateName, setNewTemplateName] = useState("");
   const [templateDuration, setTemplateDuration] = useState(30);
-  const [activeTab, setActiveTab] = useState("overview");
-  const [currentTimezone, setCurrentTimezone] =
-    useState<string>("America/New_York");
-  const [sendConfirmationEmails, setSendConfirmationEmails] = useState(false);
-  const [sendReminderEmails, setSendReminderEmails] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const { toast } = useToast();
+
+  // Time options for dropdown
+  const timeOptions = useMemo(() => {
+    const options = [];
+    for (let hour = 0; hour < 24; hour++) {
+      for (let minute = 0; minute < 60; minute += 15) {
+        const formattedHour = hour.toString().padStart(2, "0");
+        const formattedMinute = minute.toString().padStart(2, "0");
+        options.push(`${formattedHour}:${formattedMinute}`);
+      }
+    }
+    return options;
+  }, []);
 
   // Load templates from backend
   const loadTemplates = async () => {
@@ -173,16 +206,6 @@ export function ScheduleTemplates({
             transformedTemplates.find((t) => t.templateName === "default") ||
             transformedTemplates[0];
           setCurrentTemplate(defaultTemplate);
-          setCurrentTimezone(defaultTemplate.timezone);
-          setSendConfirmationEmails(
-            defaultTemplate.advancedRules.sendConfirmationEmail
-          );
-          setSendReminderEmails(
-            defaultTemplate.advancedRules.sendReminderEmails
-          );
-          if (defaultTemplate.duration) {
-            setTemplateDuration(defaultTemplate.duration);
-          }
         }
       }
     } catch {
@@ -200,17 +223,6 @@ export function ScheduleTemplates({
   useEffect(() => {
     if (currentTemplate?.duration) {
       setTemplateDuration(currentTemplate.duration);
-    }
-    // Set timezone from template if available
-    if (currentTemplate?.timezone) {
-      setCurrentTimezone(currentTemplate.timezone);
-    }
-    // Set advanced rules from template
-    if (currentTemplate?.advancedRules) {
-      setSendConfirmationEmails(
-        currentTemplate.advancedRules.sendConfirmationEmail
-      );
-      setSendReminderEmails(currentTemplate.advancedRules.sendReminderEmails);
     }
   }, [currentTemplate]);
 
@@ -272,11 +284,14 @@ export function ScheduleTemplates({
       if (data.daysAvailability) {
         // Weekly availability data
         const weeklyAvailability = data.daysAvailability
-          .filter((day: any) => day.isAvailable && day.timeSlots.length > 0)
-          .map((day: any) => ({
+          .filter(
+            (day: DayAvailability) =>
+              day.isAvailable && day.timeSlots.length > 0
+          )
+          .map((day: DayAvailability) => ({
             type: "weekDay",
             day: day.day,
-            slots: day.timeSlots.map((slot: any) => ({
+            slots: day.timeSlots.map((slot: TimeSlot) => ({
               from: slot.startTime,
               to: slot.endTime,
             })),
@@ -286,11 +301,11 @@ export function ScheduleTemplates({
       } else if (data.dates) {
         // Date-specific availability data
         const dateSpecificAvailability = data.dates
-          .filter((date: any) => date.timeSlots.length > 0)
-          .map((date: any) => ({
+          .filter((date: DateSpecificSettings) => date.timeSlots.length > 0)
+          .map((date: DateSpecificSettings) => ({
             type: "date",
             date: format(date.date, "yyyy-MM-dd"),
-            slots: date.timeSlots.map((slot: any) => ({
+            slots: date.timeSlots.map((slot: TimeSlot) => ({
               from: slot.startTime,
               to: slot.endTime,
             })),
@@ -360,580 +375,848 @@ export function ScheduleTemplates({
         title: "Success",
         description: "Availability saved successfully",
       });
-    } catch {
+    } catch (error) {
       toast({
         title: "Error",
         description: "Failed to save availability. Please try again.",
       });
+      throw error; // Re-throw to be caught by the calling functions
     }
   };
 
-  const handleTimezoneChange = async (newTimezone: string) => {
+  // Helper function to format time for display
+  const formatTime = (time: string) => {
+    const [hour, minute] = time.split(":");
+    const hourNum = parseInt(hour);
+    const ampm = hourNum >= 12 ? "pm" : "am";
+    const hour12 = hourNum % 12 || 12;
+    return `${hour12}:${minute}${ampm}`;
+  };
+
+  const getWeeklyAvailabilityData = () => {
+    if (!currentTemplate?.availabilities) return null;
+    return currentTemplate.availabilities.find((a) => a.type === "weekly");
+  };
+
+  const getDateSpecificAvailabilityData = () => {
+    if (!currentTemplate?.availabilities) return null;
+    return currentTemplate.availabilities.find(
+      (a) => a.type === "date-specific"
+    );
+  };
+
+  const getDayLabel = (day: string) => {
+    // Convert 'monday' to 'M', etc.
+    return day.charAt(0).toUpperCase();
+  };
+
+  const getDayFullLabel = (day: string) => {
+    return day.charAt(0).toUpperCase() + day.slice(1);
+  };
+
+  // Helper function to convert time string to minutes since midnight
+  const timeStringToMinutes = (timeString: string): number => {
+    const [hours, minutes] = timeString.split(":").map(Number);
+    return hours * 60 + minutes;
+  };
+
+  // Function to check if two time slots overlap
+  const checkOverlap = (slot1: TimeSlot, slot2: TimeSlot): boolean => {
+    // Convert times to minutes for accurate comparison
+    const start1 = timeStringToMinutes(slot1.startTime);
+    const end1 = timeStringToMinutes(slot1.endTime);
+    const start2 = timeStringToMinutes(slot2.startTime);
+    const end2 = timeStringToMinutes(slot2.endTime);
+
+    // Check for overlap: if one slot starts before the other ends and ends after the other starts
+    return start1 < end2 && end1 > start2;
+  };
+
+  // Function to check if a time slot has any overlaps
+  const hasOverlaps = (slot: TimeSlot, timeSlots: TimeSlot[]): boolean => {
+    return timeSlots.some(
+      (otherSlot) => slot.id !== otherSlot.id && checkOverlap(slot, otherSlot)
+    );
+  };
+
+  // Add a new time slot to a day
+  const addTimeSlot = async (day: string) => {
     if (!currentTemplate) return;
 
+    const weeklyData = getWeeklyAvailabilityData();
+    if (!weeklyData) return;
+
+    // Find the day
+    const dayIndex = weeklyData.daysAvailability.findIndex(
+      (d: DayAvailability) => d.day === day
+    );
+    if (dayIndex === -1) return;
+
+    const currentDay = weeklyData.daysAvailability[dayIndex];
+    const lastSlot = currentDay.timeSlots[currentDay.timeSlots.length - 1];
+
+    // Default start and end times
+    let startTime = "09:00";
+    let endTime = "10:00";
+
+    if (lastSlot) {
+      // Set the new slot to start 30 minutes after the last one ends
+      const [lastEndHour, lastEndMinute] = lastSlot.endTime
+        .split(":")
+        .map(Number);
+      let newStartHour = lastEndHour;
+      let newStartMinute = lastEndMinute + 30;
+
+      if (newStartMinute >= 60) {
+        newStartHour += 1;
+        newStartMinute -= 60;
+      }
+
+      if (newStartHour > 23) {
+        newStartHour = 23;
+        newStartMinute = 30;
+      }
+
+      startTime = `${newStartHour.toString().padStart(2, "0")}:${newStartMinute
+        .toString()
+        .padStart(2, "0")}`;
+
+      // Set the end time based on template duration
+      let newEndHour = newStartHour;
+      let newEndMinute = newStartMinute + (currentTemplate.duration || 60);
+
+      if (newEndMinute >= 60) {
+        newEndHour += Math.floor(newEndMinute / 60);
+        newEndMinute = newEndMinute % 60;
+      }
+
+      if (newEndHour > 23) {
+        newEndHour = 23;
+        newEndMinute = 59;
+      }
+
+      endTime = `${newEndHour.toString().padStart(2, "0")}:${newEndMinute
+        .toString()
+        .padStart(2, "0")}`;
+    }
+
+    // Create a new slot with unique ID
+    const newSlot: TimeSlot = {
+      id: `${day}-${Date.now()}`,
+      startTime,
+      endTime,
+      eventTypeId: "",
+    };
+
+    // Update the day with the new slot
+    const updatedDaysAvailability = [...weeklyData.daysAvailability];
+    updatedDaysAvailability[dayIndex] = {
+      ...updatedDaysAvailability[dayIndex],
+      timeSlots: [...updatedDaysAvailability[dayIndex].timeSlots, newSlot],
+    };
+
+    // Create updated data
+    const updatedData = {
+      ...weeklyData,
+      daysAvailability: updatedDaysAvailability,
+    };
+
+    // Save changes
     try {
-      setCurrentTimezone(newTimezone);
+      await handleSaveTemplate(currentTemplate.id, updatedData);
 
-      // Update the template with the new timezone
-      const updatedTemplate = { ...currentTemplate, timezone: newTimezone };
-
-      // Update the backend
-      await updateAvailabilityTemplate(currentTemplate.id, updatedTemplate);
-
-      // Update local state
-      setCurrentTemplate(updatedTemplate);
-      setTemplates((prev) =>
-        prev.map((t) => (t.id === currentTemplate.id ? updatedTemplate : t))
+      // Update local state directly after successful API call
+      const updatedTemplate = { ...currentTemplate };
+      const availabilityIndex = updatedTemplate.availabilities.findIndex(
+        (a) => a.type === "weekly"
       );
-
-      toast({
-        title: "Timezone Updated",
-        description: `Timezone changed to ${newTimezone}`,
-      });
-    } catch {
+      if (availabilityIndex !== -1) {
+        updatedTemplate.availabilities[availabilityIndex] = updatedData;
+        setCurrentTemplate(updatedTemplate);
+      }
+    } catch (_) {
       toast({
         title: "Error",
-        description: "Failed to update timezone. Please try again.",
+        description: "Failed to add time slot. Please try again.",
       });
     }
   };
 
-  const handleAdvancedRulesChange = async (
-    field: "sendConfirmationEmail" | "sendReminderEmails",
-    value: boolean
+  // Toggle day availability
+  const toggleDayAvailability = async (day: string, isAvailable: boolean) => {
+    if (!currentTemplate) return;
+
+    const weeklyData = getWeeklyAvailabilityData();
+    if (!weeklyData) return;
+
+    // Find the day
+    const dayIndex = weeklyData.daysAvailability.findIndex(
+      (d: DayAvailability) => d.day === day
+    );
+    if (dayIndex === -1) return;
+
+    // Update the day's availability
+    const updatedDaysAvailability = [...weeklyData.daysAvailability];
+    updatedDaysAvailability[dayIndex] = {
+      ...updatedDaysAvailability[dayIndex],
+      isAvailable,
+    };
+
+    // Create updated data
+    const updatedData = {
+      ...weeklyData,
+      daysAvailability: updatedDaysAvailability,
+    };
+
+    // Save changes
+    try {
+      await handleSaveTemplate(currentTemplate.id, updatedData);
+
+      // Update local state directly after successful API call
+      const updatedTemplate = { ...currentTemplate };
+      const availabilityIndex = updatedTemplate.availabilities.findIndex(
+        (a) => a.type === "weekly"
+      );
+      if (availabilityIndex !== -1) {
+        updatedTemplate.availabilities[availabilityIndex] = updatedData;
+        setCurrentTemplate(updatedTemplate);
+      }
+    } catch (_) {
+      toast({
+        title: "Error",
+        description: "Failed to update availability. Please try again.",
+      });
+    }
+  };
+
+  // Update time slot time
+  const updateTimeSlot = async (
+    day: string,
+    slotId: string,
+    field: "startTime" | "endTime",
+    value: string
   ) => {
     if (!currentTemplate) return;
 
+    const weeklyData = getWeeklyAvailabilityData();
+    if (!weeklyData) return;
+
+    // Find the day
+    const dayIndex = weeklyData.daysAvailability.findIndex(
+      (d: DayAvailability) => d.day === day
+    );
+    if (dayIndex === -1) return;
+
+    // Find the slot
+    const slotIndex = weeklyData.daysAvailability[dayIndex].timeSlots.findIndex(
+      (slot: TimeSlot) => slot.id === slotId
+    );
+    if (slotIndex === -1) return;
+
+    // Update the slot
+    const updatedDaysAvailability = [...weeklyData.daysAvailability];
+    const updatedTimeSlots = [...updatedDaysAvailability[dayIndex].timeSlots];
+    updatedTimeSlots[slotIndex] = {
+      ...updatedTimeSlots[slotIndex],
+      [field]: value,
+    };
+
+    updatedDaysAvailability[dayIndex] = {
+      ...updatedDaysAvailability[dayIndex],
+      timeSlots: updatedTimeSlots,
+    };
+
+    // Create updated data
+    const updatedData = {
+      ...weeklyData,
+      daysAvailability: updatedDaysAvailability,
+    };
+
+    // Save changes
     try {
-      // Update local state immediately for UI responsiveness
-      if (field === "sendConfirmationEmail") {
-        setSendConfirmationEmails(value);
-      } else if (field === "sendReminderEmails") {
-        setSendReminderEmails(value);
-      }
+      await handleSaveTemplate(currentTemplate.id, updatedData);
 
-      // Update the template with the new advanced rules
-      const updatedTemplate = {
-        ...currentTemplate,
-        advancedRules: {
-          ...currentTemplate.advancedRules,
-          [field]: value,
-        },
-      };
-
-      // Update the backend
-      await updateAvailabilityTemplate(currentTemplate.id, updatedTemplate);
-
-      // Update local state
-      setCurrentTemplate(updatedTemplate);
-      setTemplates((prev) =>
-        prev.map((t) => (t.id === currentTemplate.id ? updatedTemplate : t))
+      // Update local state directly after successful API call
+      const updatedTemplate = { ...currentTemplate };
+      const availabilityIndex = updatedTemplate.availabilities.findIndex(
+        (a) => a.type === "weekly"
       );
-
-      toast({
-        title: "Settings Updated",
-        description: "Advanced rules updated successfully",
-      });
-    } catch {
-      // Revert local state on error
-      if (field === "sendConfirmationEmail") {
-        setSendConfirmationEmails(!value);
-      } else if (field === "sendReminderEmails") {
-        setSendReminderEmails(!value);
+      if (availabilityIndex !== -1) {
+        updatedTemplate.availabilities[availabilityIndex] = updatedData;
+        setCurrentTemplate(updatedTemplate);
       }
 
+      // Close the dropdown
+      setIsTimeDropdownOpen({ type: null });
+    } catch (_) {
       toast({
         title: "Error",
-        description: "Failed to update settings. Please try again.",
+        description: "Failed to update time slot. Please try again.",
+      });
+    }
+  };
+
+  const handleDeleteTimeSlot = async (day: string, slotId: string) => {
+    if (!currentTemplate) return;
+
+    const weeklyData = getWeeklyAvailabilityData();
+    if (!weeklyData) return;
+
+    // Find the day
+    const dayIndex = weeklyData.daysAvailability.findIndex(
+      (d: DayAvailability) => d.day === day
+    );
+    if (dayIndex === -1) return;
+
+    // Remove the time slot
+    const updatedDaysAvailability = [...weeklyData.daysAvailability];
+    updatedDaysAvailability[dayIndex] = {
+      ...updatedDaysAvailability[dayIndex],
+      timeSlots: updatedDaysAvailability[dayIndex].timeSlots.filter(
+        (slot: TimeSlot) => slot.id !== slotId
+      ),
+    };
+
+    // Create updated data
+    const updatedData = {
+      ...weeklyData,
+      daysAvailability: updatedDaysAvailability,
+    };
+
+    // Save changes
+    try {
+      await handleSaveTemplate(currentTemplate.id, updatedData);
+
+      // Update local state directly after successful API call
+      const updatedTemplate = { ...currentTemplate };
+      const availabilityIndex = updatedTemplate.availabilities.findIndex(
+        (a) => a.type === "weekly"
+      );
+      if (availabilityIndex !== -1) {
+        updatedTemplate.availabilities[availabilityIndex] = updatedData;
+        setCurrentTemplate(updatedTemplate);
+      }
+    } catch (_) {
+      toast({
+        title: "Error",
+        description: "Failed to delete time slot. Please try again.",
+      });
+    }
+  };
+
+  const handleDeleteDateSlot = async (dateId: string, slotId: string) => {
+    if (!currentTemplate) return;
+
+    const dateSpecificData = getDateSpecificAvailabilityData();
+    if (!dateSpecificData) return;
+
+    // Find the date
+    const dateIndex = dateSpecificData.dates.findIndex(
+      (d: DateSpecificSettings) => d.id === dateId
+    );
+    if (dateIndex === -1) return;
+
+    // Remove the time slot
+    const updatedDates = [...dateSpecificData.dates];
+    updatedDates[dateIndex] = {
+      ...updatedDates[dateIndex],
+      timeSlots: updatedDates[dateIndex].timeSlots.filter(
+        (slot: TimeSlot) => slot.id !== slotId
+      ),
+    };
+
+    // If no more time slots, remove the date entirely
+    if (updatedDates[dateIndex].timeSlots.length === 0) {
+      updatedDates.splice(dateIndex, 1);
+    }
+
+    // Create updated data
+    const updatedData = {
+      ...dateSpecificData,
+      dates: updatedDates,
+    };
+
+    // Save changes
+    try {
+      await handleSaveTemplate(currentTemplate.id, updatedData);
+
+      // Update local state directly after successful API call
+      const updatedTemplate = { ...currentTemplate };
+      const availabilityIndex = updatedTemplate.availabilities.findIndex(
+        (a) => a.type === "date-specific"
+      );
+      if (availabilityIndex !== -1) {
+        updatedTemplate.availabilities[availabilityIndex] = updatedData;
+        setCurrentTemplate(updatedTemplate);
+      }
+    } catch (_) {
+      toast({
+        title: "Error",
+        description: "Failed to delete time slot. Please try again.",
       });
     }
   };
 
   return (
-    <div className="space-y-4">
-      {/* Compact Header */}
+    <div className="space-y-6">
+      {/* Header with template selection */}
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-semibold text-gray-900">Booking Pages</h2>
-          <p className="text-sm text-gray-600 mt-1">
-            Manage multiple schedule configurations
-          </p>
-        </div>
+        <div className="flex items-center gap-3">
+          <Select
+            value={currentTemplate?.id}
+            onValueChange={handleTemplateChange}
+          >
+            <SelectTrigger className="w-60">
+              <SelectValue placeholder="Select a template" />
+            </SelectTrigger>
+            <SelectContent>
+              {templates.map((template) => (
+                <SelectItem key={template.id} value={template.id}>
+                  <div className="flex items-center gap-2">
+                    <span>{template.templateName}</span>
+                    {template.templateName === "default" && (
+                      <Badge variant="secondary" className="text-xs">
+                        Default
+                      </Badge>
+                    )}
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
+          {/* Delete Template Button - Only show for non-default templates */}
+          {currentTemplate && currentTemplate.templateName !== "default" && (
             <Button
               size="sm"
-              className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md hover:shadow-lg transition-all duration-200"
+              variant="outline"
+              className="text-xs px-3 py-1 text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
+              onClick={() => {
+                setTemplateToDelete(currentTemplate);
+                setIsDeleteDialogOpen(true);
+              }}
             >
-              <Plus className="w-4 h-4" />
-              New Booking
+              <Trash2 className="w-3 h-3 mr-1" />
+              Delete
             </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create New Booking Page</DialogTitle>
-              <DialogDescription>
-                Create a new schedule template with a custom name
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="template-name">Template Name</Label>
-                <Input
-                  id="template-name"
-                  value={newTemplateName}
-                  onChange={(e) => setNewTemplateName(e.target.value)}
-                  placeholder="e.g., Interview Schedule, Client Meetings"
-                  className="mt-2"
-                />
-              </div>
-              <div>
-                <Label htmlFor="interview-duration">Interview Duration</Label>
-                <Select
-                  onValueChange={(value) => {
-                    setTemplateDuration(parseInt(value));
-                  }}
-                  defaultValue="30"
-                >
-                  <SelectTrigger className="mt-2">
-                    <SelectValue placeholder="Select duration" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="30">Quick Interview (30 min)</SelectItem>
-                    <SelectItem value="45">
-                      Standard Interview (45 min)
-                    </SelectItem>
-                    <SelectItem value="60">Full Interview (60 min)</SelectItem>
-                    <SelectItem value="90">Panel Interview (90 min)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setIsCreateDialogOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button onClick={handleCreateTemplate}>
-                Create Booking Page
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setIsCreateDialogOpen(true)}
+          >
+            <Copy className="w-3 h-3 mr-1" />
+            New Template
+          </Button>
+          <Button onClick={() => setIsAddHoursDialogOpen(true)}>
+            <Plus className="w-4 h-4 mr-1" />
+            Hours
+          </Button>
+        </div>
       </div>
 
-      {/* Template Selection and Management */}
-      <div className="space-y-4">
-        {/* Template Selection */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <Select
-              value={currentTemplate?.id}
-              onValueChange={handleTemplateChange}
-            >
-              <SelectTrigger className="w-80">
-                <SelectValue placeholder="Select a template" />
-              </SelectTrigger>
-              <SelectContent>
-                {templates.map((template) => (
-                  <SelectItem key={template.id} value={template.id}>
-                    <div className="flex items-center gap-2">
-                      <span>{template.templateName}</span>
-                      {template.templateName === "default" && (
-                        <Badge variant="secondary" className="text-xs">
-                          Default
-                        </Badge>
-                      )}
-                      {/* {template.isActive && (
-                        <Badge
-                          variant="secondary"
-                          className="text-xs bg-green-100 text-green-700"
-                        >
-                          Active
-                        </Badge>
-                      )} */}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+      {/* Main layout - side by side Weekly and Date-specific */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Weekly hours - left side */}
+        <div className="p-4">
+          <div className="flex items-center mb-2">
+            <div className="flex items-center gap-2 text-gray-700">
+              <Clock className="w-4 h-4" />
+              <h3 className="font-medium">Weekly hours</h3>
+            </div>
+          </div>
+          <p className="text-sm text-gray-500 mb-4">
+            Set when you are typically available for meetings
+          </p>
 
-            {/* Delete Template Button - Only show for non-default templates */}
-            {currentTemplate && currentTemplate.templateName !== "default" && (
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-xs px-3 py-1 text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
-                onClick={() => {
-                  setTemplateToDelete(currentTemplate);
-                  setIsDeleteDialogOpen(true);
-                }}
-              >
-                <svg
-                  className="w-3 h-3 mr-1"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                  />
-                </svg>
-                Delete
-              </Button>
+          {getWeeklyAvailabilityData()?.daysAvailability.map(
+            (day: DayAvailability) => (
+              <div key={day.day} className="mb-4">
+                <div className="flex items-center mb-1">
+                  <div
+                    className={`w-8 h-8 rounded-full ${
+                      day.isAvailable ? "bg-blue-600" : "bg-gray-400"
+                    } text-white flex items-center justify-center text-sm font-medium mr-2`}
+                  >
+                    {getDayLabel(day.day)}
+                  </div>
+                  <span className="text-sm font-medium">
+                    {getDayFullLabel(day.day)}
+                  </span>
+
+                  <div className="ml-auto flex items-center">
+                    {day.isAvailable ? (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => addTimeSlot(day.day)}
+                        className="h-6 text-xs px-2 text-blue-600"
+                      >
+                        <Plus className="h-3 w-3 mr-1" />
+                        Add
+                      </Button>
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleDayAvailability(day.day, true)}
+                        className="h-6 text-xs px-2 text-blue-600"
+                      >
+                        Set Available
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                {day.isAvailable ? (
+                  day.timeSlots.length > 0 ? (
+                    <div className="ml-10 space-y-2">
+                      {day.timeSlots.map((slot: TimeSlot) => {
+                        const hasSlotOverlap = hasOverlaps(slot, day.timeSlots);
+                        return (
+                          <div key={slot.id} className="relative">
+                            <div
+                              className={`flex items-center gap-2 p-2 border ${
+                                hasSlotOverlap
+                                  ? "border-red-200 bg-red-50"
+                                  : "border-gray-200 bg-gray-50"
+                              } rounded-md`}
+                            >
+                              <div className="flex-1 grid grid-cols-3 gap-2">
+                                {/* Start time dropdown */}
+                                <div className="relative">
+                                  <div
+                                    onClick={() =>
+                                      setIsTimeDropdownOpen({
+                                        dayId: day.day,
+                                        slotId: slot.id,
+                                        type: "start",
+                                      })
+                                    }
+                                    className="border border-gray-200 rounded px-2 py-1 text-sm cursor-pointer flex items-center justify-between bg-white"
+                                  >
+                                    <span>{formatTime(slot.startTime)}</span>
+                                    <svg
+                                      className="h-4 w-4 text-gray-500"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      stroke="currentColor"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M19 9l-7 7-7-7"
+                                      />
+                                    </svg>
+                                  </div>
+
+                                  {isTimeDropdownOpen.dayId === day.day &&
+                                    isTimeDropdownOpen.slotId === slot.id &&
+                                    isTimeDropdownOpen.type === "start" && (
+                                      <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
+                                        <div className="p-1">
+                                          {timeOptions.map((time) => (
+                                            <div
+                                              key={time}
+                                              onClick={() =>
+                                                updateTimeSlot(
+                                                  day.day,
+                                                  slot.id,
+                                                  "startTime",
+                                                  time
+                                                )
+                                              }
+                                              className={`px-2 py-1 text-sm hover:bg-gray-100 cursor-pointer rounded ${
+                                                time === slot.startTime
+                                                  ? "bg-blue-50 text-blue-600"
+                                                  : ""
+                                              }`}
+                                            >
+                                              {formatTime(time)}
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+                                </div>
+
+                                <div className="flex items-center justify-center">
+                                  <span className="text-gray-500">-</span>
+                                </div>
+
+                                {/* End time dropdown */}
+                                <div className="relative">
+                                  <div
+                                    onClick={() =>
+                                      setIsTimeDropdownOpen({
+                                        dayId: day.day,
+                                        slotId: slot.id,
+                                        type: "end",
+                                      })
+                                    }
+                                    className="border border-gray-200 rounded px-2 py-1 text-sm cursor-pointer flex items-center justify-between bg-white"
+                                  >
+                                    <span>{formatTime(slot.endTime)}</span>
+                                    <svg
+                                      className="h-4 w-4 text-gray-500"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      stroke="currentColor"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M19 9l-7 7-7-7"
+                                      />
+                                    </svg>
+                                  </div>
+
+                                  {isTimeDropdownOpen.dayId === day.day &&
+                                    isTimeDropdownOpen.slotId === slot.id &&
+                                    isTimeDropdownOpen.type === "end" && (
+                                      <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
+                                        <div className="p-1">
+                                          {timeOptions.map((time) => (
+                                            <div
+                                              key={time}
+                                              onClick={() =>
+                                                updateTimeSlot(
+                                                  day.day,
+                                                  slot.id,
+                                                  "endTime",
+                                                  time
+                                                )
+                                              }
+                                              className={`px-2 py-1 text-sm hover:bg-gray-100 cursor-pointer rounded ${
+                                                time === slot.endTime
+                                                  ? "bg-blue-50 text-blue-600"
+                                                  : ""
+                                              }`}
+                                            >
+                                              {formatTime(time)}
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+                                </div>
+                              </div>
+
+                              <div className="flex items-center">
+                                <button
+                                  onClick={() =>
+                                    handleDeleteTimeSlot(day.day, slot.id)
+                                  }
+                                  className="text-gray-500 hover:text-red-600 ml-2"
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </button>
+                              </div>
+                            </div>
+
+                            {hasSlotOverlap && (
+                              <div className="text-xs text-red-600 mt-0.5 ml-2 flex items-center">
+                                <AlertCircle className="w-3 h-3 mr-1" />
+                                Overlaps with another time slot
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="ml-10 text-sm text-gray-500">
+                      No time slots defined
+                    </div>
+                  )
+                ) : (
+                  <div className="ml-10 text-sm text-gray-500">Unavailable</div>
+                )}
+              </div>
+            )
+          )}
+        </div>
+
+        {/* Date specific hours - right side */}
+        <div className="p-4">
+          <div className="flex items-center mb-2">
+            <div className="flex items-center gap-2 text-gray-700">
+              <Calendar className="w-4 h-4" />
+              <h3 className="font-medium">Date-specific hours</h3>
+            </div>
+          </div>
+          <p className="text-sm text-gray-500 mb-4">
+            Adjust hours for specific days
+          </p>
+
+          <div className="space-y-4">
+            {getDateSpecificAvailabilityData()?.dates?.map(
+              (date: DateSpecificSettings) => (
+                <div key={date.id} className="mb-4">
+                  <div className="mb-2">
+                    <div className="text-sm font-medium">
+                      {format(date.date, "MMM d, yyyy")}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    {date.timeSlots.map((slot: TimeSlot) => (
+                      <div key={slot.id} className="flex items-center gap-2">
+                        <div className="bg-gray-100 rounded-md px-3 py-1 flex items-center gap-2">
+                          <span className="text-sm">
+                            {formatTime(slot.startTime)} -{" "}
+                            {formatTime(slot.endTime)}
+                          </span>
+                          <button
+                            onClick={() =>
+                              handleDeleteDateSlot(
+                                date.id || date.date.toISOString(),
+                                slot.id
+                              )
+                            }
+                            className="text-gray-500 hover:text-red-600"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            )}
+
+            {(!getDateSpecificAvailabilityData()?.dates ||
+              getDateSpecificAvailabilityData()?.dates.length === 0) && (
+              <div className="text-center py-8">
+                <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-2" />
+                <p className="text-gray-500">No date-specific hours set</p>
+                <p className="text-sm text-gray-400">
+                  Click the + Hours button to add availability for specific
+                  dates
+                </p>
+              </div>
             )}
           </div>
         </div>
-
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 h-9">
-            <TabsTrigger
-              value="overview"
-              className="text-xs data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700"
-            >
-              Overview
-            </TabsTrigger>
-            <TabsTrigger
-              value="weekly"
-              className="text-xs data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700"
-            >
-              Weekly
-            </TabsTrigger>
-            <TabsTrigger
-              value="date-specific"
-              className="text-xs data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700"
-            >
-              Date Specific
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview" className="mt-4 space-y-8">
-            {/* Timezone Section */}
-            <div>
-              <h3 className="text-lg font-bold text-gray-900 mb-1">Timezone</h3>
-              <p className="text-xs text-gray-600 mb-4">
-                Set the timezone for your schedule. All times will be displayed
-                and managed in this timezone.
-              </p>
-              <div className="flex items-center gap-3">
-                <Select
-                  value={currentTimezone}
-                  onValueChange={handleTimezoneChange}
-                >
-                  <SelectTrigger className="w-80">
-                    <SelectValue placeholder="Select timezone" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="America/New_York">
-                      Eastern Time (ET) - America/New_York
-                    </SelectItem>
-                    <SelectItem value="America/Chicago">
-                      Central Time (CT) - America/Chicago
-                    </SelectItem>
-                    <SelectItem value="America/Denver">
-                      Mountain Time (MT) - America/Denver
-                    </SelectItem>
-                    <SelectItem value="America/Los_Angeles">
-                      Pacific Time (PT) - America/Los_Angeles
-                    </SelectItem>
-                    <SelectItem value="Europe/London">
-                      Greenwich Mean Time (GMT) - Europe/London
-                    </SelectItem>
-                    <SelectItem value="Europe/Paris">
-                      Central European Time (CET) - Europe/Paris
-                    </SelectItem>
-                    <SelectItem value="Asia/Dubai">
-                      Gulf Standard Time (GST) - Asia/Dubai
-                    </SelectItem>
-                    <SelectItem value="Asia/Kolkata">
-                      India Standard Time (IST) - Asia/Kolkata
-                    </SelectItem>
-                    <SelectItem value="Asia/Shanghai">
-                      China Standard Time (CST) - Asia/Shanghai
-                    </SelectItem>
-                    <SelectItem value="Asia/Tokyo">
-                      Japan Standard Time (JST) - Asia/Tokyo
-                    </SelectItem>
-                    <SelectItem value="Australia/Sydney">
-                      Australian Eastern Time (AET) - Australia/Sydney
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                <div className="flex items-center gap-2 text-xs text-gray-500">
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  <span>Current: {currentTimezone || "Not set"}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Event Types Section - Removed */}
-
-            {/* Meeting Platform Section */}
-            <div className="mt-4">
-              <h3 className="text-lg font-bold text-gray-900">
-                Select Meeting Platform
-              </h3>
-              <p className="text-xs text-gray-600 mb-4">
-                Choose your preferred video conferencing platform for
-                interviews. Currently, Google Meet is fully integrated and ready
-                to use.
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                {/* Google Meet - Enabled */}
-                <div className="p-3 bg-green-50 border border-green-200 rounded-lg cursor-pointer hover:bg-green-100 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
-                      <svg
-                        className="w-5 h-5 text-white"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-green-900 text-sm">
-                        Google Meet
-                      </h4>
-                      <p className="text-xs text-green-700">Active</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Microsoft Teams - Disabled */}
-                <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg opacity-60">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-gray-400 rounded-lg flex items-center justify-center">
-                      <svg
-                        className="w-5 h-5 text-white"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-gray-700 text-sm">
-                        Microsoft Teams
-                      </h4>
-                      <p className="text-xs text-gray-600">Coming Soon</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Zoom - Disabled */}
-                <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg opacity-60">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-gray-400 rounded-lg flex items-center justify-center">
-                      <svg
-                        className="w-5 h-5 text-white"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-gray-700 text-sm">
-                        Zoom
-                      </h4>
-                      <p className="text-xs text-gray-600">Coming Soon</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Advanced Rules Section */}
-            <div className="mt-4">
-              <h3 className="text-lg font-bold text-gray-900">
-                Advanced Rules
-              </h3>
-              <p className="text-xs text-gray-600 mb-4">
-                Configure email automation rules for your interview scheduling
-                process.
-              </p>
-              <div className="space-y-4">
-                {/* Send Confirmation Emails */}
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div>
-                    <h4 className="font-medium text-gray-900 text-sm">
-                      Send Confirmation Emails
-                    </h4>
-                    <p className="text-xs text-gray-600">
-                      Automatically send confirmation emails when interviews are
-                      scheduled
-                    </p>
-                  </div>
-                  <Switch
-                    checked={sendConfirmationEmails}
-                    onCheckedChange={(checked) =>
-                      handleAdvancedRulesChange(
-                        "sendConfirmationEmail",
-                        checked
-                      )
-                    }
-                  />
-                </div>
-
-                {/* Send Reminder Emails */}
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div>
-                    <h4 className="font-medium text-gray-900 text-sm">
-                      Send Reminder Emails
-                    </h4>
-                    <p className="text-xs text-gray-600">
-                      Automatically send reminder emails before scheduled
-                      interviews
-                    </p>
-                  </div>
-                  <Switch
-                    checked={sendReminderEmails}
-                    onCheckedChange={(checked) =>
-                      handleAdvancedRulesChange("sendReminderEmails", checked)
-                    }
-                  />
-                </div>
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="weekly" className="mt-4">
-            <div className="space-y-3">
-              <h3 className="text-base font-medium text-gray-900">
-                Weekly Availability
-              </h3>
-              <p className="text-xs text-gray-600 mb-3">
-                Set recurring weekly availability patterns
-              </p>
-              {currentTemplate ? (
-                <WeeklyAvailabilityForm
-                  initialData={
-                    currentTemplate.availabilities?.find(
-                      (a) => a.type === "weekly"
-                    ) || {
-                      type: "weekly",
-                      daysAvailability: [
-                        {
-                          id: "monday",
-                          day: "monday",
-                          isAvailable: false,
-                          timeSlots: [],
-                        },
-                        {
-                          id: "tuesday",
-                          day: "tuesday",
-                          isAvailable: false,
-                          timeSlots: [],
-                        },
-                        {
-                          id: "wednesday",
-                          day: "wednesday",
-                          isAvailable: false,
-                          timeSlots: [],
-                        },
-                        {
-                          id: "thursday",
-                          day: "thursday",
-                          isAvailable: false,
-                          timeSlots: [],
-                        },
-                        {
-                          id: "friday",
-                          day: "friday",
-                          isAvailable: false,
-                          timeSlots: [],
-                        },
-                        {
-                          id: "saturday",
-                          day: "saturday",
-                          isAvailable: false,
-                          timeSlots: [],
-                        },
-                        {
-                          id: "sunday",
-                          day: "sunday",
-                          isAvailable: false,
-                          timeSlots: [],
-                        },
-                      ],
-                    }
-                  }
-                  duration={currentTemplate.duration}
-                  onSave={async (data) =>
-                    await handleSaveTemplate(currentTemplate.id, data)
-                  }
-                  onCancel={() => {}}
-                  isLoading={false}
-                />
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  Please select a template to configure weekly availability
-                </div>
-              )}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="date-specific" className="mt-4">
-            <div className="space-y-3">
-              <h3 className="text-base font-medium text-gray-900">
-                Date-Specific Availability
-              </h3>
-              <p className="text-xs text-gray-600 mb-3">
-                Configure availability for specific calendar dates
-              </p>
-              {currentTemplate ? (
-                <DateSpecificForm
-                  initialData={
-                    currentTemplate.availabilities?.find(
-                      (a) => a.type === "date-specific"
-                    ) || {
-                      type: "date-specific",
-                      dates: [],
-                    }
-                  }
-                  onSave={async (data) =>
-                    await handleSaveTemplate(currentTemplate.id, data)
-                  }
-                  isLoading={false}
-                  duration={currentTemplate.duration}
-                />
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  Please select a template to configure date-specific
-                  availability
-                </div>
-              )}
-            </div>
-          </TabsContent>
-        </Tabs>
       </div>
+
+      {/* Add Hours Dialog */}
+      <Dialog
+        open={isAddHoursDialogOpen}
+        onOpenChange={setIsAddHoursDialogOpen}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Date-Specific Hours</DialogTitle>
+            <DialogDescription>
+              Select a date and set available hours for that specific day.
+            </DialogDescription>
+          </DialogHeader>
+
+          {currentTemplate && (
+            <div className="space-y-4 py-4">
+              <div className="flex justify-center pb-4">
+                <CalendarComponent
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={setSelectedDate}
+                  initialFocus
+                  className="rounded-md border"
+                />
+              </div>
+
+              {selectedDate && (
+                <DateSpecificForm
+                  initialData={{
+                    type: "date-specific",
+                    dates: [
+                      {
+                        id: format(selectedDate, "yyyy-MM-dd"),
+                        date: selectedDate,
+                        isAvailable: true,
+                        timeSlots: [],
+                      },
+                    ],
+                  }}
+                  duration={currentTemplate.duration}
+                  onSave={async (data) => {
+                    await handleSaveTemplate(currentTemplate.id, data);
+                    setIsAddHoursDialogOpen(false);
+                    setSelectedDate(undefined);
+                  }}
+                  onCancel={() => {
+                    setIsAddHoursDialogOpen(false);
+                    setSelectedDate(undefined);
+                  }}
+                  isInModal={true}
+                />
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Template Dialog */}
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Booking Page</DialogTitle>
+            <DialogDescription>
+              Create a new schedule template with a custom name
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="template-name">Template Name</Label>
+              <Input
+                id="template-name"
+                value={newTemplateName}
+                onChange={(e) => setNewTemplateName(e.target.value)}
+                placeholder="e.g., Interview Schedule, Client Meetings"
+                className="mt-2"
+              />
+            </div>
+            <div>
+              <Label htmlFor="interview-duration">Interview Duration</Label>
+              <Select
+                onValueChange={(value) => {
+                  setTemplateDuration(parseInt(value));
+                }}
+                defaultValue="30"
+              >
+                <SelectTrigger className="mt-2">
+                  <SelectValue placeholder="Select duration" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="30">Quick Interview (30 min)</SelectItem>
+                  <SelectItem value="45">
+                    Standard Interview (45 min)
+                  </SelectItem>
+                  <SelectItem value="60">Full Interview (60 min)</SelectItem>
+                  <SelectItem value="90">Panel Interview (90 min)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsCreateDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleCreateTemplate}>Create Booking Page</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation Modal */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
@@ -941,19 +1224,7 @@ export function ScheduleTemplates({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                <svg
-                  className="w-5 h-5 text-red-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
-                  />
-                </svg>
+                <Trash2 className="w-5 h-5 text-red-600" />
               </div>
               Delete Template
             </DialogTitle>
@@ -1027,18 +1298,6 @@ export function ScheduleTemplates({
                           (t) => t.templateName === "default"
                         ) || updatedTemplates[0];
                       setCurrentTemplate(defaultTemplate);
-                      setCurrentTimezone(defaultTemplate.timezone);
-                      setSendConfirmationEmails(
-                        defaultTemplate.advancedRules.sendConfirmationEmail
-                      );
-                      setSendReminderEmails(
-                        defaultTemplate.advancedRules.sendReminderEmails
-                      );
-                      if (defaultTemplate.eventTypes.length > 0) {
-                        setSelectedEventTypeId(
-                          defaultTemplate.eventTypes[0].id
-                        );
-                      }
                     }
 
                     // Close modal and reset state
@@ -1065,19 +1324,7 @@ export function ScheduleTemplates({
               }}
               className="flex-1"
             >
-              <svg
-                className="w-4 h-4 mr-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                />
-              </svg>
+              <Trash2 className="w-4 h-4 mr-2" />
               Delete Template
             </Button>
           </DialogFooter>

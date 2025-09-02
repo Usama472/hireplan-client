@@ -80,6 +80,7 @@ interface DateSpecificFormProps {
   onCancel?: () => void;
   isLoading?: boolean;
   duration?: number;
+  isInModal?: boolean;
 }
 
 export function DateSpecificForm({
@@ -88,6 +89,7 @@ export function DateSpecificForm({
   onCancel,
   isLoading = false,
   duration = 60,
+  isInModal = false,
 }: DateSpecificFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
@@ -288,59 +290,50 @@ export function DateSpecificForm({
         <div className="flex gap-2"></div>
       </div>
 
-      <Card className="border border-gray-200">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm">Add New Date</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-3">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-[240px] justify-start text-left font-normal h-8",
-                    !selectedDate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-3 w-3" />
-                  {selectedDate ? formatDate(selectedDate) : "Pick a date"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={setSelectedDate}
-                  initialFocus
-                  disabled={(date) => date < new Date()}
-                />
-              </PopoverContent>
-            </Popover>
-            <Button
-              type="button"
-              onClick={handleAddDate}
-              disabled={!selectedDate}
-              size="sm"
-              className="h-8"
-            >
-              <Plus className="h-3 w-3 mr-1" />
-              Add Date
-            </Button>
-            {/* <Button
-              type='button'
-              variant='outline'
-              onClick={handleLoadTestData}
-              disabled={isSubmitting}
-              size='sm'
-              className='h-8'
-            >
-              <Clock className='h-3 w-3 mr-1' />
-              Load Test Data
-            </Button> */}
-          </div>
-        </CardContent>
-      </Card>
+      {!isInModal && (
+        <Card className="border border-gray-200">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm">Add New Date</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-3">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-[240px] justify-start text-left font-normal h-8",
+                      !selectedDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-3 w-3" />
+                    {selectedDate ? formatDate(selectedDate) : "Pick a date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={setSelectedDate}
+                    initialFocus
+                    disabled={(date) => date < new Date()}
+                  />
+                </PopoverContent>
+              </Popover>
+              <Button
+                type="button"
+                onClick={handleAddDate}
+                disabled={!selectedDate}
+                size="sm"
+                className="h-8"
+              >
+                <Plus className="h-3 w-3 mr-1" />
+                Add Date
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="mt-2 p-2 bg-white border border-blue-200 rounded text-xs text-blue-800">
         <strong>Note:</strong> Time slots will be created with a duration of{" "}
@@ -413,16 +406,18 @@ export function DateSpecificForm({
                       </Button>
                     )}
 
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRemoveDate(dateIndex)}
-                      disabled={isSubmitting}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50 h-7 w-7 p-0"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
+                    {!isInModal && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemoveDate(dateIndex)}
+                        disabled={isSubmitting}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 h-7 w-7 p-0"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    )}
                   </div>
                 </div>
               </CardHeader>
@@ -545,7 +540,7 @@ export function DateSpecificForm({
         })}
       </div>
 
-      {fields.length === 0 && (
+      {!isInModal && fields.length === 0 && (
         <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
           <CalendarIcon className="h-10 w-10 text-gray-400 mx-auto mb-3" />
           <h3 className="text-base font-medium text-gray-900 mb-1">
