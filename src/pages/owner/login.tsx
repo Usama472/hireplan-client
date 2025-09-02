@@ -1,120 +1,116 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ownerAuthService } from '@/http/owner/auth';
-import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
+import { toast } from 'sonner';
+import { Shield, Crown } from 'lucide-react';
 
 const OwnerLogin: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+  });
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setIsLoading(true);
+    setLoading(true);
 
     try {
-      await ownerAuthService.login({ email, password });
-      navigate('/owner/dashboard');
-    } catch (err) {
-      setError('Invalid email or password. Please try again.');
+      const response = await fetch('https://hireplan.co/api/v1/owner/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.status) {
+        localStorage.setItem('ownerToken', data.data.tokens.access.token);
+        toast.success('Owner login successful');
+        navigate('/owner/dashboard');
+      } else {
+        toast.error(data.message || 'Login failed');
+      }
+    } catch (error) {
+      toast.error('Network error occurred');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-xl border-0">
-        <CardHeader className="text-center space-y-2">
-          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center mb-4">
-            <Lock className="w-8 h-8 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-purple-900 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md shadow-2xl border-0 bg-white/10 backdrop-blur-md">
+        <CardHeader className="text-center pb-6">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-yellow-400 to-yellow-600">
+            <Crown className="h-8 w-8 text-white" />
           </div>
-          <CardTitle className="text-2xl font-bold text-gray-900">
-            Owner Access
+          <CardTitle className="text-2xl font-bold text-white">
+            HirePlan Owner Portal
           </CardTitle>
-          <CardDescription className="text-gray-600">
-            Sign in to access the owner dashboard
-          </CardDescription>
+          <p className="text-blue-200">Platform Management Access</p>
         </CardHeader>
         
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-            
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="email" className="text-white">
                 Email Address
               </Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                  required
-                />
-              </div>
+              <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="bg-white/20 border-white/30 text-white placeholder:text-white/60"
+                placeholder="owner@hireplan.co"
+                required
+              />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="password" className="text-white">
                 Password
               </Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 pr-10 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                  required
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="w-4 h-4 text-gray-400" />
-                  ) : (
-                    <Eye className="w-4 h-4 text-gray-400" />
-                  )}
-                </Button>
-              </div>
+              <Input
+                id="password"
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                className="bg-white/20 border-white/30 text-white placeholder:text-white/60"
+                placeholder="••••••••"
+                required
+              />
             </div>
-            
+
             <Button
               type="submit"
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105"
-              disabled={isLoading}
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 shadow-lg"
             >
-              {isLoading ? 'Signing In...' : 'Sign In'}
+              {loading ? (
+                <div className="flex items-center space-x-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <span>Authenticating...</span>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <Shield className="h-4 w-4" />
+                  <span>Access Owner Portal</span>
+                </div>
+              )}
             </Button>
           </form>
-          
+
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-500">
-              This area is restricted to authorized personnel only.
+            <p className="text-xs text-blue-200">
+              🔒 Restricted access for platform owners only
             </p>
           </div>
         </CardContent>

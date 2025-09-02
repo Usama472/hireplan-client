@@ -39,6 +39,10 @@ import ChatsPage from "@/pages/dashboard/chats";
 import ConversationPage from "@/pages/dashboard/chats/conversation";
 import JobTemplatesPage from "@/pages/dashboard/job-templates";
 
+// Owner Portal Pages
+import OwnerLogin from "@/pages/owner/login";
+import OwnerDashboard from "@/pages/owner/dashboard";
+
 export const appRoutes: AppRoutesType[] = [
   {
     id: HOME_TEXT,
@@ -190,5 +194,17 @@ export const appRoutes: AppRoutesType[] = [
     url: ROUTES.DASHBOARD.JOB_TEMPLATES,
     element: <JobTemplatesPage />,
     isPrivate: true,
+  },
+  {
+    id: "owner-login",
+    url: "/owner",
+    element: <OwnerLogin />,
+    isPrivate: false,
+  },
+  {
+    id: "owner-dashboard",
+    url: "/owner/dashboard",
+    element: <OwnerDashboard />,
+    isPrivate: false,
   },
 ];
