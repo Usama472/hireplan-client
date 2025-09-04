@@ -104,7 +104,8 @@ export function SMSOptIn() {
           <Button
             type="submit"
             disabled={!phoneNumber || !agreed || isSubmitting}
-            className="h-14 px-8 bg-primary text-white font-semibold border-0 transition-all duration-200 group z-10"
+            variant="secondary"
+            className="h-14 px-8 font-semibold border-0 transition-all duration-200 group z-10"
           >
             {isSubmitting ? "Joining..." : "Join Now"}
             <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-200" />

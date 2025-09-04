@@ -10,7 +10,7 @@ import API from "@/http";
 import type { JobFormDataWithId } from "@/interfaces";
 import { errorResolver } from "@/lib/utils";
 import { AlertCircle, ArrowLeft, Edit, RefreshCw, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { ReviewPublishStep } from "@/components/dashboard/jobs/common/review-publish-step";
@@ -36,26 +36,30 @@ interface LoadingState {
 
 // Loading skeleton for the review component
 const ReviewSkeleton = () => (
-  <div className="max-w-6xl mx-auto space-y-8">
-    <div className="space-y-4">
-      <Skeleton className="h-8 w-32" />
-      <Skeleton className="h-12 w-96" />
-      <div className="flex gap-4">
-        <Skeleton className="h-6 w-24" />
-        <Skeleton className="h-6 w-32" />
-        <Skeleton className="h-6 w-28" />
+  <div className="max-w-7xl mx-auto px-6 pb-8">
+    <div className="space-y-6">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+        <div className="space-y-4">
+          <Skeleton className="h-6 w-48" />
+          <Skeleton className="h-4 w-96" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-20 w-full" />
+          </div>
+        </div>
       </div>
-    </div>
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      <div className="lg:col-span-2 space-y-6">
-        <Skeleton className="h-64 w-full" />
-        <Skeleton className="h-48 w-full" />
-        <Skeleton className="h-48 w-full" />
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+          <Skeleton className="h-32 w-full" />
+        </div>
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+          <Skeleton className="h-32 w-full" />
+        </div>
       </div>
-      <div className="space-y-6">
-        <Skeleton className="h-32 w-full" />
-        <Skeleton className="h-32 w-full" />
-        <Skeleton className="h-32 w-full" />
+
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+        <Skeleton className="h-48 w-full" />
       </div>
     </div>
   </div>
@@ -67,6 +71,7 @@ export default function JobDetails() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [job, setJob] = useState<JobFormDataWithId | null>(null);
+
   const [loadingState, setLoadingState] = useState<LoadingState>({
     isLoading: true,
     error: null,
@@ -88,59 +93,62 @@ export default function JobDetails() {
     }
   }, [job, form]);
 
-  const fetchJobDetails = async (showRetryIndicator = false) => {
-    if (!id) {
-      setLoadingState({
-        isLoading: false,
-        error: "Job ID is required",
-        isRetrying: false,
-      });
-      return;
-    }
-
-    try {
-      setLoadingState((prev) => ({
-        ...prev,
-        isLoading: true,
-        error: null,
-        isRetrying: showRetryIndicator,
-      }));
-
-      const response: JobDetailsResponse = await API.job.getJobDetails(id);
-
-      if (!response?.job) {
-        throw new Error("Job not found");
+  const fetchJobDetails = useCallback(
+    async (showRetryIndicator = false) => {
+      if (!id) {
+        setLoadingState({
+          isLoading: false,
+          error: "Job ID is required",
+          isRetrying: false,
+        });
+        return;
       }
 
-      const jobData = {
-        ...response.job,
-        startDate: new Date(response.job.startDate),
-        endDate: new Date(response.job.endDate),
-      };
+      try {
+        setLoadingState((prev) => ({
+          ...prev,
+          isLoading: true,
+          error: null,
+          isRetrying: showRetryIndicator,
+        }));
 
-      setJob(jobData);
-      setLoadingState({
-        isLoading: false,
-        error: null,
-        isRetrying: false,
-      });
-    } catch (error) {
-      const errorMessage = errorResolver(error);
-      console.error("Error fetching job details:", error);
+        const response: JobDetailsResponse = await API.job.getJobDetails(id);
 
-      setLoadingState({
-        isLoading: false,
-        error: errorMessage,
-        isRetrying: false,
-      });
+        if (!response?.job) {
+          throw new Error("Job not found");
+        }
 
-      toast.error(`Failed to load job details: ${errorMessage}`);
-    }
-  };
+        const jobData = {
+          ...response.job,
+          startDate: new Date(response.job.startDate),
+          endDate: new Date(response.job.endDate),
+        };
+
+        setJob(jobData);
+        setLoadingState({
+          isLoading: false,
+          error: null,
+          isRetrying: false,
+        });
+      } catch (error) {
+        const errorMessage = errorResolver(error);
+        console.error("Error fetching job details:", error);
+
+        setLoadingState({
+          isLoading: false,
+          error: errorMessage,
+          isRetrying: false,
+        });
+
+        toast.error(`Failed to load job details: ${errorMessage}`);
+      }
+    },
+    [id]
+  );
 
   useEffect(() => {
     fetchJobDetails();
-  }, [id]);
+  }, [fetchJobDetails]);
 
   const handleRetry = () => {
     fetchJobDetails(true);
@@ -172,10 +180,8 @@ export default function JobDetails() {
   // Loading state
   if (loadingState.isLoading && !loadingState.isRetrying) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <ReviewSkeleton />
-        </div>
+      <div className="min-h-screen">
+        <ReviewSkeleton />
       </div>
     );
   }
@@ -184,18 +190,18 @@ export default function JobDetails() {
   if (loadingState.error && !job) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <Button
             variant="ghost"
             onClick={() => navigate("/dashboard/jobs")}
-            className="mb-8 text-gray-600 hover:text-gray-900"
+            className="mb-6 text-gray-600 hover:text-gray-900"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Jobs
           </Button>
 
           <div className="flex items-center justify-center min-h-[400px]">
-            <Card className="w-full max-w-md">
+            <Card className="w-full max-w-md shadow-none">
               <CardContent className="pt-6 text-center">
                 <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
@@ -206,6 +212,7 @@ export default function JobDetails() {
                   <Button
                     onClick={handleRetry}
                     disabled={loadingState.isRetrying}
+                    className="bg-primary hover:bg-primary/90"
                   >
                     {loadingState.isRetrying ? (
                       <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
@@ -232,18 +239,18 @@ export default function JobDetails() {
   if (!job) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <Button
             variant="ghost"
             onClick={() => navigate("/dashboard/jobs")}
-            className="mb-8 text-gray-600 hover:text-gray-900"
+            className="mb-6 text-gray-600 hover:text-gray-900"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Jobs
           </Button>
 
           <div className="flex items-center justify-center min-h-[400px]">
-            <Card className="w-full max-w-md">
+            <Card className="w-full max-w-md shadow-none">
               <CardContent className="pt-6 text-center">
                 <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
@@ -252,7 +259,10 @@ export default function JobDetails() {
                 <p className="text-gray-600 mb-4">
                   The job you're looking for doesn't exist or has been removed.
                 </p>
-                <Button onClick={() => navigate("/dashboard/jobs")}>
+                <Button
+                  onClick={() => navigate("/dashboard/jobs")}
+                  className="bg-primary hover:bg-primary/90"
+                >
                   Back to Jobs
                 </Button>
               </CardContent>
@@ -265,81 +275,74 @@ export default function JobDetails() {
 
   return (
     <TooltipProvider>
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Retry indicator */}
-          {loadingState.isRetrying && (
-            <Alert className="mb-6 border-blue-200 bg-blue-50">
-              <RefreshCw className="h-4 w-4 animate-spin text-blue-600" />
-              <AlertDescription className="text-blue-800">
-                Refreshing job details...
-              </AlertDescription>
-            </Alert>
-          )}
+      <div className="min-h-screen">
+        {/* Retry indicator */}
+        {loadingState.isRetrying && (
+          <Alert className="mb-4 border-blue-200 bg-blue-50 rounded-lg">
+            <RefreshCw className="h-4 w-4 animate-spin text-blue-600" />
+            <AlertDescription className="text-blue-800">
+              Refreshing job details...
+            </AlertDescription>
+          </Alert>
+        )}
 
-          {/* Compact Header */}
-          <div className="bg-white rounded-lg border border-gray-200 shadow-sm mb-6">
-            <div className="px-4 py-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <Button
-                    variant="ghost"
-                    onClick={() => navigate("/dashboard/jobs")}
-                    className="text-gray-600 hover:text-gray-900 hover:bg-gray-50 px-2 py-1 rounded-md transition-all duration-200"
-                  >
-                    <ArrowLeft className="w-4 h-4 mr-1" />
-                    <span className="text-sm font-medium">Back</span>
-                  </Button>
-
-                  <div className="h-4 w-px bg-gray-300" />
-
-                  <div>
-                    <h1 className="text-lg font-semibold text-gray-900">
-                      Job Review
-                    </h1>
-                    <p className="text-xs text-gray-500">
-                      Review and manage job details
-                    </p>
-                  </div>
+        {/* Professional Header */}
+        <div className="bg-white border-b border-gray-200 px-6 py-3 relative overflow-hidden mb-6">
+          <div className="relative z-10">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200">
+                  <Edit className="h-4 w-4 text-gray-600" />
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        size="sm"
-                        onClick={handleEdit}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-md transition-all duration-200 text-sm"
-                      >
-                        <Edit className="w-3.5 h-3.5" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Edit job posting</p>
-                    </TooltipContent>
-                  </Tooltip>
-
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setShowDeleteModal(true)}
-                        className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 px-3 py-1.5 rounded-md transition-all duration-200 text-sm"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Delete job posting</p>
-                    </TooltipContent>
-                  </Tooltip>
+                <div className="flex flex-col">
+                  <h1 className="text-lg font-semibold text-gray-900 leading-tight">
+                    {job.jobTitle || "Job Review"}
+                  </h1>
+                  <span className="text-xs text-gray-600 mt-0.5">
+                    Review and manage job details
+                  </span>
                 </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      onClick={handleEdit}
+                      className="bg-white hover:bg-gray-50 text-gray-600 border border-gray-200 hover:border-gray-300 gap-2 px-4 py-2 font-medium transition-all duration-200 text-sm"
+                    >
+                      <Edit className="w-4 h-4" />
+                      Edit Job
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Edit job posting</p>
+                  </TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowDeleteModal(true)}
+                      className="bg-red-50 text-red-600 border border-red-200 hover:border-red-300 gap-2 px-4 py-2 font-medium transition-all duration-200 text-sm"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Delete
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Delete job posting</p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Review Component with Card Wrapper */}
+        {/* Main Content */}
+        <div className="max-w-7xl mx-auto px-6 pb-8">
           <FormProvider {...form}>
             <ReviewPublishStep
               mode="review"
@@ -353,18 +356,17 @@ export default function JobDetails() {
               }}
             />
           </FormProvider>
-
-          {/* Delete Modal */}
-          {job && (
-            <DeleteJobModal
-              job={job}
-              isOpen={showDeleteModal}
-              onClose={() => setShowDeleteModal(false)}
-              onConfirm={handleDelete}
-              isDeleting={isDeleting}
-            />
-          )}
         </div>
+
+        {job && (
+          <DeleteJobModal
+            job={job}
+            isOpen={showDeleteModal}
+            onClose={() => setShowDeleteModal(false)}
+            onConfirm={handleDelete}
+            isDeleting={isDeleting}
+          />
+        )}
       </div>
     </TooltipProvider>
   );

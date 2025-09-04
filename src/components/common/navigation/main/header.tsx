@@ -76,7 +76,7 @@ export function Header() {
             {status === "authenticated" ? (
               <>
                 <Button
-                  className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-md transition-all duration-300 text-white"
+                  variant="secondary"
                   onClick={() => navigate(ROUTES.DASHBOARD.MAIN)}
                 >
                   Dashboard

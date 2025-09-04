@@ -73,11 +73,8 @@ export default function Home() {
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.1 }}
-        className="w-full py-20 bg-gradient-to-r from-primary to-secondary relative overflow-hidden"
+        className="w-full py-20 bg-primary relative overflow-hidden"
       >
-        {/* Background Elements */}
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-primary/90 to-secondary/90"></div>
-
         {/* Floating Elements */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}

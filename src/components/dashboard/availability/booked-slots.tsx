@@ -1,12 +1,5 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -151,71 +144,67 @@ export function BookedSlots({ className }: BookedSlotsProps) {
 
   if (loading) {
     return (
-      <Card className={className}>
-        <CardHeader>
-          <CardTitle className="text-lg font-medium flex items-center gap-2">
+      <div className={className}>
+        <div className="mb-6">
+          <h3 className="text-lg font-medium flex items-center gap-2 mb-2">
             <CalendarCheck className="h-5 w-5" />
             Booked Interviews
-          </CardTitle>
-          <CardDescription>
+          </h3>
+          <p className="text-gray-600 text-sm">
             Manage your upcoming interviews and appointments.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="bg-gray-50 rounded-md p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <Skeleton className="h-5 w-32" />
-                  <Skeleton className="h-6 w-24" />
-                </div>
-                <Skeleton className="h-4 w-48 mb-3" />
-                <Separator className="my-2" />
-                <div className="flex items-center gap-4">
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="h-4 w-32" />
-                </div>
+          </p>
+        </div>
+        <div className="space-y-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="bg-gray-50 rounded-md p-4">
+              <div className="flex items-center justify-between mb-2">
+                <Skeleton className="h-5 w-32" />
+                <Skeleton className="h-6 w-24" />
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              <Skeleton className="h-4 w-48 mb-3" />
+              <Separator className="my-2" />
+              <div className="flex items-center gap-4">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-32" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <Card className={className}>
-        <CardHeader>
-          <CardTitle className="text-lg font-medium flex items-center gap-2">
+      <div className={className}>
+        <div className="mb-6">
+          <h3 className="text-lg font-medium flex items-center gap-2 mb-2">
             <CalendarCheck className="h-5 w-5" />
             Booked Interviews
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8">
-            <CalendarCheck className="h-12 w-12 text-red-300 mx-auto mb-2" />
-            <p className="text-red-500 mb-4">{error}</p>
-            <Button
-              onClick={() => fetchInterviews(currentPage)}
-              variant="outline"
-            >
-              Try Again
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+          </h3>
+        </div>
+        <div className="text-center py-8">
+          <CalendarCheck className="h-12 w-12 text-red-300 mx-auto mb-2" />
+          <p className="text-red-500 mb-4">{error}</p>
+          <Button
+            onClick={() => fetchInterviews(currentPage)}
+            variant="outline"
+          >
+            Try Again
+          </Button>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Card className={className}>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-medium flex items-center gap-2">
+    <div className={className}>
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-lg font-medium flex items-center gap-2">
             <CalendarCheck className="h-5 w-5" />
             Booked Interviews
-          </CardTitle>
+          </h3>
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
@@ -238,12 +227,12 @@ export function BookedSlots({ className }: BookedSlotsProps) {
             </Button>
           </div>
         </div>
-        <CardDescription>
+        <p className="text-gray-600 text-sm">
           {totalResults} total interviews • Manage your upcoming interviews and
           appointments.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+        </p>
+      </div>
+      <div>
         <ScrollArea className="h-[400px] pr-4">
           {interviews.length > 0 ? (
             <div className="space-y-4">
@@ -356,7 +345,7 @@ export function BookedSlots({ className }: BookedSlotsProps) {
             </div>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

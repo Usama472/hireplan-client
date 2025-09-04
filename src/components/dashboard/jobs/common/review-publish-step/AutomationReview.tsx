@@ -1,16 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import {
-  Zap,
-  Target,
-  Settings,
-  Brain,
-  TrendingUp,
-  AlertTriangle,
-  MessageSquare,
-  Info,
-} from "lucide-react";
 import type { JobFormData } from "@/interfaces";
 
 interface AutomationReviewProps {
@@ -49,383 +36,395 @@ export function AutomationReview({ formData }: AutomationReviewProps) {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Automation Overview */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Zap className="h-5 w-5" />
-            Automation Overview
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-600">
-                Enabled Rules
-              </label>
-              <div className="p-3 bg-gray-50 rounded-lg">
-                <p className="text-sm text-gray-900">
-                  {automation?.enabledRules?.length || 0} rules enabled
-                </p>
-              </div>
-            </div>
+    <div className="space-y-8">
+      {/* Section Header */}
+      <div className="space-y-2">
+        <h2 className="text-2xl font-bold text-gray-900">AI Automation</h2>
+        <p className="text-gray-600">
+          Review automation settings, scoring thresholds, and AI ranking
+          configuration.
+        </p>
+      </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-600">
-                Template
-              </label>
-              <div className="p-3 bg-gray-50 rounded-lg">
-                <p className="text-sm text-gray-900">
-                  {automation?.templateId || "Default template"}
-                </p>
-              </div>
+      {/* Automation Overview */}
+      <div className="space-y-6">
+        <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+          Automation Overview
+        </h3>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+              Enabled Rules
+            </h4>
+            <div className="text-gray-700 text-sm font-medium">
+              {automation?.enabledRules?.length || 0} rules enabled
             </div>
           </div>
-        </CardContent>
-      </Card>
+
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+              Template
+            </h4>
+            <div className="text-gray-700 text-sm font-medium">
+              {automation?.templateId || "Default template"}
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Scoring Thresholds */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Target className="h-5 w-5" />
-            Scoring Thresholds
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-600">
-                Acceptance Threshold
-              </label>
-              <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                <p className="text-sm text-green-800 font-medium">
-                  {formatThreshold(automation?.acceptanceThreshold || 76)}
-                </p>
-                <p className="text-xs text-green-600 mt-1">
-                  Candidates above this score are auto-accepted
-                </p>
-              </div>
-            </div>
+      <div className="space-y-6">
+        <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+          Scoring Thresholds
+        </h3>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-600">
-                Manual Review Threshold
-              </label>
-              <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <p className="text-sm text-yellow-800 font-medium">
-                  {formatThreshold(automation?.manualReviewThreshold || 41)}
-                </p>
-                <p className="text-xs text-yellow-600 mt-1">
-                  Candidates in this range need manual review
-                </p>
-              </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+              Acceptance Threshold
+            </h4>
+            <div className="text-gray-700 text-sm font-medium">
+              {formatThreshold(automation?.acceptanceThreshold || 76)}
             </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-600">
-                Auto Reject Threshold
-              </label>
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-sm text-red-800 font-medium">
-                  {formatThreshold(automation?.autoRejectThreshold || 40)}
-                </p>
-                <p className="text-xs text-red-600 mt-1">
-                  Candidates below this score are auto-rejected
-                </p>
-              </div>
+            <div className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 border border-green-200 rounded-full">
+              <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+              <span className="text-xs font-medium text-green-700">
+                Auto-accept above this score
+              </span>
             </div>
           </div>
 
-          {/* Threshold Validation */}
-          {automation && (
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-600">
-                Threshold Flow
-              </label>
-              <div className="p-3 bg-gray-50 rounded-lg">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-red-600">Auto Reject</span>
-                  <span className="text-yellow-600">Manual Review</span>
-                  <span className="text-green-600">Auto Accept</span>
-                </div>
-                <Progress
-                  value={100}
-                  className="h-2 mt-2"
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+              Manual Review Threshold
+            </h4>
+            <div className="text-gray-700 text-sm font-medium">
+              {formatThreshold(automation?.manualReviewThreshold || 41)}
+            </div>
+            <div className="inline-flex items-center gap-1 px-2 py-1 bg-amber-50 border border-amber-200 rounded-full">
+              <div className="w-1.5 h-1.5 bg-amber-500 rounded-full"></div>
+              <span className="text-xs font-medium text-amber-700">
+                Manual review required
+              </span>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+              Auto Reject Threshold
+            </h4>
+            <div className="text-gray-700 text-sm font-medium">
+              {formatThreshold(automation?.autoRejectThreshold || 40)}
+            </div>
+            <div className="inline-flex items-center gap-1 px-2 py-1 bg-red-50 border border-red-200 rounded-full">
+              <div className="w-1.5 h-1.5 bg-red-500 rounded-full"></div>
+              <span className="text-xs font-medium text-red-700">
+                Auto-reject below this score
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Threshold Flow Visualization */}
+        {automation && (
+          <div className="space-y-3">
+            <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+              Threshold Flow
+            </h4>
+            <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+              <div className="flex items-center justify-between text-sm mb-2">
+                <span className="text-red-600 font-medium">Auto Reject</span>
+                <span className="text-amber-600 font-medium">
+                  Manual Review
+                </span>
+                <span className="text-green-600 font-medium">Auto Accept</span>
+              </div>
+              <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  className="h-full"
                   style={{
                     background: `linear-gradient(to right, #ef4444 0%, #ef4444 ${automation.autoRejectThreshold}%, #eab308 ${automation.autoRejectThreshold}%, #eab308 ${automation.manualReviewThreshold}%, #22c55e ${automation.manualReviewThreshold}%, #22c55e 100%)`,
                   }}
                 />
-                <div className="flex justify-between text-xs text-gray-500 mt-1">
-                  <span>0%</span>
-                  <span>{formatThreshold(automation.autoRejectThreshold)}</span>
-                  <span>
-                    {formatThreshold(automation.manualReviewThreshold)}
-                  </span>
-                  <span>{formatThreshold(automation.acceptanceThreshold)}</span>
-                  <span>100%</span>
-                </div>
+              </div>
+              <div className="flex justify-between text-xs text-gray-500 mt-2">
+                <span>0%</span>
+                <span>{formatThreshold(automation.autoRejectThreshold)}</span>
+                <span>{formatThreshold(automation.manualReviewThreshold)}</span>
+                <span>{formatThreshold(automation.acceptanceThreshold)}</span>
+                <span>100%</span>
               </div>
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </div>
+        )}
+      </div>
 
       {/* Scoring Weights */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Brain className="h-5 w-5" />
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
             Scoring Weights
-            <Badge
-              variant={
-                getScoringWeightsTotal() === 100 ? "default" : "destructive"
-              }
+          </h3>
+          <div
+            className={`inline-flex items-center gap-1 px-2 py-1 rounded-full ${
+              getScoringWeightsTotal() === 100
+                ? "bg-emerald-50 border border-emerald-200"
+                : "bg-red-50 border border-red-200"
+            }`}
+          >
+            <div
+              className={`w-1.5 h-1.5 rounded-full ${
+                getScoringWeightsTotal() === 100
+                  ? "bg-emerald-500"
+                  : "bg-red-500"
+              }`}
+            ></div>
+            <span
+              className={`text-xs font-medium ${
+                getScoringWeightsTotal() === 100
+                  ? "text-emerald-700"
+                  : "text-red-700"
+              }`}
             >
               {getScoringWeightsTotal()}%
-            </Badge>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {automation?.scoringWeights && (
-            <div className="space-y-3">
-              {Object.entries(automation.scoringWeights).map(
-                ([key, weight]) => (
-                  <div key={key} className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <label className="text-sm font-medium text-gray-600 capitalize">
-                        {key.replace(/([A-Z])/g, " $1").trim()}
-                      </label>
-                      <span className="text-sm text-gray-900">{weight}%</span>
-                    </div>
-                    <Progress value={weight} className="h-2" />
-                  </div>
-                )
-              )}
-            </div>
-          )}
+            </span>
+          </div>
+        </div>
 
-          {getScoringWeightsTotal() !== 100 && (
-            <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <p className="text-sm text-yellow-800 font-medium">
-                Scoring weights total {getScoringWeightsTotal()}%
-              </p>
-              <p className="text-xs text-yellow-600 mt-1">
-                Total should equal 100% for optimal scoring
-              </p>
+        {automation?.scoringWeights && (
+          <div className="space-y-4">
+            {Object.entries(automation.scoringWeights).map(([key, weight]) => (
+              <div key={key} className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide capitalize">
+                    {key.replace(/([A-Z])/g, " $1").trim()}
+                  </h4>
+                  <span className="text-gray-700 text-sm font-medium">
+                    {weight}%
+                  </span>
+                </div>
+                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-blue-500 transition-all duration-300"
+                    style={{ width: `${weight}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {getScoringWeightsTotal() !== 100 && (
+          <div className="flex justify-end">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-full shadow-sm">
+              <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+              <span className="text-sm font-medium text-amber-800">
+                Scoring weights total {getScoringWeightsTotal()}% - Should equal
+                100% for optimal scoring
+              </span>
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </div>
+        )}
+      </div>
 
       {/* AI Ranking Categories */}
       {automation?.aiRankingCategories &&
         automation.aiRankingCategories.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5" />
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
                 AI Ranking Categories
-                <Badge
-                  variant={
+              </h3>
+              <div
+                className={`inline-flex items-center gap-1 px-2 py-1 rounded-full ${
+                  getCategoryWeightsTotal() === 100
+                    ? "bg-emerald-50 border border-emerald-200"
+                    : "bg-red-50 border border-red-200"
+                }`}
+              >
+                <div
+                  className={`w-1.5 h-1.5 rounded-full ${
                     getCategoryWeightsTotal() === 100
-                      ? "default"
-                      : "destructive"
-                  }
+                      ? "bg-emerald-500"
+                      : "bg-red-500"
+                  }`}
+                ></div>
+                <span
+                  className={`text-xs font-medium ${
+                    getCategoryWeightsTotal() === 100
+                      ? "text-emerald-700"
+                      : "text-red-700"
+                  }`}
                 >
                   {getCategoryWeightsTotal()}%
-                </Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {automation.aiRankingCategories.map((category, index) => (
-                  <div key={index} className="p-4 bg-gray-50 rounded-lg border">
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-900">
-                          {category.name}
-                        </h4>
-                        <p className="text-xs text-gray-500 mt-1">
-                          Weight: {category.weight || 0}%
-                        </p>
-                      </div>
-                      <Badge variant="outline">{category.weight || 0}%</Badge>
-                    </div>
-
-                    <div className="space-y-2">
-                      <p className="text-xs text-gray-600">Data Sources:</p>
-                      <p className="text-sm text-gray-900">
-                        {formatDataSource(category.dataSource)}
-                      </p>
-                    </div>
-
-                    {category.customQuestions &&
-                      category.customQuestions.length > 0 && (
-                        <div className="mt-3">
-                          <p className="text-xs text-gray-600 mb-2">
-                            Custom Questions:
-                          </p>
-                          <div className="space-y-1">
-                            {category.customQuestions.map(
-                              (question, qIndex) => (
-                                <div
-                                  key={qIndex}
-                                  className="text-xs text-gray-700 bg-white px-2 py-1 rounded"
-                                >
-                                  {question}
-                                </div>
-                              )
-                            )}
-                          </div>
-                        </div>
-                      )}
-                  </div>
-                ))}
+                </span>
               </div>
+            </div>
 
-              {getCategoryWeightsTotal() !== 100 && (
-                <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg mt-4">
-                  <p className="text-sm text-yellow-800 font-medium">
-                    Category weights total {getCategoryWeightsTotal()}%
-                  </p>
-                  <p className="text-xs text-yellow-600 mt-1">
-                    Total should equal 100% for optimal ranking
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
-
-      {/* Custom Rules */}
-      {automation?.customRules && automation.customRules.length > 0 && (
-        <Card className="border-gray-200 shadow-sm">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-2">
-              <Settings className="h-5 w-5 text-blue-600" />
-              Custom Rules
-              <Badge
-                variant="secondary"
-                className="ml-2 bg-blue-100 text-blue-700 border-blue-200"
-              >
-                {automation.customRules.length}
-              </Badge>
-            </CardTitle>
-            <p className="text-sm text-gray-500">
-              Automated actions based on candidate scores and conditions
-            </p>
-          </CardHeader>
-          <CardContent>
             <div className="space-y-4">
-              {automation.customRules.map((rule, index) => (
+              {automation.aiRankingCategories.map((category, index) => (
                 <div
                   key={index}
-                  className="relative p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 hover:shadow-sm transition-all duration-200"
+                  className="p-4 bg-gray-50 border border-gray-200 rounded-lg"
                 >
-                  {/* Rule Number Badge */}
-                  <div className="absolute -top-2 -left-2 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold">
-                    {index + 1}
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h4 className="text-gray-700 text-sm font-medium">
+                        {category.name}
+                      </h4>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Weight: {category.weight || 0}%
+                      </p>
+                    </div>
+                    <div className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 border border-blue-200 rounded-full">
+                      <span className="text-xs font-medium text-blue-700">
+                        {category.weight || 0}%
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="space-y-4">
-                    {/* Condition Section */}
-                    <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <Target className="h-4 w-4 text-blue-600" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-semibold text-gray-900 mb-1">
-                          Condition
-                        </p>
-                        <p className="text-sm text-gray-700 bg-white px-3 py-2 rounded-md border border-gray-200">
-                          {rule.condition}
-                        </p>
-                      </div>
-                    </div>
+                  <div className="space-y-2">
+                    <h5 className="text-xs text-gray-500 uppercase tracking-wide">
+                      Data Sources:
+                    </h5>
+                    <p className="text-gray-700 text-sm font-medium">
+                      {formatDataSource(category.dataSource)}
+                    </p>
+                  </div>
 
-                    {/* Action Section */}
-                    <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <Zap className="h-4 w-4 text-green-600" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-semibold text-gray-900 mb-1">
-                          Action
-                        </p>
-                        <div className="flex items-center gap-2">
-                          <Badge
-                            variant="outline"
-                            className="bg-green-50 border-green-200 text-green-700"
-                          >
-                            {rule.action}
-                          </Badge>
+                  {category.customQuestions &&
+                    category.customQuestions.length > 0 && (
+                      <div className="mt-3">
+                        <h5 className="text-xs text-gray-500 uppercase tracking-wide mb-2">
+                          Custom Questions:
+                        </h5>
+                        <div className="space-y-1">
+                          {category.customQuestions.map((question, qIndex) => (
+                            <div
+                              key={qIndex}
+                              className="text-xs text-gray-600 bg-white px-3 py-2 rounded border border-gray-200"
+                            >
+                              {question}
+                            </div>
+                          ))}
                         </div>
                       </div>
-                    </div>
-
-                    {/* Template Section */}
-                    <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <MessageSquare className="h-4 w-4 text-purple-600" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-semibold text-gray-900 mb-1">
-                          Email Template
-                        </p>
-                        <p className="text-sm text-gray-700 bg-white px-3 py-2 rounded-md border border-gray-200">
-                          {rule.template}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                    )}
                 </div>
               ))}
             </div>
 
-            {/* Summary Stats */}
-            <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Info className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm font-medium text-gray-700">
-                    Automation Summary
+            {getCategoryWeightsTotal() !== 100 && (
+              <div className="flex justify-end">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-full shadow-sm">
+                  <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                  <span className="text-sm font-medium text-amber-800">
+                    Category weights total {getCategoryWeightsTotal()}% - Should
+                    equal 100% for optimal ranking
                   </span>
-                </div>
-                <div className="flex items-center gap-4 text-xs text-gray-600">
-                  <span>
-                    • {automation.customRules.length} rules configured
-                  </span>
-                  <span>• Automated workflow enabled</span>
                 </div>
               </div>
+            )}
+          </div>
+        )}
+
+      {/* Custom Rules */}
+      {automation?.customRules && automation.customRules.length > 0 && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+              Custom Rules
+            </h3>
+            <div className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 border border-blue-200 rounded-full">
+              <span className="text-xs font-medium text-blue-700">
+                {automation.customRules.length}
+              </span>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+
+          <div className="space-y-4">
+            {automation.customRules.map((rule, index) => (
+              <div
+                key={index}
+                className="relative p-4 bg-gray-50 border border-gray-200 rounded-lg"
+              >
+                {/* Rule Number Badge */}
+                <div className="absolute -top-2 -left-2 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                  {index + 1}
+                </div>
+
+                <div className="space-y-4">
+                  {/* Condition Section */}
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+                      Condition
+                    </h4>
+                    <div className="p-3 bg-white border border-gray-200 rounded-lg">
+                      <p className="text-gray-700 text-sm font-medium">
+                        {rule.condition}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Action Section */}
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+                      Action
+                    </h4>
+                    <div className="inline-flex items-center gap-1 px-3 py-1 bg-green-50 border border-green-200 rounded-full">
+                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                      <span className="text-xs font-medium text-green-700">
+                        {rule.action}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Template Section */}
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+                      Email Template
+                    </h4>
+                    <div className="p-3 bg-white border border-gray-200 rounded-lg">
+                      <p className="text-gray-700 text-sm font-medium">
+                        {rule.template}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Summary Stats */}
+          <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                <span className="text-sm font-medium text-gray-700">
+                  Automation Summary
+                </span>
+              </div>
+              <div className="flex items-center gap-4 text-xs text-gray-600">
+                <span>• {automation.customRules.length} rules configured</span>
+                <span>• Automated workflow enabled</span>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Automation Recommendations */}
       {(!automation || Object.keys(automation).length === 0) && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-yellow-600" />
-              Automation Setup
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <p className="text-sm text-yellow-800 font-medium">
-                No automation configured
-              </p>
-              <p className="text-xs text-yellow-600 mt-1">
-                Consider setting up AI automation to streamline your hiring
-                process and improve candidate screening.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex justify-end">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-full shadow-sm">
+            <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+            <span className="text-sm font-medium text-amber-800">
+              No automation configured - Consider setting up AI automation to
+              streamline your hiring process
+            </span>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -163,7 +163,7 @@ export function PricingSection() {
               <Card
                 className={`relative transition-all shadow-none duration-300 group h-full flex flex-col cursor-pointer ${
                   plan.popular
-                    ? "border-2 border-primary bg-white"
+                    ? "border-2 border-secondary bg-white"
                     : "border border-gray-100 bg-white"
                 }`}
               >
@@ -175,7 +175,7 @@ export function PricingSection() {
                     transition={{ duration: 0.5, delay: 0.3 }}
                     className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10"
                   >
-                    <span className="bg-gradient-to-r from-primary to-secondary text-white px-6 py-2.5 rounded-full text-sm font-semibold border border-white/20">
+                    <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white px-6 py-2.5 rounded-full text-sm font-semibold border border-white/20">
                       <Star className="inline h-4 w-4 mr-2 fill-current" />
                       Most Popular
                     </span>
@@ -228,9 +228,10 @@ export function PricingSection() {
                       transition={{ duration: 0.2, ease: "easeOut" }}
                     >
                       <Button
+                        variant="secondary"
                         className={`w-full py-3 text-sm font-semibold transition-all duration-200 rounded-xl h-12 ${
                           plan.popular
-                            ? "bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white"
+                            ? " text-white"
                             : "bg-gray-900 hover:bg-gray-800 text-white"
                         }`}
                         onClick={() =>
@@ -308,8 +309,7 @@ export function PricingSection() {
                 transition={{ duration: 0.2, ease: "easeOut" }}
               >
                 <Button
-                  size="lg"
-                  className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white px-8 py-4 h-12 rounded-xl font-semibold transition-all duration-300"
+                  variant="secondary"
                   onClick={() => navigate("/contact")}
                 >
                   Contact Sales

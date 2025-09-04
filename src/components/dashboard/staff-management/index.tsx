@@ -293,18 +293,18 @@ export default function StaffManagement() {
   return (
     <div className="min-h-full px-6 py-0">
       <div className="space-y-6">
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100 -mx-6 px-6 py-4 relative overflow-hidden max-h-[80px] mt-0">
+        <div className="bg-white border-b border-gray-200 -mx-6 px-6 py-4 relative overflow-hidden max-h-[80px] mt-0">
           <div className="flex flex-col">
-            <h1 className="text-2xl font-semibold text-black mb-1">
+            <h1 className="text-xl font-semibold text-gray-900 mb-1">
               Staff Management
             </h1>
-            <p className="text-black text-sm">
+            <p className="text-gray-600 text-sm">
               Manage your staff members and role permissions
             </p>
           </div>
         </div>
 
-        <div className="px-1">
+        <div className="px-1 max-w-7xl mx-auto">
           {/* Tabs */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-4">

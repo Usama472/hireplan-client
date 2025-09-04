@@ -1,52 +1,46 @@
-'use client'
+"use client";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import { CreditCard } from 'lucide-react'
-import { PlanSelection } from './plan-selection'
-import { SubscriptionManager } from '../subscription/subscription-manager'
-import useAuthSessionContext from '@/lib/context/AuthSessionContext'
+import { CreditCard } from "lucide-react";
+import { PlanSelection } from "./plan-selection";
+import { SubscriptionManager } from "../subscription/subscription-manager";
+import useAuthSessionContext from "@/lib/context/AuthSessionContext";
 
 export function AccountSettingsForm() {
-  const { data: session } = useAuthSessionContext()
-  
-  console.log('🔍 AccountSettingsForm - session:', session);
-  console.log('🔍 AccountSettingsForm - user ID check:', {
+  const { data: session } = useAuthSessionContext();
+
+  console.log("🔍 AccountSettingsForm - session:", session);
+  console.log("🔍 AccountSettingsForm - user ID check:", {
     hasUser: !!session?.user,
     hasId: !!session?.user?.id,
     has_id: !!session?.user?._id,
-    userId: session?.user?.id || session?.user?._id
+    userId: session?.user?.id || session?.user?._id,
   });
-  
+
   const userId = session?.user?.id || session?.user?._id;
-  
+
   return (
-    <div className='space-y-8'>
-      <Card className='border-0 shadow-lg shadow-gray-100/50'>
-        <CardHeader className='pb-6'>
-          <CardTitle className='flex items-center gap-2 text-xl'>
-            <div className='p-2 bg-blue-50 rounded-lg'>
-              <CreditCard className='h-5 w-5 text-blue-600' />
-            </div>
-            Subscription & Billing
-          </CardTitle>
-          <CardDescription className='text-base'>
-            Manage your subscription, billing, and payment methods
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {userId ? (
-            <SubscriptionManager userId={userId} />
-          ) : (
-            <PlanSelection />
-          )}
-        </CardContent>
-      </Card>
+    <div className="space-y-8">
+      {/* Professional Header Section */}
+      <div className="border-b border-gray-200 pb-6">
+        <div className="flex items-center gap-4 mb-3">
+          <div className="p-3 bg-gray-100 rounded-xl">
+            <CreditCard className="h-6 w-6 text-gray-600" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">
+              Subscription & Billing
+            </h2>
+            <p className="text-gray-600 mt-1">
+              Manage your subscription, billing, and payment methods
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Content Section */}
+      <div className="space-y-6">
+        {userId ? <SubscriptionManager userId={userId} /> : <PlanSelection />}
+      </div>
     </div>
-  )
+  );
 }

@@ -123,20 +123,22 @@ export default function JobsPage() {
     <div className="min-h-full">
       <div className="space-y-6">
         {/* Enhanced Header - Matching Navbar Style */}
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100 px-6 py-4 relative overflow-hidden max-h-[80px]">
+        <div className="bg-white border-b border-gray-200 px-6 py-4 relative overflow-hidden max-h-[80px]">
           <div className="relative z-10">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-blue-100 rounded-xl">
-                  <Briefcase className="h-6 w-6 text-blue-600" />
+                <div className="p-3 bg-gray-100 rounded-xl">
+                  <Briefcase className="h-6 w-6 text-gray-600" />
                 </div>
                 <div className="flex flex-col">
-                  <h1 className="text-2xl font-bold text-black">Job Postings</h1>
-                  <p className="text-black flex items-center gap-2">
+                  <h1 className="text-2xl font-bold text-gray-900">
+                    Job Postings
+                  </h1>
+                  <p className="text-gray-600 flex items-center gap-2">
                     Manage and track your job postings and applications
                     <Badge
                       variant="secondary"
-                      className="bg-blue-100 text-blue-700 text-xs"
+                      className="bg-gray-100 text-gray-700 text-xs"
                     >
                       {jobs.length} active
                     </Badge>
@@ -147,14 +149,14 @@ export default function JobsPage() {
                 <Button
                   onClick={() => navigate(`/company/${company?.slug}`)}
                   variant="outline"
-                  className="bg-white hover:bg-blue-50 text-blue-600 border border-blue-200 hover:border-blue-300 gap-2 px-5 font-medium transition-all duration-200 text-sm shadow-sm"
+                  className="bg-white hover:bg-gray-50 text-gray-600 border border-gray-200 hover:border-gray-300 gap-2 px-5 font-medium transition-all duration-200 text-sm shadow-sm"
                 >
                   Website View
                 </Button>
                 {canCreateJob && (
                   <Button
                     onClick={() => navigate(ROUTES.DASHBOARD.CREATE_JOB)}
-                    className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200 gap-2"
+                    className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white border-0 transition-all duration-200 gap-2"
                   >
                     <Plus className="w-4 h-4" />
                     Create Job

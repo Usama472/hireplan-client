@@ -32,13 +32,16 @@ interface ProfileTabsProps {
   activeTab: string;
   onTabChange: (tabId: string) => void;
   children: React.ReactNode;
+  tabs?: Tab[];
 }
 
 export function ProfileTabs({
   activeTab,
   onTabChange,
   children,
+  tabs: customTabs,
 }: ProfileTabsProps) {
+  const tabsToRender = customTabs || tabs;
   const handleTabClick = (e: React.MouseEvent, tabId: string) => {
     e.preventDefault();
     e.stopPropagation();
@@ -50,7 +53,7 @@ export function ProfileTabs({
       {/* Clean Tab Navigation */}
       <div className="border-b border-gray-200 mb-8">
         <nav className="flex space-x-8">
-          {tabs.map((tab) => {
+          {tabsToRender.map((tab) => {
             const isActive = activeTab === tab.id;
             const IconComponent = tab.icon;
 

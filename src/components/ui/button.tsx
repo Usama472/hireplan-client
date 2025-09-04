@@ -15,7 +15,7 @@ const buttonVariants = cva(
           "bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         // Make secondary a gradient like in stepNavigation.tsx
         secondary:
-          "bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white shadow-xs py-2 rounded-sm font-semibold transition-all duration-300 hover:shadow-lg transform hover:-translate-y-0.5",
+          "bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white",
         outline: "",
         "outline-primary":
           "bg-transparent text-primary border border-primary hover:bg-primary hover:text-white dark:hover:bg-primary/10",

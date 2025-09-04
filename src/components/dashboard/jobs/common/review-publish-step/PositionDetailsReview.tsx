@@ -1,5 +1,3 @@
-import { Card, CardContent } from "@/components/ui/card";
-
 import type { JobFormData } from "@/interfaces";
 
 interface PositionDetailsReviewProps {
@@ -72,199 +70,188 @@ export function PositionDetailsReview({
     return timelineMap[timeline] || timeline;
   };
 
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Section Header */}
+      <div className="space-y-2">
+        <h2 className="text-2xl font-bold text-gray-900">Position Details</h2>
+        <p className="text-gray-600">
+          Review your position requirements, compensation, and location details.
+        </p>
+      </div>
+
       {/* Company & Position Overview */}
-      <Card className="border-gray-200 shadow-sm">
-        <CardContent className="p-6">
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="space-y-3">
-                <label className="text-sm font-semibold text-gray-700">
-                  Company
-                </label>
-                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <p className="text-gray-900 font-medium">
-                    {formData.company || "Not specified"}
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <label className="text-sm font-semibold text-gray-700">
-                  Positions to Hire
-                </label>
-                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <p className="text-gray-900 font-medium">
-                    {formData.positionsToHire || "Not specified"}
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <label className="text-sm font-semibold text-gray-700">
-                  Work Setting
-                </label>
-                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <p className="text-gray-900 font-medium">
-                    {formData.workSetting || "Not specified"}
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <label className="text-sm font-semibold text-gray-700">
-                  Hiring Timeline
-                </label>
-                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <p className="text-gray-900 font-medium">
-                    {formatHiringTimeline(formData.hiringTimeline || "")}
-                  </p>
-                </div>
-              </div>
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="space-y-2">
+            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+              Company
+            </h3>
+            <div className="text-gray-600 text-sm font-medium">
+              {formData.company || (
+                <span className="text-gray-400 italic">Not specified</span>
+              )}
             </div>
           </div>
-        </CardContent>
-      </Card>
+
+          <div className="space-y-2">
+            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+              Positions to Hire
+            </h3>
+            <div className="text-gray-600 text-sm font-medium">
+              {formData.positionsToHire || (
+                <span className="text-gray-400 italic">Not specified</span>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+              Work Setting
+            </h3>
+            <div className="text-gray-600 text-sm font-medium">
+              {formData.workSetting || (
+                <span className="text-gray-400 italic">Not specified</span>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+              Hiring Timeline
+            </h3>
+            <div className="text-gray-600 text-sm font-medium">
+              {formatHiringTimeline(formData.hiringTimeline || "") || (
+                <span className="text-gray-400 italic">Not specified</span>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Employment Details */}
-      <Card className="border-gray-200 shadow-sm">
-        <CardContent className="p-6">
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="space-y-3">
-                <label className="text-sm font-semibold text-gray-700">
-                  Employment Type
-                </label>
-                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <p className="text-gray-900 font-medium">
-                    {formatEmploymentType(formData.employmentType || "")}
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <label className="text-sm font-semibold text-gray-700">
-                  Pay Type
-                </label>
-                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <p className="text-gray-900 font-medium capitalize">
-                    {formData.payType || "Not specified"}
-                  </p>
-                </div>
-              </div>
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="space-y-2">
+            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+              Employment Type
+            </h3>
+            <div className="text-gray-600 text-sm font-medium">
+              {formatEmploymentType(formData.employmentType || "") || (
+                <span className="text-gray-400 italic">Not specified</span>
+              )}
             </div>
           </div>
-        </CardContent>
-      </Card>
+
+          <div className="space-y-2">
+            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+              Pay Type
+            </h3>
+            <div className="text-gray-600 text-sm font-medium capitalize">
+              {formData.payType || (
+                <span className="text-gray-400 italic">Not specified</span>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Compensation */}
-      <Card className="border-gray-200 shadow-sm">
-        <CardContent className="p-6">
-          <div className="p-6 bg-emerald-50 rounded-lg border border-emerald-200">
-            <p className="text-lg font-semibold text-emerald-900">
-              {formatPayRate(formData.payRate)}
+      <div className="space-y-4">
+        <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+          Compensation
+        </h3>
+        <div className="p-6 bg-emerald-50 border border-emerald-200 rounded-lg">
+          <p className="text-xl font-semibold text-emerald-900">
+            {formatPayRate(formData.payRate)}
+          </p>
+          {formData.payRate && (
+            <p className="text-sm text-emerald-700 mt-2">
+              Pay structure:{" "}
+              {formData.payRate.type
+                .replace("-", " ")
+                .replace(/\b\w/g, (l) => l.toUpperCase())}
             </p>
-            {formData.payRate && (
-              <p className="text-sm text-emerald-700 mt-2">
-                Pay structure:{" "}
-                {formData.payRate.type
-                  .replace("-", " ")
-                  .replace(/\b\w/g, (l) => l.toUpperCase())}
-              </p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+          )}
+        </div>
+      </div>
 
       {/* Location Information */}
-      <Card className="border-gray-200 shadow-sm">
-        <CardContent className="p-6">
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="space-y-3">
-                <label className="text-sm font-semibold text-gray-700">
-                  Work Type
-                </label>
-                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <p className="text-gray-900 font-medium capitalize">
-                    {formData.jobLocationWorkType?.replace("-", " ") ||
-                      "Not specified"}
-                  </p>
-                </div>
-              </div>
+      <div className="space-y-6">
+        <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+          Location Details
+        </h3>
 
-              <div className="space-y-3">
-                <label className="text-sm font-semibold text-gray-700">
-                  Country
-                </label>
-                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <p className="text-gray-900 font-medium">
-                    {formData.country || "United States"}
-                  </p>
-                </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+              Work Type
+            </h4>
+            <div className="text-gray-600 text-sm font-medium capitalize">
+              {formData.jobLocationWorkType?.replace("-", " ") || (
+                <span className="text-gray-400 italic">Not specified</span>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+              Country
+            </h4>
+            <div className="text-gray-600 text-sm font-medium">
+              {formData.country || "United States"}
+            </div>
+          </div>
+        </div>
+
+        {formData.jobLocation && (
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+              Physical Location
+            </h4>
+            <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+              <div className="text-gray-700 space-y-1">
+                {formData.jobLocation.address && (
+                  <p className="font-medium">{formData.jobLocation.address}</p>
+                )}
+                <p>
+                  {[
+                    formData.jobLocation.city,
+                    formData.jobLocation.state,
+                    formData.jobLocation.zipCode,
+                  ]
+                    .filter(Boolean)
+                    .join(", ")}
+                </p>
+                {formData.jobLocation.country && (
+                  <p>{formData.jobLocation.country}</p>
+                )}
               </div>
             </div>
-
-            {formData.jobLocation && (
-              <div className="space-y-3">
-                <label className="text-sm font-semibold text-gray-700">
-                  Physical Location
-                </label>
-                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <div className="text-gray-900 space-y-1">
-                    {formData.jobLocation.address && (
-                      <p className="font-medium">
-                        {formData.jobLocation.address}
-                      </p>
-                    )}
-                    <p>
-                      {[
-                        formData.jobLocation.city,
-                        formData.jobLocation.state,
-                        formData.jobLocation.zipCode,
-                      ]
-                        .filter(Boolean)
-                        .join(", ")}
-                    </p>
-                    {formData.jobLocation.country && (
-                      <p>{formData.jobLocation.country}</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {formData.remoteLocationRequirement?.required && (
-              <div className="space-y-3">
-                <label className="text-sm font-semibold text-gray-700">
-                  Remote Location Requirement
-                </label>
-                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <p className="text-blue-900 font-medium">
-                    {formData.remoteLocationRequirement.location ||
-                      "Any location"}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {formData.jobLocationWorkType === "on-the-road" && (
-              <div className="space-y-3">
-                <label className="text-sm font-semibold text-gray-700">
-                  Operating Area
-                </label>
-                <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
-                  <p className="text-orange-900 font-medium">
-                    {formData.operatingArea || "Not specified"}
-                  </p>
-                </div>
-              </div>
-            )}
           </div>
-        </CardContent>
-      </Card>
+        )}
+
+        {formData.remoteLocationRequirement?.required && (
+          <div className="flex justify-end">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-full">
+              <span className="text-sm font-medium text-blue-800">
+                Remote:{" "}
+                {formData.remoteLocationRequirement.location || "Any location"}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {formData.jobLocationWorkType === "on-the-road" && (
+          <div className="flex justify-end">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-50 border border-orange-200 rounded-full">
+              <span className="text-sm font-medium text-orange-800">
+                Operating Area: {formData.operatingArea || "Not specified"}
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

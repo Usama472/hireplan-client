@@ -1,12 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  Users,
-  Target,
-  HelpCircle,
-  CheckCircle,
-  AlertTriangle,
-} from "lucide-react";
 import type { JobFormData } from "@/interfaces";
 
 interface QualificationsReviewProps {
@@ -32,218 +23,234 @@ export function QualificationsReview({ formData }: QualificationsReviewProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Section Header */}
+      <div className="space-y-2">
+        <h2 className="text-2xl font-bold text-gray-900">
+          Qualifications & Requirements
+        </h2>
+        <p className="text-gray-600">
+          Review required qualifications, preferred skills, and custom screening
+          questions.
+        </p>
+      </div>
+
       {/* Required Qualifications */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Target className="h-5 w-5" />
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
             Required Qualifications
-            <Badge variant="destructive" className="ml-2 text-white">
+          </h3>
+          <div className="inline-flex items-center gap-1 px-2 py-1 bg-red-50 border border-red-200 rounded-full">
+            <span className="text-xs font-medium text-red-700">
               {formData.requiredQualifications?.length || 0}
-            </Badge>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {!formData.requiredQualifications ||
-          formData.requiredQualifications.length === 0 ? (
-            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <p className="text-sm text-yellow-800">
-                No required qualifications specified. Consider adding essential
-                requirements for the role.
-              </p>
+            </span>
+          </div>
+        </div>
+
+        {!formData.requiredQualifications ||
+        formData.requiredQualifications.length === 0 ? (
+          <div className="flex justify-end">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-full shadow-sm">
+              <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+              <span className="text-sm font-medium text-amber-800">
+                Consider adding essential requirements for the role
+              </span>
             </div>
-          ) : (
-            <div className="space-y-3">
-              {formData.requiredQualifications.map((qual, index) => {
-                const scoreInfo = formatQualificationScore(qual.score || 0);
-                return (
-                  <div key={index} className="p-3 bg-gray-50 rounded-lg">
-                    <div className="flex items-start justify-between">
-                      <p className="text-sm text-gray-900 flex-1">
-                        {qual.text}
-                      </p>
-                      <Badge
-                        variant={scoreInfo.color}
-                        className="ml-2 text-white"
-                      >
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {formData.requiredQualifications.map((qual, index) => {
+              const scoreInfo = formatQualificationScore(qual.score || 0);
+              return (
+                <div
+                  key={index}
+                  className="p-4 bg-gray-50 border border-gray-200 rounded-lg"
+                >
+                  <div className="flex items-start justify-between">
+                    <p className="text-gray-700 text-sm font-medium flex-1">
+                      {qual.text}
+                    </p>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-50 border border-red-200 rounded-full">
+                      <div className="w-1.5 h-1.5 bg-red-500 rounded-full"></div>
+                      <span className="text-xs font-medium text-red-700">
                         {scoreInfo.label}
-                      </Badge>
+                      </span>
                     </div>
-                    {qual.score !== undefined && (
-                      <p className="text-xs text-gray-500 mt-1">
-                        Score: {qual.score}/100
-                      </p>
-                    )}
                   </div>
-                );
-              })}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                  {qual.score !== undefined && (
+                    <p className="text-xs text-gray-500 mt-2">
+                      Score: {qual.score}/100
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
 
       {/* Preferred Qualifications */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
             Preferred Qualifications
-            <Badge variant="outline" className="ml-2">
+          </h3>
+          <div className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 border border-blue-200 rounded-full">
+            <span className="text-xs font-medium text-blue-700">
               {formData.preferredQualifications?.length || 0}
-            </Badge>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {!formData.preferredQualifications ||
-          formData.preferredQualifications.length === 0 ? (
-            <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-              <p className="text-sm text-gray-600">
-                No preferred qualifications specified.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {formData.preferredQualifications.map((qual, index) => {
-                const scoreInfo = formatQualificationScore(qual.score || 0);
-                return (
-                  <div key={index} className="p-3 bg-gray-50 rounded-lg">
-                    <div className="flex items-start justify-between">
-                      <p className="text-sm text-gray-900 flex-1">
-                        {qual.text}
-                      </p>
-                      <Badge variant={scoreInfo.color} className="ml-2">
+            </span>
+          </div>
+        </div>
+
+        {!formData.preferredQualifications ||
+        formData.preferredQualifications.length === 0 ? (
+          <div className="text-gray-400 italic text-sm">
+            No preferred qualifications specified.
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {formData.preferredQualifications.map((qual, index) => {
+              const scoreInfo = formatQualificationScore(qual.score || 0);
+              return (
+                <div
+                  key={index}
+                  className="p-4 bg-gray-50 border border-gray-200 rounded-lg"
+                >
+                  <div className="flex items-start justify-between">
+                    <p className="text-gray-700 text-sm font-medium flex-1">
+                      {qual.text}
+                    </p>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 border border-blue-200 rounded-full">
+                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                      <span className="text-xs font-medium text-blue-700">
                         {scoreInfo.label}
-                      </Badge>
+                      </span>
                     </div>
-                    {qual.score !== undefined && (
-                      <p className="text-xs text-gray-500 mt-1">
-                        Score: {qual.score}/100
-                      </p>
-                    )}
                   </div>
-                );
-              })}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                  {qual.score !== undefined && (
+                    <p className="text-xs text-gray-500 mt-2">
+                      Score: {qual.score}/100
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
 
       {/* Job Requirements */}
       {formData.jobRequirements && formData.jobRequirements.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5" />
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
               Job Requirements
-              <Badge variant="default" className="ml-2">
+            </h3>
+            <div className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-50 border border-emerald-200 rounded-full">
+              <span className="text-xs font-medium text-emerald-700">
                 {formData.jobRequirements.length}
-              </Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {formData.jobRequirements.map((req, index) => (
-                <div key={index} className="p-3 bg-gray-50 rounded-lg">
-                  <p className="text-sm text-gray-900">{req}</p>
-                </div>
-              ))}
+              </span>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+          <div className="space-y-3">
+            {formData.jobRequirements.map((req, index) => (
+              <div
+                key={index}
+                className="p-4 bg-gray-50 border border-gray-200 rounded-lg"
+              >
+                <p className="text-gray-700 text-sm font-medium">{req}</p>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
 
       {/* Custom Screening Questions */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <HelpCircle className="h-5 w-5" />
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
             Custom Screening Questions
-            <Badge variant="secondary" className="ml-2">
+          </h3>
+          <div className="inline-flex items-center gap-1 px-2 py-1 bg-purple-50 border border-purple-200 rounded-full">
+            <span className="text-xs font-medium text-purple-700">
               {formData.customQuestions?.length || 0}
-            </Badge>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {!formData.customQuestions ||
-          formData.customQuestions.length === 0 ? (
-            <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-              <p className="text-sm text-gray-600">
-                No custom screening questions added.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {formData.customQuestions.map((question, index) => (
-                <div key={index} className="p-4 bg-gray-50 rounded-lg border">
-                  <div className="flex items-start justify-between mb-2">
-                    <p className="text-sm font-medium text-gray-900">
-                      {question.question}
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline">
+            </span>
+          </div>
+        </div>
+
+        {!formData.customQuestions || formData.customQuestions.length === 0 ? (
+          <div className="text-gray-400 italic text-sm">
+            No custom screening questions added.
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {formData.customQuestions.map((question, index) => (
+              <div
+                key={index}
+                className="p-4 bg-gray-50 border border-gray-200 rounded-lg"
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <p className="text-gray-700 text-sm font-medium flex-1">
+                    {question.question}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <div className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 border border-gray-200 rounded-full">
+                      <span className="text-xs font-medium text-gray-700">
                         {formatQuestionType(question.type)}
-                      </Badge>
-                      {question.required && (
-                        <Badge variant="destructive" className="text-white">
+                      </span>
+                    </div>
+                    {question.required && (
+                      <div className="inline-flex items-center gap-1 px-2 py-1 bg-red-50 border border-red-200 rounded-full">
+                        <div className="w-1.5 h-1.5 bg-red-500 rounded-full"></div>
+                        <span className="text-xs font-medium text-red-700">
                           Required
-                        </Badge>
-                      )}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {question.type === "select" && question.options && (
+                  <div className="mt-3">
+                    <p className="text-xs text-gray-500 mb-2">Options:</p>
+                    <div className="space-y-1">
+                      {question.options.map((option, optIndex) => (
+                        <div
+                          key={optIndex}
+                          className="text-xs text-gray-600 bg-white px-3 py-2 rounded border border-gray-200"
+                        >
+                          {option}
+                        </div>
+                      ))}
                     </div>
                   </div>
+                )}
 
-                  {question.type === "select" && question.options && (
-                    <div className="mt-3">
-                      <p className="text-xs text-gray-600 mb-2">Options:</p>
-                      <div className="space-y-1">
-                        {question.options.map((option, optIndex) => (
-                          <div
-                            key={optIndex}
-                            className="text-xs text-gray-700 bg-white px-2 py-1 rounded"
-                          >
-                            {option}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {question.placeholder && (
-                    <p className="text-xs text-gray-500 mt-2">
-                      Placeholder: {question.placeholder}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                {question.placeholder && (
+                  <p className="text-xs text-gray-500 mt-2">
+                    Placeholder: {question.placeholder}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Validation Warnings */}
       {formData.customQuestions &&
         formData.customQuestions.some(
           (q) => q.type === "select" && (!q.options || q.options.length < 2)
         ) && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-yellow-600" />
-                Validation Issues
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <p className="text-sm text-yellow-800 font-medium">
-                  Multiple choice questions need at least 2 options
-                </p>
-                <p className="text-xs text-yellow-600 mt-1">
-                  Please review and update your custom questions before
-                  publishing.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="flex justify-end">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-full shadow-sm">
+              <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+              <span className="text-sm font-medium text-amber-800">
+                Multiple choice questions need at least 2 options
+              </span>
+            </div>
+          </div>
         )}
     </div>
   );

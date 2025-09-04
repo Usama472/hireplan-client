@@ -1,8 +1,6 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -15,7 +13,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import API from "@/http";
 import { errorResolver } from "@/lib/utils";
 import {
-  AlertCircle,
   Calendar,
   CalendarCheck,
   Clock,
@@ -30,8 +27,8 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { ApplicantDetailModal } from "./applicant-detail-modal";
 
 interface Applicant {
   id: string;
@@ -129,21 +126,21 @@ const StatsCard = ({
   value: number;
   color: string;
 }) => (
-  <Card className="hover:shadow-md transition-shadow">
-    <CardContent className="p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-muted-foreground">{title}</p>
-          <p className="text-3xl font-bold mt-2">{value}</p>
-        </div>
-        <div
-          className={`w-12 h-12 rounded-xl flex items-center justify-center ${color}`}
-        >
-          <Icon className="w-6 h-6" />
-        </div>
+  <div className="p-6 bg-gray-50 border border-gray-200 rounded-lg">
+    <div className="flex items-center justify-between">
+      <div>
+        <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+          {title}
+        </p>
+        <p className="text-3xl font-bold mt-2 text-gray-900">{value}</p>
       </div>
-    </CardContent>
-  </Card>
+      <div
+        className={`w-12 h-12 rounded-xl flex items-center justify-center ${color}`}
+      >
+        <Icon className="w-6 h-6" />
+      </div>
+    </div>
+  </div>
 );
 
 // Applicant Card Component
@@ -154,144 +151,142 @@ const ApplicantCard = ({
   applicant: Applicant;
   onClick: () => void;
 }) => (
-  <Card
-    className="hover:shadow-lg transition-all duration-200 cursor-pointer group"
+  <div
+    className="p-6 bg-gray-50 border border-gray-200 rounded-lg transition-all duration-200 cursor-pointer group"
     onClick={onClick}
   >
-    <CardContent className="p-6">
-      <div className="flex items-start gap-4">
-        {/* Avatar */}
-        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-semibold text-lg flex-shrink-0">
-          {applicant.firstName[0]}
-          {applicant.lastName[0]}
-        </div>
+    <div className="flex items-start gap-4">
+      {/* Avatar */}
+      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-semibold text-lg flex-shrink-0">
+        {applicant.firstName[0]}
+        {applicant.lastName[0]}
+      </div>
 
-        {/* Main Content */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between mb-3">
-            <div>
-              <h3 className="font-semibold text-lg text-gray-900 group-hover:text-blue-600 transition-colors">
-                {applicant.firstName} {applicant.lastName}
-              </h3>
-              <p className="text-sm text-muted-foreground">{applicant.email}</p>
-            </div>
+      {/* Main Content */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-start justify-between mb-3">
+          <div>
+            <h3 className="font-semibold text-lg text-gray-900 group-hover:text-blue-600 transition-colors">
+              {applicant.firstName} {applicant.lastName}
+            </h3>
+            <p className="text-sm text-gray-600">{applicant.email}</p>
+          </div>
 
-            {/* Action Buttons - Moved to top right */}
-            <div className="flex items-center gap-2">
+          {/* Action Buttons - Moved to top right */}
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              className="flex items-center gap-1 bg-blue-50 border-blue-100 text-blue-600 hover:bg-blue-100 hover:text-blue-700 transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                onClick();
+              }}
+            >
+              <Eye className="w-3.5 h-3.5" />
+              View
+            </Button>
+
+            {applicant.resume && (
               <Button
                 size="sm"
                 variant="outline"
-                className="flex items-center gap-1 bg-blue-50 border-blue-100 text-blue-600 hover:bg-blue-100 hover:text-blue-700 transition-colors"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onClick();
-                }}
+                className="flex items-center gap-1 bg-green-50 border-green-100 text-green-600 hover:bg-green-100 hover:text-green-700 transition-colors"
+                asChild
+                onClick={(e) => e.stopPropagation()}
               >
-                <Eye className="w-3.5 h-3.5" />
-                View
+                <a
+                  href={applicant.resume}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  Resume
+                </a>
               </Button>
+            )}
+          </div>
+        </div>
 
-              {applicant.resume && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="flex items-center gap-1 bg-green-50 border-green-100 text-green-600 hover:bg-green-100 hover:text-green-700 transition-colors"
-                  asChild
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <a
-                    href={applicant.resume}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    Resume
-                  </a>
-                </Button>
-              )}
+        {/* Details Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+          {(applicant.city || applicant.state) && (
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <MapPin className="w-4 h-4" />
+              <span className="truncate">
+                {applicant.city && applicant.state
+                  ? `${applicant.city}, ${applicant.state}`
+                  : applicant.city || applicant.state}
+              </span>
             </div>
+          )}
+
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <Calendar className="w-4 h-4" />
+            <span>Applied {formatDate(applicant.createdAt)}</span>
           </div>
 
-          {/* Details Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-            {(applicant.city || applicant.state) && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <MapPin className="w-4 h-4" />
-                <span className="truncate">
-                  {applicant.city && applicant.state
-                    ? `${applicant.city}, ${applicant.state}`
-                    : applicant.city || applicant.state}
-                </span>
-              </div>
-            )}
+          {applicant.interviewScheduled && applicant.interview && (
+            <div className="flex items-center gap-2 text-sm text-purple-600 font-medium">
+              <CalendarCheck className="w-4 h-4" />
+              <span>
+                Interview:{" "}
+                {formatInterviewTime(
+                  applicant.interview.scheduledDate,
+                  applicant.interview.timezone
+                )}
+              </span>
+            </div>
+          )}
 
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          {applicant.invitationSent && !applicant.interviewScheduled && (
+            <div className="flex items-center gap-2 text-sm text-orange-600 font-medium">
               <Calendar className="w-4 h-4" />
-              <span>Applied {formatDate(applicant.createdAt)}</span>
+              <span>
+                Invitation sent:{" "}
+                {formatInvitationDate(applicant.invitationSentAt || "")}
+              </span>
             </div>
+          )}
+        </div>
 
-            {applicant.interviewScheduled && applicant.interview && (
-              <div className="flex items-center gap-2 text-sm text-purple-600 font-medium">
-                <CalendarCheck className="w-4 h-4" />
-                <span>
-                  Interview:{" "}
-                  {formatInterviewTime(
-                    applicant.interview.scheduledDate,
-                    applicant.interview.timezone
-                  )}
-                </span>
-              </div>
-            )}
-
-            {applicant.invitationSent && !applicant.interviewScheduled && (
-              <div className="flex items-center gap-2 text-sm text-orange-600 font-medium">
-                <Calendar className="w-4 h-4" />
-                <span>
-                  Invitation sent:{" "}
-                  {formatInvitationDate(applicant.invitationSentAt || "")}
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Status Badges */}
-          <div className="flex justify-end items-center">
-            <div className="flex items-center gap-2">
-              {applicant.aiScore && (
-                <Badge
-                  className={`text-xs font-medium ${getScoreColor(
-                    applicant.aiScore
-                  )}`}
-                >
-                  <Star className="w-3 h-3 mr-1" />
-                  {applicant.aiScore}%
-                </Badge>
-              )}
-              <Badge
-                className={`text-xs font-medium ${getStatusColor(
-                  applicant.status
+        {/* Status Badges */}
+        <div className="flex justify-end items-center">
+          <div className="flex items-center gap-2">
+            {applicant.aiScore && (
+              <div
+                className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getScoreColor(
+                  applicant.aiScore
                 )}`}
               >
-                {applicant.status || "pending"}
-              </Badge>
-              {applicant.interviewScheduled && applicant.interview && (
-                <Badge className="text-xs font-medium bg-purple-50 text-purple-700 border-purple-200">
-                  <Video className="w-3 h-3 mr-1" />
-                  Interview Scheduled
-                </Badge>
-              )}
-              {applicant.invitationSent && !applicant.interviewScheduled && (
-                <Badge className="text-xs font-medium bg-orange-50 text-orange-700 border-orange-200">
-                  <Calendar className="w-3 h-3 mr-1" />
-                  Invited
-                </Badge>
-              )}
+                <Star className="w-3 h-3" />
+                {applicant.aiScore}%
+              </div>
+            )}
+            <div
+              className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                applicant.status
+              )}`}
+            >
+              {applicant.status || "pending"}
             </div>
+            {applicant.interviewScheduled && applicant.interview && (
+              <div className="inline-flex items-center gap-1 px-2 py-1 bg-purple-50 text-purple-700 border border-purple-200 rounded-full text-xs font-medium">
+                <Video className="w-3 h-3" />
+                Interview Scheduled
+              </div>
+            )}
+            {applicant.invitationSent && !applicant.interviewScheduled && (
+              <div className="inline-flex items-center gap-1 px-2 py-1 bg-orange-50 text-orange-700 border border-orange-200 rounded-full text-xs font-medium">
+                <Calendar className="w-3 h-3" />
+                Invited
+              </div>
+            )}
           </div>
         </div>
       </div>
-    </CardContent>
-  </Card>
+    </div>
+  </div>
 );
 
 // Loading Skeleton (same as before)
@@ -300,17 +295,18 @@ const ApplicantsLoadingSkeleton = () => (
     {/* Stats Skeleton */}
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
       {Array.from({ length: 4 }).map((_, i) => (
-        <Card key={i}>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-8 w-16" />
-              </div>
-              <Skeleton className="w-12 h-12 rounded-xl" />
+        <div
+          key={i}
+          className="p-6 bg-gray-50 border border-gray-200 rounded-lg"
+        >
+          <div className="flex items-center justify-between">
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-8 w-16" />
             </div>
-          </CardContent>
-        </Card>
+            <Skeleton className="w-12 h-12 rounded-xl" />
+          </div>
+        </div>
       ))}
     </div>
 
@@ -327,31 +323,32 @@ const ApplicantsLoadingSkeleton = () => (
     {/* Applicants List Skeleton */}
     <div className="grid gap-6">
       {Array.from({ length: 5 }).map((_, i) => (
-        <Card key={i}>
-          <CardContent className="p-6">
-            <div className="flex items-start gap-4">
-              <Skeleton className="w-12 h-12 rounded-xl" />
-              <div className="flex-1 space-y-3">
-                <div className="flex justify-between">
-                  <div className="space-y-2">
-                    <Skeleton className="h-5 w-48" />
-                    <Skeleton className="h-4 w-64" />
-                  </div>
-                  <div className="flex gap-2">
-                    <Skeleton className="h-6 w-16" />
-                    <Skeleton className="h-6 w-20" />
-                  </div>
+        <div
+          key={i}
+          className="p-6 bg-gray-50 border border-gray-200 rounded-lg"
+        >
+          <div className="flex items-start gap-4">
+            <Skeleton className="w-12 h-12 rounded-xl" />
+            <div className="flex-1 space-y-3">
+              <div className="flex justify-between">
+                <div className="space-y-2">
+                  <Skeleton className="h-5 w-48" />
+                  <Skeleton className="h-4 w-64" />
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <Skeleton className="h-4 w-32" />
-                  <Skeleton className="h-4 w-28" />
-                  <Skeleton className="h-4 w-36" />
-                  <Skeleton className="h-4 w-24" />
+                <div className="flex gap-2">
+                  <Skeleton className="h-6 w-16" />
+                  <Skeleton className="h-6 w-20" />
                 </div>
               </div>
+              <div className="grid grid-cols-2 gap-3">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-4 w-28" />
+                <Skeleton className="h-4 w-36" />
+                <Skeleton className="h-4 w-24" />
+              </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       ))}
     </div>
   </div>
@@ -361,6 +358,7 @@ export function ApplicantsSection({
   jobId,
   jobViews = 0,
 }: ApplicantsSectionProps) {
+  const navigate = useNavigate();
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [stats, setStats] = useState({
     total: 0,
@@ -371,10 +369,6 @@ export function ApplicantsSection({
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedApplicant, setSelectedApplicant] = useState<Applicant | null>(
-    null
-  );
-  const [showDetailModal, setShowDetailModal] = useState(false);
 
   // Filters
   const [searchQuery, setSearchQuery] = useState("");
@@ -424,24 +418,8 @@ export function ApplicantsSection({
     setStatusFilter("all");
   };
 
-  const handleStatusUpdate = async (applicantId: string, newStatus: string) => {
-    try {
-      await API.applicant.updateApplicantStatus(jobId, applicantId, newStatus)
-      // Update local state
-      setApplicants((prev) =>
-        prev.map((applicant) =>
-          applicant.id === applicantId
-            ? { ...applicant, status: newStatus as Applicant["status"] }
-            : applicant
-        )
-      );
-      // Refresh stats
-      await fetchApplicants();
-      toast.success("Applicant status updated successfully");
-    } catch (err) {
-      const errorMessage = errorResolver(err);
-      toast.error(`Failed to update status: ${errorMessage}`);
-    }
+  const handleViewApplicant = (applicant: Applicant) => {
+    navigate(`/dashboard/jobs/${jobId}/applicants/${applicant.id}`);
   };
 
   const filteredApplicants = applicants.filter((applicant) => {
@@ -470,32 +448,32 @@ export function ApplicantsSection({
 
   if (error) {
     return (
-      <div className="text-center py-12">
-        <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">
-          Failed to Load Applicants
-        </h3>
-        <p className="text-gray-600 mb-4">{error}</p>
-        <Button onClick={fetchApplicants} variant="outline">
-          Try Again
-        </Button>
+      <div className="flex justify-end">
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-50 border border-red-200 rounded-full shadow-sm">
+          <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+          <span className="text-sm font-medium text-red-800">{error}</span>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header with Stats */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-200">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900">
-              Applicant Overview
-            </h2>
-            <p className="text-sm text-gray-600 mt-1">
-              Manage and review job applications
-            </p>
-          </div>
+    <div className="space-y-8">
+      {/* Section Header */}
+      <div className="space-y-2">
+        <h2 className="text-2xl font-bold text-gray-900">Applicants</h2>
+        <p className="text-gray-600">
+          Review and manage job applications, track candidate progress, and
+          schedule interviews.
+        </p>
+      </div>
+
+      {/* Stats Overview */}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+            Applicant Overview
+          </h3>
           <div className="flex items-center gap-2 text-sm text-gray-500">
             <Eye className="w-4 h-4" />
             <span>{jobViews} job views</span>
@@ -503,7 +481,7 @@ export function ApplicantsSection({
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           <StatsCard
             icon={Users}
             title="Total Applicants"
@@ -532,48 +510,51 @@ export function ApplicantsSection({
       </div>
 
       {/* Filters and Search */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-          <div className="flex flex-col sm:flex-row gap-3 flex-1">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                placeholder="Search applicants..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+      <div className="space-y-6">
+        <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+          Search & Filters
+        </h3>
+        <div className="p-6 bg-gray-50 border border-gray-200 rounded-lg">
+          <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+            <div className="flex flex-col sm:flex-row gap-4 flex-1 w-full">
+              <div className="relative flex-1 max-w-md border-gray-300 border rounded-md">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  placeholder="Search applicants..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 focus:border-gray-400 focus:ring-gray-400 border-none h-full"
+                />
+              </div>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-48 h-10 border-gray-300 focus:border-gray-400 focus:ring-gray-400">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="reviewed">Reviewed</SelectItem>
+                  <SelectItem value="shortlisted">Shortlisted</SelectItem>
+                  <SelectItem value="rejected">Rejected</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-40">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="reviewed">Reviewed</SelectItem>
-                <SelectItem value="shortlisted">Shortlisted</SelectItem>
-                <SelectItem value="rejected">Rejected</SelectItem>
-              </SelectContent>
-            </Select>
+            <Button
+              variant="outline-destructive"
+              onClick={handleClearFilters}
+              className="text-sm h-10 px-4 whitespace-nowrap"
+            >
+              Clear Filters
+            </Button>
           </div>
-          <Button
-            variant="outline"
-            onClick={handleClearFilters}
-            className="text-sm"
-          >
-            Clear Filters
-          </Button>
         </div>
       </div>
 
       {/* Applicants List */}
-      <div className="bg-white rounded-lg border border-gray-200">
-        <div className="p-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">
-            Applicants ({filteredApplicants.length})
-          </h3>
-        </div>
+      <div className="space-y-6">
+        <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+          Applicants ({filteredApplicants.length})
+        </h3>
 
         {filteredApplicants.length === 0 ? (
           <div className="text-center py-12">
@@ -588,30 +569,17 @@ export function ApplicantsSection({
             </p>
           </div>
         ) : (
-          <div className="divide-y divide-gray-200">
+          <div className="space-y-4">
             {filteredApplicants.map((applicant) => (
               <ApplicantCard
                 key={applicant.id}
                 applicant={applicant}
-                onClick={() => {
-                  setSelectedApplicant(applicant);
-                  setShowDetailModal(true);
-                }}
+                onClick={() => handleViewApplicant(applicant)}
               />
             ))}
           </div>
         )}
       </div>
-
-      {/* Applicant Detail Modal */}
-      {selectedApplicant && (
-        <ApplicantDetailModal
-          applicant={selectedApplicant}
-          isOpen={showDetailModal}
-          onClose={() => setShowDetailModal(false)}
-          onStatusUpdate={handleStatusUpdate}
-        />
-      )}
     </div>
   );
 }

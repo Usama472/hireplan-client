@@ -131,15 +131,7 @@ export const DashboardSidebar = ({
       collapsible="icon"
       className="bg-white border-r border-gray-200 relative overflow-hidden p-0"
     >
-      {/* Subtle Pattern Overlay */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.03)_1px,transparent_0)] bg-[length:20px_20px] opacity-40"></div>
-
       <SidebarHeader className="bg-white border-b border-gray-100 px-6 py-4 relative overflow-hidden max-h-[80px] h-full flex flex-col justify-center">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5 opacity-40"></div>
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full blur-2xl"></div>
-
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
@@ -154,7 +146,7 @@ export const DashboardSidebar = ({
                     className="h-9 w-9 object-contain"
                   />
                   <div className="flex flex-col min-w-0">
-                    <span className="font-extrabold text-gray-900 text-[1.65rem] leading-tight tracking-tight group-hover:text-blue-600 transition-colors truncate drop-shadow-sm">
+                    <span className="font-extrabold text-3xl leading-tight tracking-tight transition-colors truncate drop-shadow-sm bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
                       {APP_NAME}
                     </span>
                   </div>

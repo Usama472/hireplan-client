@@ -256,22 +256,22 @@ const GlobalSettingPage = () => {
   return (
     <div className="min-h-screen">
       {/* Enhanced Header - Matching Job Page Style */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100 px-6 py-4 relative overflow-hidden max-h-[80px]">
+      <div className="bg-white border-b border-gray-200 px-6 py-4 relative overflow-hidden max-h-[80px]">
         <div className="relative z-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-blue-100 rounded-xl">
-                <Settings className="h-6 w-6 text-blue-600" />
+              <div className="p-3 bg-gray-100 rounded-xl">
+                <Settings className="h-6 w-6 text-gray-600" />
               </div>
               <div className="flex flex-col">
-                <h1 className="text-2xl font-bold text-black">
+                <h1 className="text-xl font-bold text-gray-900">
                   Account Settings
                 </h1>
-                <p className="text-black flex items-center gap-2">
+                <p className="text-gray-600 flex items-center gap-2">
                   Manage your profile, company, and application preferences
                   <Badge
                     variant="secondary"
-                    className="bg-blue-100 text-blue-700 text-xs"
+                    className="bg-gray-100 text-gray-700 text-xs"
                   >
                     {isDirty ? `${dirtyFieldsCount} unsaved` : "All saved"}
                   </Badge>
@@ -280,9 +280,9 @@ const GlobalSettingPage = () => {
             </div>
             <div className="flex items-center gap-3">
               {lastSaved && (
-                <div className="flex items-center gap-2 bg-white hover:bg-blue-50 rounded-lg px-3 py-2 border border-blue-200 shadow-sm">
-                  <CheckCircle2 className="h-4 w-4 text-blue-600" />
-                  <span className="text-sm text-blue-700 font-medium">
+                <div className="flex items-center gap-2 bg-white hover:bg-gray-50 rounded-lg px-3 py-2 border border-gray-200">
+                  <CheckCircle2 className="h-4 w-4 text-gray-600" />
+                  <span className="text-sm text-gray-700 font-medium">
                     Saved {lastSaved.toLocaleTimeString()}
                   </span>
                 </div>

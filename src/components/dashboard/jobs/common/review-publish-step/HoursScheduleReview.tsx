@@ -1,6 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Clock, Calendar, Heart, Languages } from "lucide-react";
 import type { JobFormData } from "@/interfaces";
 
 interface HoursScheduleReviewProps {
@@ -36,200 +33,163 @@ export function HoursScheduleReview({ formData }: HoursScheduleReviewProps) {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Hours & Schedule */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5" />
-            Hours & Schedule
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-600">
-                Hours Per Week
-              </label>
-              <div className="p-3 bg-gray-50 rounded-lg">
-                <p className="text-sm text-gray-900">
-                  {formatHoursPerWeek(formData.hoursPerWeek)}
-                </p>
-              </div>
-            </div>
+    <div className="space-y-8">
+      {/* Section Header */}
+      <div className="space-y-2">
+        <h2 className="text-2xl font-bold text-gray-900">Hours & Schedule</h2>
+        <p className="text-gray-600">
+          Review work hours, schedule, benefits, and location requirements.
+        </p>
+      </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-600">
-                Language
-              </label>
-              <div className="p-3 bg-gray-50 rounded-lg">
-                <p className="text-sm text-gray-900">
-                  {formData.language || "English"}
-                </p>
-              </div>
+      {/* Hours & Schedule */}
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="space-y-2">
+            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+              Hours Per Week
+            </h3>
+            <div className="text-gray-600 text-sm font-medium">
+              {formatHoursPerWeek(formData.hoursPerWeek) || (
+                <span className="text-gray-400 italic">Not specified</span>
+              )}
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-600">
-              Work Schedule
-            </label>
-            <div className="p-3 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-900">
-                {formatSchedule(formData.schedule || [])}
-              </p>
+            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+              Language
+            </h3>
+            <div className="text-gray-600 text-sm font-medium">
+              {formData.language || "English"}
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+            Work Schedule
+          </h3>
+          <div className="text-gray-600 text-sm font-medium">
+            {formatSchedule(formData.schedule || []) || (
+              <span className="text-gray-400 italic">Not specified</span>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* Benefits */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Heart className="h-5 w-5" />
-            Benefits & Perks
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-600">
-              Benefits Offered
-            </label>
-            <div className="p-3 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-900">
-                {formatBenefits(formData.benefits || [])}
-              </p>
-            </div>
-            {(!formData.benefits || formData.benefits.length === 0) && (
-              <p className="text-xs text-gray-500 mt-1">
+      <div className="space-y-4">
+        <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+          Benefits & Perks
+        </h3>
+        <div className="text-gray-600 text-sm font-medium">
+          {formatBenefits(formData.benefits || []) || (
+            <span className="text-gray-400 italic">No benefits specified</span>
+          )}
+        </div>
+        {(!formData.benefits || formData.benefits.length === 0) && (
+          <div className="flex justify-end">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-full">
+              <span className="text-sm font-medium text-amber-800">
                 Consider adding benefits to attract more qualified candidates
-              </p>
-            )}
+              </span>
+            </div>
           </div>
-        </CardContent>
-      </Card>
+        )}
+      </div>
 
       {/* Work Location Details */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
-            Work Location Details
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-600">
-                Work Type
-              </label>
-              <div className="p-3 bg-gray-50 rounded-lg">
-                <p className="text-sm text-gray-900 capitalize">
-                  {formData.jobLocationWorkType?.replace("-", " ") ||
-                    "Not specified"}
-                </p>
-              </div>
-            </div>
+      <div className="space-y-6">
+        <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+          Work Location Details
+        </h3>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-600">
-                Country
-              </label>
-              <div className="p-3 bg-gray-50 rounded-lg">
-                <p className="text-sm text-gray-900">
-                  {formData.country || "United States"}
-                </p>
-              </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+              Work Type
+            </h4>
+            <div className="text-gray-600 text-sm font-medium capitalize">
+              {formData.jobLocationWorkType?.replace("-", " ") || (
+                <span className="text-gray-400 italic">Not specified</span>
+              )}
             </div>
           </div>
 
-          {/* Remote Work Details */}
-          {formData.jobLocationWorkType === "fully-remote" && (
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-600">
-                Remote Work Setup
-              </label>
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-sm text-blue-800">
-                  This is a fully remote position
-                </p>
-                {formData.remoteLocationRequirement?.location && (
-                  <p className="text-xs text-blue-600 mt-1">
-                    Location requirement:{" "}
-                    {formData.remoteLocationRequirement.location}
-                  </p>
-                )}
-              </div>
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+              Country
+            </h4>
+            <div className="text-gray-600 text-sm font-medium">
+              {formData.country || "United States"}
             </div>
-          )}
+          </div>
+        </div>
 
-          {formData.jobLocationWorkType === "hybrid" && (
+        {/* Physical Location */}
+        {formData.jobLocation &&
+          formData.jobLocationWorkType !== "fully-remote" && (
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-600">
-                Hybrid Work Setup
-              </label>
-              <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                <p className="text-sm text-green-800">
-                  This position offers a hybrid work arrangement
-                </p>
-              </div>
-            </div>
-          )}
-
-          {formData.jobLocationWorkType === "on-the-road" && (
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-600">
-                Travel Requirements
-              </label>
-              <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
-                <p className="text-sm text-orange-800">
-                  This position requires travel
-                </p>
-                {formData.hasConsistentStartingLocation && (
-                  <p className="text-xs text-orange-600 mt-1">
-                    Has consistent starting location
-                  </p>
-                )}
-                {formData.operatingArea && (
-                  <p className="text-xs text-orange-600 mt-1">
-                    Operating area: {formData.operatingArea}
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Physical Location */}
-          {formData.jobLocation &&
-            formData.jobLocationWorkType !== "fully-remote" && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-600">
-                  Physical Location
-                </label>
-                <div className="p-3 bg-gray-50 rounded-lg">
-                  <div className="text-sm text-gray-900 space-y-1">
-                    {formData.jobLocation.address && (
-                      <p>{formData.jobLocation.address}</p>
-                    )}
-                    <p>
-                      {[
-                        formData.jobLocation.city,
-                        formData.jobLocation.state,
-                        formData.jobLocation.zipCode,
-                      ]
-                        .filter(Boolean)
-                        .join(", ")}
+              <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+                Physical Location
+              </h4>
+              <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                <div className="text-gray-700 space-y-1">
+                  {formData.jobLocation.address && (
+                    <p className="font-medium">
+                      {formData.jobLocation.address}
                     </p>
-                    {formData.jobLocation.country && (
-                      <p>{formData.jobLocation.country}</p>
-                    )}
-                  </div>
+                  )}
+                  <p>
+                    {[
+                      formData.jobLocation.city,
+                      formData.jobLocation.state,
+                      formData.jobLocation.zipCode,
+                    ]
+                      .filter(Boolean)
+                      .join(", ")}
+                  </p>
+                  {formData.jobLocation.country && (
+                    <p>{formData.jobLocation.country}</p>
+                  )}
                 </div>
               </div>
-            )}
-        </CardContent>
-      </Card>
+            </div>
+          )}
+
+        {/* Work Type Badges */}
+        {formData.jobLocationWorkType === "fully-remote" && (
+          <div className="flex justify-end">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-full">
+              <span className="text-sm font-medium text-blue-800">
+                Remote:{" "}
+                {formData.remoteLocationRequirement?.location || "Any location"}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {formData.jobLocationWorkType === "hybrid" && (
+          <div className="flex justify-end">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-200 rounded-full">
+              <span className="text-sm font-medium text-green-800">
+                Hybrid work arrangement
+              </span>
+            </div>
+          </div>
+        )}
+
+        {formData.jobLocationWorkType === "on-the-road" && (
+          <div className="flex justify-end">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-50 border border-orange-200 rounded-full">
+              <span className="text-sm font-medium text-orange-800">
+                Travel required: {formData.operatingArea || "Various locations"}
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

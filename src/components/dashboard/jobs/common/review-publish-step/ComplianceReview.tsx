@@ -1,6 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Building, Shield, Users, FileText } from "lucide-react";
 import type { JobFormData } from "@/interfaces";
 
 interface ComplianceReviewProps {
@@ -20,169 +17,144 @@ export function ComplianceReview({ formData }: ComplianceReviewProps) {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Department Information */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Building className="h-5 w-5" />
-            Department Information
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-600">
-                Department
-              </label>
-              <div className="p-3 bg-gray-50 rounded-lg">
-                <p className="text-sm text-gray-900">
-                  {formatDepartment(
-                    formData.department || "",
-                    formData.customDepartment || ""
-                  )}
-                </p>
-                {formData.customDepartment && (
-                  <p className="text-xs text-gray-500 mt-1">
-                    Custom department specified
-                  </p>
-                )}
-              </div>
-            </div>
+    <div className="space-y-8">
+      {/* Section Header */}
+      <div className="space-y-2">
+        <h2 className="text-2xl font-bold text-gray-900">
+          Compliance & Department
+        </h2>
+        <p className="text-gray-600">
+          Review department information, compliance requirements, and regulatory
+          details.
+        </p>
+      </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-600">
-                EEO Job Category
-              </label>
-              <div className="p-3 bg-gray-50 rounded-lg">
-                <p className="text-sm text-gray-900">
-                  {formData.eeoJobCategory || "Not specified"}
-                </p>
+      {/* Department Information */}
+      <div className="space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <div className="space-y-3">
+            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+              Department
+            </h3>
+            <div className="text-gray-700 text-base font-medium">
+              {formatDepartment(
+                formData.department || "",
+                formData.customDepartment || ""
+              ) || <span className="text-gray-400 italic">Not specified</span>}
+            </div>
+            {formData.customDepartment && (
+              <div className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 border border-blue-200 rounded-full">
+                <span className="text-xs font-medium text-blue-700">
+                  Custom
+                </span>
               </div>
+            )}
+          </div>
+
+          <div className="space-y-3">
+            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+              EEO Job Category
+            </h3>
+            <div className="text-gray-700 text-base font-medium">
+              {formData.eeoJobCategory || (
+                <span className="text-gray-400 italic">Not specified</span>
+              )}
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Compliance Details */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Shield className="h-5 w-5" />
-            Compliance Details
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-600">
-              Exempt Status
-            </label>
-            <div className="p-3 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-900">
-                {formatExemptStatus(formData.exemptStatus || "")}
-              </p>
+      <div className="space-y-8">
+        <div className="space-y-3">
+          <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+            Exempt Status
+          </h3>
+          <div className="text-gray-700 text-base font-medium">
+            {formatExemptStatus(formData.exemptStatus || "") || (
+              <span className="text-gray-400 italic">Not specified</span>
+            )}
+          </div>
+        </div>
+
+        {/* Compliance Status Badges */}
+        <div className="flex flex-wrap gap-3 justify-end">
+          {formData.exemptStatus === "exempt" && (
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-full shadow-sm">
+              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+              <span className="text-sm font-medium text-blue-800">
+                Exempt Employee
+              </span>
             </div>
-          </div>
+          )}
 
-          {/* Compliance Notes */}
-          <div className="space-y-3">
-            {formData.exemptStatus === "exempt" && (
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-sm text-blue-800 font-medium">
-                  Exempt Employee
-                </p>
-                <p className="text-xs text-blue-600 mt-1">
-                  This position is exempt from overtime pay requirements under
-                  the Fair Labor Standards Act (FLSA).
-                </p>
-              </div>
-            )}
+          {formData.exemptStatus === "non-exempt" && (
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-50 border border-orange-200 rounded-full shadow-sm">
+              <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+              <span className="text-sm font-medium text-orange-800">
+                Non-Exempt Employee
+              </span>
+            </div>
+          )}
 
-            {formData.exemptStatus === "non-exempt" && (
-              <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
-                <p className="text-sm text-orange-800 font-medium">
-                  Non-Exempt Employee
-                </p>
-                <p className="text-xs text-orange-600 mt-1">
-                  This position is eligible for overtime pay under the Fair
-                  Labor Standards Act (FLSA).
-                </p>
-              </div>
-            )}
+          {formData.exemptStatus === "not-applicable" && (
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gray-50 border border-gray-200 rounded-full shadow-sm">
+              <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
+              <span className="text-sm font-medium text-gray-800">
+                Not Applicable
+              </span>
+            </div>
+          )}
 
-            {formData.exemptStatus === "not-applicable" && (
-              <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
-                <p className="text-sm text-gray-800 font-medium">
-                  Not Applicable
-                </p>
-                <p className="text-xs text-gray-600 mt-1">
-                  Exempt status does not apply to this position type.
-                </p>
-              </div>
-            )}
+          {formData.eeoJobCategory && (
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 border border-emerald-200 rounded-full shadow-sm">
+              <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+              <span className="text-sm font-medium text-emerald-800">
+                EEO Compliant
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
 
-            {formData.eeoJobCategory && (
-              <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                <p className="text-sm text-green-800 font-medium">
-                  EEO Category Set
-                </p>
-                <p className="text-xs text-green-600 mt-1">
-                  EEO job category is specified for compliance reporting.
-                </p>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Additional Information */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Additional Information
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
+      {/* Recommendations */}
+      {(formData.department || formData.customDepartment) &&
+      formData.eeoJobCategory &&
+      formData.exemptStatus ? null : (
+        <div className="space-y-6">
+          <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+            Recommendations
+          </h3>
+          <div className="flex flex-wrap gap-3 justify-end">
             {!formData.department && !formData.customDepartment && (
-              <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <p className="text-sm text-yellow-800 font-medium">
-                  Department Not Specified
-                </p>
-                <p className="text-xs text-yellow-600 mt-1">
-                  Consider specifying a department for better organization and
-                  reporting.
-                </p>
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-full shadow-sm">
+                <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                <span className="text-sm font-medium text-amber-800">
+                  Add Department
+                </span>
               </div>
             )}
 
             {!formData.eeoJobCategory && (
-              <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <p className="text-sm text-yellow-800 font-medium">
-                  EEO Category Not Set
-                </p>
-                <p className="text-xs text-yellow-600 mt-1">
-                  Consider setting an EEO job category for compliance reporting
-                  requirements.
-                </p>
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-full shadow-sm">
+                <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                <span className="text-sm font-medium text-amber-800">
+                  Set EEO Category
+                </span>
               </div>
             )}
 
             {!formData.exemptStatus && (
-              <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <p className="text-sm text-yellow-800 font-medium">
-                  Exempt Status Not Set
-                </p>
-                <p className="text-xs text-yellow-600 mt-1">
-                  Consider specifying exempt status for proper wage and hour
-                  compliance.
-                </p>
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-full shadow-sm">
+                <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                <span className="text-sm font-medium text-amber-800">
+                  Set Exempt Status
+                </span>
               </div>
             )}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      )}
     </div>
   );
 }

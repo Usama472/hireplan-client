@@ -2,7 +2,6 @@
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { JobFormData } from "@/interfaces";
 import {
   AlertTriangle,
@@ -17,6 +16,8 @@ import {
   Zap,
 } from "lucide-react";
 import { useFormContext } from "react-hook-form";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
 import { AutomationReview } from "./AutomationReview";
 import { AvailabilityReview } from "./AvailabilityReview";
 import { ComplianceReview } from "./ComplianceReview";
@@ -46,6 +47,24 @@ export function ReviewPublishStep({
 }: ReviewPublishStepProps) {
   const { watch } = useFormContext<JobFormData>();
   const formData = watch();
+  const [activeTab, setActiveTab] = useState(
+    mode === "review" ? "applicants" : "job-ad"
+  );
+
+  // Tab configuration
+  const tabs = [
+    { id: "job-ad", label: "Overview", icon: FileText },
+    { id: "position", label: "Position", icon: Briefcase },
+    { id: "schedule", label: "Schedule", icon: Clock },
+    { id: "compliance", label: "Compliance", icon: Building },
+    { id: "qualifications", label: "Qualifications", icon: Users },
+    { id: "posting", label: "Posting", icon: Calendar },
+    { id: "automation", label: "Automation", icon: Zap },
+    { id: "availability", label: "Availability", icon: CalendarClock },
+    ...(mode === "review"
+      ? [{ id: "applicants", label: "Applicants", icon: UserCheck }]
+      : []),
+  ];
 
   const getValidationStatus = () => {
     const issues: string[] = [];
@@ -166,128 +185,66 @@ export function ReviewPublishStep({
         </div>
       )}
 
-      {/* Review Tabs */}
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-        <Tabs
-          defaultValue={mode === "review" ? "applicants" : "job-ad"}
-          className="w-full"
-        >
-          <div className="border-b-2 border-gray-200">
-            <TabsList
-              className={`grid w-full ${
-                mode === "review" ? "grid-cols-9" : "grid-cols-8"
-              } h-16 bg-transparent border-0 p-0`}
-            >
-              <TabsTrigger
-                value="job-ad"
-                className="flex flex-col items-center gap-1 h-full rounded-none border-b-2 border-transparent data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-700 hover:bg-gray-50 transition-all rounded-tl-md"
+      {/* Clean Tab Navigation */}
+      <div className="bg-white rounded-lg shadow-sm mb-8 border border-gray-200">
+        <nav className="flex space-x-8 px-8 pt-4 pb-4">
+          {tabs.map((tab) => {
+            const isActive = activeTab === tab.id;
+            const IconComponent = tab.icon;
+
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={cn(
+                  "flex items-center gap-2 py-4 px-1 font-medium text-sm transition-all duration-200 cursor-pointer border-b-2 relative",
+                  isActive
+                    ? "border-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent font-semibold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-gradient-to-r after:from-blue-500 after:via-purple-500 after:to-pink-500"
+                    : "border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300"
+                )}
               >
-                <FileText className="h-5 w-5" />
-                <span className="text-xs font-medium">Job Ad</span>
-              </TabsTrigger>
-              <TabsTrigger
-                value="position"
-                className="flex flex-col items-center gap-1 h-full rounded-none border-b-2 border-transparent data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-700 hover:bg-gray-50 transition-all"
-              >
-                <Briefcase className="h-5 w-5" />
-                <span className="text-xs font-medium">Position</span>
-              </TabsTrigger>
-              <TabsTrigger
-                value="schedule"
-                className="flex flex-col items-center gap-1 h-full rounded-none border-b-2 border-transparent data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-700 hover:bg-gray-50 transition-all"
-              >
-                <Clock className="h-5 w-5" />
-                <span className="text-xs font-medium">Schedule</span>
-              </TabsTrigger>
-              <TabsTrigger
-                value="compliance"
-                className="flex flex-col items-center gap-1 h-full rounded-none border-b-2 border-transparent data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-700 hover:bg-gray-50 transition-all"
-              >
-                <Building className="h-5 w-5" />
-                <span className="text-xs font-medium">Compliance</span>
-              </TabsTrigger>
-              <TabsTrigger
-                value="qualifications"
-                className="flex flex-col items-center gap-1 h-full rounded-none border-b-2 border-transparent data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-700 hover:bg-gray-50 transition-all"
-              >
-                <Users className="h-5 w-5" />
-                <span className="text-xs font-medium">Qualifications</span>
-              </TabsTrigger>
-              <TabsTrigger
-                value="posting"
-                className="flex flex-col items-center gap-1 h-full rounded-none border-b-2 border-transparent data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-700 hover:bg-gray-50 transition-all"
-              >
-                <Calendar className="h-5 w-5" />
-                <span className="text-xs font-medium">Posting</span>
-              </TabsTrigger>
-              <TabsTrigger
-                value="automation"
-                className="flex flex-col items-center gap-1 h-full rounded-none border-b-2 border-transparent data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-700 hover:bg-gray-50 transition-all"
-              >
-                <Zap className="h-5 w-5" />
-                <span className="text-xs font-medium">Automation</span>
-              </TabsTrigger>
-              <TabsTrigger
-                value="availability"
-                className={`flex flex-col items-center gap-1 h-full rounded-none border-b-2 border-transparent data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-700 hover:bg-gray-50 transition-all ${
-                  mode !== "review" ? "rounded-tr-md" : ""
-                }`}
-              >
-                <CalendarClock className="h-5 w-5" />
-                <span className="text-xs font-medium">Availability</span>
-              </TabsTrigger>
-              {mode === "review" && (
-                <TabsTrigger
-                  value="applicants"
-                  className="flex flex-col items-center gap-1 h-full rounded-none border-b-2 border-transparent data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-700 hover:bg-gray-50 transition-all rounded-tr-md"
-                >
-                  <UserCheck className="h-5 w-5" />
-                  <span className="text-xs font-medium">Applicants</span>
-                </TabsTrigger>
-              )}
-            </TabsList>
-          </div>
+                <IconComponent
+                  className={cn(
+                    "w-4 h-4",
+                    isActive ? "text-blue-600" : "text-gray-500"
+                  )}
+                />
+                {tab.label}
+              </button>
+            );
+          })}
+        </nav>
+      </div>
 
-          <div className="p-8">
-            <TabsContent value="job-ad" className="mt-0">
-              <JobAdReview formData={formData} />
-            </TabsContent>
-
-            <TabsContent value="position" className="mt-0">
-              <PositionDetailsReview formData={formData} />
-            </TabsContent>
-
-            <TabsContent value="schedule" className="mt-0">
-              <HoursScheduleReview formData={formData} />
-            </TabsContent>
-
-            <TabsContent value="compliance" className="mt-0">
-              <ComplianceReview formData={formData} />
-            </TabsContent>
-
-            <TabsContent value="qualifications" className="mt-0">
-              <QualificationsReview formData={formData} />
-            </TabsContent>
-
-            <TabsContent value="posting" className="mt-0">
-              <PostingScheduleReview formData={formData} />
-            </TabsContent>
-
-            <TabsContent value="automation" className="mt-0">
-              <AutomationReview formData={formData} />
-            </TabsContent>
-
-            <TabsContent value="availability" className="mt-0">
-              <AvailabilityReview formData={formData} />
-            </TabsContent>
-
-            {mode === "review" && jobId && (
-              <TabsContent value="applicants" className="mt-0">
-                <ApplicantsSection jobId={jobId} jobViews={jobViews} />
-              </TabsContent>
-            )}
-          </div>
-        </Tabs>
+      {/* Tab Content */}
+      <div className="bg-white rounded-lg border border-gray-100 shadow-none">
+        <div className="p-8">
+          {activeTab === "job-ad" && <JobAdReview formData={formData} />}
+          {activeTab === "position" && (
+            <PositionDetailsReview formData={formData} />
+          )}
+          {activeTab === "schedule" && (
+            <HoursScheduleReview formData={formData} />
+          )}
+          {activeTab === "compliance" && (
+            <ComplianceReview formData={formData} />
+          )}
+          {activeTab === "qualifications" && (
+            <QualificationsReview formData={formData} />
+          )}
+          {activeTab === "posting" && (
+            <PostingScheduleReview formData={formData} />
+          )}
+          {activeTab === "automation" && (
+            <AutomationReview formData={formData} />
+          )}
+          {activeTab === "availability" && (
+            <AvailabilityReview formData={formData} />
+          )}
+          {activeTab === "applicants" && mode === "review" && jobId && (
+            <ApplicantsSection jobId={jobId} jobViews={jobViews} />
+          )}
+        </div>
       </div>
     </div>
   );

@@ -1,17 +1,7 @@
 "use client";
 
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import API from "@/http";
 import type { AvailabilityTemplate, JobFormData } from "@/interfaces";
-import {
-  Calendar,
-  CalendarClock,
-  CalendarDays,
-  Clock,
-  User,
-} from "lucide-react";
 import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { toast } from "sonner";
@@ -92,117 +82,154 @@ export function AvailabilityReview({ formData }: AvailabilityReviewProps) {
 
   if (error) {
     return (
-      <Alert variant="destructive">
-        <AlertDescription>{error}</AlertDescription>
-      </Alert>
+      <div className="flex justify-end">
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-50 border border-red-200 rounded-full shadow-sm">
+          <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+          <span className="text-sm font-medium text-red-800">{error}</span>
+        </div>
+      </div>
     );
   }
 
   if (!template) {
     return (
-      <Alert className="bg-yellow-50 border-yellow-200 text-yellow-800">
-        <AlertDescription>
-          Loading availability template... Please wait or go back to the Booking
-          Page step to select a template.
-        </AlertDescription>
-      </Alert>
+      <div className="flex justify-end">
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-full shadow-sm">
+          <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+          <span className="text-sm font-medium text-amber-800">
+            Loading availability template... Please wait or go back to the
+            Booking Page step to select a template.
+          </span>
+        </div>
+      </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8">
+      {/* Section Header */}
+      <div className="space-y-2">
         <h2 className="text-2xl font-bold text-gray-900">Booking Page</h2>
+        <p className="text-gray-600">
+          Review the selected availability template and scheduling
+          configuration.
+        </p>
       </div>
 
-      <Card className="overflow-hidden border-blue-200 bg-blue-50/50">
-        <CardHeader className="bg-blue-100/50 border-b border-blue-200 pb-3">
-          <CardTitle className="text-lg flex items-center gap-2 text-blue-900">
-            <CalendarClock className="h-5 w-5 text-blue-600" />
+      {/* Selected Availability Template */}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
             Selected Availability Template
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="pt-4 pb-4">
-          <div className="bg-white rounded-lg border border-blue-100 p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <CalendarDays className="h-5 w-5 text-blue-600" />
-                <h3 className="text-lg font-semibold text-gray-900">
-                  {template.templateName}
-                </h3>
+          </h3>
+          <div
+            className={`inline-flex items-center gap-1 px-2 py-1 rounded-full ${
+              template.isActive
+                ? "bg-emerald-50 border border-emerald-200"
+                : "bg-gray-50 border border-gray-200"
+            }`}
+          >
+            <div
+              className={`w-1.5 h-1.5 rounded-full ${
+                template.isActive ? "bg-emerald-500" : "bg-gray-500"
+              }`}
+            ></div>
+            <span
+              className={`text-xs font-medium ${
+                template.isActive ? "text-emerald-700" : "text-gray-700"
+              }`}
+            >
+              {template.isActive ? "Active" : "Inactive"}
+            </span>
+          </div>
+        </div>
+
+        <div className="p-6 bg-gray-50 border border-gray-200 rounded-lg">
+          <div className="space-y-6">
+            {/* Template Name */}
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+                Template Name
+              </h4>
+              <div className="text-gray-700 text-lg font-medium">
+                {template.templateName}
               </div>
-              <Badge
-                variant={template.isActive ? "default" : "outline"}
-                className={
-                  template.isActive
-                    ? "bg-green-100 text-green-700 border-green-200"
-                    : "bg-gray-100 text-gray-700 border-gray-200"
-                }
-              >
-                {template.isActive ? "Active" : "Inactive"}
-              </Badge>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-sm text-gray-700">
-                  <Clock className="h-4 w-4 text-gray-500" />
-                  <span>Timezone: {template.timezone}</span>
-                </div>
-
-                <div className="flex items-center gap-2 text-sm text-gray-700">
-                  <User className="h-4 w-4 text-gray-500" />
-                  <span>
-                    Owner: {template.user.firstName} {template.user.lastName}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2 text-sm text-gray-700">
-                  <Calendar className="h-4 w-4 text-gray-500" />
-                  <span>
-                    Meeting Platform:{" "}
-                    {template.selectedMeetingPlatform || "Not specified"}
-                  </span>
-                </div>
-              </div>
-
-              <div>
-                <p className="text-sm font-medium text-gray-700 mb-2">
-                  Available Event Types:
-                </p>
-                {template.eventTypes && template.eventTypes.length > 0 ? (
-                  <div className="flex flex-wrap gap-1.5">
-                    {template.eventTypes.map((eventType) => (
-                      <Badge
-                        key={eventType.id}
-                        variant="secondary"
-                        className="text-xs"
-                        style={{
-                          backgroundColor: `${eventType.color}20`,
-                          color: eventType.color,
-                        }}
-                      >
-                        {eventType.name} ({eventType.duration} min)
-                      </Badge>
-                    ))}
+            {/* Template Details */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+                    Timezone
+                  </h4>
+                  <div className="text-gray-700 text-sm font-medium">
+                    {template.timezone}
                   </div>
-                ) : (
-                  <p className="text-sm text-gray-500">
-                    No event types defined
-                  </p>
-                )}
+                </div>
+
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+                    Owner
+                  </h4>
+                  <div className="text-gray-700 text-sm font-medium">
+                    {template.user.firstName} {template.user.lastName}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+                    Meeting Platform
+                  </h4>
+                  <div className="text-gray-700 text-sm font-medium">
+                    {template.selectedMeetingPlatform || "Not specified"}
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+                    Available Event Types
+                  </h4>
+                  {template.eventTypes && template.eventTypes.length > 0 ? (
+                    <div className="space-y-2">
+                      {template.eventTypes.map((eventType) => (
+                        <div
+                          key={eventType.id}
+                          className="inline-flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg"
+                        >
+                          <div
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: eventType.color }}
+                          ></div>
+                          <span className="text-gray-700 text-sm font-medium">
+                            {eventType.name} ({eventType.duration} min)
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-gray-400 italic text-sm">
+                      No event types defined
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
-            <div className="mt-4 text-sm text-gray-500">
-              <p>
-                Last updated:{" "}
+            {/* Last Updated */}
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+                Last Updated
+              </h4>
+              <div className="text-gray-700 text-sm font-medium">
                 {new Date(template.updatedAt).toLocaleDateString()}
-              </p>
+              </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

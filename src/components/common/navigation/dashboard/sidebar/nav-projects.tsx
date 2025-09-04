@@ -25,7 +25,7 @@ export function NavProjects({
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel className="text-xs font-medium text-gray-600 dark:text-white/60 uppercase tracking-wider mb-4 px-3">
+      <SidebarGroupLabel className=" font-medium text-gray-600 dark:text-white/60 uppercase tracking-wider mb-4 px-3">
         {name}
       </SidebarGroupLabel>
       <SidebarMenu className="space-y-1">
@@ -40,9 +40,9 @@ export function NavProjects({
                 className="p-0 hover:bg-transparent focus:bg-transparent active:bg-transparent"
               >
                 <div
-                  className={`group cursor-pointer flex items-center gap-3 px-3 py-2.5 mx-2 rounded-xl transition-all duration-200 ${
+                  className={`group cursor-pointer flex items-center gap-3 px-4 py-5 mx-2 rounded-md transition-all duration-200 font-normal ${
                     isActive
-                      ? "bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30"
+                      ? "bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white"
                       : "hover:bg-gray-100 text-gray-700 dark:hover:bg-white/10 dark:text-white/70"
                   }`}
                 >
@@ -63,7 +63,7 @@ export function NavProjects({
                     {item.name}
                   </span>
                   {isActive && (
-                    <div className="w-2 h-2 bg-white rounded-full opacity-80"></div>
+                    <div className="w-2 h-2 bg-white rounded-full opacity-80 ml-auto"></div>
                   )}
                 </div>
               </SidebarMenuButton>

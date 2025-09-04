@@ -10,9 +10,9 @@ import { JobQualificationsStep } from "@/components/dashboard/jobs/common/job-qu
 import { PostingScheduleBudgetStep } from "@/components/dashboard/jobs/common/posting-schedule-budget-step";
 import { ReviewPublishStep } from "@/components/dashboard/jobs/common/review-publish-step";
 import { StepNavigation } from "@/components/main/signup/stepNavigation";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
   TooltipContent,
@@ -32,14 +32,14 @@ import {
   jobFormSchema,
   type JobFormSchema,
 } from "@/lib/validations/forms/job-form-schema";
+import type { JobTemplate } from "@/types/job-template";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Database, FileText, RotateCcw, Sparkles, Layers } from "lucide-react";
+import { Database, FileText, Layers, RotateCcw, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { SaveAsTemplateDialog } from "./SaveAsTemplateDialog";
-import type { JobTemplate } from "@/types/job-template";
 
 // Draft Management Constants
 const DRAFT_STORAGE_KEY = "job_creation_draft";
@@ -646,21 +646,23 @@ export default function CreateJob() {
   return (
     <main className="pb-16">
       {/* Enhanced Header */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100 px-6 py-4 relative overflow-hidden max-h-[80px]">
+      <div className="bg-white border-b border-gray-200 px-6 py-4 relative overflow-hidden max-h-[80px]">
         <div className="relative z-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-blue-100 rounded-xl">
-                <FileText className="h-6 w-6 text-blue-600" />
+              <div className="p-3 bg-gray-100 rounded-xl">
+                <FileText className="h-6 w-6 text-gray-600" />
               </div>
               <div className="flex flex-col">
-                <h1 className="text-2xl font-bold text-black">Create New Job</h1>
-                <p className="text-black flex items-center gap-2">
+                <h1 className="text-2xl font-bold text-gray-900">
+                  Create New Job
+                </h1>
+                <p className="text-gray-600 flex items-center gap-2">
                   Set up your job posting with detailed requirements and
                   preferences
                   <Badge
                     variant="secondary"
-                    className="bg-blue-100 text-blue-700 text-xs"
+                    className="bg-gray-100 text-gray-700 text-xs"
                   >
                     Step {currentStep} of {totalSteps}
                   </Badge>
@@ -674,7 +676,7 @@ export default function CreateJob() {
                   variant="outline"
                   size="sm"
                   onClick={() => setShowSaveTemplateDialog(true)}
-                  className="bg-white hover:bg-blue-50 border-blue-200 text-blue-600 hover:text-blue-700 rounded-xl h-9 px-4 font-medium transition-all duration-200 shadow-sm"
+                  className="bg-white hover:bg-gray-50 border-gray-200 text-gray-600 hover:text-gray-700 rounded-xl h-9 px-4 font-medium transition-all duration-200 shadow-sm"
                 >
                   <FileText className="h-4 w-4 mr-2" />
                   Save as Template
@@ -687,25 +689,25 @@ export default function CreateJob() {
                       state: { fromJobCreation: true },
                     })
                   }
-                  className="bg-white hover:bg-blue-50 border-blue-200 text-blue-600 hover:text-blue-700 rounded-xl h-9 px-4 font-medium transition-all duration-200 shadow-sm"
+                  className="bg-white hover:bg-gray-50 border-gray-200 text-gray-600 hover:text-gray-700 rounded-xl h-9 px-4 font-medium transition-all duration-200 shadow-sm"
                 >
                   <Layers className="h-4 w-4 mr-2" />
                   {selectedTemplate ? "Change Template" : "Browse Templates"}
                 </Button>
               </div>
 
-              <div className="h-8 w-px bg-blue-200" />
+              <div className="h-8 w-px bg-gray-200" />
 
               {/* Progress Display */}
               <div className="text-right">
-                <div className="text-2xl font-bold text-black">
+                <div className="text-2xl font-bold text-gray-900">
                   {Math.round(((currentStep - 1) / (totalSteps - 1)) * 100)}%
                 </div>
                 <p className="text-sm text-gray-600 font-medium">Complete</p>
               </div>
               {/* Progress Bar */}
               <div className="w-32">
-                <div className="w-full bg-blue-200 rounded-full h-2">
+                <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
                     className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full transition-all duration-300 ease-out"
                     style={{
