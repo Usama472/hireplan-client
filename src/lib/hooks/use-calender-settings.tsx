@@ -31,6 +31,8 @@ const useCalenderSettings = () => {
           };
           if (res.meetingPlatform === "google") {
             latestUser.googleTokens = res.platformSettings;
+          } else if (res.meetingPlatform === "outlook") {
+            latestUser.microsoftTokens = res.platformSettings;
           }
           updateUser(latestUser);
         }

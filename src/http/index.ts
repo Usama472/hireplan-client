@@ -8,6 +8,7 @@ import * as emailTemplateApi from "./email-template/api";
 import * as globalSettingApi from "./global-setting/api";
 import * as googleApi from "./google/api";
 import * as interviewApi from "./interview/api";
+import * as microsoftApi from "./microsoft/api";
 import * as jobTemplateApi from "./job-template/api";
 import * as jobApi from "./job/api";
 import * as roleApi from "./role/api";
@@ -24,6 +25,7 @@ const API = {
   applicant: applicantApi,
   availability: availabilityApi,
   google: googleApi,
+  microsoft: microsoftApi,
   emailChat: emailChatApi,
   emailTemplate: emailTemplateApi,
   globalSetting: globalSettingApi,

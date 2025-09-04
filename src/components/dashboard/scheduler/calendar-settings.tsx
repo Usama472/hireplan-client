@@ -16,9 +16,13 @@ interface CalendarSettingsProps {
 export function CalendarSettings({ className }: CalendarSettingsProps) {
   const { toast } = useToast();
   const [isConnecting, setIsConnecting] = useState(false);
+  const [isConnectingMicrosoft, setIsConnectingMicrosoft] = useState(false);
   const { isMeetingPlatformConnected, platformSettings, isLoading, refresh } =
     useCalenderSettings();
   const isConnected = isMeetingPlatformConnected;
+  
+  // Check if Microsoft is connected (you'll need to add this to your hook)
+  const isMicrosoftConnected = platformSettings?.preferredMeetingPlatform === 'outlook';
 
   const handleConnectGoogleCalendar = async () => {
     setIsConnecting(true);
@@ -35,6 +39,43 @@ export function CalendarSettings({ className }: CalendarSettingsProps) {
       });
     } finally {
       setIsConnecting(false);
+    }
+  };
+
+  const handleConnectMicrosoftCalendar = async () => {
+    setIsConnectingMicrosoft(true);
+    try {
+      const res = await API.microsoft.getMicrosoftAuthUrl();
+      const microsoftAuthUrl = res.authUrl;
+      location.href = microsoftAuthUrl;
+    } catch (error) {
+      console.error("Failed to connect Microsoft Calendar:", error);
+      toast({
+        type: "error",
+        title: "Connection Failed",
+        description: "Failed to connect Microsoft Calendar. Please try again.",
+      });
+    } finally {
+      setIsConnectingMicrosoft(false);
+    }
+  };
+
+  const handleDisconnectMicrosoft = async () => {
+    try {
+      await API.microsoft.disconnectMicrosoftCalendar();
+      await refresh();
+      toast({
+        type: "success",
+        title: "Disconnected",
+        description: "Microsoft Calendar has been disconnected successfully.",
+      });
+    } catch (error) {
+      console.error("Failed to disconnect Microsoft Calendar:", error);
+      toast({
+        type: "error",
+        title: "Disconnection Failed",
+        description: "Failed to disconnect Microsoft Calendar. Please try again.",
+      });
     }
   };
 
@@ -140,26 +181,64 @@ export function CalendarSettings({ className }: CalendarSettingsProps) {
             </div>
           </div>
 
-          {/* Future Integrations - Coming Soon */}
-          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg opacity-60">
+          {/* Microsoft Outlook Calendar Integration */}
+          <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
             <div className="flex items-center gap-4">
               <div className="h-10 w-10 rounded-lg overflow-hidden flex items-center justify-center bg-white">
                 <img 
                   src="/microsoft.png" 
-                  alt="Microsoft Teams" 
+                  alt="Microsoft Outlook" 
                   className="h-8 w-8 object-contain" 
                 />
               </div>
               <div>
                 <h3 className="font-medium text-gray-900">Outlook Calendar</h3>
                 <p className="text-sm text-gray-600">
-                  Office 365, Outlook.com, live.com, or hotmail calendar
+                  {isMicrosoftConnected && typeof platformSettings === 'object' && platformSettings?.email ? (
+                    <>Connected as {platformSettings.email}</>
+                  ) : (
+                    "Office 365, Outlook.com, live.com, or hotmail calendar"
+                  )}
                 </p>
               </div>
             </div>
-            <Button variant="outline" disabled size="sm" className="text-gray-400">
-              Coming Soon
-            </Button>
+            <div className="flex items-center gap-3">
+              {isMicrosoftConnected && !isLoading && (
+                <>
+                  <Badge 
+                    variant="secondary" 
+                    className="bg-green-50 text-green-700 border-green-200"
+                  >
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    Connected
+                  </Badge>
+                  <Button 
+                    onClick={handleDisconnectMicrosoft} 
+                    variant="outline"
+                    size="sm"
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    Disconnect
+                  </Button>
+                </>
+              )}
+              {!isMicrosoftConnected && !isLoading && (
+                <Button 
+                  onClick={handleConnectMicrosoftCalendar} 
+                  disabled={isConnectingMicrosoft} 
+                  size="sm"
+                >
+                  {isConnectingMicrosoft ? (
+                    <>
+                      <div className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent mr-2"></div>
+                      Connecting...
+                    </>
+                  ) : (
+                    "Connect"
+                  )}
+                </Button>
+              )}
+            </div>
           </div>
 
           <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg opacity-60">

@@ -35,6 +35,7 @@ import GlobalSettingPage from "@/pages/dashboard/global-setting";
 import JobTemplatesPage from "@/pages/dashboard/job-templates";
 import EditJobPage from "@/pages/dashboard/jobs/edit";
 import InterviewSchedulePage from "@/pages/interview/schedule";
+import OutlookAuthPage from "@/pages/outlook/auth";
 import ForgotPassword from "@pages/auth/ForgotPassword";
 import Login from "@pages/auth/Login";
 import ResetPassword from "@pages/auth/ResetPassword";
@@ -83,6 +84,12 @@ export const appRoutes: AppRoutesType[] = [
     id: "interview-schedule",
     url: ROUTES.INTERVIEW_SCHEDULE,
     element: <InterviewSchedulePage />,
+    isPrivate: false,
+  },
+  {
+    id: "outlook-auth",
+    url: "/outlook/auth",
+    element: <OutlookAuthPage />,
     isPrivate: false,
   },
   {
