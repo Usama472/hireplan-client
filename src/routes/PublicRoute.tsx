@@ -15,7 +15,7 @@ const PublicRoute: FC<PublicRouteProps> = ({ children }) => {
   const { status } = useAuthSessionContext();
   const path = location.pathname;
 
-  const hideLayoutFor = ["/login", "/signup"];
+  const hideLayoutFor = ["/signup"];
 
   // Show loading state while checking authentication
   if (status === "loading") {

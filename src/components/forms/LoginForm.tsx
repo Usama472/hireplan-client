@@ -118,7 +118,7 @@ export const LoginForm = () => {
         {/* Submit Button */}
         <Button
           type="submit"
-          className="w-full h-12 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:transform-none disabled:shadow-lg"
+          className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-blue-600/25 transform hover:-translate-y-0.5 disabled:transform-none disabled:shadow-lg"
           disabled={isLoading}
         >
           {isLoading ? (

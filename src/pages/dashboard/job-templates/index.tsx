@@ -38,7 +38,7 @@ const JobTemplatesPage: React.FC = () => {
               {/* Create Job Button */}
               <Button
                 onClick={() => navigate(ROUTES.DASHBOARD.CREATE_JOB)}
-                className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200 gap-2 px-5 font-medium"
+                className="bg-blue-600 hover:bg-blue-700 text-white border-0 shadow-lg hover:shadow-xl hover:shadow-blue-600/25 transition-all duration-300 gap-2 px-5 font-medium"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Create Job from Template

@@ -16,24 +16,14 @@ export const LoginLayout = ({ children }: LoginLayoutProps) => {
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
 
-      {/* Logo */}
-      <div
-        className="absolute top-8 left-8 text-2xl font-bold tracking-tight cursor-pointer z-10 group"
-        onClick={() => navigate(ROUTES.HOME)}
-      >
-        <div className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent group-hover:scale-105 transition-transform duration-200">
-          {APP_NAME}
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="relative z-10 flex items-center justify-center min-h-screen px-4 sm:px-6 pt-20 pb-8">
+      {/* Main Content - Adjusted for header */}
+      <div className="relative z-10 flex items-center justify-center min-h-[calc(100vh-64px)] px-4 sm:px-6 pt-8 pb-8 mt-16">
         <div className="w-full max-w-md">
           {/* Login Card */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
             {/* Header */}
             <div className="text-center mb-8">
-              <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-r from-primary to-secondary rounded-2xl shadow-lg mb-4 mx-auto">
+              <div className="flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl shadow-lg mb-4 mx-auto">
                 <Shield className="h-8 w-8 text-white" />
               </div>
               <h1 className="text-2xl font-bold text-gray-900 mb-2">
@@ -79,8 +69,8 @@ export const LoginLayout = ({ children }: LoginLayoutProps) => {
       </div>
 
       {/* Decorative Elements */}
-      <div className="absolute top-1/4 right-0 w-32 h-32 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-1/4 left-0 w-24 h-24 bg-gradient-to-br from-secondary/10 to-primary/10 rounded-full blur-2xl"></div>
+      <div className="absolute top-1/4 right-0 w-32 h-32 bg-blue-600/10 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-1/4 left-0 w-24 h-24 bg-blue-600/10 rounded-full blur-2xl"></div>
     </div>
   );
 };

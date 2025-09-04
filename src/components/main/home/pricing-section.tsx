@@ -134,7 +134,7 @@ export function PricingSection() {
             className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-4 tracking-tight leading-tight"
           >
             Plans that grow{" "}
-            <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+            <span className="text-blue-600 font-bold">
               with your business
             </span>
           </motion.h2>

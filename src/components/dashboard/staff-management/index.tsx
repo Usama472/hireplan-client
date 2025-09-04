@@ -363,7 +363,7 @@ export default function StaffManagement() {
               />
               <Button
                 onClick={handleCreateNew}
-                className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white gap-1"
+                className="bg-blue-600 hover:bg-blue-700 text-white gap-1 shadow-lg hover:shadow-xl hover:shadow-blue-600/25 transition-all duration-300"
               >
                 <Plus className="h-4 w-4" />
                 <span>Add {activeTab === "staff" ? "Staff" : "Role"}</span>

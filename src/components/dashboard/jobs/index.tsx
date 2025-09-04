@@ -156,7 +156,7 @@ export default function JobsPage() {
                 {canCreateJob && (
                   <Button
                     onClick={() => navigate(ROUTES.DASHBOARD.CREATE_JOB)}
-                    className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white border-0 transition-all duration-200 gap-2"
+                    className="bg-blue-600 hover:bg-blue-700 text-white border-0 shadow-lg hover:shadow-xl hover:shadow-blue-600/25 transition-all duration-300 gap-2"
                   >
                     <Plus className="w-4 h-4" />
                     Create Job

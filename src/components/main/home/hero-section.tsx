@@ -1,14 +1,13 @@
-import BackgroundImage from "@/assets/home-bg.png";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
 import {
-  ArrowRight,
-  Briefcase,
   Rocket,
   Sparkles,
+  ArrowRight,
   Users,
+  Briefcase,
   Zap,
 } from "lucide-react";
+import { motion } from "framer-motion";
 
 export function HeroSection() {
   // Animation variants
@@ -111,34 +110,60 @@ export function HeroSection() {
     },
   };
 
-  return (
-    <section className="relative overflow-hidden bg-[#ececec] min-h-[calc(100vh-65px)]">
-      {/* Background Image */}
-      <img
-        src={BackgroundImage}
-        alt="Professional business team meeting"
-        className="absolute inset-0 w-full h-full object-cover brightness-75"
-      />
+  const floatVariants = {
+    hidden: { opacity: 0, scale: 0.8 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        duration: 1,
+        ease: "easeOut",
+      },
+    },
+  };
 
-      {/* Blackish Overlay for better text readability */}
-      <div className="absolute inset-0 bg-black/50"></div>
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent"></div>
+  return (
+    <section className="relative pt-16 pb-12 overflow-hidden bg-primary">
+      {/* Background Elements */}
+      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-purple-500/10 via-transparent to-blue-500/10"></div>
+
+      {/* Floating Elements */}
+      <motion.div
+        variants={floatVariants}
+        initial="hidden"
+        animate="visible"
+        className="absolute top-16 left-8 w-56 h-56 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"
+      ></motion.div>
+      <motion.div
+        variants={floatVariants}
+        initial="hidden"
+        animate="visible"
+        transition={{ delay: 0.3 }}
+        className="absolute top-32 right-8 w-80 h-80 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse delay-1000"
+      ></motion.div>
+      <motion.div
+        variants={floatVariants}
+        initial="hidden"
+        animate="visible"
+        transition={{ delay: 0.6 }}
+        className="absolute bottom-16 left-1/2 transform -translate-x-1/2 w-48 h-48 bg-gradient-to-r from-pink-400/20 to-purple-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse delay-500"
+      ></motion.div>
 
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 z-10"
+        className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8"
       >
-        <div className="text-center max-w-6xl mx-auto flex flex-col items-center justify-center min-h-[calc(100vh-65px)]">
+        <div className="text-center max-w-3xl mx-auto">
           {/* Trust Badge */}
           <motion.div
             variants={trustBadgeVariants}
             whileHover={{
               scale: 1.05,
               y: -3,
-              backgroundColor: "rgba(59, 130, 246, 0.1)",
-              borderColor: "rgba(59, 130, 246, 0.3)",
+              backgroundColor: "rgba(255, 255, 255, 0.15)",
+              borderColor: "rgba(255, 255, 255, 0.3)",
             }}
             whileTap={{ scale: 0.98 }}
             transition={{
@@ -147,18 +172,18 @@ export function HeroSection() {
               backgroundColor: { duration: 0.2 },
               borderColor: { duration: 0.2 },
             }}
-            className="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-md border border-white/20 text-white px-4 py-2 rounded-full text-xs font-medium mb-6 cursor-pointer group hover:bg-white/20 transition-all duration-300"
+            className="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-sm text-white/90 px-4 py-2 rounded-full text-sm font-medium mb-6 border border-white/20 shadow-lg cursor-pointer group"
           >
             <motion.div
               whileHover={{ rotate: 360, scale: 1.2 }}
               transition={{ duration: 0.6, ease: "easeOut" }}
             >
-              <Sparkles className="h-3 w-3 text-white" />
+              <Sparkles className="h-4 w-4 text-yellow-400" />
             </motion.div>
             <motion.span
-              whileHover={{ color: "rgba(59, 130, 246, 1)" }}
+              whileHover={{ color: "rgba(255, 255, 255, 1)" }}
               transition={{ duration: 0.2 }}
-              className="font-semibold"
+              className="font-medium"
             >
               Trusted by 500+ companies worldwide
             </motion.span>
@@ -167,26 +192,24 @@ export function HeroSection() {
           {/* Main Headline */}
           <motion.h1
             variants={headlineVariants}
-            className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-white leading-tight mb-4 tracking-tight"
+            className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight mb-4 tracking-tight"
           >
-            Your All-in-One{" "}
+            Hire the right talent{" "}
             <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-              Hiring Solution
-            </span>{" "}
-            Platform
+              10x faster
+            </span>
           </motion.h1>
 
           {/* Subheadline */}
           <motion.p
             variants={subheadlineVariants}
-            className="text-sm sm:text-base lg:text-lg text-white/90 max-w-3xl mx-auto leading-relaxed mb-8 font-light"
+            className="text-base sm:text-lg text-white/80 max-w-2xl mx-auto leading-relaxed mb-8 font-light"
           >
-            Streamline your entire recruitment process with our powerful
-            dashboard. From job creation to final selection,{" "}
-            <span className="text-white font-semibold">
-              everything is simplified and efficient
-            </span>{" "}
-            with AI-powered tools.
+            AI-powered candidate matching that eliminates 90% of manual screening. 
+            Find perfect candidates in{" "}
+            <span className="text-white font-medium">
+              minutes, not weeks
+            </span>.
           </motion.p>
 
           {/* Key Benefits Grid */}
@@ -196,61 +219,52 @@ export function HeroSection() {
           >
             <motion.div
               variants={cardVariants}
-              whileHover={{ y: -8, scale: 1.05 }}
-              className="relative group"
+              whileHover={{ y: -5 }}
+              className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-6 hover:bg-white/15 hover:border-white/30 transition-all duration-300 group"
             >
-              <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-xl p-4 hover:border-white/30 transition-all duration-500 h-full flex flex-col">
-                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
-                  <Briefcase className="h-6 w-6 text-blue-400" />
-                </div>
-                <h3 className="text-white font-bold text-sm mb-2">
-                  Job Creation & Management
-                </h3>
-                <p className="text-white/80 text-xs leading-relaxed flex-grow">
-                  Easily create and manage job postings tailored to your hiring
-                  needs with our intuitive dashboard
-                </p>
+              <div className="w-14 h-14 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <Briefcase className="h-7 w-7 text-white" />
               </div>
+              <h3 className="text-white font-semibold text-sm mb-3">
+                Job Creation & Management
+              </h3>
+              <p className="text-white/70 text-xs leading-relaxed">
+                Create and manage job postings with our intuitive dashboard
+              </p>
             </motion.div>
 
             <motion.div
               variants={cardVariants}
-              whileHover={{ y: -8, scale: 1.05 }}
+              whileHover={{ y: -5 }}
               transition={{ delay: 0.1 }}
-              className="relative group"
+              className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-6 hover:bg-white/15 hover:border-white/30 transition-all duration-300 group"
             >
-              <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-xl p-4 hover:border-white/30 transition-all duration-500 h-full flex flex-col">
-                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
-                  <Users className="h-6 w-6 text-green-400" />
-                </div>
-                <h3 className="text-white font-bold text-sm mb-2">
-                  AI-Powered Screening
-                </h3>
-                <p className="text-white/80 text-xs leading-relaxed flex-grow">
-                  Automatically evaluate resumes and highlight top candidates
-                  with intelligent algorithms
-                </p>
+              <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <Users className="h-7 w-7 text-white" />
               </div>
+              <h3 className="text-white font-semibold text-sm mb-3">
+                AI-Powered Screening
+              </h3>
+              <p className="text-white/70 text-xs leading-relaxed">
+                Automatically evaluate and rank candidates with intelligent scoring
+              </p>
             </motion.div>
 
             <motion.div
               variants={cardVariants}
-              whileHover={{ y: -8, scale: 1.05 }}
+              whileHover={{ y: -5 }}
               transition={{ delay: 0.2 }}
-              className="relative group"
+              className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-6 hover:bg-white/15 hover:border-white/30 transition-all duration-300 group"
             >
-              <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-xl p-4 hover:border-white/30 transition-all duration-500 h-full flex flex-col">
-                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
-                  <Zap className="h-6 w-6 text-purple-400" />
-                </div>
-                <h3 className="text-white font-bold text-sm mb-2">
-                  Automated Communication
-                </h3>
-                <p className="text-white/80 text-xs leading-relaxed flex-grow">
-                  Send AI-generated emails and manage responses efficiently with
-                  smart templates
-                </p>
+              <div className="w-14 h-14 bg-gradient-to-br from-purple-400 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <Zap className="h-7 w-7 text-white" />
               </div>
+              <h3 className="text-white font-semibold text-sm mb-3">
+                Automated Communication
+              </h3>
+              <p className="text-white/70 text-xs leading-relaxed">
+                Send AI-generated emails and SMS with smart templates
+              </p>
             </motion.div>
           </motion.div>
 
@@ -269,8 +283,8 @@ export function HeroSection() {
 
             <motion.div whileHover={{ y: -2 }}>
               <Button
-                variant="secondary"
-                className="h-[44px] px-8  text-white font-semibold group rounded-sm transition-all duration-500 flex items-center"
+                size="lg"
+                className="h-[56px] px-8 bg-blue-600 hover:bg-blue-700 text-white font-semibold group rounded-md shadow-lg hover:shadow-xl hover:shadow-blue-600/25 transition-all duration-300"
               >
                 <Rocket className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
                 Get Started
