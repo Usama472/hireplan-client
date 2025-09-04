@@ -89,23 +89,12 @@ export function SubscriptionManager({}: SubscriptionManagerProps) {
 
     try {
       setActionLoading("checkout");
-      const successUrl = `${window.location.origin}/dashboard/profile?tab=settings&success=true`;
-      const cancelUrl = `${window.location.origin}/dashboard/jobs`;
-
-      const response = await simpleSubscriptionAPI.createCheckout(
-        planId,
-        successUrl,
-        cancelUrl
-      );
-
-      if (response.url) {
-        window.location.href = response.url;
-      } else {
-        throw new Error("No checkout URL received");
-      }
+      
+      // Navigate to custom checkout page
+      window.location.href = `/checkout?plan=${planId}`;
     } catch (error: any) {
       toast.error(
-        `Failed to create checkout session: ${error.message || "Unknown error"}`
+        `Failed to navigate to checkout: ${error.message || "Unknown error"}`
       );
       setActionLoading(null);
     }

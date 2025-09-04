@@ -39,6 +39,7 @@ import ForgotPassword from "@pages/auth/ForgotPassword";
 import Login from "@pages/auth/Login";
 import ResetPassword from "@pages/auth/ResetPassword";
 import Signup from "@pages/auth/Signup";
+import CheckoutPage from "@/pages/checkout";
 
 export const appRoutes: AppRoutesType[] = [
   {
@@ -83,6 +84,12 @@ export const appRoutes: AppRoutesType[] = [
     url: ROUTES.INTERVIEW_SCHEDULE,
     element: <InterviewSchedulePage />,
     isPrivate: false,
+  },
+  {
+    id: "checkout",
+    url: ROUTES.CHECKOUT,
+    element: <CheckoutPage />,
+    isPrivate: true,
   },
   {
     id: DASHBOARD_TEXT,

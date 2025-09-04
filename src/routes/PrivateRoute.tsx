@@ -41,7 +41,7 @@ export const PrivateRoute = ({ children }: DefaultLayoutProps) => {
     <SidebarProvider>
       <ScrollToTop />
       <DashboardSidebar />
-      <SidebarInset className="max-h-screen bg-[#ececec]">
+      <SidebarInset className="max-h-screen bg-blue-50/30">
         <div className="overflow-y-auto w-full">{children}</div>
       </SidebarInset>
     </SidebarProvider>

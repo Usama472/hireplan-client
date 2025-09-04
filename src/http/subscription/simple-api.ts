@@ -61,6 +61,16 @@ export const simpleSubscriptionAPI = {
   reactivate: async () => {
     const response = await apiHelper.post(`${BASE_URL}/reactivate`, {});
     return response.data;
+  },
+
+  // Create subscription with payment method (for custom checkout)
+  createSubscription: async (data: {
+    planId: string;
+    paymentMethodId: string;
+    billingDetails: any;
+  }) => {
+    const response = await apiHelper.post(`${BASE_URL}/create`, data);
+    return response.data;
   }
 };
 

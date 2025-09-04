@@ -27,6 +27,7 @@ export const ROUTES = {
   FORGOT_PASSWORD: "/forgot-password",
   RESET_PASSWORD: "/reset-password",
   // RESET_PASSWORD_QUERY: "/reset-password",
+  CHECKOUT: "/checkout",
   DASHBOARD: DASHBOARD_ROUTES,
   CONTACT: "/contact",
   PRIVACY: "/privacy",
