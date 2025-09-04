@@ -33,6 +33,7 @@ export const INDUSTRIES: SelectOption[] = [
 export const PLANS = [
   {
     id: "starter",
+    stripeId: import.meta.env.VITE_STRIPE_STARTER_PRICE_ID,
     name: "Starter",
     price: "Starting at $149",
     period: "/month",
@@ -50,6 +51,7 @@ export const PLANS = [
   },
   {
     id: "professional",
+    stripeId: import.meta.env.VITE_STRIPE_PROFESSIONAL_PRICE_ID,
     name: "Professional",
     price: "Starting at $249",
     period: "/month",
@@ -69,6 +71,7 @@ export const PLANS = [
   },
   {
     id: "enterprise",
+    stripeId: import.meta.env.VITE_STRIPE_ENTERPRISE_PRICE_ID,
     name: "Enterprise",
     price: "Custom Pricing",
     period: "",

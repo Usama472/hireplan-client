@@ -13,6 +13,19 @@ export interface SubscriptionStatus {
 }
 
 export const simpleSubscriptionAPI = {
+  // Get Stripe configuration
+  getConfig: async () => {
+    try {
+      console.log('🚀 API: Getting Stripe config from backend');
+      const response = await apiHelper.get(`${BASE_URL}/config`);
+      console.log('📥 API: Config received:', response);
+      return response.data;
+    } catch (error) {
+      console.error('❌ API: Failed to get Stripe config:', error);
+      throw error;
+    }
+  },
+
   // Get subscription status
   getStatus: async (): Promise<SubscriptionStatus> => {
     try {
@@ -69,8 +82,10 @@ export const simpleSubscriptionAPI = {
     paymentMethodId: string;
     billingDetails: any;
   }) => {
+    console.log('🚀 Creating subscription with data:', { ...data, paymentMethodId: data.paymentMethodId?.substring(0, 10) + '...' });
     const response = await apiHelper.post(`${BASE_URL}/create`, data);
-    return response.data;
+    console.log('📥 Subscription creation response:', response);
+    return response;
   }
 };
 

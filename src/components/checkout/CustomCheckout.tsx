@@ -25,7 +25,33 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { simpleSubscriptionAPI } from '@/http/subscription/simple-api';
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY!);
+// Initialize Stripe dynamically from backend config
+let stripePromise: Promise<any> | null = null;
+
+const initializeStripe = async () => {
+  if (stripePromise) return stripePromise;
+  
+  try {
+    console.log('🔍 Fetching Stripe config from backend...');
+    const config = await simpleSubscriptionAPI.getConfig();
+    
+    console.log('🔍 Backend config response structure:', config);
+    
+    if (!config.publishableKey) {
+      console.error('❌ No Stripe publishable key received from backend');
+      console.error('   Expected: config.publishableKey');
+      console.error('   Received:', config);
+      return null;
+    }
+    
+    console.log('✅ Stripe config received, initializing Stripe...');
+    stripePromise = loadStripe(config.publishableKey);
+    return stripePromise;
+  } catch (error) {
+    console.error('❌ Failed to fetch Stripe config:', error);
+    return null;
+  }
+};
 
 interface CheckoutFormProps {
   selectedPlan: any;
@@ -88,10 +114,10 @@ function CheckoutForm({ selectedPlan, onBack }: CheckoutFormProps) {
         billingDetails
       });
 
-      if (response.requiresAction) {
+      if (response.data?.requiresAction && response.data?.clientSecret) {
         // Handle 3D Secure authentication
         const { error: confirmError } = await stripe.confirmCardPayment(
-          response.clientSecret
+          response.data.clientSecret
         );
 
         if (confirmError) {
@@ -105,7 +131,9 @@ function CheckoutForm({ selectedPlan, onBack }: CheckoutFormProps) {
       window.location.href = '/dashboard/profile?tab=settings&success=true';
 
     } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred');
+      console.error('Checkout error:', err);
+      const errorMessage = err.response?.data?.message || err.message || 'An unexpected error occurred';
+      setError(errorMessage);
       setLoading(false);
     }
   };
@@ -318,17 +346,12 @@ function CheckoutForm({ selectedPlan, onBack }: CheckoutFormProps) {
               <div className="space-y-2">
                 <h5 className="font-medium text-gray-900">Includes:</h5>
                 <ul className="space-y-1">
-                  {selectedPlan.features.slice(0, 5).map((feature: string, index: number) => (
+                  {selectedPlan.features.map((feature: string, index: number) => (
                     <li key={index} className="flex items-center space-x-2 text-sm text-gray-600">
                       <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
                       <span>{feature}</span>
                     </li>
                   ))}
-                  {selectedPlan.features.length > 5 && (
-                    <li className="text-sm text-gray-500 ml-6">
-                      +{selectedPlan.features.length - 5} more features
-                    </li>
-                  )}
                 </ul>
               </div>
 
@@ -350,14 +373,6 @@ function CheckoutForm({ selectedPlan, onBack }: CheckoutFormProps) {
                   <span>{selectedPlan.price}{selectedPlan.period}</span>
                 </div>
               </div>
-
-              {/* Money Back Guarantee */}
-              <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                <div className="flex items-center space-x-2">
-                  <Shield className="h-4 w-4 text-green-600" />
-                  <span className="text-sm font-medium text-green-800">30-day money back guarantee</span>
-                </div>
-              </div>
             </CardContent>
           </Card>
         </div>
@@ -373,9 +388,61 @@ interface CustomCheckoutProps {
 export function CustomCheckout({ planId }: CustomCheckoutProps) {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const [stripe, setStripe] = useState<any>(null);
+  const [stripeLoading, setStripeLoading] = useState(true);
+  const [stripeError, setStripeError] = useState<string | null>(null);
   const selectedPlanId = planId || searchParams.get('plan');
   
   const selectedPlan = PLANS.find(plan => plan.id === selectedPlanId);
+
+  useEffect(() => {
+    const loadStripeConfig = async () => {
+      try {
+        const stripeInstance = await initializeStripe();
+        setStripe(stripeInstance);
+        setStripeLoading(false);
+      } catch (error) {
+        console.error('Failed to initialize Stripe:', error);
+        setStripeError('Failed to load payment system');
+        setStripeLoading(false);
+      }
+    };
+
+    loadStripeConfig();
+  }, []);
+
+  // Show loading state while Stripe is initializing
+  if (stripeLoading) {
+    return (
+      <div className="min-h-screen bg-blue-50/30 flex items-center justify-center">
+        <Card className="max-w-md mx-auto">
+          <CardContent className="text-center p-8">
+            <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Loading Payment System</h2>
+            <p className="text-gray-600">Initializing secure checkout...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Check if Stripe initialization failed
+  if (stripeError || !stripe) {
+    return (
+      <div className="min-h-screen bg-blue-50/30 flex items-center justify-center">
+        <Card className="max-w-md mx-auto">
+          <CardContent className="text-center p-8">
+            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Payment System Unavailable</h2>
+            <p className="text-gray-600 mb-6">{stripeError || 'Unable to load payment system. Please try again later.'}</p>
+            <Button onClick={() => navigate('/dashboard/profile?tab=settings')}>
+              Back to Plans
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (!selectedPlan) {
     return (
@@ -396,7 +463,7 @@ export function CustomCheckout({ planId }: CustomCheckoutProps) {
 
   return (
     <div className="min-h-screen bg-blue-50/30">
-      <Elements stripe={stripePromise}>
+      <Elements stripe={stripe}>
         <CheckoutForm 
           selectedPlan={selectedPlan}
           onBack={() => navigate('/dashboard/profile?tab=settings')}
