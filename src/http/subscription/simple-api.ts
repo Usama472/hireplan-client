@@ -86,6 +86,14 @@ export const simpleSubscriptionAPI = {
     const response = await apiHelper.post(`${BASE_URL}/create`, data);
     console.log('📥 Subscription creation response:', response);
     return response;
+  },
+
+  // Validate promo code
+  validatePromoCode: async (code: string) => {
+    const response = await apiHelper.post(`${BASE_URL}/validate-promo-code`, {
+      code
+    });
+    return response;
   }
 };
 

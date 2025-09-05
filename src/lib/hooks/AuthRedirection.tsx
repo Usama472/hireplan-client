@@ -1,15 +1,29 @@
 'use client'
-import { SimpleLoader } from '@/components/common/LoadingScreen'
+import { LoadingScreen } from '@/components/common/LoadingScreen'
 import { type PropsWithChildren, useEffect, useState } from 'react'
 import useAuthSessionContext from '../context/AuthSessionContext'
 
 const UnauthenticatedRoutes = ['/login', '/signup']
 const AuthVerificationRoutes = ['/verification']
 const AuthenticatedRoutes = ['/dashboard'] as string[]
+const PublicRoutes = ['/', '/contact', '/privacy', '/terms', '/company', '/apply', '/interview', '/outlook/auth']
 
 const AuthRedirection = ({ children }: PropsWithChildren) => {
-  const { status } = useAuthSessionContext()
   const [isReloading, setReloading] = useState(false)
+  
+  // Check if current route is public
+  const isPublicRoute = PublicRoutes.some(route => 
+    window.location.pathname === route || 
+    window.location.pathname.startsWith(route + '/')
+  )
+
+  // For public routes, render immediately without any auth checks
+  if (isPublicRoute) {
+    return <>{children}</>
+  }
+
+  // Only use auth context for private routes
+  const { status } = useAuthSessionContext()
 
   useEffect(() => {
     if (AuthVerificationRoutes.includes(window.location.pathname)) {
@@ -40,7 +54,7 @@ const AuthRedirection = ({ children }: PropsWithChildren) => {
   }, [])
 
   if (status === 'loading' || isReloading) {
-    return <SimpleLoader />
+    return <LoadingScreen message="Setting up your workspace..." />
   }
   return <>{children}</>
 }

@@ -24,6 +24,7 @@ import { PLANS } from '@/constants/form-constants';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { simpleSubscriptionAPI } from '@/http/subscription/simple-api';
+import { PromoCodeInput } from './PromoCodeInput';
 
 // Initialize Stripe dynamically from backend config
 let stripePromise: Promise<any> | null = null;
@@ -74,6 +75,7 @@ function CheckoutForm({ selectedPlan, onBack }: CheckoutFormProps) {
       country: 'US'
     }
   });
+  const [appliedPromoCode, setAppliedPromoCode] = useState<any>(null);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -111,7 +113,8 @@ function CheckoutForm({ selectedPlan, onBack }: CheckoutFormProps) {
       const response = await simpleSubscriptionAPI.createSubscription({
         planId: selectedPlan.id,
         paymentMethodId: paymentMethod.id,
-        billingDetails
+        billingDetails,
+        promotionCode: appliedPromoCode?.promotionCode?.code
       });
 
       if (response.data?.requiresAction && response.data?.clientSecret) {
@@ -280,6 +283,17 @@ function CheckoutForm({ selectedPlan, onBack }: CheckoutFormProps) {
 
                 <Separator />
 
+                {/* Promo Code */}
+                <div className="space-y-4">
+                  <PromoCodeInput
+                    onPromoCodeApplied={setAppliedPromoCode}
+                    onPromoCodeRemoved={() => setAppliedPromoCode(null)}
+                    appliedPromoCode={appliedPromoCode}
+                  />
+                </div>
+
+                <Separator />
+
                 {/* Card Details */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-gray-900">Card Details</h3>
@@ -370,7 +384,7 @@ function CheckoutForm({ selectedPlan, onBack }: CheckoutFormProps) {
                 <Separator />
                 <div className="flex items-center justify-between text-lg font-bold">
                   <span>Total</span>
-                  <span>{selectedPlan.price}{selectedPlan.period}</span>
+                  <span>{selectedPlan.price}</span>
                 </div>
               </div>
             </CardContent>

@@ -16,10 +16,16 @@ const PublicRoute: FC<PublicRouteProps> = ({ children }) => {
   const path = location.pathname;
 
   const hideLayoutFor = ["/signup"];
+  
+  // Skip loading for landing page and other critical public pages
+  const skipLoadingFor = ["/", "/contact", "/privacy", "/terms", "/company", "/apply", "/interview"];
+  const shouldSkipLoading = skipLoadingFor.some(route => 
+    path === route || path.startsWith(route + '/')
+  );
 
-  // Show loading state while checking authentication
-  if (status === "loading") {
-    return <LoadingScreen />;
+  // Show loading state while checking authentication (except for critical public pages)
+  if (status === "loading" && !shouldSkipLoading) {
+    return <LoadingScreen message="Loading your workspace..." />;
   }
 
   // Hide layout for specific routes and all company routes
