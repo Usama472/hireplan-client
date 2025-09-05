@@ -59,7 +59,7 @@ export function StepNavigation({
         variant="ghost"
         onClick={handlePrevious}
         disabled={isFirstStep || isSubmitting}
-        className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 px-3 py-2 rounded-lg transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+        className="flex items-center gap-2 text-muted-foreground hover:text-foreground hover:bg-muted px-3 py-2 rounded-lg transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed text-sm"
       >
         <ChevronLeft className="h-4 w-4" />
         <span>Previous</span>

@@ -1,5 +1,6 @@
 import { HeroSection } from "./hero-section";
 import { FeaturesSection } from "./features-section";
+import { CompactHowItWorks } from "./compact-how-it-works";
 import { PricingSection } from "./pricing-section";
 import { SMSOptIn } from "./sms-opt-in";
 import { MessageSquare } from "lucide-react";
@@ -9,6 +10,7 @@ export default function Home() {
     <main>
       <HeroSection />
       <FeaturesSection />
+      <CompactHowItWorks />
       <PricingSection />
 
       {/* Simplified SMS Opt-in Section */}

@@ -66,7 +66,7 @@ export function PricingSection() {
             className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2"
           >
             Plans that grow{" "}
-            <span className="text-blue-600">with your business</span>
+            <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">with your business</span>
           </motion.h2>
 
           {/* Subheadline */}

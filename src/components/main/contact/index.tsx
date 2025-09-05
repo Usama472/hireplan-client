@@ -108,26 +108,31 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
-      <main className="pt-16 pb-8">
+    <div className="min-h-screen">
+      {/* Hero Section - Full Width */}
+      <div className="bg-primary text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Hero Section */}
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-50 to-purple-50 text-secondary px-5 py-2.5 rounded-full text-sm font-medium mb-6 border border-blue-200/60">
-              <MessageSquare className="h-4 w-4 text-secondary" />
+          <div className="text-center">
+            <div className="inline-flex items-center space-x-2 bg-white/20 backdrop-blur-sm text-white px-5 py-2.5 rounded-full text-sm font-medium mb-6 border border-white/30">
+              <MessageSquare className="h-4 w-4 text-white" />
               <span>Get in Touch</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 tracking-tight leading-tight">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 tracking-tight leading-tight">
               Let's Start a{" "}
-              <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              <span className="text-white">
                 Conversation
               </span>
             </h1>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed font-light">
+            <p className="text-lg text-white/90 max-w-2xl mx-auto leading-relaxed font-light">
               Have questions about HirePlan? We're here to help. Reach out to
               our team and we'll get back to you within 24 hours.
             </p>
           </div>
+        </div>
+      </div>
+
+      <main className="pt-16 pb-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
           {/* Contact Information & Form Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -369,7 +374,7 @@ export default function ContactPage() {
                     <Button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full sm:w-auto bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-medium px-8 py-3 h-12 transition-all duration-200 group text-base"
+                      className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-medium px-8 py-3 h-12 transition-all duration-200 group text-base"
                     >
                       {isSubmitting ? (
                         <>
@@ -391,31 +396,25 @@ export default function ContactPage() {
         </div>
       </main>
       {/* FAQ Section */}
-      <div className="mt-20 py-16 bg-gradient-to-r from-primary to-secondary relative overflow-hidden">
-        {/* Background Elements */}
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-primary/90 to-secondary/90"></div>
-
-        {/* Floating Elements */}
-        <div className="absolute top-20 right-10 w-64 h-64 bg-white/10 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
-        <div className="absolute bottom-20 left-10 w-80 h-80 bg-white/10 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse delay-1000"></div>
+      <div className="mt-20 py-16 bg-[#ececec]/70 relative overflow-hidden">
 
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <div className="inline-flex items-center space-x-2 bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-full text-sm font-medium mb-6 border border-white/30">
-              <Zap className="h-4 w-4 text-white" />
+            <div className="inline-flex items-center space-x-2 bg-blue-50 text-primary px-6 py-3 rounded-full text-sm font-medium mb-6 border border-blue-200/60">
+              <Zap className="h-4 w-4 text-primary" />
               <span>Quick Answers</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 tracking-tight">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 tracking-tight">
               Frequently Asked Questions
             </h2>
-            <p className="text-lg text-white/90 max-w-2xl mx-auto leading-relaxed font-light">
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed font-light">
               Quick answers to common questions. Can't find what you're looking
               for? Contact us directly.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="bg-white/95 backdrop-blur-sm rounded-xl p-6 border border-white/30 hover:border-white/50 transition-all duration-300 group">
+            <div className="bg-white rounded-xl p-6 border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-300 group">
               <div className="w-12 h-12 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg flex items-center justify-center mb-4 border border-blue-200 group-hover:scale-110 transition-transform duration-200">
                 <MessageSquare className="w-6 h-6 text-blue-600" />
               </div>
@@ -428,7 +427,7 @@ export default function ContactPage() {
               </p>
             </div>
 
-            <div className="bg-white/95 backdrop-blur-sm rounded-xl p-6 border border-white/30 hover:border-white/50 transition-all duration-300 group">
+            <div className="bg-white rounded-xl p-6 border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-300 group">
               <div className="w-12 h-12 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg flex items-center justify-center mb-4 border border-purple-200 group-hover:scale-110 transition-transform duration-200">
                 <Users className="w-6 h-6 text-purple-600" />
               </div>
@@ -441,7 +440,7 @@ export default function ContactPage() {
               </p>
             </div>
 
-            <div className="bg-white/95 backdrop-blur-sm rounded-xl p-6 border border-white/30 hover:border-white/50 transition-all duration-300 group">
+            <div className="bg-white rounded-xl p-6 border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-300 group">
               <div className="w-12 h-12 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg flex items-center justify-center mb-4 border border-purple-200 group-hover:scale-110 transition-transform duration-200">
                 <Zap className="w-6 h-6 text-purple-600" />
               </div>

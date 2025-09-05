@@ -4,16 +4,15 @@ import type { FieldValues } from "react-hook-form";
 import { useFormContext } from "react-hook-form";
 
 // Add calendar imports
-import { Calendar as CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { Calendar as CalendarIcon } from "lucide-react";
 
-import Editor from "@/components/editor";
 import { Button } from "@/components/ui/button";
 import {
   FormControl,
