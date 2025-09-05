@@ -23,20 +23,20 @@ export function ReviewSubmitStep() {
           </CardHeader>
           <CardContent className="space-y-3">
             <div>
-              <span className="text-sm font-medium text-gray-500">Name:</span>
-              <p className="text-sm">
+              <span className="text-sm font-medium text-muted-foreground">Name:</span>
+              <p className="text-sm text-foreground">
                 {formData.firstName} {formData.lastName}
               </p>
             </div>
             <div>
-              <span className="text-sm font-medium text-gray-500">Email:</span>
-              <p className="text-sm">{formData.email}</p>
+              <span className="text-sm font-medium text-muted-foreground">Email:</span>
+              <p className="text-sm text-foreground">{formData.email}</p>
             </div>
             <div>
-              <span className="text-sm font-medium text-gray-500">
+              <span className="text-sm font-medium text-muted-foreground">
                 Job Title:
               </span>
-              <p className="text-sm">{formData.jobTitle}</p>
+              <p className="text-sm text-foreground">{formData.jobTitle}</p>
             </div>
           </CardContent>
         </Card>
@@ -47,36 +47,36 @@ export function ReviewSubmitStep() {
           </CardHeader>
           <CardContent className="space-y-3">
             <div>
-              <span className="text-sm font-medium text-gray-500">
+              <span className="text-sm font-medium text-muted-foreground">
                 Company:
               </span>
-              <p className="text-sm">{formData.companyName}</p>
+              <p className="text-sm text-foreground">{formData.companyName}</p>
             </div>
             {formData.websiteDomain && (
               <div>
-                <span className="text-sm font-medium text-gray-500">
+                <span className="text-sm font-medium text-muted-foreground">
                   Website:
                 </span>
-                <p className="text-sm">{formData.websiteDomain}</p>
+                <p className="text-sm text-foreground">{formData.websiteDomain}</p>
               </div>
             )}
             <div>
-              <span className="text-sm font-medium text-gray-500">
+              <span className="text-sm font-medium text-muted-foreground">
                 Industry:
               </span>
-              <p className="text-sm">{selectedIndustry?.label}</p>
+              <p className="text-sm text-foreground">{selectedIndustry?.label}</p>
             </div>
             <div>
-              <span className="text-sm font-medium text-gray-500">
+              <span className="text-sm font-medium text-muted-foreground">
                 Company Size:
               </span>
-              <p className="text-sm">{selectedCompanySize?.label}</p>
+              <p className="text-sm text-foreground">{selectedCompanySize?.label}</p>
             </div>
             <div>
-              <span className="text-sm font-medium text-gray-500">
+              <span className="text-sm font-medium text-muted-foreground">
                 Address:
               </span>
-              <p className="text-sm">
+              <p className="text-sm text-foreground">
                 {formData.address}
                 <br />
                 {formData.city}, {formData.state} {formData.zipCode}

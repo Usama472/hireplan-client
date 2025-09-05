@@ -46,16 +46,16 @@ export const AuthLayout = ({
       </div>
 
       {/* Navbar Header */}
-      <div className="fixed top-0 left-0 right-0 flex items-center justify-between p-3 sm:p-4 bg-white border-b border-gray-200 shadow-md z-20">
+      <div className="fixed top-0 left-0 right-0 flex items-center justify-between p-3 sm:p-4 bg-background border-b border-border shadow-md z-20">
         <div className="flex items-center space-x-2 sm:space-x-4">
-          <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-primary to-secondary rounded-xl shadow-md">
+          <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-blue-600 rounded-xl shadow-md">
             <Building2 className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
           </div>
           <div className="min-w-0">
-            <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent truncate">
+            <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent truncate">
               {title}
             </h1>
-            <p className="text-gray-600 text-xs sm:text-sm truncate">
+            <p className="text-muted-foreground text-xs sm:text-sm truncate">
               Welcome back! Please enter your details
             </p>
           </div>
@@ -63,22 +63,22 @@ export const AuthLayout = ({
         <div className="flex items-center space-x-3 sm:space-x-6">
           <div className="hidden sm:flex items-center space-x-4">
             <div className="text-right">
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-muted-foreground">
                 Step {currentStep} of {totalSteps}
               </div>
-              <div className="text-xs text-gray-400">
+              <div className="text-xs text-muted-foreground/70">
                 {Math.round(progressPercentage)}% complete
               </div>
             </div>
-            <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div className="w-16 h-2 bg-muted rounded-full overflow-hidden">
               <div
-                className="bg-gradient-to-r from-primary to-secondary h-2 rounded-full transition-all duration-300"
+                className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 h-2 rounded-full transition-all duration-300"
                 style={{ width: `${progressPercentage}%` }}
               ></div>
             </div>
           </div>
-          <div className="border-l border-gray-200 pl-3 sm:pl-6">
-            <span className="text-xs sm:text-sm text-gray-600 hidden sm:inline">
+          <div className="border-l border-border pl-3 sm:pl-6">
+            <span className="text-xs sm:text-sm text-muted-foreground hidden sm:inline">
               {footerText}{" "}
             </span>
             <Button

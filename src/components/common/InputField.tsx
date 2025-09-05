@@ -78,12 +78,12 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
   const renderFormLabel = (labelText?: string) => (
     <FormLabel
       className={cn(
-        "paragraph-medium text-dark400_light700",
-        fieldError && "text-red-500"
+        "text-sm font-medium text-foreground",
+        fieldError && "text-destructive"
       )}
     >
       {capitalizeText(labelText || "")}
-      {showIsRequired && <span className="text-red-400">{` * `}</span>}
+      {showIsRequired && <span className="text-destructive">{` * `}</span>}
     </FormLabel>
   );
 
@@ -98,8 +98,8 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
     defaultValue,
     disabled,
     className: cn(
-      "paragraph-regular background-light900_dark300 light-border-2 text-dark300_light700 no-focus min-h-12 resize-none rounded-1.5 border",
-      fieldError && "border-red-500 focus:border-red-500"
+      "flex h-12 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+      fieldError && "border-destructive focus-visible:ring-destructive"
     ),
   };
 
@@ -142,7 +142,7 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
                   />
                 </FormControl>
                 <FormMessage />
-                <FormDescription className="body-regular mt-2.5 text-light-400">
+                <FormDescription className="text-sm text-muted-foreground mt-2.5">
                   {description}
                 </FormDescription>
               </FormItem>
@@ -162,12 +162,12 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
                   <FormControl>
                     <SelectTrigger
                       className={cn(
-                        "w-full",
+                        "flex h-12 w-full items-center justify-between rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
                         fieldError &&
-                        "border-red-500 focus-visible:ring-red-500",
+                        "border-destructive focus-visible:ring-destructive",
                         isDirty &&
                         !fieldError &&
-                        "border-blue-300 focus-visible:ring-blue-500"
+                        "border-primary focus-visible:ring-primary"
                       )}
                     >
                       <SelectValue
@@ -185,7 +185,7 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
                   </SelectContent>
                 </Select>
                 <FormMessage />
-                <FormDescription className="body-regular mt-2.5 text-light-400">
+                <FormDescription className="text-sm text-muted-foreground mt-2.5">
                   {description}
                 </FormDescription>
               </FormItem>
@@ -235,7 +235,7 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
                   </div>
                 </FormControl>
                 <FormMessage />
-                <FormDescription className="body-regular mt-2.5 text-light-400">
+                <FormDescription className="text-sm text-muted-foreground mt-2.5">
                   {description}
                 </FormDescription>
               </FormItem>
@@ -252,9 +252,9 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
                       <Button
                         variant={"outline"}
                         className={cn(
-                          "w-full pl-3 text-left font-normal",
+                          "flex h-12 w-full items-center justify-between rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
                           !field.value && "text-muted-foreground",
-                          fieldError && "border-red-500 focus:border-red-500"
+                          fieldError && "border-destructive focus-visible:ring-destructive"
                         )}
                       >
                         {field.value ? (
@@ -276,7 +276,7 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
                   </PopoverContent>
                 </Popover>
                 <FormMessage />
-                <FormDescription className="body-regular mt-2.5 text-light-400">
+                <FormDescription className="text-sm text-muted-foreground mt-2.5">
                   {description}
                 </FormDescription>
               </FormItem>
@@ -295,8 +295,8 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
                       value={field.value ?? ""}
                       disabled={disabled}
                       className={cn(
-                        commonInputProps.className,
-                        fieldError && "border-red-500 focus:border-red-500"
+                        "flex min-h-[80px] w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                        fieldError && "border-destructive focus-visible:ring-destructive"
                       )}
                       onChange={handleChange}
                     />
@@ -340,8 +340,8 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
                     )}
                   </div>
                 </FormControl>
-                <FormMessage className="text-red-500" />
-                <FormDescription className="body-regular mt-2.5 text-light-400">
+                <FormMessage className="text-destructive" />
+                <FormDescription className="text-sm text-muted-foreground mt-2.5">
                   {description}
                 </FormDescription>
               </FormItem>

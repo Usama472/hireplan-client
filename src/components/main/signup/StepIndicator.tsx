@@ -28,12 +28,12 @@ export function StepIndicator({ currentStep }: StepIndicatorProps) {
       </div>
 
       {/* Main heading */}
-      <h2 className="text-2xl font-bold text-gray-900 mb-3">
+      <h2 className="text-2xl font-bold text-foreground mb-3">
         {currentStepData?.title}
       </h2>
 
       {/* Description */}
-      <p className="text-gray-600 text-base leading-relaxed max-w-2xl">
+      <p className="text-muted-foreground text-base leading-relaxed max-w-2xl">
         {currentStepData?.description}
       </p>
     </div>

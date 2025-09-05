@@ -52,7 +52,7 @@ const PrivacyPolicy = () => {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="bg-gradient-to-r from-primary to-secondary text-white py-16"
+        className="bg-primary text-white py-16"
       >
         <div className="max-w-5xl mx-auto px-6 text-center">
           <motion.div variants={sectionVariants} className="mb-6">
