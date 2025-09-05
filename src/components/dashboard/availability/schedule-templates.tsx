@@ -3,6 +3,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -31,8 +32,31 @@ import {
 import type { AvailabilityTemplate } from "@/interfaces";
 import { useToast } from "@/lib/hooks/use-toast";
 import { format } from "date-fns";
-import { AlertCircle, Calendar, Clock, Copy, Plus, Trash2 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { Calendar, Clock, Edit, Plus, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+
+// Timezone conversion utilities
+const convertTimeToTimezone = (time: string, fromTimezone: string, toTimezone: string): string => {
+  // Create a date object for today with the given time
+  const today = new Date();
+  const [hours, minutes] = time.split(':').map(Number);
+  const date = new Date(today.getFullYear(), today.getMonth(), today.getDate(), hours, minutes);
+  
+  // Convert from source timezone to UTC
+  const utcTime = new Date(date.toLocaleString("en-US", { timeZone: fromTimezone }));
+  
+  // Convert from UTC to target timezone
+  const targetTime = new Date(utcTime.toLocaleString("en-US", { timeZone: toTimezone }));
+  
+  return format(targetTime, 'HH:mm');
+};
+
+const getTimezoneDisplayName = (timezone: string): string => {
+  const date = new Date();
+  const offset = date.toLocaleString("en-US", { timeZone: timezone, timeZoneName: "short" }).split(' ').pop() || '';
+  const city = timezone.split('/').pop()?.replace('_', ' ') || timezone;
+  return `${city} (${offset})`;
+};
 import { DateSpecificForm } from "./date-specific-form";
 
 // Add interface for TimeSlot and Day to fix type errors
@@ -70,11 +94,6 @@ export function ScheduleTemplates({
     useState<AvailabilityTemplate | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isAddHoursDialogOpen, setIsAddHoursDialogOpen] = useState(false);
-  const [isTimeDropdownOpen, setIsTimeDropdownOpen] = useState<{
-    dayId?: string;
-    slotId?: string;
-    type: "start" | "end" | null;
-  }>({ type: null });
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [templateToDelete, setTemplateToDelete] =
@@ -84,7 +103,15 @@ export function ScheduleTemplates({
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [currentTimezone, setCurrentTimezone] =
     useState<string>("America/New_York");
+  const [candidateTimezone, setCandidateTimezone] = useState<string>("America/New_York");
+  const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
+
+  // Filter templates based on search query
+  const filteredTemplates = templates.filter(template =>
+    template.templateName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (template.templateName === "default" && "default".includes(searchQuery.toLowerCase()))
+  );
 
   // Add handleTimezoneChange function
   const handleTimezoneChange = async (newTimezone: string) => {
@@ -116,18 +143,6 @@ export function ScheduleTemplates({
     }
   };
 
-  // Time options for dropdown
-  const timeOptions = useMemo(() => {
-    const options = [];
-    for (let hour = 0; hour < 24; hour++) {
-      for (let minute = 0; minute < 60; minute += 15) {
-        const formattedHour = hour.toString().padStart(2, "0");
-        const formattedMinute = minute.toString().padStart(2, "0");
-        options.push(`${formattedHour}:${formattedMinute}`);
-      }
-    }
-    return options;
-  }, []);
 
   // Load templates from backend
   const loadTemplates = async () => {
@@ -628,72 +643,6 @@ export function ScheduleTemplates({
     }
   };
 
-  // Update time slot time
-  const updateTimeSlot = async (
-    day: string,
-    slotId: string,
-    field: "startTime" | "endTime",
-    value: string
-  ) => {
-    if (!currentTemplate) return;
-
-    const weeklyData = getWeeklyAvailabilityData();
-    if (!weeklyData) return;
-
-    // Find the day
-    const dayIndex = weeklyData.daysAvailability.findIndex(
-      (d: DayAvailability) => d.day === day
-    );
-    if (dayIndex === -1) return;
-
-    // Find the slot
-    const slotIndex = weeklyData.daysAvailability[dayIndex].timeSlots.findIndex(
-      (slot: TimeSlot) => slot.id === slotId
-    );
-    if (slotIndex === -1) return;
-
-    // Update the slot
-    const updatedDaysAvailability = [...weeklyData.daysAvailability];
-    const updatedTimeSlots = [...updatedDaysAvailability[dayIndex].timeSlots];
-    updatedTimeSlots[slotIndex] = {
-      ...updatedTimeSlots[slotIndex],
-      [field]: value,
-    };
-
-    updatedDaysAvailability[dayIndex] = {
-      ...updatedDaysAvailability[dayIndex],
-      timeSlots: updatedTimeSlots,
-    };
-
-    // Create updated data
-    const updatedData = {
-      ...weeklyData,
-      daysAvailability: updatedDaysAvailability,
-    };
-
-    // Save changes
-    try {
-      await handleSaveTemplate(currentTemplate.id, updatedData);
-
-      // Update local state directly after successful API call
-      const updatedTemplate = { ...currentTemplate };
-      const availabilityIndex = updatedTemplate.availabilities.findIndex(
-        (a) => a.type === "weekly"
-      );
-      if (availabilityIndex !== -1) {
-        updatedTemplate.availabilities[availabilityIndex] = updatedData;
-        setCurrentTemplate(updatedTemplate);
-      }
-
-      // Close the dropdown
-      setIsTimeDropdownOpen({ type: null });
-    } catch {
-      toast({
-        title: "Error",
-        description: "Failed to update time slot. Please try again.",
-      });
-    }
-  };
 
   const handleDeleteTimeSlot = async (day: string, slotId: string) => {
     if (!currentTemplate) return;
@@ -864,325 +813,420 @@ export function ScheduleTemplates({
   return (
     <div className="space-y-6">
       {/* Header with template selection */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Select
-            value={currentTemplate?.id}
-            onValueChange={handleTemplateChange}
-          >
-            <SelectTrigger className="w-60">
-              <SelectValue placeholder="Select a template" />
-            </SelectTrigger>
-            <SelectContent>
-              {templates.map((template) => (
-                <SelectItem key={template.id} value={template.id}>
-                  <div className="flex items-center gap-2">
-                    <span>{template.templateName}</span>
-                    {template.templateName === "default" && (
-                      <Badge variant="secondary" className="text-xs">
-                        Default
-                      </Badge>
-                    )}
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {/* Delete Template Button - Only show for non-default templates */}
-          {currentTemplate && currentTemplate.templateName !== "default" && (
-            <Button
-              size="sm"
-              variant="outline"
-              className="text-xs px-3 py-1 text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
-              onClick={() => {
-                setTemplateToDelete(currentTemplate);
-                setIsDeleteDialogOpen(true);
-              }}
-            >
-              <Trash2 className="w-3 h-3 mr-1" />
-              Delete
-            </Button>
-          )}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            Schedule Templates
+          </h2>
+          <p className="text-sm text-gray-600">
+            Create and manage your availability templates
+          </p>
         </div>
 
         <div className="flex items-center gap-2">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search templates..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-48 px-3 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
           <Button
             size="sm"
             variant="outline"
             onClick={() => setIsCreateDialogOpen(true)}
           >
-            <Copy className="w-3 h-3 mr-1" />
+            <Plus className="w-4 h-4 mr-2" />
             New Template
           </Button>
         </div>
       </div>
 
-      {/* Main layout - side by side Weekly and Date-specific */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Weekly hours - left side */}
-        <div className="p-4">
-          <div className="flex items-center mb-2">
-            <div className="flex items-center gap-2 text-gray-700">
-              <Clock className="w-4 h-4" />
-              <h3 className="font-medium">Weekly hours</h3>
+      {/* Template Cards Grid */}
+      {templates.length === 0 ? (
+        <Card className="p-8 text-center">
+          <div className="flex flex-col items-center gap-4">
+            <Calendar className="h-12 w-12 text-gray-400" />
+            <div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                No templates yet
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Create your first schedule template to get started
+              </p>
+              <Button onClick={() => setIsCreateDialogOpen(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Create Template
+              </Button>
             </div>
           </div>
-          <p className="text-sm text-gray-500 mb-4">
-            Set when you are typically available for meetings
-          </p>
-
-          {getWeeklyAvailabilityData()?.daysAvailability.map(
-            (day: DayAvailability) => (
-              <div key={day.day} className="mb-4">
-                <div className="flex items-center mb-1">
-                  <div
-                    className={`w-8 h-8 rounded-full ${
-                      day.isAvailable ? "bg-blue-600" : "bg-gray-400"
-                    } text-white flex items-center justify-center text-sm font-medium mr-2`}
-                  >
-                    {getDayLabel(day.day)}
+        </Card>
+      ) : filteredTemplates.length === 0 ? (
+        <Card className="p-8 text-center">
+          <div className="flex flex-col items-center gap-4">
+            <Calendar className="h-12 w-12 text-gray-400" />
+            <div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                No templates found
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Try adjusting your search terms
+              </p>
+              <Button 
+                variant="outline"
+                onClick={() => setSearchQuery("")}
+              >
+                Clear Search
+              </Button>
+            </div>
+          </div>
+        </Card>
+      ) : (
+        <div>
+          {searchQuery && (
+            <div className="mb-4 text-sm text-gray-600">
+              Showing {filteredTemplates.length} of {templates.length} templates
+            </div>
+          )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+            {filteredTemplates.map((template) => (
+            <Card 
+              key={template.id} 
+              className={`hover:shadow-md transition-all duration-200 cursor-pointer border-l-4 ${
+                currentTemplate?.id === template.id 
+                  ? 'border-l-blue-500 bg-blue-50/50 shadow-md' 
+                  : 'border-l-gray-300 hover:border-l-blue-400'
+              }`}
+              onClick={() => handleTemplateChange(template.id)}
+            >
+              <CardHeader className="pb-2">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 min-w-0">
+                    <CardTitle className="text-sm font-semibold text-gray-900 mb-1 truncate">
+                      {template.templateName || "Untitled Template"}
+                    </CardTitle>
+                    <CardDescription className="text-xs text-gray-600">
+                      {template.templateName === "default" ? "Default template" : "Custom template"}
+                    </CardDescription>
                   </div>
-                  <span className="text-sm font-medium">
-                    {getDayFullLabel(day.day)}
-                  </span>
-
-                  <div className="ml-auto flex items-center">
-                    {day.isAvailable ? (
+                  <Badge 
+                    variant={template.templateName === "default" ? "default" : "secondary"} 
+                    className="shrink-0 text-xs"
+                  >
+                    {template.templateName === "default" ? "Default" : "Custom"}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-1 text-xs font-medium text-blue-600">
+                    <Clock className="h-3 w-3" />
+                    <span>{template.duration || 30} min</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-xs text-gray-600">
+                    <Calendar className="h-3 w-3" />
+                    <span>
+                      {template.availabilities?.[0]?.daysAvailability?.filter((d: any) => d.isAvailable).length || 0} days
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1 pt-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleTemplateChange(template.id);
+                      }}
+                      className="flex-1 h-7 text-xs"
+                    >
+                      <Edit className="h-3 w-3 mr-1" />
+                      {currentTemplate?.id === template.id ? 'Selected' : 'Select'}
+                    </Button>
+                    {template.templateName !== "default" && (
                       <Button
-                        type="button"
-                        variant="ghost"
+                        variant="outline"
                         size="sm"
-                        onClick={() => addTimeSlot(day.day)}
-                        className="h-6 text-xs px-2 text-blue-600"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setTemplateToDelete(template);
+                          setIsDeleteDialogOpen(true);
+                        }}
+                        className="h-7 w-7 p-0 text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
                       >
-                        <Plus className="h-3 w-3 mr-1" />
-                        Add
-                      </Button>
-                    ) : (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => toggleDayAvailability(day.day, true)}
-                        className="h-6 text-xs px-2 text-blue-600"
-                      >
-                        Set Available
+                        <Trash2 className="h-3 w-3" />
                       </Button>
                     )}
                   </div>
                 </div>
-
-                {day.isAvailable ? (
-                  day.timeSlots.length > 0 ? (
-                    <div className="ml-10 space-y-2">
-                      {day.timeSlots.map((slot: TimeSlot) => {
-                        const hasSlotOverlap = hasOverlaps(slot, day.timeSlots);
-                        return (
-                          <div key={slot.id} className="relative">
-                            <div
-                              className={`flex items-center gap-2 p-2 border ${
-                                hasSlotOverlap
-                                  ? "border-red-200 bg-red-50"
-                                  : "border-gray-200 bg-gray-50"
-                              } rounded-md`}
-                            >
-                              <div className="flex-1 grid grid-cols-3 gap-2">
-                                {/* Start time dropdown */}
-                                <div className="relative">
-                                  <div
-                                    onClick={() =>
-                                      setIsTimeDropdownOpen({
-                                        dayId: day.day,
-                                        slotId: slot.id,
-                                        type: "start",
-                                      })
-                                    }
-                                    className="border border-gray-200 rounded px-2 py-1 text-sm cursor-pointer flex items-center justify-between bg-white"
-                                  >
-                                    <span>{formatTime(slot.startTime)}</span>
-                                    <svg
-                                      className="h-4 w-4 text-gray-500"
-                                      fill="none"
-                                      viewBox="0 0 24 24"
-                                      stroke="currentColor"
-                                    >
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M19 9l-7 7-7-7"
-                                      />
-                                    </svg>
-                                  </div>
-
-                                  {isTimeDropdownOpen.dayId === day.day &&
-                                    isTimeDropdownOpen.slotId === slot.id &&
-                                    isTimeDropdownOpen.type === "start" && (
-                                      <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
-                                        <div className="p-1">
-                                          {timeOptions.map((time) => (
-                                            <div
-                                              key={time}
-                                              onClick={() =>
-                                                updateTimeSlot(
-                                                  day.day,
-                                                  slot.id,
-                                                  "startTime",
-                                                  time
-                                                )
-                                              }
-                                              className={`px-2 py-1 text-sm hover:bg-gray-100 cursor-pointer rounded ${
-                                                time === slot.startTime
-                                                  ? "bg-blue-50 text-blue-600"
-                                                  : ""
-                                              }`}
-                                            >
-                                              {formatTime(time)}
-                                            </div>
-                                          ))}
-                                        </div>
-                                      </div>
-                                    )}
-                                </div>
-
-                                <div className="flex items-center justify-center">
-                                  <span className="text-gray-500">-</span>
-                                </div>
-
-                                {/* End time dropdown */}
-                                <div className="relative">
-                                  <div
-                                    onClick={() =>
-                                      setIsTimeDropdownOpen({
-                                        dayId: day.day,
-                                        slotId: slot.id,
-                                        type: "end",
-                                      })
-                                    }
-                                    className="border border-gray-200 rounded px-2 py-1 text-sm cursor-pointer flex items-center justify-between bg-white"
-                                  >
-                                    <span>{formatTime(slot.endTime)}</span>
-                                    <svg
-                                      className="h-4 w-4 text-gray-500"
-                                      fill="none"
-                                      viewBox="0 0 24 24"
-                                      stroke="currentColor"
-                                    >
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M19 9l-7 7-7-7"
-                                      />
-                                    </svg>
-                                  </div>
-
-                                  {isTimeDropdownOpen.dayId === day.day &&
-                                    isTimeDropdownOpen.slotId === slot.id &&
-                                    isTimeDropdownOpen.type === "end" && (
-                                      <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
-                                        <div className="p-1">
-                                          {timeOptions.map((time) => (
-                                            <div
-                                              key={time}
-                                              onClick={() =>
-                                                updateTimeSlot(
-                                                  day.day,
-                                                  slot.id,
-                                                  "endTime",
-                                                  time
-                                                )
-                                              }
-                                              className={`px-2 py-1 text-sm hover:bg-gray-100 cursor-pointer rounded ${
-                                                time === slot.endTime
-                                                  ? "bg-blue-50 text-blue-600"
-                                                  : ""
-                                              }`}
-                                            >
-                                              {formatTime(time)}
-                                            </div>
-                                          ))}
-                                        </div>
-                                      </div>
-                                    )}
-                                </div>
-                              </div>
-
-                              <div className="flex items-center">
-                                <button
-                                  onClick={() =>
-                                    handleDeleteTimeSlot(day.day, slot.id)
-                                  }
-                                  className="text-gray-500 hover:text-red-600 ml-2"
-                                >
-                                  <Trash2 className="w-3 h-3" />
-                                </button>
-                              </div>
-                            </div>
-
-                            {hasSlotOverlap && (
-                              <div className="text-xs text-red-600 mt-0.5 ml-2 flex items-center">
-                                <AlertCircle className="w-3 h-3 mr-1" />
-                                Overlaps with another time slot
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <div className="ml-10 text-sm text-gray-500">
-                      No time slots defined
-                    </div>
-                  )
-                ) : (
-                  <div className="ml-10 text-sm text-gray-500">Unavailable</div>
-                )}
-              </div>
-            )
-          )}
+              </CardContent>
+            </Card>
+            ))}
+          </div>
         </div>
+      )}
+
+      {/* Timezone selector */}
+      <Card className="mt-6">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <svg
+                  className="w-4 h-4 text-green-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900">Timezone</h3>
+                <p className="text-xs text-gray-500">Set your local timezone for scheduling</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 w-80">
+              <Select
+                value={currentTimezone}
+                onValueChange={handleTimezoneChange}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select timezone" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="America/New_York">
+                    Eastern Time (ET) - America/New_York
+                  </SelectItem>
+                  <SelectItem value="America/Chicago">
+                    Central Time (CT) - America/Chicago
+                  </SelectItem>
+                  <SelectItem value="America/Denver">
+                    Mountain Time (MT) - America/Denver
+                  </SelectItem>
+                  <SelectItem value="America/Los_Angeles">
+                    Pacific Time (PT) - America/Los_Angeles
+                  </SelectItem>
+                  <SelectItem value="Europe/London">
+                    Greenwich Mean Time (GMT) - Europe/London
+                  </SelectItem>
+                  <SelectItem value="Europe/Paris">
+                    Central European Time (CET) - Europe/Paris
+                  </SelectItem>
+                  <SelectItem value="Asia/Dubai">
+                    Gulf Standard Time (GST) - Asia/Dubai
+                  </SelectItem>
+                  <SelectItem value="Asia/Kolkata">
+                    India Standard Time (IST) - Asia/Kolkata
+                  </SelectItem>
+                  <SelectItem value="Asia/Shanghai">
+                    China Standard Time (CST) - Asia/Shanghai
+                  </SelectItem>
+                  <SelectItem value="Asia/Tokyo">
+                    Japan Standard Time (JST) - Asia/Tokyo
+                  </SelectItem>
+                  <SelectItem value="Australia/Sydney">
+                    Australian Eastern Time (AET) - Australia/Sydney
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+
+      {/* Main layout - side by side Weekly and Date-specific */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+        {/* Weekly hours - left side */}
+        <Card className="p-3">
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 bg-blue-100 rounded-md">
+                <Clock className="w-4 h-4 text-blue-600" />
+              </div>
+              <div>
+                <CardTitle className="text-base font-semibold text-gray-900">
+                  Weekly Availability
+                </CardTitle>
+                <CardDescription className="text-xs text-gray-600">
+                  Set when you are typically available for meetings
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0">
+            {/* Ultra-compact horizontal layout */}
+            <div className="space-y-1">
+              {getWeeklyAvailabilityData()?.daysAvailability.map(
+                (day: DayAvailability) => (
+                  <div key={day.day} className="flex items-center gap-2 p-1.5 border border-gray-200 rounded-md hover:border-gray-300 transition-colors">
+                    {/* Day indicator */}
+                    <div
+                      className={`w-6 h-6 rounded-full ${
+                        day.isAvailable 
+                          ? "bg-gradient-to-r from-blue-500 to-purple-600" 
+                          : "bg-gray-200"
+                      } text-white flex items-center justify-center text-xs font-semibold flex-shrink-0`}
+                    >
+                      {getDayLabel(day.day)}
+                    </div>
+                    
+                    {/* Day name */}
+                    <div className="flex-1 min-w-0">
+                      <span className="text-sm font-medium text-gray-900">
+                        {getDayFullLabel(day.day)}
+                      </span>
+                      {day.isAvailable && (
+                        <div className="text-xs text-gray-500">
+                          {day.timeSlots.length} slot{day.timeSlots.length !== 1 ? 's' : ''}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Time slots display - horizontal */}
+                    {day.isAvailable && day.timeSlots.length > 0 && (
+                      <div className="flex flex-wrap gap-1 flex-1">
+                        {day.timeSlots.map((slot: TimeSlot) => {
+                          const hasSlotOverlap = hasOverlaps(slot, day.timeSlots);
+                          return (
+                            <div
+                              key={slot.id}
+                              className={`flex items-center gap-1 px-1.5 py-0.5 text-xs rounded border ${
+                                hasSlotOverlap
+                                  ? "border-red-200 bg-red-50 text-red-700"
+                                  : "border-gray-200 bg-gray-50 text-gray-700"
+                              }`}
+                            >
+                              <div className="flex flex-col">
+                                <span className="font-medium">
+                                  {formatTime(slot.startTime)}-{formatTime(slot.endTime)}
+                                </span>
+                              </div>
+                              <button
+                                onClick={() => handleDeleteTimeSlot(day.day, slot.id)}
+                                className="text-gray-400 hover:text-red-500"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* Action button */}
+                    <div className="flex-shrink-0">
+                      {day.isAvailable ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => addTimeSlot(day.day)}
+                          className="h-6 text-xs px-2 text-blue-600 border-blue-200 hover:bg-blue-50"
+                        >
+                          <Plus className="h-3 w-3" />
+                        </Button>
+                      ) : (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => toggleDayAvailability(day.day, true)}
+                          className="h-6 text-xs px-2 text-blue-600 border-blue-200 hover:bg-blue-50"
+                        >
+                          Enable
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                )
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Date specific hours - right side */}
-        <div className="p-4">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2 text-gray-700">
-              <Calendar className="w-4 h-4" />
-              <h3 className="font-medium">Date-specific hours</h3>
+        <Card className="p-4">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-purple-100 rounded-lg">
+                  <Calendar className="w-5 h-5 text-purple-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-semibold text-gray-900">
+                    Date-Specific Hours
+                  </CardTitle>
+                  <CardDescription className="text-sm text-gray-600">
+                    Adjust hours for specific days
+                  </CardDescription>
+                </div>
+              </div>
+              <Button
+                size="sm"
+                className="h-9 px-4 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-sm"
+                onClick={() => setIsAddHoursDialogOpen(true)}
+                title="Add Date-Specific Hours"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Hours
+              </Button>
             </div>
-            <Button
-              size="sm"
-              className="rounded-full h-8 px-3 bg-blue-600 hover:bg-blue-700 text-white"
-              onClick={() => setIsAddHoursDialogOpen(true)}
-              title="Add Date-Specific Hours"
-            >
-              <Plus className="h-4 w-4 mr-1" />
-              Hours
-            </Button>
-          </div>
-          <p className="text-sm text-gray-500 mb-4">
-            Adjust hours for specific days
-          </p>
+          </CardHeader>
+          <CardContent className="pt-0">
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {getDateSpecificAvailabilityData()?.dates?.map(
               (date: DateSpecificSettings) => (
-                <div key={date.id} className="mb-4">
-                  <div className="mb-2">
-                    <div className="text-sm font-medium">
-                      {format(date.date, "MMM d, yyyy")}
+                <div key={date.id} className="border border-gray-200 rounded-lg p-3 hover:border-gray-300 transition-colors">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center text-white text-sm font-semibold shadow-sm">
+                        {format(date.date, "d")}
+                      </div>
+                      <div>
+                        <div className="text-sm font-semibold text-gray-900">
+                          {format(date.date, "MMM d, yyyy")}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {format(date.date, "EEEE")}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {date.timeSlots.length} time slot{date.timeSlots.length !== 1 ? 's' : ''}
                     </div>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     {date.timeSlots.map((slot: TimeSlot) => (
                       <div key={slot.id} className="flex items-center gap-2">
-                        <div className="bg-gray-100 rounded-md px-3 py-1 flex items-center gap-2">
-                          <span className="text-sm">
-                            {formatTime(slot.startTime)} -{" "}
-                            {formatTime(slot.endTime)}
-                          </span>
+                        <div className="bg-white border border-gray-200 rounded-lg px-2 py-1 flex items-center justify-between gap-2 flex-1 hover:bg-gray-50 transition-colors">
+                          <div className="flex items-center gap-2">
+                            <Clock className="w-4 h-4 text-gray-400" />
+                            <div className="flex flex-col">
+                              <span className="text-sm font-medium text-gray-900">
+                                {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
+                              </span>
+                            </div>
+                          </div>
                           <button
                             onClick={() =>
                               handleDeleteDateSlot(
@@ -1190,9 +1234,10 @@ export function ScheduleTemplates({
                                 slot.id
                               )
                             }
-                            className="text-gray-500 hover:text-red-600"
+                            className="text-gray-400 hover:text-red-500 p-1 rounded transition-colors"
+                            title="Remove time slot"
                           >
-                            <Trash2 className="w-3 h-3" />
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
                       </div>
@@ -1204,85 +1249,32 @@ export function ScheduleTemplates({
 
             {(!getDateSpecificAvailabilityData()?.dates ||
               getDateSpecificAvailabilityData()?.dates.length === 0) && (
-              <div className="text-center py-8">
-                <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-                <p className="text-gray-500">No date-specific hours set</p>
-                <p className="text-sm text-gray-400">
-                  Click the + Hours button to add availability for specific
-                  dates
+              <div className="text-center py-6">
+                <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <Calendar className="w-6 h-6 text-gray-400" />
+                </div>
+                <h3 className="text-base font-medium text-gray-900 mb-1">
+                  No date-specific hours set
+                </h3>
+                <p className="text-sm text-gray-500 mb-3">
+                  Add availability for specific dates to override your weekly schedule
                 </p>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setIsAddHoursDialogOpen(true)}
+                  className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add First Date
+                </Button>
               </div>
             )}
           </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Timezone selector at bottom */}
-      <div className="mt-6 pt-4 border-t border-gray-200">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <svg
-              className="w-4 h-4 text-gray-500"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <span className="text-sm font-medium text-gray-700">Timezone</span>
-          </div>
-          <div className="flex items-center gap-3 w-80">
-            <Select
-              value={currentTimezone}
-              onValueChange={handleTimezoneChange}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select timezone" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="America/New_York">
-                  Eastern Time (ET) - America/New_York
-                </SelectItem>
-                <SelectItem value="America/Chicago">
-                  Central Time (CT) - America/Chicago
-                </SelectItem>
-                <SelectItem value="America/Denver">
-                  Mountain Time (MT) - America/Denver
-                </SelectItem>
-                <SelectItem value="America/Los_Angeles">
-                  Pacific Time (PT) - America/Los_Angeles
-                </SelectItem>
-                <SelectItem value="Europe/London">
-                  Greenwich Mean Time (GMT) - Europe/London
-                </SelectItem>
-                <SelectItem value="Europe/Paris">
-                  Central European Time (CET) - Europe/Paris
-                </SelectItem>
-                <SelectItem value="Asia/Dubai">
-                  Gulf Standard Time (GST) - Asia/Dubai
-                </SelectItem>
-                <SelectItem value="Asia/Kolkata">
-                  India Standard Time (IST) - Asia/Kolkata
-                </SelectItem>
-                <SelectItem value="Asia/Shanghai">
-                  China Standard Time (CST) - Asia/Shanghai
-                </SelectItem>
-                <SelectItem value="Asia/Tokyo">
-                  Japan Standard Time (JST) - Asia/Tokyo
-                </SelectItem>
-                <SelectItem value="Australia/Sydney">
-                  Australian Eastern Time (AET) - Australia/Sydney
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      </div>
 
       {/* Add Hours Dialog */}
       <Dialog

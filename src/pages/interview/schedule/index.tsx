@@ -17,6 +17,47 @@ import {
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
+// Timezone conversion utilities
+const convertTimeToTimezone = (timeString: string, fromTimezone: string, toTimezone: string): string => {
+  try {
+    // Handle different time formats (HH:mm or full ISO string)
+    let timePart = timeString;
+    if (timeString.includes('T')) {
+      timePart = timeString.split('T')[1]?.split('.')[0] || timeString;
+    }
+    
+    const [hours, minutes] = timePart.split(':').map(Number);
+    
+    // Create a date object for today with the given time
+    const today = new Date();
+    const date = new Date(today.getFullYear(), today.getMonth(), today.getDate(), hours, minutes);
+    
+    // Convert from source timezone to target timezone
+    const sourceTime = new Date(date.toLocaleString("en-US", { timeZone: fromTimezone }));
+    const targetTime = new Date(sourceTime.toLocaleString("en-US", { timeZone: toTimezone }));
+    
+    return format(targetTime, 'HH:mm');
+  } catch (error) {
+    console.log("Error converting timezone:", error);
+    return timeString; // Return original if conversion fails
+  }
+};
+
+const getCandidateTimezone = (): string => {
+  // Try to detect candidate's timezone from browser
+  try {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (timezone) {
+      return timezone;
+    }
+  } catch (error) {
+    console.log("Error detecting timezone:", error);
+  }
+  
+  // Fallback to Eastern Time (most common in US)
+  return "America/New_York";
+};
+
 interface AvailableSlot {
   date: string;
   startTime: string;
@@ -60,6 +101,12 @@ const InterviewSchedulePage = () => {
   );
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedSlot, setSelectedSlot] = useState<AvailableSlot | null>(null);
+  const [candidateTimezone, setCandidateTimezone] = useState<string>("");
+
+  // Detect candidate's timezone on component mount
+  useEffect(() => {
+    setCandidateTimezone(getCandidateTimezone());
+  }, []);
 
   useEffect(() => {
     if (token) {
@@ -135,8 +182,28 @@ const InterviewSchedulePage = () => {
   };
 
   const formatTimeSlot = (startTime: string, endTime: string) => {
-    const start = format(parseISO(startTime), "h:mm a");
-    const end = format(parseISO(endTime), "h:mm a");
+    if (!interviewData || !candidateTimezone) {
+      // Fallback to original formatting if timezone data not available
+      const start = format(parseISO(startTime), "h:mm a");
+      const end = format(parseISO(endTime), "h:mm a");
+      return `${start} - ${end}`;
+    }
+
+    // Convert times from interviewer's timezone to candidate's timezone
+    const convertedStartTime = convertTimeToTimezone(
+      startTime,
+      interviewData.timezone,
+      candidateTimezone
+    );
+    const convertedEndTime = convertTimeToTimezone(
+      endTime,
+      interviewData.timezone,
+      candidateTimezone
+    );
+
+    // Format the converted times
+    const start = format(parseISO(`2000-01-01T${convertedStartTime}:00`), "h:mm a");
+    const end = format(parseISO(`2000-01-01T${convertedEndTime}:00`), "h:mm a");
     return `${start} - ${end}`;
   };
 
@@ -234,12 +301,6 @@ const InterviewSchedulePage = () => {
                 <p className="text-blue-100 text-sm mb-2 sm:mb-3">
                   {interviewData.applicant.email}
                 </p>
-                <div className="flex items-center gap-1">
-                  <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
-                  <span className="text-blue-100 text-sm">
-                    {interviewData.timezone}
-                  </span>
-                </div>
               </div>
             </div>
           </div>
@@ -294,14 +355,17 @@ const InterviewSchedulePage = () => {
 
               {/* Time Selection Section */}
               <div>
-                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 sm:mb-6">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2 sm:mb-3">
                   {selectedDate
                     ? `Available Times for ${format(
-                      selectedDate,
-                      "EEEE, MMMM do"
-                    )}`
+                        selectedDate,
+                        "EEEE, MMMM do"
+                      )}`
                     : "Select a date to view available times"}
                 </h3>
+                <p className="text-xs text-gray-500 mb-4 sm:mb-6">
+                  Times shown in your local timezone
+                </p>
 
                 {selectedDate && (
                   <div className="space-y-2 sm:space-y-3">
@@ -356,7 +420,7 @@ const InterviewSchedulePage = () => {
                       Interview Summary
                     </h3>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
                     <div className="text-center">
                       <p className="text-xs sm:text-sm text-green-600 font-medium mb-1">
                         Date
@@ -374,14 +438,6 @@ const InterviewSchedulePage = () => {
                           selectedSlot.startTime,
                           selectedSlot.endTime
                         )}
-                      </p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-xs sm:text-sm text-green-600 font-medium mb-1">
-                        Timezone
-                      </p>
-                      <p className="text-green-800 font-semibold text-sm sm:text-base">
-                        {interviewData.timezone}
                       </p>
                     </div>
                   </div>
