@@ -18,6 +18,8 @@ export const DASHBOARD_ROUTES = {
   JOB_TEMPLATES: `/dashboard/job-templates`,
   GLOBAL_SETTINGS: `/dashboard/global-settings`,
   STAFF_MANAGEMENT: `/dashboard/staff-management`,
+  AUTOMATIONS: `/dashboard/automations`,
+  AUTOMATION_LOGS: `/dashboard/automations/logs`,
 };
 
 export const ROUTES = {

@@ -16,6 +16,7 @@ export const PERMISSIONS = {
   PAYMENT_PERMISSIONS: "p1fj3423",
   GLOBAL_SETTINGS: "g1gs3423",
   SCHEDULING_ACCESS: "s1in4567",
+  AUTOMATION_ACCESS: "a1ac8901",
 };
 
 export const SHOW_PERMISSIONS = [
@@ -93,5 +94,10 @@ export const SHOW_PERMISSIONS = [
     name: "Allow user to manage scheduling",
     code: PERMISSIONS.SCHEDULING_ACCESS,
     type: "scheduling",
+  },
+  {
+    name: "Allow user to manage automations",
+    code: PERMISSIONS.AUTOMATION_ACCESS,
+    type: "automation",
   },
 ];

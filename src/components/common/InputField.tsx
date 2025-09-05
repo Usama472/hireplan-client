@@ -142,9 +142,11 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
                   />
                 </FormControl>
                 <FormMessage />
-                <FormDescription className="body-regular mt-2.5 text-light-400">
-                  {description}
-                </FormDescription>
+                {description && (
+                  <FormDescription className="body-regular mt-2.5 text-light-400">
+                    {description}
+                  </FormDescription>
+                )}
               </FormItem>
             );
 
@@ -164,10 +166,10 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
                       className={cn(
                         "w-full",
                         fieldError &&
-                        "border-red-500 focus-visible:ring-red-500",
+                          "border-red-500 focus-visible:ring-red-500",
                         isDirty &&
-                        !fieldError &&
-                        "border-blue-300 focus-visible:ring-blue-500"
+                          !fieldError &&
+                          "border-blue-300 focus-visible:ring-blue-500"
                       )}
                     >
                       <SelectValue
@@ -185,9 +187,11 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
                   </SelectContent>
                 </Select>
                 <FormMessage />
-                <FormDescription className="body-regular mt-2.5 text-light-400">
-                  {description}
-                </FormDescription>
+                {description && (
+                  <FormDescription className="body-regular mt-2.5 text-light-400">
+                    {description}
+                  </FormDescription>
+                )}
               </FormItem>
             );
 
@@ -235,9 +239,11 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
                   </div>
                 </FormControl>
                 <FormMessage />
-                <FormDescription className="body-regular mt-2.5 text-light-400">
-                  {description}
-                </FormDescription>
+                {description && (
+                  <FormDescription className="body-regular mt-2.5 text-light-400">
+                    {description}
+                  </FormDescription>
+                )}
               </FormItem>
             );
 
@@ -276,9 +282,11 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
                   </PopoverContent>
                 </Popover>
                 <FormMessage />
-                <FormDescription className="body-regular mt-2.5 text-light-400">
-                  {description}
-                </FormDescription>
+                {description && (
+                  <FormDescription className="body-regular mt-2.5 text-light-400">
+                    {description}
+                  </FormDescription>
+                )}
               </FormItem>
             );
 
@@ -302,9 +310,11 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
                     />
                   </FormControl>
                   <FormMessage />
-                  <FormDescription className="body-regular mt-2.5 text-light-400">
-                    {description}
-                  </FormDescription>
+                  {description && (
+                    <FormDescription className="body-regular mt-2.5 text-light-400">
+                      {description}
+                    </FormDescription>
+                  )}
                 </FormItem>
               );
             }
@@ -341,9 +351,11 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
                   </div>
                 </FormControl>
                 <FormMessage className="text-red-500" />
-                <FormDescription className="body-regular mt-2.5 text-light-400">
-                  {description}
-                </FormDescription>
+                {description && (
+                  <FormDescription className="body-regular mt-2.5 text-light-400">
+                    {description}
+                  </FormDescription>
+                )}
               </FormItem>
             );
         }

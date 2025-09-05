@@ -1,6 +1,7 @@
 import {
   Briefcase,
   Calendar,
+  Filter,
   LifeBuoy,
   Mail,
   MessageCircle,
@@ -104,6 +105,16 @@ export const DashboardSidebar = ({
       icon: Mail,
     });
   }
+
+  // Add Automations menu item
+  // if (userPermissions.includes(PERMISSIONS.AUTOMATION_ACCESS)) {
+  staticData.projects.push({
+    name: "Automations",
+    url: ROUTES.DASHBOARD.AUTOMATIONS,
+    icon: Filter,
+  });
+  //}
+
   if (userPermissions.includes(PERMISSIONS.GLOBAL_SETTINGS)) {
     staticData.projects.push({
       name: "Settings",

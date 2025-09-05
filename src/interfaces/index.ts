@@ -320,6 +320,7 @@ export interface IApplicant {
   updatedAt?: Date | string;
 }
 
+export * from "@/interfaces/automations";
 export * from "@/interfaces/enums";
 export * from "@/interfaces/forms";
 

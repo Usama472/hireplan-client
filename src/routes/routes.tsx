@@ -26,6 +26,8 @@ import TermsPage from "@/pages/terms";
 import Home from "@/pages/home";
 
 // Auth Pages
+import CheckoutPage from "@/pages/checkout";
+import AutomationsDashboard from "@/pages/dashboard/automations";
 import ChatsPage from "@/pages/dashboard/chats";
 import ConversationPage from "@/pages/dashboard/chats/conversation";
 import EmailTemplatesPage from "@/pages/dashboard/email-template";
@@ -40,7 +42,6 @@ import ForgotPassword from "@pages/auth/ForgotPassword";
 import Login from "@pages/auth/Login";
 import ResetPassword from "@pages/auth/ResetPassword";
 import Signup from "@pages/auth/Signup";
-import CheckoutPage from "@/pages/checkout";
 
 export const appRoutes: AppRoutesType[] = [
   {
@@ -210,6 +211,12 @@ export const appRoutes: AppRoutesType[] = [
     id: "staff-management",
     url: ROUTES.DASHBOARD.STAFF_MANAGEMENT,
     element: <StaffManagementPage />,
+    isPrivate: true,
+  },
+  {
+    id: "automations",
+    url: ROUTES.DASHBOARD.AUTOMATIONS,
+    element: <AutomationsDashboard />,
     isPrivate: true,
   },
 ];
