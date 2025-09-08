@@ -14,6 +14,8 @@ import * as jobApi from "./job/api";
 import * as roleApi from "./role/api";
 import * as staffApi from "./staff/api";
 import * as userApi from "./user/api";
+import * as zoomApi from "./zoom/api";
+import * as meetingApi from "./meeting/api";
 
 const API = {
   auth: authApi,
@@ -26,6 +28,8 @@ const API = {
   availability: availabilityApi,
   google: googleApi,
   microsoft: microsoftApi,
+  zoom: zoomApi,
+  meeting: meetingApi,
   emailChat: emailChatApi,
   emailTemplate: emailTemplateApi,
   globalSetting: globalSettingApi,

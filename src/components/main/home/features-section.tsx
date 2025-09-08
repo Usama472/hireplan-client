@@ -94,9 +94,9 @@ export function FeaturesSection() {
         >
           <motion.div
             variants={itemVariants}
-            className="inline-flex items-center space-x-2 bg-blue-50 text-blue-600 px-4 py-2 rounded-full text-sm font-medium mb-6"
+            className="inline-flex items-center space-x-2 bg-blue-50 text-blue-600 px-4 py-2 rounded-full text-sm font-medium mb-6 border border-blue-200"
           >
-            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+            <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
             <span>Features</span>
           </motion.div>
 
@@ -105,7 +105,7 @@ export function FeaturesSection() {
             className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4"
           >
             Everything you need to hire{" "}
-            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
               faster and smarter
             </span>
           </motion.h2>

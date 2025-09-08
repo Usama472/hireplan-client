@@ -46,9 +46,14 @@ export const getAvailability = async (): Promise<GetAvailabilityResponse> => {
 
 export const createAvailabilityTemplate = async (
   templateName: string,
-  duration: number
+  duration: number,
+  selectedMeetingPlatform?: string
 ): Promise<{ status: boolean; availability: any }> => {
-  return await post("/availabilities/templates", { templateName, duration });
+  return await post("/availabilities/templates", { 
+    templateName, 
+    duration, 
+    selectedMeetingPlatform 
+  });
 };
 
 export const getAvailabilityTemplates =

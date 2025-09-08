@@ -15,3 +15,7 @@ export const updateApplicantStatus = async (
 ) => {
   return await put(`/applicants/${jobId}/status`, { status, applicantId })
 }
+
+export const requestAIAssessment = async (applicantId: string) => {
+  return await get(`/applicants/ai-calculation?applicationId=${applicantId}`)
+}

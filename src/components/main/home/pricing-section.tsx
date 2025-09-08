@@ -54,16 +54,16 @@ export function PricingSection() {
           {/* Trust Badge */}
           <motion.div
             variants={itemVariants}
-            className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-50 to-purple-50 text-blue-700 px-3 py-1.5 rounded-full text-xs font-medium mb-3"
+            className="inline-flex items-center space-x-2 bg-blue-50 text-blue-600 px-4 py-2 rounded-full text-sm font-medium mb-6 border border-blue-200"
           >
-            <Sparkles className="h-3 w-3 text-blue-600" />
+            <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
             <span>Simple & Transparent Pricing</span>
           </motion.div>
 
           {/* Main Headline */}
           <motion.h2
             variants={itemVariants}
-            className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2"
+            className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4"
           >
             Plans that grow{" "}
             <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">with your business</span>
@@ -72,7 +72,7 @@ export function PricingSection() {
           {/* Subheadline */}
           <motion.p
             variants={itemVariants}
-            className="text-sm text-gray-600 max-w-xl mx-auto"
+            className="text-gray-600 max-w-xl mx-auto"
           >
             Choose the perfect plan for your needs. All plans include our core
             AI matching technology and 24/7 support.
@@ -171,16 +171,20 @@ export function PricingSection() {
           className="text-center"
         >
           <div className="bg-white rounded-lg p-4">
-            <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-50 to-purple-50 text-purple-700 px-3 py-1.5 rounded-full text-xs font-medium mb-3">
-              <Zap className="h-3 w-3 text-purple-600" />
+            <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-primary/10 to-secondary/10 text-secondary px-4 py-2 rounded-full text-sm font-medium mb-6">
+              <div className="w-2 h-2 bg-secondary rounded-full"></div>
               <span>Enterprise Solutions</span>
             </div>
 
-            <h3 className="text-lg font-bold text-gray-900 mb-2">
-              Need a custom solution?
+            <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
+              Need a{" "}
+              <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+                custom solution
+              </span>
+              ?
             </h3>
 
-            <p className="text-gray-600 mb-4 max-w-lg mx-auto text-xs">
+            <p className="text-gray-600 mb-4 max-w-lg mx-auto">
               We offer enterprise packages with dedicated support and custom
               integrations for large organizations.
             </p>

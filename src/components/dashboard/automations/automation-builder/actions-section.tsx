@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Code, Mail, MessageSquare, Plus, Trash2, Webhook } from "lucide-react";
+import { Code, Mail, MessageSquare, Plus, Trash2, Webhook, Briefcase, UserCheck, Brain } from "lucide-react";
 import { useState } from "react";
 
 interface ActionsSectionProps {
@@ -97,6 +97,44 @@ export default function ActionsSection({ form }: ActionsSectionProps) {
         };
         break;
 
+      case "update_job_status":
+        newAction = {
+          type: "update_job_status",
+          config: {
+            status: "active",
+          },
+        };
+        break;
+
+      case "assign_recruiter":
+        newAction = {
+          type: "assign_recruiter",
+          config: {
+            recruiterId: "",
+            notify: true,
+          },
+        };
+        break;
+
+      case "ai_follow_up":
+        newAction = {
+          type: "ai_follow_up",
+          config: {
+            followUpType: "candidate_interview",
+            questions: [
+              "How did you feel about the interview process?",
+              "What questions do you have about the role?",
+              "What is your timeline for making a decision?"
+            ],
+            autoSend: false,
+            delay: {
+              value: 1,
+              unit: "days"
+            }
+          },
+        };
+        break;
+
       case "custom":
       default:
         newAction = {
@@ -127,6 +165,12 @@ export default function ActionsSection({ form }: ActionsSectionProps) {
         return <Webhook className="h-5 w-5 text-purple-600" />;
       case "slack":
         return <MessageSquare className="h-5 w-5 text-green-600" />;
+      case "update_job_status":
+        return <Briefcase className="h-5 w-5 text-orange-600" />;
+      case "assign_recruiter":
+        return <UserCheck className="h-5 w-5 text-indigo-600" />;
+      case "ai_follow_up":
+        return <Brain className="h-5 w-5 text-purple-600" />;
       case "custom":
       default:
         return <Code className="h-5 w-5 text-gray-600" />;
@@ -359,6 +403,266 @@ Status: {{status}}`}
           </div>
         );
 
+      case "update_job_status":
+        return (
+          <div className="space-y-4">
+            <FormField
+              control={form.control}
+              name={`actions.${index}.config.status`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Job Status</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="paused">Paused</SelectItem>
+                      <SelectItem value="closed">Closed</SelectItem>
+                      <SelectItem value="draft">Draft</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
+
+            <div className="p-4 bg-gray-50 rounded-md shadow-none">
+              <p className="text-sm mb-2">Job Status Update</p>
+              <p className="text-xs text-gray-500">
+                This action will automatically update the job posting status when the automation is triggered.
+              </p>
+            </div>
+          </div>
+        );
+
+      case "assign_recruiter":
+        return (
+          <div className="space-y-4">
+            <FormField
+              control={form.control}
+              name={`actions.${index}.config.recruiterId`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Assign to Recruiter</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter recruiter email or ID" {...field} />
+                  </FormControl>
+                  <p className="text-xs text-gray-500">
+                    Enter the recruiter's email address or user ID
+                  </p>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name={`actions.${index}.config.notify`}
+              render={({ field }) => (
+                <FormItem className="flex items-center gap-2">
+                  <FormLabel className="text-sm font-medium">
+                    Send notification email
+                  </FormLabel>
+                  <FormControl>
+                    <input
+                      type="checkbox"
+                      checked={field.value}
+                      onChange={(e) => field.onChange(e.target.checked)}
+                      className="rounded border-gray-300"
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <div className="p-4 bg-gray-50 rounded-md shadow-none">
+              <p className="text-sm mb-2">Recruiter Assignment</p>
+              <p className="text-xs text-gray-500">
+                This action will assign the job or application to the specified recruiter and optionally send them a notification.
+              </p>
+            </div>
+          </div>
+        );
+
+      case "ai_follow_up":
+        return (
+          <div className="space-y-4">
+            <FormField
+              control={form.control}
+              name={`actions.${index}.config.followUpType`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Follow-up Type</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select follow-up type" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="candidate_interview">Post-Interview Follow-up</SelectItem>
+                      <SelectItem value="application_status">Application Status Check</SelectItem>
+                      <SelectItem value="job_interest">Job Interest Survey</SelectItem>
+                      <SelectItem value="feedback_request">Feedback Request</SelectItem>
+                      <SelectItem value="custom">Custom Follow-up</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <FormLabel>AI Follow-up Questions</FormLabel>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="text-xs h-7"
+                >
+                  + Add Question
+                </Button>
+              </div>
+              <div className="space-y-2">
+                <div className="relative">
+                  <Input 
+                    placeholder="Question 1: How did you feel about the interview process?"
+                    className="text-sm pr-8"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-1 top-1 h-6 w-6 p-0 text-gray-400 hover:text-red-500"
+                  >
+                    ×
+                  </Button>
+                </div>
+                <div className="relative">
+                  <Input 
+                    placeholder="Question 2: What questions do you have about the role?"
+                    className="text-sm pr-8"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-1 top-1 h-6 w-6 p-0 text-gray-400 hover:text-red-500"
+                  >
+                    ×
+                  </Button>
+                </div>
+                <div className="relative">
+                  <Input 
+                    placeholder="Question 3: What is your timeline for making a decision?"
+                    className="text-sm pr-8"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-1 top-1 h-6 w-6 p-0 text-gray-400 hover:text-red-500"
+                  >
+                    ×
+                  </Button>
+                </div>
+              </div>
+              <p className="text-xs text-gray-500">AI will generate personalized questions based on the context and your selections</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <FormLabel>Send Delay</FormLabel>
+                <div className="flex items-center gap-2">
+                  <FormField
+                    control={form.control}
+                    name={`actions.${index}.config.delay.value`}
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormControl>
+                          <Input
+                            type="number"
+                            min={0}
+                            {...field}
+                            onChange={(e) =>
+                              field.onChange(parseInt(e.target.value) || 0)
+                            }
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={`actions.${index}.config.delay.unit`}
+                    render={({ field }) => (
+                      <FormItem className="w-20">
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="hours">Hours</SelectItem>
+                            <SelectItem value="days">Days</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              <FormField
+                control={form.control}
+                name={`actions.${index}.config.autoSend`}
+                render={({ field }) => (
+                  <FormItem className="flex flex-col justify-end">
+                    <div className="flex items-center gap-2">
+                      <FormLabel className="text-sm font-medium">
+                        Auto-send follow-up
+                      </FormLabel>
+                      <FormControl>
+                        <input
+                          type="checkbox"
+                          checked={field.value}
+                          onChange={(e) => field.onChange(e.target.checked)}
+                          className="rounded border-gray-300"
+                        />
+                      </FormControl>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      If unchecked, generates draft for review
+                    </p>
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-md border border-purple-200">
+              <div className="flex items-center gap-2 mb-2">
+                <Brain className="h-4 w-4 text-purple-600" />
+                <p className="text-sm font-medium text-purple-800">AI Follow-up</p>
+              </div>
+              <p className="text-xs text-purple-700">
+                AI will automatically generate personalized follow-up emails with your custom questions, tailored to each candidate's context and interview experience.
+              </p>
+            </div>
+          </div>
+        );
+
       case "custom":
       default:
         return (
@@ -443,28 +747,46 @@ Status: {{status}}`}
               onValueChange={setTempActionType}
               className="flex-1"
             >
-              <TabsList className="grid grid-cols-4 w-full bg-transparent p-0 rounded-none border-0 shadow-none">
+              <TabsList className="flex flex-wrap justify-start w-full bg-gray-100 p-1 rounded-lg border border-gray-200">
                 <TabsTrigger
                   value="send_email"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-indigo-600 data-[state=active]:text-indigo-600 data-[state=active]:shadow-none bg-transparent text-gray-500 hover:text-gray-700 rounded-none transition-all duration-200 py-3 text-sm font-medium border-0 border-b-2 border-transparent shadow-none"
+                  className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm px-4 py-2 rounded-md text-sm font-medium transition-all duration-200"
                 >
                   Email
                 </TabsTrigger>
                 <TabsTrigger
                   value="webhook"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-indigo-600 data-[state=active]:text-indigo-600 data-[state=active]:shadow-none bg-transparent text-gray-500 hover:text-gray-700 rounded-none transition-all duration-200 py-3 text-sm font-medium border-0 border-b-2 border-transparent shadow-none"
+                  className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm px-4 py-2 rounded-md text-sm font-medium transition-all duration-200"
                 >
                   Webhook
                 </TabsTrigger>
                 <TabsTrigger
                   value="slack"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-indigo-600 data-[state=active]:text-indigo-600 data-[state=active]:shadow-none bg-transparent text-gray-500 hover:text-gray-700 rounded-none transition-all duration-200 py-3 text-sm font-medium border-0 border-b-2 border-transparent shadow-none"
+                  className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm px-4 py-2 rounded-md text-sm font-medium transition-all duration-200"
                 >
                   Slack
                 </TabsTrigger>
                 <TabsTrigger
+                  value="update_job_status"
+                  className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm px-4 py-2 rounded-md text-sm font-medium transition-all duration-200"
+                >
+                  Job Status
+                </TabsTrigger>
+                <TabsTrigger
+                  value="assign_recruiter"
+                  className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm px-4 py-2 rounded-md text-sm font-medium transition-all duration-200"
+                >
+                  Assign
+                </TabsTrigger>
+                <TabsTrigger
+                  value="ai_follow_up"
+                  className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm px-4 py-2 rounded-md text-sm font-medium transition-all duration-200"
+                >
+                  AI Follow-up
+                </TabsTrigger>
+                <TabsTrigger
                   value="custom"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-indigo-600 data-[state=active]:text-indigo-600 data-[state=active]:shadow-none bg-transparent text-gray-500 hover:text-gray-700 rounded-none transition-all duration-200 py-3 text-sm font-medium border-0 border-b-2 border-transparent shadow-none"
+                  className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm px-4 py-2 rounded-md text-sm font-medium transition-all duration-200"
                 >
                   Custom
                 </TabsTrigger>
@@ -474,9 +796,9 @@ Status: {{status}}`}
             <Button
               type="button"
               onClick={addAction}
-              className="bg-indigo-600 hover:bg-indigo-700"
+              className="bg-blue-600 hover:bg-blue-700 text-white border-0 shadow-lg hover:shadow-xl hover:shadow-blue-600/25 transition-all duration-300 gap-2"
             >
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="h-4 w-4" />
               Add Action
             </Button>
           </div>

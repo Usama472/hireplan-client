@@ -34,6 +34,8 @@ import {
   X,
 } from "lucide-react";
 import { useState } from "react";
+import API from "@/http";
+import { useToast } from "@/lib/hooks/use-toast";
 import useAuthSessionContext from "@/lib/context/AuthSessionContext";
 
 export interface AIEvaluation {
@@ -162,6 +164,8 @@ export function ApplicantDetailModal({
 }: ApplicantDetailModalProps) {
   const [activeTab, setActiveTab] = useState("overview");
   const { subscription } = useAuthSessionContext();
+  const [isRequestingAI, setIsRequestingAI] = useState(false);
+  const { toast } = useToast();
   
   // Check subscription for AI features
   const hasProfessionalFeatures = subscription?.planId === 'professional' || subscription?.planId === 'enterprise';
@@ -169,6 +173,76 @@ export function ApplicantDetailModal({
 
   // Trigger animation on initial render
   setTimeout(() => setAnimateHeader(true), 100);
+
+  const handleRequestAIAssessment = async () => {
+    if (!hasProfessionalFeatures) {
+      toast({
+        title: "Upgrade Required",
+        description: "AI assessment requires Professional or Enterprise plan",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsRequestingAI(true);
+    try {
+      const response = await API.applicant.requestAIAssessment(applicant.id);
+      if (response.status) {
+        toast({
+          title: "AI Assessment Completed",
+          description: "The candidate has been evaluated by our AI system",
+        });
+        // Close modal and refresh parent to show updated data
+        onClose();
+        // Trigger a page refresh to reload applicant data with AI evaluation
+        setTimeout(() => window.location.reload(), 500);
+      } else {
+        throw new Error(response.message || "Failed to complete AI assessment");
+      }
+    } catch (error: any) {
+      console.error("AI Assessment error:", error);
+      toast({
+        title: "Assessment Failed",
+        description: error.message || "Failed to complete AI assessment. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRequestingAI(false);
+    }
+  };
+
+  const handleStatusUpdate = async (status: string) => {
+    try {
+      // We need the jobId to update status - let me get it from the applicant
+      const jobId = applicant.jobId || applicant.job?.id;
+      if (!jobId) {
+        throw new Error("Job ID not found");
+      }
+
+      const response = await API.applicant.updateApplicantStatus(jobId, applicant.id, status);
+      if (response.success) {
+        toast({
+          title: "Status Updated",
+          description: `Candidate has been ${status}`,
+        });
+        
+        // Call the parent callback if provided
+        onStatusUpdate?.(applicant.id, status);
+        
+        // Close the modal
+        onClose();
+      } else {
+        throw new Error(response.message || "Failed to update status");
+      }
+    } catch (error: any) {
+      console.error("Status update error:", error);
+      toast({
+        title: "Update Failed",
+        description: error.message || "Failed to update candidate status. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -875,9 +949,14 @@ export function ApplicantDetailModal({
                           This candidate hasn't been evaluated by our AI system
                           yet. Check back later for a comprehensive assessment.
                         </p>
-                        <Button variant="outline" className="mt-4">
+                        <Button 
+                          variant="outline" 
+                          className="mt-4"
+                          onClick={handleRequestAIAssessment}
+                          disabled={isRequestingAI || !hasProfessionalFeatures}
+                        >
                           <Brain className="w-4 h-4 mr-2" />
-                          Request AI Assessment
+                          {isRequestingAI ? "Processing..." : "Request AI Assessment"}
                         </Button>
                       </div>
                     </div>
@@ -898,14 +977,14 @@ export function ApplicantDetailModal({
               <>
                 <Button
                   className="flex-1 bg-red-600 hover:bg-red-700 transform transition-all duration-200 hover:-translate-y-0.5"
-                  onClick={() => onStatusUpdate?.(applicant.id, "rejected")}
+                  onClick={() => handleStatusUpdate("rejected")}
                 >
                   <X className="w-4 h-4 mr-2" />
                   Reject Candidate
                 </Button>
                 <Button
                   className="flex-1 bg-green-600 hover:bg-green-700 transform transition-all duration-200 hover:-translate-y-0.5"
-                  onClick={() => onStatusUpdate?.(applicant.id, "shortlisted")}
+                  onClick={() => handleStatusUpdate("shortlisted")}
                 >
                   <CheckCircle className="w-4 h-4 mr-2" />
                   Shortlist Candidate
@@ -914,7 +993,7 @@ export function ApplicantDetailModal({
             ) : (
               <Button
                 className="flex-1 bg-green-600 hover:bg-green-700 transform transition-all duration-200 hover:-translate-y-0.5"
-                onClick={() => onStatusUpdate?.(applicant.id, "shortlisted")}
+                onClick={() => handleStatusUpdate("shortlisted")}
               >
                 <CheckCircle className="w-4 h-4 mr-2" />
                 Shortlist Candidate

@@ -215,19 +215,33 @@ export default function AutomationsDashboard() {
   const hasFilters = searchQuery !== "" || statusFilter !== "all";
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-full">
       <div className="space-y-6">
-        {/* Enhanced Header with gradient background */}
-        <div className="flex items-center justify-between bg-gradient-to-r from-indigo-50 via-blue-50 to-sky-50 px-8 py-8 border-b border-indigo-100 animate-fadeIn">
-          <div className="flex items-center gap-5">
-            <div className="p-3.5 bg-indigo-100 rounded-xl animate-scaleIn">
-              <Filter className="h-7 w-7 text-indigo-600" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Automations</h1>
-              <p className="text-gray-600 mt-1">
-                Create and manage recruitment workflow automations
-              </p>
+        {/* Enhanced Header */}
+        <div className="bg-white border-b border-gray-200 px-6 py-4 relative overflow-hidden max-h-[80px]">
+          <div className="relative z-10">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-gray-100 rounded-xl">
+                  <Filter className="h-6 w-6 text-gray-600" />
+                </div>
+                <div className="flex flex-col">
+                  <h1 className="text-2xl font-bold text-gray-900">Automations</h1>
+                  <p className="text-gray-600 flex items-center gap-2">
+                    Create and manage recruitment workflow automations
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <Button
+                  onClick={handleCreateAutomation}
+                  className="bg-blue-600 hover:bg-blue-700 text-white border-0 shadow-lg hover:shadow-xl hover:shadow-blue-600/25 transition-all duration-300 gap-2 px-5 font-medium"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Automation
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -240,20 +254,14 @@ export default function AutomationsDashboard() {
               <div className="space-y-5">
                 {/* Controls */}
                 <div className="flex items-center justify-between">
-                  <Button
-                    onClick={handleCreateAutomation}
-                    className="bg-indigo-600 hover:bg-indigo-700 px-5 transition-all duration-300 hover:scale-[1.03] hover:shadow-md"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    New Automation
-                  </Button>
+                  <h2 className="text-lg font-semibold text-gray-900">All Automations</h2>
 
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="hover:bg-indigo-50 transition-colors duration-200"
+                        className="hover:bg-primary/10 hover:text-primary transition-colors duration-200"
                       >
                         <HelpCircle className="h-5 w-5 text-gray-500" />
                       </Button>
@@ -276,11 +284,11 @@ export default function AutomationsDashboard() {
                       placeholder="Search automations..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-9 border-gray-200 focus:ring-indigo-400 transition-all duration-200"
+                      className="pl-9 border-gray-200 focus:ring-primary transition-all duration-200"
                     />
                   </div>
                   <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-36 border-gray-200 focus:ring-indigo-400 transition-all duration-200">
+                    <SelectTrigger className="w-36 border-gray-200 focus:ring-primary transition-all duration-200">
                       <SelectValue placeholder="Status" />
                     </SelectTrigger>
                     <SelectContent>

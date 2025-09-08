@@ -29,7 +29,8 @@ export function NavUser({
     avatar: string;
   };
 }) {
-  const { isMobile } = useSidebar();
+  const sidebarContext = useSidebar();
+  const isMobile = sidebarContext?.isMobile ?? false;
   const navigate = useNavigate();
   const { data } = useAuthSessionContext();
 

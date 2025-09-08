@@ -20,6 +20,8 @@ export const DASHBOARD_ROUTES = {
   STAFF_MANAGEMENT: `/dashboard/staff-management`,
   AUTOMATIONS: `/dashboard/automations`,
   AUTOMATION_LOGS: `/dashboard/automations/logs`,
+  AVAILABILITY: `/dashboard/availability`,
+  MEETING_SETTINGS: `/dashboard/meeting-settings`,
 };
 
 export const ROUTES = {

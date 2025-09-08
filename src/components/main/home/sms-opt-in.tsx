@@ -61,7 +61,7 @@ export function SMSOptIn() {
     return (
       <Card className="w-full max-w-md mx-auto bg-white/95 backdrop-blur-sm border-2 border-purple-200/60">
         <CardContent className="p-8 text-center">
-          <div className="w-16 h-16 bg-gradient-to-br from-blue-50 to-purple-50 rounded-full flex items-center justify-center mx-auto mb-6 border border-purple-200">
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-50 to-purple-50 rounded-full flex items-center justify-center mx-auto mb-6 border border-purple-200">
             <CheckCircle className="w-8 h-8 text-purple-600" />
           </div>
           <h3 className="text-xl font-bold text-purple-800 mb-3">

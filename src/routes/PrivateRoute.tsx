@@ -3,14 +3,15 @@ import { DashboardSidebar } from "@/components/common/navigation/dashboard/sideb
 import type { DefaultLayoutProps } from "@/interfaces";
 import useAuthSessionContext from "@/lib/context/AuthSessionContext";
 import { ScrollToTop } from "@/lib/hooks/ScrollToTop";
-import { SidebarInset, SidebarProvider } from "@components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { SubscriptionStatusAlert } from "@/components/common/SubscriptionStatusAlert";
 
 export const PrivateRoute = ({ children }: DefaultLayoutProps) => {
   const { status, subscription, refreshSubscription } = useAuthSessionContext();
 
-  if (status === "loading") {
-    return <LoadingScreen />;
+  // Show loading state for private routes
+  if (status === 'loading') {
+    return <LoadingScreen message="Loading dashboard..." />;
   }
 
   // if (!subscription || subscription.subscriptionStatus === "none") {

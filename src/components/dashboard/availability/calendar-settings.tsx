@@ -59,6 +59,7 @@ export function CalendarSettings({ className }: CalendarSettingsProps) {
     }
   };
 
+
   const handleDisconnectMicrosoft = async () => {
     try {
       await API.microsoft.disconnectMicrosoftCalendar();
@@ -77,6 +78,7 @@ export function CalendarSettings({ className }: CalendarSettingsProps) {
       });
     }
   };
+
 
   const handleRefresh = async () => {
     try {
@@ -242,31 +244,6 @@ export function CalendarSettings({ className }: CalendarSettingsProps) {
           </div>
         </div>
 
-        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg opacity-60">
-          <div className="flex items-center gap-4">
-            <div className="h-10 w-10 rounded-lg overflow-hidden flex items-center justify-center bg-white">
-              <img
-                src="/zoom.png"
-                alt="Zoom"
-                className="h-8 w-8 object-contain"
-              />
-            </div>
-            <div>
-              <h3 className="font-medium text-gray-900">Exchange Calendar</h3>
-              <p className="text-sm text-gray-600">
-                Exchange Server 2013, 2016, or 2019
-              </p>
-            </div>
-          </div>
-          <Button
-            variant="outline"
-            disabled
-            size="sm"
-            className="text-gray-400"
-          >
-            Coming Soon
-          </Button>
-        </div>
       </div>
     </div>
   );

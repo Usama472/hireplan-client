@@ -56,7 +56,7 @@ export default function AutomationsList({
           key={automation.id}
           className={cn(
             "border border-gray-200 bg-white rounded-lg cursor-pointer transition-all duration-300 card-hover-effect",
-            selectedId === automation.id && "border-indigo-400 bg-indigo-50/30",
+            selectedId === automation.id && "border-primary bg-primary/5",
             "animate-slideIn"
           )}
           style={{ animationDelay: `${index * 50}ms` }}
@@ -123,25 +123,25 @@ export default function AutomationsList({
                 className="flex items-center gap-1 ml-4"
                 onClick={(e) => e.stopPropagation()}
               >
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 rounded-full hover:bg-indigo-50 transition-transform duration-200 hover:scale-110"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onEdit(automation.id);
-                  }}
-                >
-                  <Pencil className="h-4 w-4 text-gray-500" />
-                  <span className="sr-only">Edit</span>
-                </Button>
+                                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 rounded-full hover:bg-primary/10 transition-transform duration-200 hover:scale-110"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEdit(automation.id);
+                    }}
+                  >
+                    <Pencil className="h-4 w-4 text-gray-500" />
+                    <span className="sr-only">Edit</span>
+                  </Button>
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 rounded-full hover:bg-indigo-50 transition-transform duration-200 hover:scale-110"
+                      className="h-8 w-8 rounded-full hover:bg-primary/10 transition-transform duration-200 hover:scale-110"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <MoreHorizontal className="h-4 w-4 text-gray-500" />

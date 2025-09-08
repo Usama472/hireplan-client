@@ -6,7 +6,7 @@ import useAuthSessionContext from '../context/AuthSessionContext'
 const UnauthenticatedRoutes = ['/login', '/signup']
 const AuthVerificationRoutes = ['/verification']
 const AuthenticatedRoutes = ['/dashboard'] as string[]
-const PublicRoutes = ['/', '/contact', '/privacy', '/terms', '/company', '/apply', '/interview', '/outlook/auth']
+const PublicRoutes = ['/', '/contact', '/privacy', '/terms', '/company', '/apply', '/interview', '/outlook/auth', '/zoom/auth']
 
 const AuthRedirection = ({ children }: PropsWithChildren) => {
   const [isReloading, setReloading] = useState(false)

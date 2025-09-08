@@ -28,7 +28,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { AutomationType } from "@/interfaces/automations";
 import { useToast } from "@/lib/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AlertCircle, ChevronLeft, ChevronRight, Save } from "lucide-react";
+import { AlertCircle, ChevronLeft, ChevronRight, Save, Brain, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -48,6 +48,11 @@ const automationSchema = z.object({
       "application_created",
       "application_status_changed",
       "resume_score_updated",
+      "job_created",
+      "job_published",
+      "job_expired",
+      "candidate_matched",
+      "email_received",
       "cron",
     ]),
     config: z.record(z.any()).optional(),
@@ -237,184 +242,164 @@ export default function AutomationBuilder({
     }
   };
 
-  const formContent = (
-    <div className="">
-      {/* Main Tabs - Email Rules vs Job Rules */}
-      <Tabs defaultValue="email-rules" className="w-full">
-        <TabsList className="grid grid-cols-2 w-full mb-6 bg-transparent p-0 rounded-none border-0 shadow-none">
-          <TabsTrigger
-            value="email-rules"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-indigo-600 data-[state=active]:text-indigo-600 data-[state=active]:shadow-none bg-transparent text-gray-500 hover:text-gray-700 rounded-none transition-all duration-200 py-3 text-sm font-medium border-0 border-b-2 border-transparent shadow-none"
-          >
-            Email Rules
-          </TabsTrigger>
-          <TabsTrigger
-            value="job-rules"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-indigo-600 data-[state=active]:text-indigo-600 data-[state=active]:shadow-none bg-transparent text-gray-500 hover:text-gray-700 rounded-none transition-all duration-200 py-3 text-sm font-medium border-0 border-b-2 border-transparent shadow-none"
-          >
-            Job Rules
-          </TabsTrigger>
-        </TabsList>
+  // This is now handled directly in the dialog mode, no separate formContent needed
+  const formContent = null;
 
-        <TabsContent value="email-rules" className="pt-4 animate-fadeIn">
-          {/* Email Rules Content */}
-          <div className="space-y-6">
-            {/* Automation Name and Description */}
+  if (mode === "dialog") {
+    return (
+      <Dialog
+        open={open}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) onClose();
+        }}
+      >
+        <DialogContent className="max-w-5xl w-full h-[95vh] max-h-[95vh] overflow-y-auto p-6">
+          <DialogHeader className="mb-6">
             <div className="flex items-center justify-between">
-              <div className="space-y-1.5 w-full">
-                <div className="flex items-center justify-between gap-4">
-                  <InputField
-                    label=""
-                    name="name"
-                    placeholder="Automation name"
-                    className="m-0 p-0"
-                  />
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Brain className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl font-bold text-gray-900">
+                    {isEditing ? "Edit Automation" : "Create Automation"}
+                  </DialogTitle>
+                  <DialogDescription className="text-gray-600">
+                    {isEditing ? "Update automation settings" : "Set up a new automation workflow"}
+                  </DialogDescription>
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleCancel}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </DialogHeader>
 
+          <Form {...form}>
+            <form className="space-y-6">
+              
+              {/* Basic Info */}
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="md:col-span-2">
+                    <FormField
+                      control={form.control}
+                    name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Automation Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter name" {...field} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div className="flex items-end">
+                    <FormField
+                      control={form.control}
+                      name="enabled"
+                      render={({ field }) => (
+                        <FormItem className="flex items-center gap-2 space-y-0">
+                          <FormLabel>Enabled</FormLabel>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+                
+                <div className="mt-3">
                   <FormField
                     control={form.control}
-                    name="enabled"
+                    name="description"
                     render={({ field }) => (
-                      <FormItem className="flex items-center gap-2">
-                        <FormLabel className="text-sm font-medium cursor-pointer text-gray-700">
-                          Enabled
-                        </FormLabel>
+                      <FormItem>
+                        <FormLabel>Description</FormLabel>
                         <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                            className="data-[state=checked]:bg-green-500"
+                          <textarea
+                            placeholder="Optional description"
+                            rows={2}
+                            {...field}
+                            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm resize-none"
                           />
                         </FormControl>
                       </FormItem>
                     )}
-                  />
-                </div>
-
-                <InputField
-                  label=""
-                  multiline
-                  rows={2}
-                  name="description"
-                  placeholder="Add a description (optional)"
-                  className="m-0 p-0"
                 />
               </div>
             </div>
 
-            <Tabs
-              value={activeStep}
-              onValueChange={setActiveStep}
-              className="w-full"
-            >
-              <TabsList className="grid grid-cols-4 w-full mb-6 bg-transparent p-0 rounded-none border-0 shadow-none">
-                <TabsTrigger
-                  value="trigger"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-indigo-600 data-[state=active]:text-indigo-600 data-[state=active]:shadow-none bg-transparent text-gray-500 hover:text-gray-700 rounded-none transition-all duration-200 py-3 text-sm font-medium border-0 border-b-2 border-transparent shadow-none"
-                >
-                  <span className="hidden sm:inline">1. </span>Trigger
-                </TabsTrigger>
-                <TabsTrigger
-                  value="conditions"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-indigo-600 data-[state=active]:text-indigo-600 data-[state=active]:shadow-none bg-transparent text-gray-500 hover:text-gray-700 rounded-none transition-all duration-200 py-3 text-sm font-medium border-0 border-b-2 border-transparent shadow-none"
-                >
-                  <span className="hidden sm:inline">2. </span>Conditions
-                </TabsTrigger>
-                <TabsTrigger
-                  value="actions"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-indigo-600 data-[state=active]:text-indigo-600 data-[state=active]:shadow-none bg-transparent text-gray-500 hover:text-gray-700 rounded-none transition-all duration-200 py-3 text-sm font-medium border-0 border-b-2 border-transparent shadow-none"
-                >
-                  <span className="hidden sm:inline">3. </span>Actions
-                </TabsTrigger>
-                <TabsTrigger
-                  value="summary"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-indigo-600 data-[state=active]:text-indigo-600 data-[state=active]:shadow-none bg-transparent text-gray-500 hover:text-gray-700 rounded-none transition-all duration-200 py-3 text-sm font-medium border-0 border-b-2 border-transparent shadow-none"
-                >
-                  <span className="hidden sm:inline">4. </span>Summary
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="trigger" className="pt-4 animate-fadeIn">
-                <TriggerSection
-                  form={form}
-                  onTriggerTypeChange={handleTriggerTypeChange}
-                />
-              </TabsContent>
-
-              <TabsContent value="conditions" className="pt-4 animate-fadeIn">
-                <ConditionsSection form={form} />
-              </TabsContent>
-
-              <TabsContent value="actions" className="pt-4 animate-fadeIn">
-                <ActionsSection form={form} />
-              </TabsContent>
-
-              <TabsContent value="summary" className="pt-4 animate-fadeIn">
-                <SummarySection form={form} />
-              </TabsContent>
-            </Tabs>
+              {/* Step Navigation */}
+              <div className="flex justify-center">
+                <div className="inline-flex bg-gray-100 rounded-lg p-1">
+                  {["trigger", "conditions", "actions", "summary"].map((step, index) => (
+                    <button
+                      key={step}
+                      type="button"
+                      onClick={() => setActiveStep(step)}
+                      className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                        activeStep === step
+                          ? "bg-white text-primary shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {index + 1}. {step.charAt(0).toUpperCase() + step.slice(1)}
+                    </button>
+                  ))}
           </div>
-        </TabsContent>
+              </div>
 
-        <TabsContent value="job-rules" className="pt-4 animate-fadeIn">
-          {/* Job Rules Coming Soon */}
-          <div className="bg-white rounded-lg p-12 text-center">
-            <div className="max-w-md mx-auto">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg
-                  className="w-8 h-8 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                  />
-                </svg>
+              {/* Step Content */}
+              <div className="border rounded-lg p-6 min-h-[500px]">
+                {activeStep === "trigger" && (
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4">When should this run?</h3>
+                    <TriggerSection form={form} onTriggerTypeChange={handleTriggerTypeChange} />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Job Rules Coming Soon
-              </h3>
-              <p className="text-gray-600 mb-6">
-                We're working on advanced job-based automation rules that will
-                help you automate job posting, screening, and management
-                workflows.
-              </p>
-              <div className="bg-gray-50 rounded-lg p-4 text-left">
-                <h4 className="font-medium text-gray-900 mb-2">
-                  Planned Features:
-                </h4>
-                <ul className="text-sm text-gray-600 space-y-1">
-                  <li>• Auto-publish jobs based on criteria</li>
-                  <li>• Smart job matching and recommendations</li>
-                  <li>• Automated job status updates</li>
-                  <li>• Bulk job operations</li>
-                  <li>• Job template automation</li>
-                </ul>
-              </div>
+                )}
+
+                {activeStep === "conditions" && (
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4">Conditions (Optional)</h3>
+                    <ConditionsSection form={form} />
             </div>
-          </div>
-        </TabsContent>
-      </Tabs>
+                )}
 
-      {Object.keys(formState.errors).length > 0 && (
-        <div className="border border-red-200 bg-red-50 text-red-700 rounded-lg p-4 flex items-center gap-2 animate-scaleIn">
-          <AlertCircle className="h-5 w-5 flex-shrink-0" />
-          <span>Please fix the validation errors before proceeding.</span>
+                {activeStep === "actions" && (
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4">What should happen?</h3>
+                    <ActionsSection form={form} />
         </div>
       )}
 
-      <div className="flex justify-between pt-7">
+                {activeStep === "summary" && (
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4">Review</h3>
+                    <SummarySection form={form} />
+                  </div>
+                )}
+              </div>
+
+              {/* Navigation Buttons */}
+              <div className="flex justify-between pt-4">
         {activeStep !== "trigger" ? (
           <Button
             type="button"
             variant="outline"
             onClick={handleBack}
-            className="gap-1 border-gray-300 transition-all duration-200 hover:border-indigo-300"
           >
-            <ChevronLeft className="h-4 w-4" />
+                    <ChevronLeft className="h-4 w-4 mr-1" />
             Back
           </Button>
         ) : (
@@ -422,7 +407,6 @@ export default function AutomationBuilder({
             type="button"
             variant="outline"
             onClick={handleCancel}
-            className="border-gray-300 transition-all duration-200 hover:border-indigo-300"
           >
             Cancel
           </Button>
@@ -433,17 +417,17 @@ export default function AutomationBuilder({
             type="button"
             onClick={form.handleSubmit(handleSubmit)}
             disabled={formState.isSubmitting || !formState.isValid}
-            className="bg-indigo-600 hover:bg-indigo-700 transition-all duration-200 gap-1"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground"
           >
             {formState.isSubmitting ? (
               <>
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2" />
                 {isEditing ? "Updating..." : "Creating..."}
               </>
             ) : (
               <>
-                <Save className="h-4 w-4" />
-                {isEditing ? "Update Automation" : "Create Automation"}
+                        <Save className="h-4 w-4 mr-2" />
+                        {isEditing ? "Update" : "Create"} Automation
               </>
             )}
           </Button>
@@ -451,38 +435,15 @@ export default function AutomationBuilder({
           <Button
             type="button"
             onClick={handleNext}
-            disabled={!formState.isValid}
-            variant="secondary"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground"
           >
             Next
-            <ChevronRight className="h-4 w-4" />
+                    <ChevronRight className="h-4 w-4 ml-1" />
           </Button>
         )}
       </div>
-    </div>
-  );
 
-  if (mode === "dialog") {
-    return (
-      <Dialog
-        open={open}
-        onOpenChange={(isOpen) => {
-          if (!isOpen) onClose();
-        }}
-      >
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto border-0 animate-scaleIn p-8 rounded-xl shadow-none">
-          <DialogHeader className="pb-2">
-            <DialogTitle className="text-2xl font-bold text-gray-900">
-              {isEditing ? "Edit" : "Create"} Automation
-            </DialogTitle>
-            <DialogDescription className="text-gray-600">
-              {isEditing
-                ? "Update your automation workflow to automate recruitment tasks."
-                : "Create a new automation workflow to automate recruitment tasks."}
-            </DialogDescription>
-          </DialogHeader>
-          <Form {...form}>
-            <form>{formContent}</form>
+            </form>
           </Form>
         </DialogContent>
       </Dialog>

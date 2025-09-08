@@ -7,6 +7,11 @@ export interface AutomationType {
       | "application_created"
       | "application_status_changed"
       | "resume_score_updated"
+      | "job_created"
+      | "job_published"
+      | "job_expired"
+      | "candidate_matched"
+      | "email_received"
       | "cron";
     config: {
       from?: string | null;
@@ -20,7 +25,7 @@ export interface AutomationType {
     value: string;
   }>;
   actions: Array<{
-    type: "send_email" | "webhook" | "slack" | "custom";
+    type: "send_email" | "webhook" | "slack" | "update_job_status" | "assign_recruiter" | "ai_follow_up" | "custom";
     config: {
       templateId?: string;
       delay?: {

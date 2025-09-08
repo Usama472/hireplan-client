@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { BookCopy, Clock, MessageSquare, RefreshCw } from "lucide-react";
+import { BookCopy, Clock, MessageSquare, RefreshCw, Briefcase, UserPlus, Mail } from "lucide-react";
 
 interface TriggerSectionProps {
   form: any; // Using any temporarily to avoid TypeScript errors with form types
@@ -28,16 +28,16 @@ export default function TriggerSection({ form }: TriggerSectionProps) {
     { value: "hired", label: "Hired" },
   ];
 
-  // SIMPLIFY: Only check the current value directly from the form
-  const currentValue = form.getValues("trigger.type") || "application_created";
+  // Get current value from form watch
+  const currentValue = form.watch("trigger.type") || "application_created";
 
-  // Simple direct handler with no side effects
+  // Handle trigger type change with proper form integration
   const selectTriggerType = (type: string) => {
     // Don't do anything if already selected
     if (currentValue === type) return;
 
     // Update the form field directly
-    form.setValue("trigger.type", type);
+    form.setValue("trigger.type", type, { shouldValidate: true });
 
     // Reset config to empty object
     form.setValue("trigger.config", {});
@@ -53,7 +53,8 @@ export default function TriggerSection({ form }: TriggerSectionProps) {
       />
 
       <div>
-        <h3 className="text-sm font-medium mb-3">Select Trigger Type</h3>
+        <h3 className="text-sm font-medium mb-3">Select Trigger Event</h3>
+        <p className="text-xs text-gray-500 mb-4">Choose what event will start this automation workflow</p>
         <div className="grid grid-cols-2 gap-3">
           {/* Application Created */}
           <div
@@ -156,6 +157,102 @@ export default function TriggerSection({ form }: TriggerSectionProps) {
                 </h4>
                 <p className="text-xs text-gray-500 leading-tight">
                   Resume score changes
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Job Created */}
+          <div
+            className={`cursor-pointer transition-all duration-200 rounded-md border p-3 ${
+              currentValue === "job_created"
+                ? "border-indigo-500 bg-indigo-50 shadow-none"
+                : "border-gray-200 hover:border-indigo-300 hover:bg-gray-50"
+            }`}
+            onClick={() => selectTriggerType("job_created")}
+          >
+            <div className="flex flex-col items-center text-center gap-2">
+              <div
+                className={`p-2 rounded-full ${
+                  currentValue === "job_created" ? "bg-indigo-100" : "bg-gray-100"
+                }`}
+              >
+                <Briefcase
+                  className={`h-4 w-4 ${
+                    currentValue === "job_created"
+                      ? "text-indigo-600"
+                      : "text-gray-600"
+                  }`}
+                />
+              </div>
+              <div className="flex-1">
+                <h4 className="block font-medium text-xs">Job Created</h4>
+                <p className="text-xs text-gray-500 leading-tight">
+                  New job posting created
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Job Published */}
+          <div
+            className={`cursor-pointer transition-all duration-200 rounded-md border p-3 ${
+              currentValue === "job_published"
+                ? "border-indigo-500 bg-indigo-50 shadow-none"
+                : "border-gray-200 hover:border-indigo-300 hover:bg-gray-50"
+            }`}
+            onClick={() => selectTriggerType("job_published")}
+          >
+            <div className="flex flex-col items-center text-center gap-2">
+              <div
+                className={`p-2 rounded-full ${
+                  currentValue === "job_published" ? "bg-indigo-100" : "bg-gray-100"
+                }`}
+              >
+                <UserPlus
+                  className={`h-4 w-4 ${
+                    currentValue === "job_published"
+                      ? "text-indigo-600"
+                      : "text-gray-600"
+                  }`}
+                />
+              </div>
+              <div className="flex-1">
+                <h4 className="block font-medium text-xs">Job Published</h4>
+                <p className="text-xs text-gray-500 leading-tight">
+                  Job goes live publicly
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Email Received */}
+          <div
+            className={`cursor-pointer transition-all duration-200 rounded-md border p-3 ${
+              currentValue === "email_received"
+                ? "border-indigo-500 bg-indigo-50 shadow-none"
+                : "border-gray-200 hover:border-indigo-300 hover:bg-gray-50"
+            }`}
+            onClick={() => selectTriggerType("email_received")}
+          >
+            <div className="flex flex-col items-center text-center gap-2">
+              <div
+                className={`p-2 rounded-full ${
+                  currentValue === "email_received" ? "bg-indigo-100" : "bg-gray-100"
+                }`}
+              >
+                <Mail
+                  className={`h-4 w-4 ${
+                    currentValue === "email_received"
+                      ? "text-indigo-600"
+                      : "text-gray-600"
+                  }`}
+                />
+              </div>
+              <div className="flex-1">
+                <h4 className="block font-medium text-xs">Email Received</h4>
+                <p className="text-xs text-gray-500 leading-tight">
+                  When email is received
                 </p>
               </div>
             </div>

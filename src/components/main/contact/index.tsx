@@ -142,8 +142,8 @@ export default function ContactPage() {
                 {/* Contact Cards */}
                 <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 border border-gray-200/60 hover:border-gray-300/60 transition-all duration-300 group">
                   <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg flex items-center justify-center flex-shrink-0 border border-blue-200 group-hover:scale-110 transition-transform duration-200">
-                      <Mail className="w-6 h-6 text-blue-600" />
+                    <div className="w-12 h-12 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-lg flex items-center justify-center flex-shrink-0 border border-primary/20 group-hover:scale-110 transition-transform duration-200">
+                      <Mail className="w-6 h-6 text-primary" />
                     </div>
                     <div>
                       <h3 className="font-medium text-gray-900 mb-2 text-base">
@@ -154,7 +154,7 @@ export default function ContactPage() {
                       </p>
                       <a
                         href="mailto:hello@hireplan.co"
-                        className="text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200 text-sm"
+                        className="text-primary hover:text-primary/80 font-medium transition-colors duration-200 text-sm"
                       >
                         hello@hireplan.co
                       </a>
@@ -227,7 +227,7 @@ export default function ContactPage() {
                       <Input
                         id="firstName"
                         {...register("firstName")}
-                        className={`h-12 border-2 border-gray-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all duration-200 text-base ${
+                        className={`h-12 border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-base ${
                           errors.firstName
                             ? "border-red-500 focus:border-red-500 focus:ring-red-100"
                             : ""
@@ -245,7 +245,7 @@ export default function ContactPage() {
                       <Input
                         id="lastName"
                         {...register("lastName")}
-                        className={`h-12 border-2 border-gray-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all duration-200 text-base ${
+                        className={`h-12 border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-base ${
                           errors.lastName
                             ? "border-red-500 focus:border-red-500 focus:ring-red-100"
                             : ""
@@ -266,7 +266,7 @@ export default function ContactPage() {
                       id="email"
                       type="email"
                       {...register("email")}
-                      className={`h-12 border-2 border-gray-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all duration-200 text-base ${
+                      className={`h-12 border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-base ${
                         errors.email
                           ? "border-red-500 focus:border-red-500 focus:ring-red-100"
                           : ""
@@ -286,7 +286,7 @@ export default function ContactPage() {
                       <Input
                         id="company"
                         {...register("company")}
-                        className={`h-12 border-2 border-gray-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all duration-200 text-base ${
+                        className={`h-12 border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-base ${
                           errors.company
                             ? "border-red-500 focus:border-red-500 focus:ring-red-100"
                             : ""
@@ -304,7 +304,7 @@ export default function ContactPage() {
                       <Input
                         id="jobTitle"
                         {...register("jobTitle")}
-                        className={`h-12 border-2 border-gray-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all duration-200 text-base ${
+                        className={`h-12 border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-base ${
                           errors.jobTitle
                             ? "border-red-500 focus:border-red-500 focus:ring-red-100"
                             : ""
@@ -326,7 +326,7 @@ export default function ContactPage() {
                       onValueChange={(value) => setValue("inquiryType", value)}
                     >
                       <SelectTrigger
-                        className={`h-12 border-2 border-gray-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all duration-200 text-base ${
+                        className={`h-12 border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-base ${
                           errors.inquiryType
                             ? "border-red-500 focus:border-red-500 focus:ring-red-100"
                             : ""
@@ -355,7 +355,7 @@ export default function ContactPage() {
                       id="message"
                       {...register("message")}
                       rows={5}
-                      className={`border-2 border-gray-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all duration-200 resize-none text-base ${
+                      className={`border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 resize-none text-base ${
                         errors.message
                           ? "border-red-500 focus:border-red-500 focus:ring-red-100"
                           : ""
@@ -374,7 +374,7 @@ export default function ContactPage() {
                     <Button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-medium px-8 py-3 h-12 transition-all duration-200 group text-base"
+                      className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-8 py-3 h-12 transition-all duration-200 group text-base"
                     >
                       {isSubmitting ? (
                         <>
@@ -400,7 +400,7 @@ export default function ContactPage() {
 
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <div className="inline-flex items-center space-x-2 bg-blue-50 text-primary px-6 py-3 rounded-full text-sm font-medium mb-6 border border-blue-200/60">
+            <div className="inline-flex items-center space-x-2 bg-primary/10 text-primary px-6 py-3 rounded-full text-sm font-medium mb-6 border border-primary/20">
               <Zap className="h-4 w-4 text-primary" />
               <span>Quick Answers</span>
             </div>
@@ -415,8 +415,8 @@ export default function ContactPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="bg-white rounded-xl p-6 border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-300 group">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg flex items-center justify-center mb-4 border border-blue-200 group-hover:scale-110 transition-transform duration-200">
-                <MessageSquare className="w-6 h-6 text-blue-600" />
+              <div className="w-12 h-12 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-lg flex items-center justify-center mb-4 border border-primary/20 group-hover:scale-110 transition-transform duration-200">
+                <MessageSquare className="w-6 h-6 text-primary" />
               </div>
               <h3 className="font-medium text-gray-900 mb-3 text-lg">
                 How does HirePlan work?

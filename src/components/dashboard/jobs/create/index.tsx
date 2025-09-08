@@ -580,7 +580,7 @@ export default function CreateJob() {
                     variant="outline"
                     size="sm"
                     onClick={loadTestData}
-                    className="absolute top-4 right-4 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+                    className="absolute top-4 right-4 bg-primary/10 border-primary/20 text-primary hover:bg-primary/20"
                   >
                     <Database className="w-4 h-4 mr-2" />
                     Load Data
@@ -709,7 +709,7 @@ export default function CreateJob() {
               <div className="w-32">
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
-                    className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full transition-all duration-300 ease-out"
+                    className="bg-gradient-to-r from-primary to-secondary h-2 rounded-full transition-all duration-300 ease-out"
                     style={{
                       width: `${Math.round(
                         ((currentStep - 1) / (totalSteps - 1)) * 100
@@ -728,16 +728,16 @@ export default function CreateJob() {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
             {selectedTemplate && (
-              <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
-                <Sparkles className="h-4 w-4 text-blue-600" />
-                <span className="text-sm font-medium text-blue-700">
+              <div className="flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-lg px-3 py-2">
+                <Sparkles className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium text-primary">
                   Using template: {selectedTemplate.name}
                 </span>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => navigate(ROUTES.DASHBOARD.JOB_TEMPLATES)}
-                  className="h-6 w-6 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-100"
+                  className="h-6 w-6 p-0 text-primary hover:text-primary/80 hover:bg-primary/10"
                 >
                   <RotateCcw className="h-3 w-3" />
                 </Button>

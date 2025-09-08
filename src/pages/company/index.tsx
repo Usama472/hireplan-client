@@ -122,10 +122,6 @@ const CompanyPage: React.FC = () => {
             domain: domainName,
           });
 
-          // Get jobs from the cached data or fetch separately
-          const jobs = company.scrapedData.jobs?.results || [];
-          setJobs(jobs);
-
           // Apply cached styles and metadata
           if (
             company.scrapedData.cssLinks &&
@@ -185,11 +181,17 @@ const CompanyPage: React.FC = () => {
             domain: domainName,
           });
 
-          const jobs = response?.jobs?.results || [];
-          setJobs(jobs);
-
           // Save the scraped data to cache for future use
           await saveScrapedDataToCache(company.id, response);
+        }
+
+        // Always fetch actual job postings from the database
+        try {
+          const jobsResponse = await API.job.getPublicJobsByCompany(slug as string);
+          setJobs(jobsResponse.jobs || []);
+        } catch (jobError) {
+          console.error("Error fetching jobs:", jobError);
+          setJobs([]);
 
           // Apply scraped styles and metadata
           if (response.cssLinks && Array.isArray(response.cssLinks)) {

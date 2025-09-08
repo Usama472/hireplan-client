@@ -134,7 +134,7 @@ export default function JobsPage() {
                   <h1 className="text-2xl font-bold text-gray-900">
                     Job Postings
                   </h1>
-                  <p className="text-gray-600 flex items-center gap-2">
+                  <div className="text-gray-600 flex items-center gap-2">
                     Manage and track your job postings and applications
                     <Badge
                       variant="secondary"
@@ -142,7 +142,7 @@ export default function JobsPage() {
                     >
                       {jobs.length} active
                     </Badge>
-                  </p>
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -156,7 +156,7 @@ export default function JobsPage() {
                 {canCreateJob && (
                   <Button
                     onClick={() => navigate(ROUTES.DASHBOARD.CREATE_JOB)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white border-0 shadow-lg hover:shadow-xl hover:shadow-blue-600/25 transition-all duration-300 gap-2"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground border-0 shadow-lg hover:shadow-xl hover:shadow-primary/25 transition-all duration-300 gap-2"
                   >
                     <Plus className="w-4 h-4" />
                     Create Job
@@ -323,8 +323,8 @@ export default function JobsPage() {
                         onClick={() => setViewMode("grid")}
                         className={`p-2 rounded-md transition-all duration-300 ease-in-out transform ${
                           viewMode === "grid"
-                            ? "bg-primary text-white scale-105"
-                            : "text-gray-600 hover:text-gray-900 hover:bg-gray-50 hover:scale-105"
+                            ? "bg-primary text-primary-foreground scale-105"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted hover:scale-105"
                         }`}
                       >
                         <Grid3X3 className="w-4 h-4 transition-transform duration-300" />
@@ -333,8 +333,8 @@ export default function JobsPage() {
                         onClick={() => setViewMode("list")}
                         className={`p-2 rounded-md transition-all duration-300 ease-in-out transform ${
                           viewMode === "list"
-                            ? "bg-primary text-white shadow-sm scale-105"
-                            : "text-gray-600 hover:text-gray-900 hover:bg-gray-50 hover:scale-105"
+                            ? "bg-primary text-primary-foreground shadow-sm scale-105"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted hover:scale-105"
                         }`}
                       >
                         <List className="w-4 h-4 transition-transform duration-300" />

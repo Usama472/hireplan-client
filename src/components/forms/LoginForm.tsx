@@ -46,6 +46,8 @@ export const LoginForm = () => {
       const token = response.tokens.accessToken.token;
       if (user.status === "active") {
         mutateSession({ shouldBroadcast: true, accessToken: token });
+        // Navigate to dashboard after successful login
+        navigate("/dashboard/jobs");
       }
     } catch (err) {
       const errMessage = errorResolver(err);

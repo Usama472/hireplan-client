@@ -23,10 +23,8 @@ const PublicRoute: FC<PublicRouteProps> = ({ children }) => {
     path === route || path.startsWith(route + '/')
   );
 
-  // Show loading state while checking authentication (except for critical public pages)
-  if (status === "loading" && !shouldSkipLoading) {
-    return <LoadingScreen message="Loading your workspace..." />;
-  }
+  // Note: Loading state is handled by AuthRedirection component
+  // No need to show loading here to avoid duplicate loading indicators
 
   // Hide layout for specific routes and all company routes
   const shouldHideLayout = hideLayoutFor.includes(path) || path.startsWith("/company/");

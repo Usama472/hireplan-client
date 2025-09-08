@@ -34,10 +34,12 @@ import EmailTemplatesPage from "@/pages/dashboard/email-template";
 import CreateEmailTemplatePage from "@/pages/dashboard/email-template/create";
 import EditEmailTemplatePage from "@/pages/dashboard/email-template/edit";
 import GlobalSettingPage from "@/pages/dashboard/global-setting";
+import MeetingSettingsPage from "@/pages/dashboard/settings/meeting-settings";
 import JobTemplatesPage from "@/pages/dashboard/job-templates";
 import EditJobPage from "@/pages/dashboard/jobs/edit";
 import InterviewSchedulePage from "@/pages/interview/schedule";
 import OutlookAuthPage from "@/pages/outlook/auth";
+import ZoomAuthPage from "@/pages/zoom/auth";
 import ForgotPassword from "@pages/auth/ForgotPassword";
 import Login from "@pages/auth/Login";
 import ResetPassword from "@pages/auth/ResetPassword";
@@ -91,6 +93,12 @@ export const appRoutes: AppRoutesType[] = [
     id: "outlook-auth",
     url: "/outlook/auth",
     element: <OutlookAuthPage />,
+    isPrivate: false,
+  },
+  {
+    id: "zoom-auth",
+    url: "/zoom/auth",
+    element: <ZoomAuthPage />,
     isPrivate: false,
   },
   {

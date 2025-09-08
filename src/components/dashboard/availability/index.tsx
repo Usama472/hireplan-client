@@ -5,12 +5,13 @@ import { Badge } from "@/components/ui/badge";
 import API from "@/http";
 import useAuthSessionContext from "@/lib/context/AuthSessionContext";
 import { useToast } from "@/lib/hooks/use-toast";
-import { CalendarClock, CalendarDays, Settings, Users } from "lucide-react";
+import { CalendarClock, CalendarDays, Settings, Users, Video } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router";
 import { BookedSlots } from "./booked-slots";
 import { CalendarSettings } from "./calendar-settings";
 import { ScheduleTemplates } from "./schedule-templates";
+import { MeetingSettings } from "../settings/meeting-settings";
 
 export default function AvailabilityManager() {
   const { toast } = useToast();
@@ -35,6 +36,11 @@ export default function AvailabilityManager() {
       id: "calendar-settings",
       label: "Calendar Settings",
       icon: Settings,
+    },
+    {
+      id: "meeting-settings",
+      label: "Meeting Settings",
+      icon: Video,
     },
   ];
 
@@ -143,6 +149,14 @@ export default function AvailabilityManager() {
               <div className="space-y-6">
                 <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
                   <CalendarSettings />
+                </div>
+              </div>
+            )}
+
+            {activeMainTab === "meeting-settings" && (
+              <div className="space-y-6">
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                  <MeetingSettings />
                 </div>
               </div>
             )}

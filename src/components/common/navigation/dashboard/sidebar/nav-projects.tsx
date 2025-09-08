@@ -50,7 +50,7 @@ export function NavProjects({
                     className={`w-5 h-5 transition-colors ${
                       isActive
                         ? "text-white"
-                        : "text-gray-500 group-hover:text-blue-600 dark:text-white/70 dark:group-hover:text-white"
+                        : "text-muted-foreground group-hover:text-primary dark:text-white/70 dark:group-hover:text-white"
                     }`}
                   />
                   <span

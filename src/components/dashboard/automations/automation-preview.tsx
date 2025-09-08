@@ -57,7 +57,7 @@ export default function AutomationPreview({
       case "application_created":
         return (
           <div className="flex items-center gap-3">
-            <ArrowRightCircle className="h-5 w-5 text-blue-500" />
+            <ArrowRightCircle className="h-5 w-5 text-primary" />
             <div>
               <p className="font-medium">Application Created</p>
               <p className="text-sm text-gray-500">
@@ -70,7 +70,7 @@ export default function AutomationPreview({
       case "application_status_changed":
         return (
           <div className="flex items-center gap-3">
-            <ArrowRightCircle className="h-5 w-5 text-blue-500" />
+            <ArrowRightCircle className="h-5 w-5 text-primary" />
             <div>
               <p className="font-medium">Application Status Changed</p>
               <div className="flex items-center gap-2 text-sm">
@@ -88,7 +88,7 @@ export default function AutomationPreview({
                 {config.to ? (
                   <Badge
                     variant="outline"
-                    className="bg-blue-50 border-blue-200 text-blue-700"
+                    className="bg-primary/10 border-primary/20 text-primary"
                   >
                     {config.to}
                   </Badge>
@@ -108,7 +108,7 @@ export default function AutomationPreview({
       case "resume_score_updated":
         return (
           <div className="flex items-center gap-3">
-            <ArrowRightCircle className="h-5 w-5 text-blue-500" />
+            <ArrowRightCircle className="h-5 w-5 text-primary" />
             <div>
               <p className="font-medium">Resume Score Updated</p>
               <p className="text-sm text-gray-500">
@@ -121,7 +121,7 @@ export default function AutomationPreview({
       case "cron":
         return (
           <div className="flex items-center gap-3">
-            <Calendar className="h-5 w-5 text-blue-500" />
+            <Calendar className="h-5 w-5 text-primary" />
             <div>
               <p className="font-medium">Scheduled</p>
               <p className="text-sm text-gray-500">
@@ -136,7 +136,7 @@ export default function AutomationPreview({
       default:
         return (
           <div className="flex items-center gap-3">
-            <ArrowRightCircle className="h-5 w-5 text-blue-500" />
+            <ArrowRightCircle className="h-5 w-5 text-primary" />
             <div>
               <p className="font-medium">Custom Trigger</p>
               <p className="text-sm text-gray-500">
@@ -213,7 +213,7 @@ export default function AutomationPreview({
                         <span className="text-gray-500">Template:</span>
                         <Badge
                           variant="outline"
-                          className="bg-blue-50 border-blue-200 text-blue-700"
+                          className="bg-primary/10 border-primary/20 text-primary"
                         >
                           {config.templateId}
                         </Badge>
@@ -250,7 +250,7 @@ export default function AutomationPreview({
                     {config.url && (
                       <div className="flex items-center gap-2 text-sm">
                         <span className="text-gray-500">URL:</span>
-                        <span className="text-blue-600 underline font-mono text-xs truncate max-w-md">
+                        <span className="text-primary underline font-mono text-xs truncate max-w-md">
                           {config.url}
                         </span>
                       </div>
@@ -275,7 +275,7 @@ export default function AutomationPreview({
               return (
                 <div key={index} className="flex gap-3">
                   <div className="mt-1 shrink-0">
-                    <ArrowRightCircle className="h-5 w-5 text-blue-500" />
+                    <ArrowRightCircle className="h-5 w-5 text-primary" />
                   </div>
                   <div className="space-y-1">
                     <p className="font-medium">Send Slack Notification</p>
@@ -339,7 +339,7 @@ export default function AutomationPreview({
               variant="outline"
               size="sm"
               onClick={onEdit}
-              className="border-gray-200 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 transition-all duration-300 hover:scale-105"
+              className="border-gray-200 hover:bg-primary/10 hover:text-primary hover:border-primary/20 transition-all duration-300 hover:scale-105"
             >
               <Pencil className="w-4 h-4 mr-2" />
               Edit
@@ -355,12 +355,12 @@ export default function AutomationPreview({
           style={{ animationDelay: "100ms" }}
         >
           <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3 flex items-center">
-            <span className="bg-indigo-100 text-indigo-600 p-1 rounded-md mr-2">
+            <span className="bg-primary/10 text-primary p-1 rounded-md mr-2">
               <ArrowRightCircle className="h-4 w-4" />
             </span>
             Trigger
           </h3>
-          <div className="bg-gray-50 border border-gray-100 rounded-lg p-4 transition-all duration-300 hover:border-indigo-100">
+          <div className="bg-gray-50 border border-gray-100 rounded-lg p-4 transition-all duration-300 hover:border-primary/20">
             {renderTriggerDetails()}
           </div>
         </div>
@@ -373,12 +373,12 @@ export default function AutomationPreview({
           style={{ animationDelay: "200ms" }}
         >
           <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3 flex items-center">
-            <span className="bg-purple-100 text-purple-600 p-1 rounded-md mr-2">
+            <span className="bg-secondary/10 text-secondary p-1 rounded-md mr-2">
               <ListFilter className="h-4 w-4" />
             </span>
             Conditions
           </h3>
-          <div className="bg-gray-50 border border-gray-100 rounded-lg p-4 transition-all duration-300 hover:border-purple-100">
+          <div className="bg-gray-50 border border-gray-100 rounded-lg p-4 transition-all duration-300 hover:border-secondary/20">
             {renderConditionsSection()}
           </div>
         </div>
@@ -391,12 +391,12 @@ export default function AutomationPreview({
           style={{ animationDelay: "300ms" }}
         >
           <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3 flex items-center">
-            <span className="bg-blue-100 text-blue-600 p-1 rounded-md mr-2">
+            <span className="bg-accent/10 text-accent p-1 rounded-md mr-2">
               <FileCheck className="h-4 w-4" />
             </span>
             Actions
           </h3>
-          <div className="bg-gray-50 border border-gray-100 rounded-lg p-4 transition-all duration-300 hover:border-blue-100">
+          <div className="bg-gray-50 border border-gray-100 rounded-lg p-4 transition-all duration-300 hover:border-accent/20">
             {renderActionsSection()}
           </div>
         </div>

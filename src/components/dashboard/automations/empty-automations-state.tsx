@@ -15,11 +15,11 @@ export default function EmptyAutomationsState({
   return (
     <div className="bg-white border border-gray-200 rounded-lg animate-fadeIn">
       <div className="p-12 text-center">
-        <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-6 animate-scaleIn animate-pulse-indigo">
+        <div className="w-20 h-20 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-full flex items-center justify-center mx-auto mb-6 animate-scaleIn shadow-lg">
           {hasFilters ? (
-            <Search className="w-10 h-10 text-indigo-400" />
+            <Search className="w-10 h-10 text-primary" />
           ) : (
-            <Filter className="w-10 h-10 text-indigo-400" />
+            <Filter className="w-10 h-10 text-primary" />
           )}
         </div>
         <h3 className="text-lg font-semibold text-gray-900 mb-3">
@@ -34,16 +34,16 @@ export default function EmptyAutomationsState({
           <Button
             onClick={onClearFilters}
             variant="outline"
-            className="border-gray-200 transition-all duration-300 hover:border-indigo-300 hover:scale-105"
+            className="border-gray-200 transition-all duration-300 hover:border-primary/30 hover:scale-105"
           >
             Clear Filters
           </Button>
         ) : (
           <Button
             onClick={onCreateAutomation}
-            className="bg-indigo-600 hover:bg-indigo-700 px-6 py-6 h-auto text-base transition-all duration-300 hover:scale-105 hover:shadow-md"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground border-0 shadow-lg hover:shadow-xl hover:shadow-primary/25 transition-all duration-300 gap-2 px-6 py-6 h-auto text-base"
           >
-            <Plus className="w-5 h-5 mr-2" />
+            <Plus className="w-5 h-5" />
             Create Your First Automation
           </Button>
         )}

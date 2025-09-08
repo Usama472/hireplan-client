@@ -29,6 +29,7 @@ import {
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { ApplicantDetailModal } from "./applicant-detail-modal";
 
 interface Applicant {
   id: string;
@@ -360,6 +361,8 @@ export function ApplicantsSection({
 }: ApplicantsSectionProps) {
   const navigate = useNavigate();
   const [applicants, setApplicants] = useState<Applicant[]>([]);
+  const [selectedApplicant, setSelectedApplicant] = useState<Applicant | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [stats, setStats] = useState({
     total: 0,
     pending: 0,
@@ -419,7 +422,8 @@ export function ApplicantsSection({
   };
 
   const handleViewApplicant = (applicant: Applicant) => {
-    navigate(`/dashboard/jobs/${jobId}/applicants/${applicant.id}`);
+    setSelectedApplicant(applicant);
+    setIsModalOpen(true);
   };
 
   const filteredApplicants = applicants.filter((applicant) => {
@@ -580,6 +584,30 @@ export function ApplicantsSection({
           </div>
         )}
       </div>
+      
+      {/* Applicant Detail Modal */}
+      {selectedApplicant && (
+        <ApplicantDetailModal
+          applicant={selectedApplicant}
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setSelectedApplicant(null);
+          }}
+          onStatusUpdate={(applicantId: string, status: string) => {
+            // Handle status update
+            setApplicants(prev => 
+              prev.map(app => 
+                app.id === applicantId 
+                  ? { ...app, status } 
+                  : app
+              )
+            );
+            // Refresh data
+            fetchApplicants();
+          }}
+        />
+      )}
     </div>
   );
 }

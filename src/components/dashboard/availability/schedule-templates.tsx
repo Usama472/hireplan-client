@@ -32,7 +32,7 @@ import {
 import type { AvailabilityTemplate } from "@/interfaces";
 import { useToast } from "@/lib/hooks/use-toast";
 import { format } from "date-fns";
-import { Calendar, Clock, Edit, Plus, Trash2 } from "lucide-react";
+import { Calendar, Clock, Edit, Plus, Trash2, Video } from "lucide-react";
 import { useEffect, useState } from "react";
 
 // Timezone conversion utilities
@@ -93,13 +93,20 @@ export function ScheduleTemplates({
   const [currentTemplate, setCurrentTemplate] =
     useState<AvailabilityTemplate | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isAddHoursDialogOpen, setIsAddHoursDialogOpen] = useState(false);
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [templateToDelete, setTemplateToDelete] =
     useState<AvailabilityTemplate | null>(null);
+  const [templateToEdit, setTemplateToEdit] = 
+    useState<AvailabilityTemplate | null>(null);
   const [newTemplateName, setNewTemplateName] = useState("");
   const [templateDuration, setTemplateDuration] = useState(30);
+  const [selectedMeetingPlatform, setSelectedMeetingPlatform] = useState("google");
+  const [editTemplateName, setEditTemplateName] = useState("");
+  const [editTemplateDuration, setEditTemplateDuration] = useState(30);
+  const [editMeetingPlatform, setEditMeetingPlatform] = useState("google");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [currentTimezone, setCurrentTimezone] =
     useState<string>("America/New_York");
@@ -286,12 +293,14 @@ export function ScheduleTemplates({
     try {
       const response = await createAvailabilityTemplate(
         newTemplateName.trim(),
-        templateDuration
+        templateDuration,
+        selectedMeetingPlatform
       );
       if (response.status) {
         setTemplates((prev) => [...prev, response.availability]);
         setCurrentTemplate(response.availability);
         setNewTemplateName("");
+        setSelectedMeetingPlatform("google");
         setIsCreateDialogOpen(false);
 
         toast({
@@ -310,6 +319,61 @@ export function ScheduleTemplates({
         description: "Failed to create template. Please try again.",
       });
     }
+  };
+
+  const handleEditTemplate = async () => {
+    if (!templateToEdit || !editTemplateName.trim()) return;
+
+    try {
+      const updatedTemplate = {
+        templateName: editTemplateName.trim(),
+        duration: editTemplateDuration,
+        selectedMeetingPlatform: editMeetingPlatform,
+      };
+
+      const response = await updateAvailabilityTemplate(templateToEdit.id, updatedTemplate);
+      if (response.status) {
+        setTemplates((prev) => 
+          prev.map(template => 
+            template.id === templateToEdit.id 
+              ? { ...template, ...updatedTemplate }
+              : template
+          )
+        );
+        
+        if (currentTemplate?.id === templateToEdit.id) {
+          setCurrentTemplate({ ...currentTemplate, ...updatedTemplate });
+        }
+
+        setIsEditDialogOpen(false);
+        setTemplateToEdit(null);
+
+        toast({
+          title: "Success",
+          description: "Template updated successfully",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to update template. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update template",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const openEditDialog = (template: AvailabilityTemplate) => {
+    setTemplateToEdit(template);
+    setEditTemplateName(template.templateName || "");
+    setEditTemplateDuration(template.duration || 30);
+    setEditMeetingPlatform(template.selectedMeetingPlatform || "google");
+    setIsEditDialogOpen(true);
   };
 
   const handleTemplateChange = (templateId: string) => {
@@ -941,6 +1005,15 @@ export function ScheduleTemplates({
                       {template.availabilities?.[0]?.daysAvailability?.filter((d: any) => d.isAvailable).length || 0} days
                     </span>
                   </div>
+                  <div className="flex items-center gap-1 text-xs text-gray-600">
+                    <Video className="h-3 w-3" />
+                    <span>
+                      {template.selectedMeetingPlatform === 'google' && 'Google Meet'}
+                      {template.selectedMeetingPlatform === 'teams' && 'Microsoft Teams'}
+                      {template.selectedMeetingPlatform === 'zoom' && 'Zoom'}
+                      {!template.selectedMeetingPlatform && 'Google Meet'}
+                    </span>
+                  </div>
                   <div className="flex items-center gap-1 pt-1">
                     <Button
                       variant="outline"
@@ -955,18 +1028,32 @@ export function ScheduleTemplates({
                       {currentTemplate?.id === template.id ? 'Selected' : 'Select'}
                     </Button>
                     {template.templateName !== "default" && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setTemplateToDelete(template);
-                          setIsDeleteDialogOpen(true);
-                        }}
-                        className="h-7 w-7 p-0 text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openEditDialog(template);
+                          }}
+                          className="h-7 w-7 p-0 text-blue-500 hover:text-blue-600 hover:bg-blue-50"
+                          title="Edit Template"
+                        >
+                          <Edit className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setTemplateToDelete(template);
+                            setIsDeleteDialogOpen(true);
+                          }}
+                          className="h-7 w-7 p-0 text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </>
                     )}
                   </div>
                 </div>
@@ -1366,15 +1453,112 @@ export function ScheduleTemplates({
                 </SelectContent>
               </Select>
             </div>
+            <div>
+              <Label htmlFor="meeting-platform">Meeting Platform</Label>
+              <Select
+                onValueChange={(value) => {
+                  setSelectedMeetingPlatform(value);
+                }}
+                defaultValue="google"
+              >
+                <SelectTrigger className="mt-2">
+                  <SelectValue placeholder="Select meeting platform" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="google">Google Meet</SelectItem>
+                  <SelectItem value="teams">Microsoft Teams</SelectItem>
+                  <SelectItem value="zoom">Zoom</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setIsCreateDialogOpen(false)}
+              onClick={() => {
+                setNewTemplateName("");
+                setSelectedMeetingPlatform("google");
+                setIsCreateDialogOpen(false);
+              }}
             >
               Cancel
             </Button>
             <Button onClick={handleCreateTemplate}>Create Booking Page</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Template Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Template</DialogTitle>
+            <DialogDescription>
+              Update the template name, duration, and meeting platform
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="edit-template-name">Template Name</Label>
+              <Input
+                id="edit-template-name"
+                value={editTemplateName}
+                onChange={(e) => setEditTemplateName(e.target.value)}
+                placeholder="e.g., Interview Schedule, Client Meetings"
+                className="mt-2"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-interview-duration">Interview Duration</Label>
+              <Select
+                onValueChange={(value) => {
+                  setEditTemplateDuration(parseInt(value));
+                }}
+                value={editTemplateDuration.toString()}
+              >
+                <SelectTrigger className="mt-2">
+                  <SelectValue placeholder="Select duration" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="30">Quick Interview (30 min)</SelectItem>
+                  <SelectItem value="45">
+                    Standard Interview (45 min)
+                  </SelectItem>
+                  <SelectItem value="60">Full Interview (60 min)</SelectItem>
+                  <SelectItem value="90">Panel Interview (90 min)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="edit-meeting-platform">Meeting Platform</Label>
+              <Select
+                onValueChange={(value) => {
+                  setEditMeetingPlatform(value);
+                }}
+                value={editMeetingPlatform}
+              >
+                <SelectTrigger className="mt-2">
+                  <SelectValue placeholder="Select meeting platform" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="google">Google Meet</SelectItem>
+                  <SelectItem value="teams">Microsoft Teams</SelectItem>
+                  <SelectItem value="zoom">Zoom</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsEditDialogOpen(false);
+                setTemplateToEdit(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleEditTemplate}>Save Changes</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
