@@ -47,12 +47,22 @@ export const getAvailability = async (): Promise<GetAvailabilityResponse> => {
 export const createAvailabilityTemplate = async (
   templateName: string,
   duration: number,
-  selectedMeetingPlatform?: string
+  selectedMeetingPlatform?: string,
+  bookingWindowDays?: number,
+  excludeFederalHolidays?: boolean,
+  excludeReligiousHolidays?: boolean,
+  customExcludedFederalHolidays?: string[],
+  customExcludedReligiousHolidays?: string[]
 ): Promise<{ status: boolean; availability: any }> => {
   return await post("/availabilities/templates", { 
     templateName, 
     duration, 
-    selectedMeetingPlatform 
+    selectedMeetingPlatform,
+    bookingWindowDays,
+    excludeFederalHolidays,
+    excludeReligiousHolidays,
+    customExcludedFederalHolidays,
+    customExcludedReligiousHolidays
   });
 };
 

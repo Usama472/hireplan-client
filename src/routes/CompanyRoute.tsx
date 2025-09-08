@@ -12,8 +12,10 @@ export type CompanyRouteProps = {
 const CompanyRoute: FC<CompanyRouteProps> = ({ children }) => {
   const { status } = useAuthSessionContext()
 
-  // Note: Loading state is handled by AuthRedirection component
-  // No need to show loading here to avoid duplicate loading indicators
+  // Show loading state for company routes
+  if (status === 'loading') {
+    return <LoadingScreen message="Loading company page..." />;
+  }
 
   if (status === 'unauthenticated') {
     return <Navigate to={ROUTES.LOGIN} />

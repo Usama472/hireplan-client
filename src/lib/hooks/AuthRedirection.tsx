@@ -53,9 +53,7 @@ const AuthRedirection = ({ children }: PropsWithChildren) => {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload)
   }, [])
 
-  if (status === 'loading' || isReloading) {
-    return <LoadingScreen message="Setting up your workspace..." />
-  }
+  // Remove global loading - let individual components handle their own loading states
   return <>{children}</>
 }
 

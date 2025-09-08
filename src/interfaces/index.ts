@@ -418,6 +418,12 @@ export interface AvailabilityTemplate {
   availabilities: any[];
   duration: number;
   timezone: string;
+  bookingWindowDays: number;
+  excludeHolidays?: boolean; // Keep for backward compatibility
+  excludeFederalHolidays?: boolean;
+  excludeReligiousHolidays?: boolean;
+  customExcludedFederalHolidays?: string[];
+  customExcludedReligiousHolidays?: string[];
   advancedRules: {
     sendConfirmationEmail: boolean;
     sendReminderEmails: boolean;

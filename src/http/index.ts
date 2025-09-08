@@ -16,6 +16,7 @@ import * as staffApi from "./staff/api";
 import * as userApi from "./user/api";
 import * as zoomApi from "./zoom/api";
 import * as meetingApi from "./meeting/api";
+import * as holidaysApi from "./holidays/api";
 
 const API = {
   auth: authApi,
@@ -30,6 +31,7 @@ const API = {
   microsoft: microsoftApi,
   zoom: zoomApi,
   meeting: meetingApi,
+  holidays: holidaysApi,
   emailChat: emailChatApi,
   emailTemplate: emailTemplateApi,
   globalSetting: globalSettingApi,

@@ -33,30 +33,10 @@ import type { AvailabilityTemplate } from "@/interfaces";
 import { useToast } from "@/lib/hooks/use-toast";
 import { format } from "date-fns";
 import { Calendar, Clock, Edit, Plus, Trash2, Video } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { useEffect, useState } from "react";
+import { HolidayPicker } from "./holiday-picker";
 
-// Timezone conversion utilities
-const convertTimeToTimezone = (time: string, fromTimezone: string, toTimezone: string): string => {
-  // Create a date object for today with the given time
-  const today = new Date();
-  const [hours, minutes] = time.split(':').map(Number);
-  const date = new Date(today.getFullYear(), today.getMonth(), today.getDate(), hours, minutes);
-  
-  // Convert from source timezone to UTC
-  const utcTime = new Date(date.toLocaleString("en-US", { timeZone: fromTimezone }));
-  
-  // Convert from UTC to target timezone
-  const targetTime = new Date(utcTime.toLocaleString("en-US", { timeZone: toTimezone }));
-  
-  return format(targetTime, 'HH:mm');
-};
-
-const getTimezoneDisplayName = (timezone: string): string => {
-  const date = new Date();
-  const offset = date.toLocaleString("en-US", { timeZone: timezone, timeZoneName: "short" }).split(' ').pop() || '';
-  const city = timezone.split('/').pop()?.replace('_', ' ') || timezone;
-  return `${city} (${offset})`;
-};
 import { DateSpecificForm } from "./date-specific-form";
 
 // Add interface for TimeSlot and Day to fix type errors
@@ -104,13 +84,22 @@ export function ScheduleTemplates({
   const [newTemplateName, setNewTemplateName] = useState("");
   const [templateDuration, setTemplateDuration] = useState(30);
   const [selectedMeetingPlatform, setSelectedMeetingPlatform] = useState("google");
+  const [bookingWindowDays, setBookingWindowDays] = useState(30);
+  const [excludeFederalHolidays, setExcludeFederalHolidays] = useState(true);
+  const [excludeReligiousHolidays, setExcludeReligiousHolidays] = useState(false);
+  const [customExcludedFederalHolidays, setCustomExcludedFederalHolidays] = useState<string[]>([]);
+  const [customExcludedReligiousHolidays, setCustomExcludedReligiousHolidays] = useState<string[]>([]);
   const [editTemplateName, setEditTemplateName] = useState("");
   const [editTemplateDuration, setEditTemplateDuration] = useState(30);
   const [editMeetingPlatform, setEditMeetingPlatform] = useState("google");
+  const [editBookingWindowDays, setEditBookingWindowDays] = useState(30);
+  const [editExcludeFederalHolidays, setEditExcludeFederalHolidays] = useState(true);
+  const [editExcludeReligiousHolidays, setEditExcludeReligiousHolidays] = useState(false);
+  const [editCustomExcludedFederalHolidays, setEditCustomExcludedFederalHolidays] = useState<string[]>([]);
+  const [editCustomExcludedReligiousHolidays, setEditCustomExcludedReligiousHolidays] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [currentTimezone, setCurrentTimezone] =
     useState<string>("America/New_York");
-  const [candidateTimezone, setCandidateTimezone] = useState<string>("America/New_York");
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
 
@@ -294,13 +283,23 @@ export function ScheduleTemplates({
       const response = await createAvailabilityTemplate(
         newTemplateName.trim(),
         templateDuration,
-        selectedMeetingPlatform
+        selectedMeetingPlatform,
+        bookingWindowDays,
+        excludeFederalHolidays,
+        excludeReligiousHolidays,
+        customExcludedFederalHolidays,
+        customExcludedReligiousHolidays
       );
       if (response.status) {
         setTemplates((prev) => [...prev, response.availability]);
         setCurrentTemplate(response.availability);
         setNewTemplateName("");
         setSelectedMeetingPlatform("google");
+        setBookingWindowDays(30);
+        setExcludeFederalHolidays(true);
+        setExcludeReligiousHolidays(false);
+        setCustomExcludedFederalHolidays([]);
+        setCustomExcludedReligiousHolidays([]);
         setIsCreateDialogOpen(false);
 
         toast({
@@ -329,6 +328,11 @@ export function ScheduleTemplates({
         templateName: editTemplateName.trim(),
         duration: editTemplateDuration,
         selectedMeetingPlatform: editMeetingPlatform,
+        bookingWindowDays: editBookingWindowDays,
+        excludeFederalHolidays: editExcludeFederalHolidays,
+        excludeReligiousHolidays: editExcludeReligiousHolidays,
+        customExcludedFederalHolidays: editCustomExcludedFederalHolidays,
+        customExcludedReligiousHolidays: editCustomExcludedReligiousHolidays,
       };
 
       const response = await updateAvailabilityTemplate(templateToEdit.id, updatedTemplate);
@@ -356,14 +360,12 @@ export function ScheduleTemplates({
         toast({
           title: "Error",
           description: "Failed to update template. Please try again.",
-          variant: "destructive",
         });
       }
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to update template",
-        variant: "destructive",
       });
     }
   };
@@ -373,6 +375,11 @@ export function ScheduleTemplates({
     setEditTemplateName(template.templateName || "");
     setEditTemplateDuration(template.duration || 30);
     setEditMeetingPlatform(template.selectedMeetingPlatform || "google");
+    setEditBookingWindowDays(template.bookingWindowDays || 30);
+    setEditExcludeFederalHolidays(template.excludeFederalHolidays !== undefined ? template.excludeFederalHolidays : true);
+    setEditExcludeReligiousHolidays(template.excludeReligiousHolidays !== undefined ? template.excludeReligiousHolidays : false);
+    setEditCustomExcludedFederalHolidays(template.customExcludedFederalHolidays || []);
+    setEditCustomExcludedReligiousHolidays(template.customExcludedReligiousHolidays || []);
     setIsEditDialogOpen(true);
   };
 
@@ -1414,7 +1421,7 @@ export function ScheduleTemplates({
 
       {/* Create Template Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Create New Booking Page</DialogTitle>
             <DialogDescription>
@@ -1471,6 +1478,89 @@ export function ScheduleTemplates({
                 </SelectContent>
               </Select>
             </div>
+            <div>
+              <Label htmlFor="booking-window">Booking Window (Days Ahead)</Label>
+              <Select
+                onValueChange={(value) => {
+                  setBookingWindowDays(parseInt(value));
+                }}
+                defaultValue="30"
+              >
+                <SelectTrigger className="mt-2">
+                  <SelectValue placeholder="Select booking window" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="3">3 days ahead</SelectItem>
+                  <SelectItem value="5">5 days ahead</SelectItem>
+                  <SelectItem value="7">1 week ahead</SelectItem>
+                  <SelectItem value="14">2 weeks ahead</SelectItem>
+                  <SelectItem value="30">1 month ahead</SelectItem>
+                  <SelectItem value="60">2 months ahead</SelectItem>
+                  <SelectItem value="90">3 months ahead</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {/* Federal Holidays Section */}
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="exclude-federal-holidays">Exclude Federal Holidays</Label>
+                <div className="text-sm text-muted-foreground">
+                  Automatically exclude US federal holidays from available booking slots
+                </div>
+              </div>
+              <Switch
+                id="exclude-federal-holidays"
+                checked={excludeFederalHolidays}
+                onCheckedChange={(checked) => {
+                  setExcludeFederalHolidays(checked);
+                  if (!checked) {
+                    setCustomExcludedFederalHolidays([]);
+                  }
+                }}
+              />
+            </div>
+            
+            {excludeFederalHolidays && (
+              <div className="border rounded-lg p-6 bg-gray-50">
+                <HolidayPicker
+                  selectedHolidays={customExcludedFederalHolidays}
+                  onHolidaysChange={setCustomExcludedFederalHolidays}
+                  className="w-full"
+                  filterType="federal"
+                />
+              </div>
+            )}
+
+            {/* Religious Holidays Section */}
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="exclude-religious-holidays">Exclude Religious Holidays</Label>
+                <div className="text-sm text-muted-foreground">
+                  Exclude religious holidays from available booking slots
+                </div>
+              </div>
+              <Switch
+                id="exclude-religious-holidays"
+                checked={excludeReligiousHolidays}
+                onCheckedChange={(checked) => {
+                  setExcludeReligiousHolidays(checked);
+                  if (!checked) {
+                    setCustomExcludedReligiousHolidays([]);
+                  }
+                }}
+              />
+            </div>
+            
+            {excludeReligiousHolidays && (
+              <div className="border rounded-lg p-6 bg-gray-50">
+                <HolidayPicker
+                  selectedHolidays={customExcludedReligiousHolidays}
+                  onHolidaysChange={setCustomExcludedReligiousHolidays}
+                  className="w-full"
+                  filterType="religious"
+                />
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button
@@ -1478,6 +1568,11 @@ export function ScheduleTemplates({
               onClick={() => {
                 setNewTemplateName("");
                 setSelectedMeetingPlatform("google");
+                setBookingWindowDays(30);
+                setExcludeFederalHolidays(true);
+                setExcludeReligiousHolidays(false);
+                setCustomExcludedFederalHolidays([]);
+                setCustomExcludedReligiousHolidays([]);
                 setIsCreateDialogOpen(false);
               }}
             >
@@ -1490,7 +1585,7 @@ export function ScheduleTemplates({
 
       {/* Edit Template Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Template</DialogTitle>
             <DialogDescription>
@@ -1547,6 +1642,89 @@ export function ScheduleTemplates({
                 </SelectContent>
               </Select>
             </div>
+            <div>
+              <Label htmlFor="edit-booking-window">Booking Window (Days Ahead)</Label>
+              <Select
+                onValueChange={(value) => {
+                  setEditBookingWindowDays(parseInt(value));
+                }}
+                value={editBookingWindowDays.toString()}
+              >
+                <SelectTrigger className="mt-2">
+                  <SelectValue placeholder="Select booking window" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="3">3 days ahead</SelectItem>
+                  <SelectItem value="5">5 days ahead</SelectItem>
+                  <SelectItem value="7">1 week ahead</SelectItem>
+                  <SelectItem value="14">2 weeks ahead</SelectItem>
+                  <SelectItem value="30">1 month ahead</SelectItem>
+                  <SelectItem value="60">2 months ahead</SelectItem>
+                  <SelectItem value="90">3 months ahead</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {/* Federal Holidays Section */}
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="edit-exclude-federal-holidays">Exclude Federal Holidays</Label>
+                <div className="text-sm text-muted-foreground">
+                  Automatically exclude US federal holidays from available booking slots
+                </div>
+              </div>
+              <Switch
+                id="edit-exclude-federal-holidays"
+                checked={editExcludeFederalHolidays}
+                onCheckedChange={(checked) => {
+                  setEditExcludeFederalHolidays(checked);
+                  if (!checked) {
+                    setEditCustomExcludedFederalHolidays([]);
+                  }
+                }}
+              />
+            </div>
+            
+            {editExcludeFederalHolidays && (
+              <div className="border rounded-lg p-6 bg-gray-50">
+                <HolidayPicker
+                  selectedHolidays={editCustomExcludedFederalHolidays}
+                  onHolidaysChange={setEditCustomExcludedFederalHolidays}
+                  className="w-full"
+                  filterType="federal"
+                />
+              </div>
+            )}
+
+            {/* Religious Holidays Section */}
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="edit-exclude-religious-holidays">Exclude Religious Holidays</Label>
+                <div className="text-sm text-muted-foreground">
+                  Exclude religious holidays from available booking slots
+                </div>
+              </div>
+              <Switch
+                id="edit-exclude-religious-holidays"
+                checked={editExcludeReligiousHolidays}
+                onCheckedChange={(checked) => {
+                  setEditExcludeReligiousHolidays(checked);
+                  if (!checked) {
+                    setEditCustomExcludedReligiousHolidays([]);
+                  }
+                }}
+              />
+            </div>
+            
+            {editExcludeReligiousHolidays && (
+              <div className="border rounded-lg p-6 bg-gray-50">
+                <HolidayPicker
+                  selectedHolidays={editCustomExcludedReligiousHolidays}
+                  onHolidaysChange={setEditCustomExcludedReligiousHolidays}
+                  className="w-full"
+                  filterType="religious"
+                />
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button
