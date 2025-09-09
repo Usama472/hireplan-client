@@ -1034,20 +1034,20 @@ export function ScheduleTemplates({
                       <Edit className="h-3 w-3 mr-1" />
                       {currentTemplate?.id === template.id ? 'Selected' : 'Select'}
                     </Button>
-                    {template.templateName !== "default" && (
-                      <>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openEditDialog(template);
-                          }}
-                          className="h-7 w-7 p-0 text-blue-500 hover:text-blue-600 hover:bg-blue-50"
-                          title="Edit Template"
-                        >
-                          <Edit className="h-3 w-3" />
-                        </Button>
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openEditDialog(template);
+                        }}
+                        className="h-7 w-7 p-0 text-blue-500 hover:text-blue-600 hover:bg-blue-50"
+                        title="Edit Template"
+                      >
+                        <Edit className="h-3 w-3" />
+                      </Button>
+                      {template.templateName !== "default" && (
                         <Button
                           variant="outline"
                           size="sm"
@@ -1060,8 +1060,8 @@ export function ScheduleTemplates({
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>
-                      </>
-                    )}
+                      )}
+                    </>
                   </div>
                 </div>
               </CardContent>
@@ -1439,27 +1439,22 @@ export function ScheduleTemplates({
                 className="mt-2"
               />
             </div>
-            <div>
-              <Label htmlFor="interview-duration">Interview Duration</Label>
-              <Select
-                onValueChange={(value) => {
-                  setTemplateDuration(parseInt(value));
-                }}
-                defaultValue="30"
-              >
-                <SelectTrigger className="mt-2">
-                  <SelectValue placeholder="Select duration" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="30">Quick Interview (30 min)</SelectItem>
-                  <SelectItem value="45">
-                    Standard Interview (45 min)
-                  </SelectItem>
-                  <SelectItem value="60">Full Interview (60 min)</SelectItem>
-                  <SelectItem value="90">Panel Interview (90 min)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+             <div>
+               <Label htmlFor="interview-duration">Interview Duration (minutes)</Label>
+               <Input
+                 id="interview-duration"
+                 type="number"
+                 min="15"
+                 max="240"
+                 value={templateDuration}
+                 onChange={(e) => setTemplateDuration(parseInt(e.target.value) || 30)}
+                 placeholder="30"
+                 className="mt-2"
+               />
+               <div className="text-xs text-muted-foreground mt-1">
+                 Recommended: 30-60 minutes for most interviews
+               </div>
+             </div>
             <div>
               <Label htmlFor="meeting-platform">Meeting Platform</Label>
               <Select
@@ -1478,28 +1473,22 @@ export function ScheduleTemplates({
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label htmlFor="booking-window">Booking Window (Days Ahead)</Label>
-              <Select
-                onValueChange={(value) => {
-                  setBookingWindowDays(parseInt(value));
-                }}
-                defaultValue="30"
-              >
-                <SelectTrigger className="mt-2">
-                  <SelectValue placeholder="Select booking window" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="3">3 days ahead</SelectItem>
-                  <SelectItem value="5">5 days ahead</SelectItem>
-                  <SelectItem value="7">1 week ahead</SelectItem>
-                  <SelectItem value="14">2 weeks ahead</SelectItem>
-                  <SelectItem value="30">1 month ahead</SelectItem>
-                  <SelectItem value="60">2 months ahead</SelectItem>
-                  <SelectItem value="90">3 months ahead</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+             <div>
+               <Label htmlFor="booking-window">Booking Window (days ahead)</Label>
+               <Input
+                 id="booking-window"
+                 type="number"
+                 min="1"
+                 max="365"
+                 value={bookingWindowDays}
+                 onChange={(e) => setBookingWindowDays(parseInt(e.target.value) || 30)}
+                 placeholder="30"
+                 className="mt-2"
+               />
+               <div className="text-xs text-muted-foreground mt-1">
+                 How far in advance candidates can book (1-365 days)
+               </div>
+             </div>
             {/* Federal Holidays Section */}
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
@@ -1604,25 +1593,20 @@ export function ScheduleTemplates({
               />
             </div>
             <div>
-              <Label htmlFor="edit-interview-duration">Interview Duration</Label>
-              <Select
-                onValueChange={(value) => {
-                  setEditTemplateDuration(parseInt(value));
-                }}
-                value={editTemplateDuration.toString()}
-              >
-                <SelectTrigger className="mt-2">
-                  <SelectValue placeholder="Select duration" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="30">Quick Interview (30 min)</SelectItem>
-                  <SelectItem value="45">
-                    Standard Interview (45 min)
-                  </SelectItem>
-                  <SelectItem value="60">Full Interview (60 min)</SelectItem>
-                  <SelectItem value="90">Panel Interview (90 min)</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label htmlFor="edit-interview-duration">Interview Duration (minutes)</Label>
+              <Input
+                id="edit-interview-duration"
+                type="number"
+                min="15"
+                max="240"
+                value={editTemplateDuration}
+                onChange={(e) => setEditTemplateDuration(parseInt(e.target.value) || 30)}
+                placeholder="30"
+                className="mt-2"
+              />
+              <div className="text-xs text-muted-foreground mt-1">
+                Recommended: 30-60 minutes for most interviews
+              </div>
             </div>
             <div>
               <Label htmlFor="edit-meeting-platform">Meeting Platform</Label>
@@ -1643,26 +1627,20 @@ export function ScheduleTemplates({
               </Select>
             </div>
             <div>
-              <Label htmlFor="edit-booking-window">Booking Window (Days Ahead)</Label>
-              <Select
-                onValueChange={(value) => {
-                  setEditBookingWindowDays(parseInt(value));
-                }}
-                value={editBookingWindowDays.toString()}
-              >
-                <SelectTrigger className="mt-2">
-                  <SelectValue placeholder="Select booking window" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="3">3 days ahead</SelectItem>
-                  <SelectItem value="5">5 days ahead</SelectItem>
-                  <SelectItem value="7">1 week ahead</SelectItem>
-                  <SelectItem value="14">2 weeks ahead</SelectItem>
-                  <SelectItem value="30">1 month ahead</SelectItem>
-                  <SelectItem value="60">2 months ahead</SelectItem>
-                  <SelectItem value="90">3 months ahead</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label htmlFor="edit-booking-window">Booking Window (days ahead)</Label>
+              <Input
+                id="edit-booking-window"
+                type="number"
+                min="1"
+                max="365"
+                value={editBookingWindowDays}
+                onChange={(e) => setEditBookingWindowDays(parseInt(e.target.value) || 30)}
+                placeholder="30"
+                className="mt-2"
+              />
+              <div className="text-xs text-muted-foreground mt-1">
+                How far in advance candidates can book (1-365 days)
+              </div>
             </div>
             {/* Federal Holidays Section */}
             <div className="flex items-center justify-between">
