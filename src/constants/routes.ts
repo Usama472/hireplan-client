@@ -19,6 +19,8 @@ export const DASHBOARD_ROUTES = {
   GLOBAL_SETTINGS: `/dashboard/global-settings`,
   STAFF_MANAGEMENT: `/dashboard/staff-management`,
   AUTOMATIONS: `/dashboard/automations`,
+  CREATE_AUTOMATION: `/dashboard/automations/create`,
+  EDIT_AUTOMATION: `/dashboard/automations/edit/:id`,
   AUTOMATION_LOGS: `/dashboard/automations/logs`,
   AVAILABILITY: `/dashboard/availability`,
   MEETING_SETTINGS: `/dashboard/meeting-settings`,

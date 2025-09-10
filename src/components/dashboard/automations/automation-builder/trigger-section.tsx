@@ -1,407 +1,426 @@
-import { Card, CardContent } from "@/components/ui/card";
 import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { cn } from "@/lib/utils";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { BookCopy, Clock, MessageSquare, RefreshCw, Briefcase, UserPlus, Mail } from "lucide-react";
+  AlertCircle,
+  Briefcase,
+  Calendar,
+  CheckCircle2,
+  Clock,
+  FileCheck,
+  Mail,
+  UserCheck,
+  type LucideIcon,
+} from "lucide-react";
+import type { UseFormReturn } from "react-hook-form";
 
 interface TriggerSectionProps {
-  form: any; // Using any temporarily to avoid TypeScript errors with form types
+  form: UseFormReturn<any>;
+  onTriggerTypeChange?: (type: string) => void;
+  selectedAutomationType?: "email" | "job" | "schedule";
 }
 
-export default function TriggerSection({ form }: TriggerSectionProps) {
-  const applicationStatuses = [
-    { value: "applied", label: "Applied" },
-    { value: "screening", label: "Screening" },
-    { value: "interviewing", label: "Interviewing" },
-    { value: "rejected", label: "Rejected" },
-    { value: "offered", label: "Offered" },
-    { value: "hired", label: "Hired" },
+type TriggerCategory = {
+  id: string;
+  title: string;
+  description: string;
+  icon: LucideIcon;
+  color: string;
+  bgColor: string;
+};
+
+export default function TriggerSection({
+  form,
+  onTriggerTypeChange,
+}: TriggerSectionProps) {
+  // Function to select a trigger type
+  const selectTriggerType = (triggerType: string) => {
+    form.setValue("trigger.type", triggerType);
+    form.setValue("trigger.config", {});
+
+    if (onTriggerTypeChange) {
+      onTriggerTypeChange(triggerType);
+    }
+  };
+
+  // Trigger categories for better organization
+  const triggerCategories: TriggerCategory[] = [
+    {
+      id: "application",
+      title: "Application Triggers",
+      description: "Events based on applicant activity",
+      icon: UserCheck,
+      color: "text-blue-600",
+      bgColor: "bg-blue-50",
+    },
+    {
+      id: "job",
+      title: "Job Triggers",
+      description: "Events related to job postings",
+      icon: Briefcase,
+      color: "text-amber-600",
+      bgColor: "bg-amber-50",
+    },
+    {
+      id: "communication",
+      title: "Communication Triggers",
+      description: "Email and messaging events",
+      icon: Mail,
+      color: "text-indigo-600",
+      bgColor: "bg-indigo-50",
+    },
+    {
+      id: "schedule",
+      title: "Scheduled Triggers",
+      description: "Time-based recurring events",
+      icon: Calendar,
+      color: "text-purple-600",
+      bgColor: "bg-purple-50",
+    },
   ];
 
-  // Get current value from form watch
-  const currentValue = form.watch("trigger.type") || "application_created";
+  // All available triggers
+  const allTriggers = [
+    {
+      type: "application_created",
+      label: "New Application",
+      description: "When a candidate applies to a job",
+      icon: <UserCheck className="h-5 w-5" />,
+      category: "application",
+      color: "bg-blue-500",
+      iconBg: "bg-blue-100",
+    },
+    {
+      type: "application_status_changed",
+      label: "Application Status Change",
+      description: "When an application's status is updated",
+      icon: <FileCheck className="h-5 w-5" />,
+      category: "application",
+      color: "bg-indigo-500",
+      iconBg: "bg-indigo-100",
+    },
+    {
+      type: "resume_score_updated",
+      label: "Resume Score Updated",
+      description: "When a candidate's resume score changes",
+      icon: <CheckCircle2 className="h-5 w-5" />,
+      category: "application",
+      color: "bg-green-500",
+      iconBg: "bg-green-100",
+    },
+    {
+      type: "job_created",
+      label: "Job Created",
+      description: "When a new job is created in the system",
+      icon: <Briefcase className="h-5 w-5" />,
+      category: "job",
+      color: "bg-amber-500",
+      iconBg: "bg-amber-100",
+    },
+    {
+      type: "job_published",
+      label: "Job Published",
+      description: "When a job posting goes live publicly",
+      icon: <Briefcase className="h-5 w-5" />,
+      category: "job",
+      color: "bg-emerald-500",
+      iconBg: "bg-emerald-100",
+    },
+    {
+      type: "job_expired",
+      label: "Job Expired",
+      description: "When a job posting reaches its expiration date",
+      icon: <AlertCircle className="h-5 w-5" />,
+      category: "job",
+      color: "bg-red-500",
+      iconBg: "bg-red-100",
+    },
+    {
+      type: "candidate_matched",
+      label: "Candidate Match",
+      description: "When a candidate is matched to a job",
+      icon: <UserCheck className="h-5 w-5" />,
+      category: "application",
+      color: "bg-violet-500",
+      iconBg: "bg-violet-100",
+    },
+    {
+      type: "email_received",
+      label: "Email Received",
+      description: "When an email is received in the system",
+      icon: <Mail className="h-5 w-5" />,
+      category: "communication",
+      color: "bg-blue-500",
+      iconBg: "bg-blue-100",
+    },
+    {
+      type: "cron",
+      label: "Scheduled Time",
+      description: "Recurring time-based trigger (daily, weekly, monthly)",
+      icon: <Calendar className="h-5 w-5" />,
+      category: "schedule",
+      color: "bg-purple-500",
+      iconBg: "bg-purple-100",
+    },
+  ];
 
-  // Handle trigger type change with proper form integration
-  const selectTriggerType = (type: string) => {
-    // Don't do anything if already selected
-    if (currentValue === type) return;
-
-    // Update the form field directly
-    form.setValue("trigger.type", type, { shouldValidate: true });
-
-    // Reset config to empty object
-    form.setValue("trigger.config", {});
-  };
+  const selectedTriggerType = form.watch("trigger.type");
 
   return (
     <div className="space-y-6">
-      {/* Hidden input to ensure trigger.type is registered with the form */}
-      <input
-        type="hidden"
-        {...form.register("trigger.type")}
-        value={currentValue}
-      />
+      <p className="text-gray-600">
+        Choose when your automation should run by selecting a trigger event
+        below
+      </p>
 
-      <div>
-        <h3 className="text-sm font-medium mb-3">Select Trigger Event</h3>
-        <p className="text-xs text-gray-500 mb-4">Choose what event will start this automation workflow</p>
-        <div className="grid grid-cols-2 gap-3">
-          {/* Application Created */}
-          <div
-            className={`cursor-pointer transition-all duration-200 rounded-md border p-3 ${
-              currentValue === "application_created"
-                ? "border-indigo-500 bg-indigo-50 shadow-none"
-                : "border-gray-200 hover:border-indigo-300 hover:bg-gray-50"
-            }`}
-            onClick={() => selectTriggerType("application_created")}
-          >
-            <div className="flex flex-col items-center text-center gap-2">
-              <div
-                className={`p-2 rounded-full ${
-                  currentValue === "application_created"
-                    ? "bg-indigo-100"
-                    : "bg-gray-100"
-                }`}
-              >
-                <BookCopy
-                  className={`h-4 w-4 ${
-                    currentValue === "application_created"
-                      ? "text-indigo-600"
-                      : "text-gray-600"
-                  }`}
-                />
-              </div>
-              <div className="flex-1">
-                <h4 className="block font-medium text-xs">
-                  Application Created
-                </h4>
-                <p className="text-xs text-gray-500 leading-tight">
-                  New application submitted
-                </p>
-              </div>
-            </div>
-          </div>
+      <div className="bg-gray-50/50 p-0.5 rounded-xl">
+        <FormField
+          control={form.control}
+          name="trigger.type"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <RadioGroup
+                  onValueChange={(value) => {
+                    selectTriggerType(value);
+                    field.onChange(value);
+                  }}
+                  value={field.value}
+                  className="space-y-6"
+                >
+                  {triggerCategories.map((category) => {
+                    const CategoryIcon = category.icon;
+                    const categoryTriggers = allTriggers.filter(
+                      (t) => t.category === category.id
+                    );
 
-          {/* Application Status Changed */}
-          <div
-            className={`cursor-pointer transition-all duration-200 rounded-md border p-3 ${
-              currentValue === "application_status_changed"
-                ? "border-indigo-500 bg-indigo-50 shadow-none"
-                : "border-gray-200 hover:border-indigo-300 hover:bg-gray-50"
-            }`}
-            onClick={() => selectTriggerType("application_status_changed")}
-          >
-            <div className="flex flex-col items-center text-center gap-2">
-              <div
-                className={`p-2 rounded-full ${
-                  currentValue === "application_status_changed"
-                    ? "bg-indigo-100"
-                    : "bg-gray-100"
-                }`}
-              >
-                <MessageSquare
-                  className={`h-4 w-4 ${
-                    currentValue === "application_status_changed"
-                      ? "text-indigo-600"
-                      : "text-gray-600"
-                  }`}
-                />
-              </div>
-              <div className="flex-1">
-                <h4 className="block font-medium text-xs">Status Changed</h4>
-                <p className="text-xs text-gray-500 leading-tight">
-                  Application status changes
-                </p>
-              </div>
-            </div>
-          </div>
+                    return (
+                      <div key={category.id} className="space-y-3">
+                        <div
+                          className={cn(
+                            "p-3 rounded-lg flex items-center gap-3",
+                            category.bgColor
+                          )}
+                        >
+                          <div
+                            className={cn(
+                              "p-1.5 rounded-md",
+                              category.color,
+                              "bg-white/80"
+                            )}
+                          >
+                            <CategoryIcon
+                              className={cn("h-5 w-5", category.color)}
+                            />
+                          </div>
+                          <div>
+                            <h4 className="font-medium text-gray-900">
+                              {category.title}
+                            </h4>
+                            <p className="text-sm text-gray-600">
+                              {category.description}
+                            </p>
+                          </div>
+                        </div>
 
-          {/* Resume Score Updated */}
-          <div
-            className={`cursor-pointer transition-all duration-200 rounded-md border p-3 ${
-              currentValue === "resume_score_updated"
-                ? "border-indigo-500 bg-indigo-50 shadow-none"
-                : "border-gray-200 hover:border-indigo-300 hover:bg-gray-50"
-            }`}
-            onClick={() => selectTriggerType("resume_score_updated")}
-          >
-            <div className="flex flex-col items-center text-center gap-2">
-              <div
-                className={`p-2 rounded-full ${
-                  currentValue === "resume_score_updated"
-                    ? "bg-indigo-100"
-                    : "bg-gray-100"
-                }`}
-              >
-                <RefreshCw
-                  className={`h-4 w-4 ${
-                    currentValue === "resume_score_updated"
-                      ? "text-indigo-600"
-                      : "text-gray-600"
-                  }`}
-                />
-              </div>
-              <div className="flex-1">
-                <h4 className="block font-medium text-xs">
-                  Resume Score Updated
-                </h4>
-                <p className="text-xs text-gray-500 leading-tight">
-                  Resume score changes
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Job Created */}
-          <div
-            className={`cursor-pointer transition-all duration-200 rounded-md border p-3 ${
-              currentValue === "job_created"
-                ? "border-indigo-500 bg-indigo-50 shadow-none"
-                : "border-gray-200 hover:border-indigo-300 hover:bg-gray-50"
-            }`}
-            onClick={() => selectTriggerType("job_created")}
-          >
-            <div className="flex flex-col items-center text-center gap-2">
-              <div
-                className={`p-2 rounded-full ${
-                  currentValue === "job_created" ? "bg-indigo-100" : "bg-gray-100"
-                }`}
-              >
-                <Briefcase
-                  className={`h-4 w-4 ${
-                    currentValue === "job_created"
-                      ? "text-indigo-600"
-                      : "text-gray-600"
-                  }`}
-                />
-              </div>
-              <div className="flex-1">
-                <h4 className="block font-medium text-xs">Job Created</h4>
-                <p className="text-xs text-gray-500 leading-tight">
-                  New job posting created
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Job Published */}
-          <div
-            className={`cursor-pointer transition-all duration-200 rounded-md border p-3 ${
-              currentValue === "job_published"
-                ? "border-indigo-500 bg-indigo-50 shadow-none"
-                : "border-gray-200 hover:border-indigo-300 hover:bg-gray-50"
-            }`}
-            onClick={() => selectTriggerType("job_published")}
-          >
-            <div className="flex flex-col items-center text-center gap-2">
-              <div
-                className={`p-2 rounded-full ${
-                  currentValue === "job_published" ? "bg-indigo-100" : "bg-gray-100"
-                }`}
-              >
-                <UserPlus
-                  className={`h-4 w-4 ${
-                    currentValue === "job_published"
-                      ? "text-indigo-600"
-                      : "text-gray-600"
-                  }`}
-                />
-              </div>
-              <div className="flex-1">
-                <h4 className="block font-medium text-xs">Job Published</h4>
-                <p className="text-xs text-gray-500 leading-tight">
-                  Job goes live publicly
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Email Received */}
-          <div
-            className={`cursor-pointer transition-all duration-200 rounded-md border p-3 ${
-              currentValue === "email_received"
-                ? "border-indigo-500 bg-indigo-50 shadow-none"
-                : "border-gray-200 hover:border-indigo-300 hover:bg-gray-50"
-            }`}
-            onClick={() => selectTriggerType("email_received")}
-          >
-            <div className="flex flex-col items-center text-center gap-2">
-              <div
-                className={`p-2 rounded-full ${
-                  currentValue === "email_received" ? "bg-indigo-100" : "bg-gray-100"
-                }`}
-              >
-                <Mail
-                  className={`h-4 w-4 ${
-                    currentValue === "email_received"
-                      ? "text-indigo-600"
-                      : "text-gray-600"
-                  }`}
-                />
-              </div>
-              <div className="flex-1">
-                <h4 className="block font-medium text-xs">Email Received</h4>
-                <p className="text-xs text-gray-500 leading-tight">
-                  When email is received
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Scheduled */}
-          <div
-            className={`cursor-pointer transition-all duration-200 rounded-md border p-3 ${
-              currentValue === "cron"
-                ? "border-indigo-500 bg-indigo-50 shadow-none"
-                : "border-gray-200 hover:border-indigo-300 hover:bg-gray-50"
-            }`}
-            onClick={() => selectTriggerType("cron")}
-          >
-            <div className="flex flex-col items-center text-center gap-2">
-              <div
-                className={`p-2 rounded-full ${
-                  currentValue === "cron" ? "bg-indigo-100" : "bg-gray-100"
-                }`}
-              >
-                <Clock
-                  className={`h-4 w-4 ${
-                    currentValue === "cron"
-                      ? "text-indigo-600"
-                      : "text-gray-600"
-                  }`}
-                />
-              </div>
-              <div className="flex-1">
-                <h4 className="block font-medium text-xs">Scheduled</h4>
-                <p className="text-xs text-gray-500 leading-tight">
-                  On a scheduled basis
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pl-2">
+                          {categoryTriggers.map((trigger) => (
+                            <div key={trigger.type} className="relative">
+                              <RadioGroupItem
+                                value={trigger.type}
+                                id={trigger.type}
+                                className="peer sr-only"
+                              />
+                              <label
+                                htmlFor={trigger.type}
+                                className={cn(
+                                  "flex h-full cursor-pointer rounded-lg p-4 border border-gray-200",
+                                  "transition-all duration-150 hover:border-gray-300 hover:bg-white",
+                                  "peer-data-[state=checked]:border-primary/60 peer-data-[state=checked]:bg-primary/5",
+                                  "peer-focus-visible:outline-none peer-focus-visible:ring-1 peer-focus-visible:ring-primary"
+                                )}
+                              >
+                                <div className="flex items-start w-full">
+                                  <div
+                                    className={cn(
+                                      "mt-0.5 p-1.5 rounded-md mr-3 flex-shrink-0",
+                                      trigger.iconBg
+                                    )}
+                                  >
+                                    <div className="text-primary">
+                                      {trigger.icon}
+                                    </div>
+                                  </div>
+                                  <div className="flex-grow min-w-0">
+                                    <div className="flex items-center justify-between">
+                                      <p className="font-medium text-sm text-gray-800 truncate pr-2">
+                                        {trigger.label}
+                                      </p>
+                                      {field.value === trigger.type && (
+                                        <div
+                                          className={cn("text-primary h-4 w-4")}
+                                        >
+                                          <CheckCircle2 className="h-full w-full" />
+                                        </div>
+                                      )}
+                                    </div>
+                                    <p className="text-xs text-gray-500 line-clamp-2">
+                                      {trigger.description}
+                                    </p>
+                                  </div>
+                                </div>
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </RadioGroup>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </div>
 
-      {/* Additional fields based on trigger type */}
-      {currentValue === "application_status_changed" && (
-        <div className="space-y-4 border border-gray-200 rounded-lg p-4 bg-gray-50">
-          <h3 className="text-sm font-medium text-gray-700">
-            Status Change Details
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="trigger.config.from"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs font-medium text-gray-600">
-                    From Status (optional)
-                  </FormLabel>
-                  <Select
-                    onValueChange={(val) => {
-                      // Convert "any" to null for the form value
-                      field.onChange(val === "any" ? null : val);
-                    }}
-                    value={
-                      field.value === null || field.value === undefined
-                        ? "any"
-                        : field.value
-                    }
-                  >
-                    <FormControl>
-                      <SelectTrigger className="shadow-none">
-                        <SelectValue placeholder="Any status" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="any">Any status</SelectItem>
-                      {applicationStatuses.map((status) => (
-                        <SelectItem key={status.value} value={status.value}>
-                          {status.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="trigger.config.to"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs font-medium text-gray-600">
-                    To Status
-                  </FormLabel>
-                  <Select
-                    onValueChange={(val) => {
-                      // Convert "any" to null for the form value
-                      field.onChange(val === "any" ? null : val);
-                    }}
-                    value={
-                      field.value === null || field.value === undefined
-                        ? "any"
-                        : field.value
-                    }
-                  >
-                    <FormControl>
-                      <SelectTrigger className="shadow-none">
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="any">Any status</SelectItem>
-                      {applicationStatuses.map((status) => (
-                        <SelectItem key={status.value} value={status.value}>
-                          {status.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormItem>
-              )}
-            />
+      {/* Dynamic configuration based on selected trigger */}
+      {selectedTriggerType && (
+        <div className="mt-6 p-4 border border-gray-200 rounded-lg bg-white">
+          <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-200">
+            <Clock className="h-4 w-4 text-primary" />
+            <h3 className="text-sm font-medium text-gray-800">
+              Configure Trigger
+            </h3>
           </div>
-        </div>
-      )}
 
-      {currentValue === "cron" && (
-        <div className="space-y-4 border border-gray-200 rounded-lg p-4 bg-gray-50">
-          <h3 className="text-sm font-medium text-gray-700">
-            Schedule Settings
-          </h3>
-          <FormField
-            control={form.control}
-            name="trigger.config.expression"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-xs font-medium text-gray-600">
-                  CRON Expression
-                </FormLabel>
-                <FormControl>
-                  <input
-                    className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50 shadow-none"
-                    placeholder="e.g., 0 9 * * *"
-                    {...field}
-                  />
-                </FormControl>
-              </FormItem>
+          <div className="p-4">
+            {selectedTriggerType === "application_status_changed" && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1.5 block">
+                    From Status
+                  </label>
+                  <select className="w-full h-10 px-3 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary">
+                    <option value="">Any status</option>
+                    <option value="applied">Applied</option>
+                    <option value="screening">Screening</option>
+                    <option value="interviewing">Interviewing</option>
+                    <option value="offered">Offered</option>
+                    <option value="rejected">Rejected</option>
+                    <option value="hired">Hired</option>
+                  </select>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Optional: Status before change
+                  </p>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1.5 block">
+                    To Status
+                  </label>
+                  <select className="w-full h-10 px-3 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary">
+                    <option value="applied">Applied</option>
+                    <option value="screening">Screening</option>
+                    <option value="interviewing">Interviewing</option>
+                    <option value="offered">Offered</option>
+                    <option value="rejected">Rejected</option>
+                    <option value="hired">Hired</option>
+                  </select>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Required: Status after change
+                  </p>
+                </div>
+              </div>
             )}
-          />
-          <p className="text-xs text-gray-500">
-            Example: "0 9 * * *" runs daily at 9 AM
-          </p>
+
+            {selectedTriggerType === "cron" && (
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1.5 block">
+                    Schedule Type
+                  </label>
+                  <select className="w-full h-10 px-3 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary">
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="custom">Custom (CRON)</option>
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-1.5 block">
+                      Time
+                    </label>
+                    <input
+                      type="time"
+                      className="w-full h-10 px-3 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary"
+                      defaultValue="09:00"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-1.5 block">
+                      Timezone
+                    </label>
+                    <select className="w-full h-10 px-3 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary">
+                      <option value="UTC">UTC</option>
+                      <option value="America/New_York">Eastern Time</option>
+                      <option value="America/Chicago">Central Time</option>
+                      <option value="America/Denver">Mountain Time</option>
+                      <option value="America/Los_Angeles">Pacific Time</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {selectedTriggerType === "email_received" && (
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1.5 block">
+                    From Email Address
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Any email address (leave blank for all)"
+                    className="w-full h-10 px-3 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">
+                    Optional: Filter by sender email address
+                  </p>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1.5 block">
+                    Subject Contains
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Keywords in subject line"
+                    className="w-full h-10 px-3 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">
+                    Optional: Filter by words in the subject line
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {selectedTriggerType !== "application_status_changed" &&
+              selectedTriggerType !== "cron" &&
+              selectedTriggerType !== "email_received" && (
+                <p className="text-gray-600 text-sm">
+                  No additional configuration needed for this trigger type.
+                </p>
+              )}
+          </div>
         </div>
       )}
     </div>

@@ -1,12 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -14,206 +12,234 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
+import { AlertCircle, Filter, FilterX, Plus, Trash2 } from "lucide-react";
+import { useFieldArray } from "react-hook-form";
 
-interface ConditionsSectionProps {
-  form: any; // Using any temporarily to avoid TypeScript errors with form types
-}
+export default function ConditionsSection({ form }: { form: any }) {
+  // Use field array to handle dynamic conditions
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "conditions",
+  });
 
-export default function ConditionsSection({ form }: ConditionsSectionProps) {
-  const [showHelp, setShowHelp] = useState(false);
-
-  const availableFields = [
+  // Define field options
+  const fieldOptions = [
     { value: "resumeScore", label: "Resume Score" },
-    { value: "experience", label: "Experience (years)" },
-    { value: "education", label: "Education Level" },
+    { value: "applicationAge", label: "Application Age (days)" },
+    { value: "jobTitle", label: "Job Title" },
+    { value: "department", label: "Department" },
     { value: "location", label: "Location" },
-    { value: "skills", label: "Skills" },
   ];
 
-  const operators = [
-    { value: "=", label: "Equals" },
-    { value: "!=", label: "Not Equals" },
-    { value: ">", label: "Greater Than" },
-    { value: "<", label: "Less Than" },
-    { value: ">=", label: "Greater Than or Equal" },
-    { value: "<=", label: "Less Than or Equal" },
+  // Define operator options
+  const operatorOptions = [
+    { value: ">", label: "Greater than" },
+    { value: "<", label: "Less than" },
+    { value: "=", label: "Equal to" },
+    { value: "!=", label: "Not equal to" },
     { value: "contains", label: "Contains" },
-    { value: "startsWith", label: "Starts With" },
-    { value: "endsWith", label: "Ends With" },
+    { value: "starts_with", label: "Starts with" },
+    { value: "ends_with", label: "Ends with" },
   ];
 
-  const conditions = form.watch("conditions") || [];
+  // Add new condition
+  const addCondition = (e?: React.MouseEvent) => {
+    // Prevent default form submission if this is triggered by a button
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
 
-  const addCondition = () => {
-    const currentConditions = form.getValues("conditions") || [];
-    form.setValue("conditions", [
-      ...currentConditions,
-      { field: "resumeScore", operator: ">", value: "50" },
-    ]);
-  };
-
-  const removeCondition = (index: number) => {
-    const currentConditions = form.getValues("conditions") || [];
-    form.setValue(
-      "conditions",
-      currentConditions.filter((_, i: number) => i !== index)
-    );
+    append({
+      field: "resumeScore",
+      operator: ">",
+      value: "",
+    });
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h3 className="text-base font-medium">Conditions</h3>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => setShowHelp(!showHelp)}
-          className="text-xs"
-        >
-          {showHelp ? "Hide Examples" : "Show Examples"}
-        </Button>
-      </div>
-
-      {showHelp && (
-        <Card className="bg-gray-50 border-gray-200 shadow-none">
-          <CardContent className="p-4 space-y-3">
-            <h4 className="font-medium text-gray-700">Example Conditions</h4>
-            <ul className="list-disc pl-5 text-sm text-gray-600 space-y-2">
-              <li>Resume Score {">"} 75 (High quality candidates)</li>
-              <li>Experience {">="} 3 (At least 3 years experience)</li>
-              <li>Location contains "Remote" (Remote candidates)</li>
-              <li>Skills contains "JavaScript" (JavaScript developers)</li>
-            </ul>
-            <p className="text-xs text-gray-500">
-              Conditions are optional. If no conditions are set, the automation
-              will run for all matching triggers.
+    <div className="space-y-5">
+      {fields.length === 0 ? (
+        <div className="rounded-lg p-6 bg-gradient-to-r from-amber-50 to-amber-100/20 flex items-center justify-center">
+          <div className="text-center max-w-md">
+            <div className="mx-auto mb-4 bg-gradient-to-br from-amber-100 to-amber-200 h-14 w-14 rounded-full flex items-center justify-center">
+              <FilterX className="h-6 w-6 text-amber-600" />
+            </div>
+            <h3 className="text-base font-medium text-amber-900 mb-2">
+              No conditions added
+            </h3>
+            <p className="text-sm text-amber-700 mb-4 max-w-xs mx-auto">
+              Without conditions, your automation will run every time the
+              trigger event occurs.
             </p>
-          </CardContent>
-        </Card>
-      )}
-
-      {conditions.length === 0 ? (
-        <div className="text-center py-6 border border-dashed border-gray-300 rounded-md bg-gray-50 shadow-none">
-          <p className="text-gray-500 mb-2">No conditions added yet</p>
-          <p className="text-gray-400 text-sm mb-4">
-            Without conditions, this automation will run for all matching
-            triggers
-          </p>
-          <Button
-            type="button"
-            onClick={addCondition}
-            variant="outline"
-            className="mx-auto"
-          >
-            <Plus className="h-4 w-4 mr-1" />
-            Add Condition
-          </Button>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {conditions.map((_, index: number) => (
-            <Card key={index} className="shadow-none">
-              <CardContent className="p-4">
-                <div className="flex items-start">
-                  <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <FormField
-                      control={form.control}
-                      name={`conditions.${index}.field`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-xs">Field</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {availableFields.map((fieldOption) => (
-                                <SelectItem
-                                  key={fieldOption.value}
-                                  value={fieldOption.value}
-                                >
-                                  {fieldOption.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name={`conditions.${index}.operator`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-xs">Operator</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {operators.map((op) => (
-                                <SelectItem key={op.value} value={op.value}>
-                                  {op.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name={`conditions.${index}.value`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-xs">Value</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeCondition(index)}
-                    className="ml-2 mt-6"
-                  >
-                    <Trash2 className="h-4 w-4 text-gray-400 hover:text-red-500" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-
-          <div className="flex justify-end">
             <Button
               type="button"
-              variant="outline"
-              size="sm"
-              onClick={addCondition}
-              className="mt-2"
+              onClick={(e) => addCondition(e)}
+              className="bg-amber-600 hover:bg-amber-700 text-white border-0"
             >
-              <Plus className="h-4 w-4 mr-1" />
+              <Plus className="h-4 w-4 mr-2" />
+              Add Condition
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div>
+          <div className="space-y-3">
+            {fields.map((field, index) => (
+              <div
+                key={field.id}
+                className={cn(
+                  "bg-white py-4 px-5 rounded-lg border-l-2 border-amber-300",
+                  "transition-all duration-200 hover:border-l-amber-500"
+                )}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <Filter className="h-4 w-4 text-amber-500" />
+                    <h4 className="text-sm font-medium text-gray-700">
+                      Condition {index + 1}
+                    </h4>
+                  </div>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          remove(index);
+                        }}
+                        className="h-7 w-7 p-0 opacity-70 hover:opacity-100 hover:bg-red-50 hover:text-red-500"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Remove condition</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+                  <FormField
+                    control={form.control}
+                    name={`conditions.${index}.field`}
+                    render={({ field: formField }) => (
+                      <FormItem className="md:col-span-4">
+                        <FormLabel className="text-sm text-gray-600 mb-1.5">
+                          Field
+                        </FormLabel>
+                        <Select
+                          onValueChange={formField.onChange}
+                          defaultValue={formField.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="h-10 text-sm bg-white border-gray-200">
+                              <SelectValue placeholder="Select field" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {fieldOptions.map((option) => (
+                              <SelectItem
+                                key={option.value}
+                                value={option.value}
+                                className="cursor-pointer"
+                              >
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name={`conditions.${index}.operator`}
+                    render={({ field: formField }) => (
+                      <FormItem className="md:col-span-3">
+                        <FormLabel className="text-sm text-gray-600 mb-1.5">
+                          Operator
+                        </FormLabel>
+                        <Select
+                          onValueChange={formField.onChange}
+                          defaultValue={formField.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="h-10 text-sm bg-white border-gray-200">
+                              <SelectValue placeholder="Select operator" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {operatorOptions.map((option) => (
+                              <SelectItem
+                                key={option.value}
+                                value={option.value}
+                                className="cursor-pointer"
+                              >
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name={`conditions.${index}.value`}
+                    render={({ field: formField }) => (
+                      <FormItem className="md:col-span-5">
+                        <FormLabel className="text-sm text-gray-600 mb-1.5">
+                          Value
+                        </FormLabel>
+                        <FormControl>
+                          <input
+                            className="h-10 px-3 w-full text-sm rounded-md border border-gray-200 bg-white ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50"
+                            placeholder="Enter value"
+                            {...formField}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex items-center justify-between mt-3">
+            <Button
+              type="button"
+              onClick={(e) => addCondition(e)}
+              variant="ghost"
+              size="sm"
+              className="text-sm font-medium text-amber-700 hover:text-amber-800 hover:bg-amber-50/50"
+            >
+              <Plus className="h-4 w-4 mr-1.5" />
               Add Another Condition
             </Button>
+
+            <p className="text-sm text-gray-500">
+              All conditions must be met to run the automation
+            </p>
+          </div>
+
+          <div className="mt-4 bg-gray-50 border border-gray-100 rounded-md p-3 flex items-start">
+            <AlertCircle className="h-4 w-4 text-amber-500 mt-0.5 mr-2.5" />
+            <p className="text-sm text-gray-600 leading-relaxed">
+              Multiple conditions are combined with logical AND. Create separate
+              automations if you need OR logic.
+            </p>
           </div>
         </div>
       )}

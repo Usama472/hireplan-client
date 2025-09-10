@@ -28,13 +28,14 @@ import Home from "@/pages/home";
 // Auth Pages
 import CheckoutPage from "@/pages/checkout";
 import AutomationsDashboard from "@/pages/dashboard/automations";
+import CreateAutomationPage from "@/pages/dashboard/automations/create";
+import EditAutomationPage from "@/pages/dashboard/automations/edit";
 import ChatsPage from "@/pages/dashboard/chats";
 import ConversationPage from "@/pages/dashboard/chats/conversation";
 import EmailTemplatesPage from "@/pages/dashboard/email-template";
 import CreateEmailTemplatePage from "@/pages/dashboard/email-template/create";
 import EditEmailTemplatePage from "@/pages/dashboard/email-template/edit";
 import GlobalSettingPage from "@/pages/dashboard/global-setting";
-import MeetingSettingsPage from "@/pages/dashboard/settings/meeting-settings";
 import JobTemplatesPage from "@/pages/dashboard/job-templates";
 import EditJobPage from "@/pages/dashboard/jobs/edit";
 import InterviewSchedulePage from "@/pages/interview/schedule";
@@ -225,6 +226,18 @@ export const appRoutes: AppRoutesType[] = [
     id: "automations",
     url: ROUTES.DASHBOARD.AUTOMATIONS,
     element: <AutomationsDashboard />,
+    isPrivate: true,
+  },
+  {
+    id: "create-automation",
+    url: ROUTES.DASHBOARD.CREATE_AUTOMATION,
+    element: <CreateAutomationPage />,
+    isPrivate: true,
+  },
+  {
+    id: "edit-automation",
+    url: ROUTES.DASHBOARD.EDIT_AUTOMATION,
+    element: <EditAutomationPage />,
     isPrivate: true,
   },
 ];
