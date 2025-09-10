@@ -1,12 +1,13 @@
 "use client";
 
-import { AIRankingStep } from "@/components/dashboard/jobs/common/ai-ranking-step";
+import { AIOverviewStep } from "@/components/dashboard/jobs/common/ai-overview-step";
 import { BookingPageStep } from "@/components/dashboard/jobs/common/booking-page-step";
 import { CompanyPositionDetailsStep } from "@/components/dashboard/jobs/common/company-position-details-step";
 import { ComplianceDepartmentStep } from "@/components/dashboard/jobs/common/compliance-department-step";
 import { HoursScheduleBenefitsStep } from "@/components/dashboard/jobs/common/hours-schedule-benefits-step";
 import { JobAdStep } from "@/components/dashboard/jobs/common/job-ad-step";
 import { JobQualificationsStep } from "@/components/dashboard/jobs/common/job-qualifications-step";
+import { ResumeAnalysisStep } from "@/components/dashboard/jobs/common/resume-analysis-step";
 import { PostingScheduleBudgetStep } from "@/components/dashboard/jobs/common/posting-schedule-budget-step";
 import { ReviewPublishStep } from "@/components/dashboard/jobs/common/review-publish-step";
 import { StepNavigation } from "@/components/main/signup/stepNavigation";
@@ -211,8 +212,8 @@ export default function CreateJob() {
     subscription?.planId === "professional" ||
     subscription?.planId === "enterprise";
 
-  // Adjust total steps based on subscription - AI step (5) is only for Professional+
-  const totalSteps = hasProfessionalFeatures ? 7 : 6;
+  // Adjust total steps based on subscription - Resume Analysis (4) and AI step (6) are only for Professional+
+  const totalSteps = hasProfessionalFeatures ? 8 : 7;
 
   // Log for debugging
   console.log("Current step and total steps:", { currentStep, totalSteps });
@@ -612,17 +613,26 @@ export default function CreateJob() {
           </div>
         );
       case 4:
-        return <PostingScheduleBudgetStep />;
+        if (hasProfessionalFeatures) {
+          return (
+            <div>
+              <ResumeAnalysisStep />
+            </div>
+          );
+        } else {
+          // For non-Professional users, step 4 is Posting/Schedule/Budget
+          return <PostingScheduleBudgetStep />;
+        }
       case 5:
         if (hasProfessionalFeatures) {
-          return <AIRankingStep />;
+          return <PostingScheduleBudgetStep />;
         } else {
           // For non-Professional users, step 5 is the Booking Page
           return <BookingPageStep />;
         }
       case 6:
         if (hasProfessionalFeatures) {
-          return <BookingPageStep />;
+          return <AIOverviewStep />;
         } else {
           // For non-Professional users, step 6 is the Review step
           return (
@@ -632,6 +642,13 @@ export default function CreateJob() {
           );
         }
       case 7:
+        if (hasProfessionalFeatures) {
+          return <BookingPageStep />;
+        } else {
+          // Non-Professional users don't have step 7
+          return <PostingScheduleBudgetStep />;
+        }
+      case 8:
         // Only for Professional+ users
         return (
           <>
@@ -657,7 +674,7 @@ export default function CreateJob() {
                 <h1 className="text-2xl font-bold text-gray-900">
                   Create New Job
                 </h1>
-                <p className="text-gray-600 flex items-center gap-2">
+                <div className="text-gray-600 flex items-center gap-2">
                   Set up your job posting with detailed requirements and
                   preferences
                   <Badge
@@ -666,7 +683,7 @@ export default function CreateJob() {
                   >
                     Step {currentStep} of {totalSteps}
                   </Badge>
-                </p>
+                </div>
               </div>
             </div>
             <div className="flex items-center gap-4">

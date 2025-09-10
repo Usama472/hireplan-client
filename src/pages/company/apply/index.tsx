@@ -53,6 +53,18 @@ interface Job {
     | 'base-bonus'
     | 'commission-only'
   jobRequirements?: string[]
+  qualifications?: Array<{
+    text: string
+    title?: string
+    isRequired?: boolean
+    aiCategory?: 'need' | 'should' | 'nice'
+  }>
+  resumeAnalysisMode?: 'simple' | 'detailed'
+  resumeCriteria?: Array<{
+    text: string
+    type: 'skill' | 'experience' | 'education' | 'certification'
+    aiCategory: 'need' | 'should' | 'nice'
+  }>
   externalApplicationSetup?: {
     customFields?: string[]
   }
@@ -588,31 +600,76 @@ const JobApplicationPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Requirements - Made more prominent */}
-              {job.jobRequirements && job.jobRequirements.length > 0 && (
+              {/* Qualifications - Updated to use new structure */}
+              {((job.qualifications && job.qualifications.length > 0) || 
+                (job.jobRequirements && job.jobRequirements.length > 0)) && (
                 <div className='mb-3 p-3 bg-gradient-to-r from-slate-50 to-gray-50 rounded-lg border border-slate-200'>
                   <h4 className='text-xs font-semibold text-gray-900 mb-2 flex items-center gap-1.5'>
                     <CheckCircle className='h-3 w-3 text-slate-600' />
-                    Key Requirements
+                    Job Requirements
                   </h4>
-                  <ul className='space-y-1'>
-                    {job.jobRequirements
-                      .slice(0, 5)
-                      .map((req: string, index: number) => (
-                        <li
-                          key={index}
-                          className='flex items-start gap-2 text-xs text-gray-700'
-                        >
-                          <span className='w-1 h-1 bg-slate-500 rounded-full mt-1.5 flex-shrink-0'></span>
-                          <span>{req}</span>
-                        </li>
-                      ))}
-                    {job.jobRequirements.length > 5 && (
-                      <li className='text-xs text-gray-500 italic'>
-                        +{job.jobRequirements.length - 5} more requirements
-                      </li>
+                  <div className='space-y-2'>
+                    {/* New Structured Qualifications */}
+                    {job.qualifications && job.qualifications.length > 0 && (
+                      <>
+                        {/* Required Qualifications */}
+                        {job.qualifications.filter(q => q.isRequired).length > 0 && (
+                          <div>
+                            <h5 className='text-xs font-medium text-red-700 mb-1'>Required:</h5>
+                            <ul className='space-y-1'>
+                              {job.qualifications
+                                .filter(q => q.isRequired)
+                                .map((qual, index) => (
+                                  <li key={index} className='flex items-start gap-2 text-xs text-gray-700'>
+                                    <span className='w-1 h-1 bg-red-500 rounded-full mt-1.5 flex-shrink-0'></span>
+                                    <span>{qual.text}</span>
+                                  </li>
+                                ))}
+                            </ul>
+                          </div>
+                        )}
+                        
+                        {/* Preferred Qualifications */}
+                        {job.qualifications.filter(q => !q.isRequired).length > 0 && (
+                          <div>
+                            <h5 className='text-xs font-medium text-green-700 mb-1'>Preferred:</h5>
+                            <ul className='space-y-1'>
+                              {job.qualifications
+                                .filter(q => !q.isRequired)
+                                .map((qual, index) => (
+                                  <li key={index} className='flex items-start gap-2 text-xs text-gray-700'>
+                                    <span className='w-1 h-1 bg-green-500 rounded-full mt-1.5 flex-shrink-0'></span>
+                                    <span>{qual.text}</span>
+                                  </li>
+                                ))}
+                            </ul>
+                          </div>
+                        )}
+                      </>
                     )}
-                  </ul>
+                    
+                    {/* Fallback to old jobRequirements */}
+                    {(!job.qualifications || job.qualifications.length === 0) && job.jobRequirements && job.jobRequirements.length > 0 && (
+                      <ul className='space-y-1'>
+                        {job.jobRequirements
+                          .slice(0, 5)
+                          .map((req: string, index: number) => (
+                            <li
+                              key={index}
+                              className='flex items-start gap-2 text-xs text-gray-700'
+                            >
+                              <span className='w-1 h-1 bg-slate-500 rounded-full mt-1.5 flex-shrink-0'></span>
+                              <span>{req}</span>
+                            </li>
+                          ))}
+                        {job.jobRequirements.length > 5 && (
+                          <li className='text-xs text-gray-500 italic'>
+                            +{job.jobRequirements.length - 5} more requirements
+                          </li>
+                        )}
+                      </ul>
+                    )}
+                  </div>
                 </div>
               )}
 

@@ -25,6 +25,24 @@ export class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
+    
+    // Safari-specific error logging
+    const userAgent = navigator.userAgent;
+    const isSafari = /Safari/.test(userAgent) && !/Chrome/.test(userAgent);
+    const isIOS = /iPad|iPhone|iPod/.test(userAgent);
+    
+    if (isSafari || isIOS) {
+      console.warn('Safari/iOS specific error detected:', {
+        error: error.message,
+        stack: error.stack,
+        userAgent,
+        viewport: {
+          width: window.innerWidth,
+          height: window.innerHeight,
+          devicePixelRatio: window.devicePixelRatio
+        }
+      });
+    }
   }
 
   handleRetry = () => {
@@ -55,6 +73,11 @@ export class ErrorBoundary extends Component<Props, State> {
             <CardContent className="space-y-4">
               <p className="text-gray-600 text-center">
                 We encountered an unexpected error. This has been logged and our team will look into it.
+                {(/Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent)) || /iPad|iPhone|iPod/.test(navigator.userAgent) ? (
+                  <span className="block mt-2 text-sm text-orange-600">
+                    Safari/iOS detected - trying compatibility fixes...
+                  </span>
+                ) : null}
               </p>
               
               {process.env.NODE_ENV === 'development' && this.state.error && (

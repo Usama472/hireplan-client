@@ -54,6 +54,8 @@ export function TiptapEditor({
           keepMarks: true,
           keepAttributes: false,
         },
+        // Disable the built-in link extension from StarterKit
+        link: false,
       }),
       Link.configure({
         openOnClick: false,
