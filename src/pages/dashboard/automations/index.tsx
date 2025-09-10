@@ -1,4 +1,3 @@
-import AutomationBuilder from "@/components/dashboard/automations/automation-builder";
 import AutomationPreview from "@/components/dashboard/automations/automation-preview";
 import AutomationsList from "@/components/dashboard/automations/automations-list";
 import EmptyAutomationsState from "@/components/dashboard/automations/empty-automations-state";
@@ -20,6 +19,7 @@ import type { AutomationType } from "@/interfaces/automations";
 import { useToast } from "@/lib/hooks/use-toast";
 import { Filter, HelpCircle, Plus, Search } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 // Temporary mock data for development
 const mockAutomations: AutomationType[] = [
@@ -109,10 +109,7 @@ export default function AutomationsDashboard() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const { toast } = useToast();
   const [isLoading] = useState<boolean>(false);
-  const [isBuilderOpen, setIsBuilderOpen] = useState<boolean>(false);
-  const [automationToEdit, setAutomationToEdit] = useState<
-    AutomationType | undefined
-  >();
+  const navigate = useNavigate();
 
   // Filter automations based on search and status
   const filteredAutomations = useMemo(() => {
@@ -140,25 +137,14 @@ export default function AutomationsDashboard() {
   };
 
   const handleCreateAutomation = useCallback(() => {
-    setAutomationToEdit(undefined);
-    // Use setTimeout to avoid React batched updates causing infinite loops
-    setTimeout(() => {
-      setIsBuilderOpen(true);
-    }, 0);
-  }, []);
+    navigate("/dashboard/automations/create");
+  }, [navigate]);
 
   const handleEditAutomation = useCallback(
     (id: string) => {
-      const automationToEdit = automations.find((a) => a.id === id);
-      if (automationToEdit) {
-        setAutomationToEdit(automationToEdit);
-        // Use setTimeout to avoid React batched updates causing infinite loops
-        setTimeout(() => {
-          setIsBuilderOpen(true);
-        }, 0);
-      }
+      navigate(`/dashboard/automations/edit/${id}`);
     },
-    [automations]
+    [navigate]
   );
 
   const handleEnableToggle = (id: string, enabled: boolean) => {
@@ -191,26 +177,6 @@ export default function AutomationsDashboard() {
     });
   };
 
-  const handleSaveAutomation = (automation: AutomationType) => {
-    if (automation.id && automations.some((a) => a.id === automation.id)) {
-      // Update existing automation
-      setAutomations((prev) =>
-        prev.map((a) => (a.id === automation.id ? automation : a))
-      );
-
-      // Update selected automation if it's the one being edited
-      if (selectedAutomation?.id === automation.id) {
-        setSelectedAutomation(automation);
-      }
-    } else {
-      // Add new automation
-      setAutomations((prev) => [...prev, automation]);
-
-      // Select the newly created automation
-      setSelectedAutomation(automation);
-    }
-  };
-
   const hasAutomations = filteredAutomations.length > 0;
   const hasFilters = searchQuery !== "" || statusFilter !== "all";
 
@@ -226,7 +192,9 @@ export default function AutomationsDashboard() {
                   <Filter className="h-6 w-6 text-gray-600" />
                 </div>
                 <div className="flex flex-col">
-                  <h1 className="text-2xl font-bold text-gray-900">Automations</h1>
+                  <h1 className="text-2xl font-bold text-gray-900">
+                    Automations
+                  </h1>
                   <p className="text-gray-600 flex items-center gap-2">
                     Create and manage recruitment workflow automations
                   </p>
@@ -254,7 +222,9 @@ export default function AutomationsDashboard() {
               <div className="space-y-5">
                 {/* Controls */}
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-gray-900">All Automations</h2>
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    All Automations
+                  </h2>
 
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -351,15 +321,6 @@ export default function AutomationsDashboard() {
           </div>
         </div>
       </div>
-
-      {/* Automation Builder Modal */}
-      <AutomationBuilder
-        open={isBuilderOpen}
-        onClose={() => setIsBuilderOpen(false)}
-        onSave={handleSaveAutomation}
-        automation={automationToEdit}
-        mode="dialog"
-      />
     </div>
   );
 }
