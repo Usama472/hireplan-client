@@ -24,7 +24,7 @@ import {
 import { APP_NAME, ROUTES } from "@/constants";
 import { PERMISSIONS } from "@/constants/permissions";
 import useAuthSessionContext from "@/lib/context/AuthSessionContext";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import LogoImage from "../../../../../../public/logo.png";
 import { NavProjects } from "./nav-projects";
 import { NavUser } from "./nav-user";
@@ -47,7 +47,6 @@ export const DashboardSidebar = ({
     ],
     projects: [],
   } as any;
-  const navigate = useNavigate();
   const { data: authData, subscription } = useAuthSessionContext();
   const location = useLocation();
 
@@ -146,9 +145,9 @@ export const DashboardSidebar = ({
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <div
-                onClick={() => navigate("/")}
-                className="cursor-pointer hover:bg-gray-50 rounded-xl p-3 transition-all duration-300 group relative z-10"
+              <Link
+                to="/"
+                className="hover:bg-gray-50 rounded-xl p-3 transition-all duration-300 group relative z-10"
               >
                 <div className="flex items-center gap-4">
                   <img
@@ -162,7 +161,7 @@ export const DashboardSidebar = ({
                     </span>
                   </div>
                 </div>
-              </div>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

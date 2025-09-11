@@ -168,22 +168,22 @@ export function JobCard({
   return (
     <>
       <Card className="group bg-white border border-gray-100 hover:border-primary/20 transition-all duration-200 rounded-lg overflow-hidden shadow-none">
-        <CardContent className="p-5 space-y-4">
+        <CardContent className="p-3 sm:p-4 lg:p-5 space-y-3 sm:space-y-4">
           {/* Header Section */}
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-3">
+            <div className="flex items-center gap-2 flex-wrap">
               {/* Status Badge */}
               <Badge
                 variant="outline"
                 className={cn(
-                  "px-2.5 py-1 rounded-md border text-xs font-medium",
+                  "px-2 sm:px-2.5 py-1 rounded-md border text-xs font-medium",
                   statusConfig.bg,
                   statusConfig.text,
                   statusConfig.border
                 )}
               >
                 <StatusIcon
-                  className={cn("w-3 h-3 mr-1.5", statusConfig.iconColor)}
+                  className={cn("w-3 h-3 mr-1 sm:mr-1.5", statusConfig.iconColor)}
                 />
                 <span className="capitalize">{job.status}</span>
               </Badge>
@@ -274,16 +274,16 @@ export function JobCard({
           </div>
 
           {/* Details Grid */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex items-center p-2.5 bg-gray-50 rounded-md">
-              <div className="p-1.5 mr-2.5 bg-primary/10 rounded-md">
-                <Briefcase className="w-3.5 h-3.5 text-primary" />
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
+            <div className="flex items-center p-2 sm:p-2.5 bg-gray-50 rounded-md">
+              <div className="p-1 sm:p-1.5 mr-2 sm:mr-2.5 bg-primary/10 rounded-md flex-shrink-0">
+                <Briefcase className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-primary" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <div className="text-xs text-gray-500 font-medium uppercase tracking-wide">
                   Type
                 </div>
-                <div className="text-sm font-medium text-gray-800">
+                <div className="text-sm font-medium text-gray-800 truncate">
                   {job.employmentType
                     ?.replace("-", " ")
                     .replace(/\b\w/g, (l) => l.toUpperCase())}
@@ -291,11 +291,11 @@ export function JobCard({
               </div>
             </div>
 
-            <div className="flex items-center p-2.5 bg-gray-50 rounded-md">
-              <div className="p-1.5 mr-2.5 bg-primary/10 rounded-md">
-                <Users className="w-3.5 h-3.5 text-primary" />
+            <div className="flex items-center p-2 sm:p-2.5 bg-gray-50 rounded-md">
+              <div className="p-1 sm:p-1.5 mr-2 sm:mr-2.5 bg-primary/10 rounded-md flex-shrink-0">
+                <Users className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-primary" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <div className="text-xs text-gray-500 font-medium uppercase tracking-wide">
                   Positions
                 </div>
@@ -305,11 +305,11 @@ export function JobCard({
               </div>
             </div>
 
-            <div className="flex items-center p-2.5 bg-gray-50 rounded-md">
-              <div className="p-1.5 mr-2.5 bg-primary/10 rounded-md">
-                <Users className="w-3.5 h-3.5 text-primary" />
+            <div className="flex items-center p-2 sm:p-2.5 bg-gray-50 rounded-md">
+              <div className="p-1 sm:p-1.5 mr-2 sm:mr-2.5 bg-primary/10 rounded-md flex-shrink-0">
+                <Users className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-primary" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <div className="text-xs text-gray-500 font-medium uppercase tracking-wide">
                   Applicants
                 </div>
@@ -319,15 +319,15 @@ export function JobCard({
               </div>
             </div>
 
-            <div className="flex items-center p-2.5 bg-gray-50 rounded-md">
-              <div className="p-1.5 mr-2.5 bg-primary/10 rounded-md">
-                <Calendar className="w-3.5 h-3.5 text-primary" />
+            <div className="flex items-center p-2 sm:p-2.5 bg-gray-50 rounded-md">
+              <div className="p-1 sm:p-1.5 mr-2 sm:mr-2.5 bg-primary/10 rounded-md flex-shrink-0">
+                <Calendar className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-primary" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <div className="text-xs text-gray-500 font-medium uppercase tracking-wide">
                   Posted
                 </div>
-                <div className="text-sm font-medium text-gray-800">
+                <div className="text-sm font-medium text-gray-800 truncate">
                   {job.createdAt
                     ? new Date(job.createdAt).toLocaleDateString("en-US", {
                         month: "short",

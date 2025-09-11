@@ -68,10 +68,10 @@ export default function SchedulerManager() {
   }, [searchParams, toast, updateUser]);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-4">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Scheduler</h1>
-        <p className="text-gray-600 mt-1">Manage your interview scheduling templates and settings</p>
+    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-4">
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Scheduler</h1>
+        <p className="text-sm sm:text-base text-gray-600 mt-1">Manage your interview scheduling templates and settings</p>
       </div>
 
       <Tabs
@@ -81,20 +81,22 @@ export default function SchedulerManager() {
       >
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
           <div className="border-b border-gray-100">
-            <TabsList className="flex w-full h-12 bg-transparent border-0 p-0 m-0">
+            <TabsList className="flex w-full h-10 sm:h-12 bg-transparent border-0 p-0 m-0">
               <TabsTrigger
                 value="templates"
-                className="flex-1 flex items-center justify-center gap-2 h-full px-4 rounded-none border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 data-[state=active]:font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 relative rounded-tl-xl"
+                className="flex-1 flex items-center justify-center gap-1 sm:gap-2 h-full px-2 sm:px-4 rounded-none border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 data-[state=active]:font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 relative rounded-tl-xl"
               >
-                <CalendarClock className="h-4 w-4" />
-                <span className="text-sm">Interview Templates</span>
+                <CalendarClock className="h-3 sm:h-4 w-3 sm:w-4" />
+                <span className="text-xs sm:text-sm hidden sm:inline">Interview Templates</span>
+                <span className="text-xs sm:hidden">Templates</span>
               </TabsTrigger>
               <TabsTrigger
                 value="booked-slots"
-                className="flex-1 flex items-center justify-center gap-2 h-full px-4 rounded-none border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 data-[state=active]:font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 relative"
+                className="flex-1 flex items-center justify-center gap-1 sm:gap-2 h-full px-2 sm:px-4 rounded-none border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 data-[state=active]:font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 relative"
               >
-                <Users className="h-4 w-4" />
-                <span className="text-sm">Scheduled Interviews</span>
+                <Users className="h-3 sm:h-4 w-3 sm:w-4" />
+                <span className="text-xs sm:text-sm hidden sm:inline">Scheduled Interviews</span>
+                <span className="text-xs sm:hidden">Scheduled</span>
                 {totalBookedAppointments > 0 && (
                   <Badge
                     variant="secondary"
