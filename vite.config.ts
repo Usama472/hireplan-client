@@ -10,6 +10,18 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react(), tailwindcss()],
+    build: {
+      target: ["es2015", "safari11"],
+      polyfillModulePreload: true,
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            vendor: ['react', 'react-dom'],
+            motion: ['framer-motion']
+          }
+        }
+      }
+    },
     define: {
       // Explicitly expose environment variables
       "import.meta.env.VITE_STRIPE_STARTER_PRICE_ID": JSON.stringify(

@@ -6,7 +6,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { useNavigate } from "react-router";
+import { Link } from "react-router-dom";
 
 export function NavProjects({
   projects,
@@ -21,8 +21,6 @@ export function NavProjects({
   }[];
   currentPath: string;
 }) {
-  const navigate = useNavigate();
-
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel className=" font-medium text-gray-600 dark:text-white/60 uppercase tracking-wider mb-4 px-3">
@@ -36,11 +34,11 @@ export function NavProjects({
             <SidebarMenuItem key={item.name}>
               <SidebarMenuButton
                 asChild
-                onClick={() => navigate(item.url)}
                 className="p-0 hover:bg-transparent focus:bg-transparent active:bg-transparent"
               >
-                <div
-                  className={`group cursor-pointer flex items-center gap-3 px-4 py-5 mx-2 rounded-md transition-all duration-200 font-normal ${
+                <Link
+                  to={item.url}
+                  className={`group flex items-center gap-3 px-4 py-5 mx-2 rounded-md transition-all duration-200 font-normal ${
                     isActive
                       ? "bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white"
                       : "hover:bg-gray-100 text-gray-700 dark:hover:bg-white/10 dark:text-white/70"
@@ -65,7 +63,7 @@ export function NavProjects({
                   {isActive && (
                     <div className="w-2 h-2 bg-white rounded-full opacity-80 ml-auto"></div>
                   )}
-                </div>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           );

@@ -41,7 +41,7 @@ export function PricingSection() {
   return (
     <section
       id="pricing"
-      className="py-8 bg-[#ececec]/70 relative"
+      className="py-8 sm:py-12 bg-[#ececec]/70 relative"
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <motion.div
@@ -63,7 +63,7 @@ export function PricingSection() {
           {/* Main Headline */}
           <motion.h2
             variants={itemVariants}
-            className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4"
+            className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4"
           >
             Plans that grow{" "}
             <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">with your business</span>
@@ -72,7 +72,7 @@ export function PricingSection() {
           {/* Subheadline */}
           <motion.p
             variants={itemVariants}
-            className="text-gray-600 max-w-xl mx-auto"
+            className="text-sm sm:text-base text-gray-600 max-w-xl mx-auto px-2"
           >
             Choose the perfect plan for your needs. All plans include our core
             AI matching technology and 24/7 support.

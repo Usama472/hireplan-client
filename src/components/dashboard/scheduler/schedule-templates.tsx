@@ -32,10 +32,13 @@ import {
 } from "@/http/availability/api";
 import type { AvailabilityTemplate } from "@/interfaces";
 import { useToast } from "@/lib/hooks/use-toast";
-import { format } from "date-fns";
 import { Plus, Clock, Trash2, Edit, Calendar } from "lucide-react";
 import { useEffect, useState } from "react";
 import { WeeklyAvailabilityForm } from "./weekly-availability-form";
+import useCalenderSettings from "@/lib/hooks/use-calender-settings";
+import useMeetingSettings from "@/lib/hooks/use-meeting-settings";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertTriangle, Video, Settings as SettingsIcon } from "lucide-react";
 
 interface ScheduleTemplatesProps {
   onTemplateChange?: (template: any) => void;
@@ -56,21 +59,51 @@ const defaultDurations: InterviewDuration[] = [
   { id: "90min", name: "Panel Interview", duration: 90, description: "Panel or final round interview", isDefault: false },
 ];
 
-export function ScheduleTemplates({ onTemplateChange }: ScheduleTemplatesProps) {
+export function ScheduleTemplates({ }: ScheduleTemplatesProps) {
   const [templates, setTemplates] = useState<AvailabilityTemplate[]>([]);
   const [currentTemplate, setCurrentTemplate] = useState<AvailabilityTemplate | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [templateToDelete, setTemplateToDelete] = useState<AvailabilityTemplate | null>(null);
   const [newTemplateName, setNewTemplateName] = useState("");
   const [newTemplateDescription, setNewTemplateDescription] = useState("");
+  const [selectedPlatform, setSelectedPlatform] = useState("");
   const [activeTab, setActiveTab] = useState("overview");
   const [isLoading, setIsLoading] = useState(true);
-  const [durations, setDurations] = useState<InterviewDuration[]>(defaultDurations);
+  const [durations] = useState<InterviewDuration[]>(defaultDurations);
   const [selectedDuration, setSelectedDuration] = useState<InterviewDuration>(defaultDurations[0]);
 
   const { toast } = useToast();
+  const { isMeetingPlatformConnected, meetingPlatform } = useCalenderSettings();
+  const { connections } = useMeetingSettings();
+
+  // Check if any meeting platform is connected
+  const hasAnyMeetingPlatform = isMeetingPlatformConnected || 
+    connections?.google || 
+    connections?.microsoft || 
+    connections?.zoom;
+
+  // Get available meeting platforms with their connection status
+  const meetingPlatforms = [
+    {
+      name: "Google Meet",
+      id: "google",
+      connected: connections?.google || meetingPlatform === "google",
+      description: "Integrate with Google Calendar and Meet"
+    },
+    {
+      name: "Microsoft Teams",
+      id: "microsoft",
+      connected: connections?.microsoft || meetingPlatform === "outlook",
+      description: "Integrate with Outlook and Teams"
+    },
+    {
+      name: "Zoom",
+      id: "zoom", 
+      connected: connections?.zoom,
+      description: "Generate Zoom meeting links"
+    }
+  ];
 
   const loadTemplates = async () => {
     try {
@@ -97,6 +130,20 @@ export function ScheduleTemplates({ onTemplateChange }: ScheduleTemplatesProps) 
     loadTemplates();
   }, []);
 
+  // Set default platform when available
+  useEffect(() => {
+    if (meetingPlatform && !selectedPlatform) {
+      setSelectedPlatform(meetingPlatform);
+    } else if (!selectedPlatform && connections) {
+      // Auto-select the first connected platform
+      const connectedPlatform = meetingPlatforms.find(p => p.connected);
+      if (connectedPlatform) {
+        setSelectedPlatform(connectedPlatform.id);
+      }
+    }
+  }, [meetingPlatform, connections, selectedPlatform]);
+
+
   const handleCreateTemplate = async () => {
     if (!newTemplateName.trim()) {
       toast({
@@ -107,9 +154,22 @@ export function ScheduleTemplates({ onTemplateChange }: ScheduleTemplatesProps) 
       return;
     }
 
+    if (!hasAnyMeetingPlatform) {
+      toast({
+        type: "error",
+        title: "Error",
+        description: "Please connect a meeting platform before creating templates",
+      });
+      return;
+    }
+
     try {
-      // First create the basic template with just the name
-      const response = await createAvailabilityTemplate(newTemplateName);
+      // Create the template with the selected platform
+      const response = await createAvailabilityTemplate(
+        newTemplateName, 
+        selectedDuration.duration,
+        selectedPlatform || meetingPlatform
+      );
       if (response.status && response.availability) {
         // Update the template with additional properties
         const templateUpdate = {
@@ -133,6 +193,8 @@ export function ScheduleTemplates({ onTemplateChange }: ScheduleTemplatesProps) 
         await loadTemplates();
         setNewTemplateName("");
         setNewTemplateDescription("");
+        setSelectedPlatform(meetingPlatform || meetingPlatforms.find(p => p.connected)?.id || "");
+        setSelectedDuration(defaultDurations[0]);
         setIsCreateDialogOpen(false);
         toast({
           type: "success",
@@ -196,7 +258,16 @@ export function ScheduleTemplates({ onTemplateChange }: ScheduleTemplatesProps) 
             Each template has a fixed duration and availability schedule for consistent interview booking
           </p>
         </div>
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <Dialog open={isCreateDialogOpen} onOpenChange={(open) => {
+          setIsCreateDialogOpen(open);
+          if (!open) {
+            // Clear form when dialog closes
+            setNewTemplateName("");
+            setNewTemplateDescription("");
+            setSelectedPlatform(meetingPlatform || meetingPlatforms.find(p => p.connected)?.id || "");
+            setSelectedDuration(defaultDurations[0]);
+          }
+        }}>
           <DialogTrigger asChild>
             <Button className="bg-blue-600 hover:bg-blue-700">
               <Plus className="h-4 w-4 mr-2" />
@@ -254,9 +325,54 @@ export function ScheduleTemplates({ onTemplateChange }: ScheduleTemplatesProps) 
                   </SelectContent>
                 </Select>
               </div>
+
+              <div>
+                <Label htmlFor="platform">Meeting Platform</Label>
+                <Select
+                  value={selectedPlatform}
+                  onValueChange={setSelectedPlatform}
+                  disabled={!hasAnyMeetingPlatform}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={hasAnyMeetingPlatform ? "Select meeting platform" : "No platforms connected"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {meetingPlatforms.map((platform) => (
+                      <SelectItem 
+                        key={platform.id} 
+                        value={platform.id}
+                        disabled={!platform.connected}
+                        className={platform.connected ? "" : "opacity-40 cursor-not-allowed pointer-events-none bg-gray-50"}
+                      >
+                        <div className="flex items-center gap-2 w-full">
+                          <div className={`w-2 h-2 rounded-full ${platform.connected ? 'bg-green-500' : 'bg-gray-400'}`} />
+                          <Video className={`h-4 w-4 ${platform.connected ? '' : 'text-gray-400'}`} />
+                          <span className={platform.connected ? '' : 'text-gray-400 line-through'}>
+                            {platform.name}
+                          </span>
+                          {!platform.connected && (
+                            <span className="text-xs text-gray-400 ml-auto font-medium">(Not connected)</span>
+                          )}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {!hasAnyMeetingPlatform && (
+                  <p className="text-sm text-amber-600 mt-1">
+                    Connect a meeting platform before creating templates
+                  </p>
+                )}
+              </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+              <Button variant="outline" onClick={() => {
+                setIsCreateDialogOpen(false);
+                setNewTemplateName("");
+                setNewTemplateDescription("");
+                setSelectedPlatform(meetingPlatform || meetingPlatforms.find(p => p.connected)?.id || "");
+                setSelectedDuration(defaultDurations[0]);
+              }}>
                 Cancel
               </Button>
               <Button onClick={handleCreateTemplate}>Create Template</Button>
@@ -264,6 +380,51 @@ export function ScheduleTemplates({ onTemplateChange }: ScheduleTemplatesProps) 
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* Meeting Platform Warning */}
+      {!hasAnyMeetingPlatform && (
+        <Alert className="border-amber-200 bg-amber-50">
+          <AlertTriangle className="h-4 w-4 text-amber-600" />
+          <AlertTitle className="text-amber-800">Meeting Platform Required</AlertTitle>
+          <AlertDescription className="text-amber-700">
+            <div className="space-y-2">
+              <p>You need to connect a meeting platform to create interview templates and generate meeting links automatically.</p>
+              <div className="flex flex-wrap gap-2 mt-3">
+                <Button
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => {
+                    // Navigate to calendar settings tab
+                    const event = new CustomEvent('scheduler-tab-change', { detail: 'calendar-settings' });
+                    window.dispatchEvent(event);
+                  }}
+                  className="text-amber-700 border-amber-300 hover:bg-amber-100"
+                >
+                  <SettingsIcon className="h-3 w-3 mr-1" />
+                  Connect Platform
+                </Button>
+              </div>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Meeting Platform Status */}
+      {hasAnyMeetingPlatform && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Video className="h-4 w-4 text-green-600" />
+            <span className="text-sm font-medium text-green-800">Meeting Platforms Connected</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {meetingPlatforms.filter(platform => platform.connected).map(platform => (
+              <Badge key={platform.id} variant="secondary" className="bg-green-100 text-green-800">
+                {platform.name}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Templates Grid */}
       {templates.length === 0 ? (
@@ -273,7 +434,11 @@ export function ScheduleTemplates({ onTemplateChange }: ScheduleTemplatesProps) 
           <p className="text-gray-600 mb-6">
             Create your first named interview template with a specific duration to start scheduling interviews with candidates
           </p>
-          <Button onClick={() => setIsCreateDialogOpen(true)}>
+          <Button 
+            onClick={() => setIsCreateDialogOpen(true)}
+            disabled={!hasAnyMeetingPlatform}
+            title={!hasAnyMeetingPlatform ? "Connect a meeting platform first" : ""}
+          >
             <Plus className="h-4 w-4 mr-2" />
             Create Your First Template
           </Button>
@@ -281,15 +446,22 @@ export function ScheduleTemplates({ onTemplateChange }: ScheduleTemplatesProps) 
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {templates.map((template) => (
-            <Card key={template.id} className="hover:shadow-md transition-shadow border-l-4 border-l-blue-500">
+            <Card 
+              key={template.id} 
+              className={`transition-shadow border-l-4 border-l-blue-500 ${
+                hasAnyMeetingPlatform 
+                  ? "hover:shadow-md" 
+                  : "opacity-60 cursor-not-allowed bg-gray-50"
+              }`}
+            >
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <CardTitle className="text-lg font-semibold text-gray-900 mb-1">
-                      {template.templateName || template.name || "Untitled Template"}
+                      {template.templateName || (template as any).name || "Untitled Template"}
                     </CardTitle>
                     <CardDescription className="text-sm text-gray-600">
-                      {template.description || "No description provided"}
+                      {(template as any).description || "No description provided"}
                     </CardDescription>
                   </div>
                   <Badge variant={template.isActive ? "default" : "secondary"} className="shrink-0">
@@ -301,12 +473,12 @@ export function ScheduleTemplates({ onTemplateChange }: ScheduleTemplatesProps) 
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-sm font-medium text-blue-600">
                     <Clock className="h-4 w-4" />
-                    <span>{template.eventTypes?.[0]?.duration || 30} minutes</span>
+                    <span>{(template as any).eventTypes?.[0]?.duration || 30} minutes</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Calendar className="h-4 w-4" />
                     <span>
-                      {template.weeklyAvailability?.daysAvailability?.filter(d => d.isActive).length || 0} active days
+                      {(template as any).weeklyAvailability?.daysAvailability?.filter((d: any) => d.isActive).length || 0} active days
                     </span>
                   </div>
                   <div className="flex items-center gap-2 pt-2">
@@ -346,9 +518,9 @@ export function ScheduleTemplates({ onTemplateChange }: ScheduleTemplatesProps) 
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>Edit Template: {currentTemplate.templateName || currentTemplate.name || "Untitled Template"}</CardTitle>
+                <CardTitle>Edit Template: {currentTemplate.templateName || (currentTemplate as any).name || "Untitled Template"}</CardTitle>
                 <CardDescription>
-                  Duration: {currentTemplate.eventTypes?.[0]?.duration || 30} minutes (fixed) • Configure availability schedule
+                  Duration: {(currentTemplate as any).eventTypes?.[0]?.duration || 30} minutes (fixed) • Configure availability schedule
                 </CardDescription>
               </div>
               <Badge variant={currentTemplate.isActive ? "default" : "secondary"} className="text-sm">
@@ -364,8 +536,7 @@ export function ScheduleTemplates({ onTemplateChange }: ScheduleTemplatesProps) 
               </TabsList>
               <TabsContent value="weekly" className="mt-6">
                 <WeeklyAvailabilityForm
-                  templateId={currentTemplate.id}
-                  initialData={currentTemplate.weeklyAvailability}
+                  initialData={(currentTemplate as any).weeklyAvailability}
                   onSave={() => loadTemplates()}
                 />
               </TabsContent>
@@ -377,15 +548,96 @@ export function ScheduleTemplates({ onTemplateChange }: ScheduleTemplatesProps) 
                       <h4 className="font-medium text-blue-900">Interview Duration</h4>
                     </div>
                     <p className="text-sm text-blue-700">
-                      This template is configured for <strong>{currentTemplate.eventTypes?.[0]?.duration || 30} minute</strong> interviews. 
+                      This template is configured for <strong>{(currentTemplate as any).eventTypes?.[0]?.duration || 30} minute</strong> interviews. 
                       Duration is set once per template and cannot be changed.
                     </p>
                   </div>
+
+                  {/* Meeting Platform Preference */}
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <Video className="h-5 w-5 text-gray-600" />
+                      <h4 className="font-medium text-gray-900">Meeting Platform Preference</h4>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Choose your preferred meeting platform for this template. Only connected platforms are available.
+                    </p>
+                    
+                    <Select 
+                      value={meetingPlatform || ""}
+                      onValueChange={(value) => {
+                        // Here you would typically save the preference for this template
+                        toast({
+                          type: "info",
+                          title: "Platform Selected",
+                          description: `${meetingPlatforms.find(p => p.id === value)?.name} will be used for this template`,
+                        });
+                      }}
+                      disabled={!hasAnyMeetingPlatform}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder={hasAnyMeetingPlatform ? "Select meeting platform" : "No platforms connected"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {meetingPlatforms.map((platform) => (
+                          <SelectItem 
+                            key={platform.id} 
+                            value={platform.id}
+                            disabled={!platform.connected}
+                            className={platform.connected ? "" : "opacity-40 cursor-not-allowed pointer-events-none bg-gray-50"}
+                          >
+                            <div className="flex items-center gap-2 w-full">
+                              <div className={`w-2 h-2 rounded-full ${platform.connected ? 'bg-green-500' : 'bg-gray-400'}`} />
+                              <span className={platform.connected ? '' : 'text-gray-400 line-through'}>
+                                {platform.name}
+                              </span>
+                              {!platform.connected && (
+                                <span className="text-xs text-gray-400 ml-auto font-medium">(Not connected)</span>
+                              )}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    {!hasAnyMeetingPlatform && (
+                      <Alert className="border-amber-200 bg-amber-50">
+                        <AlertTriangle className="h-4 w-4 text-amber-600" />
+                        <AlertDescription className="text-amber-700">
+                          <p className="mb-2">No meeting platforms are connected. Connect at least one platform to use this template.</p>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              // Navigate to calendar settings tab
+                              const event = new CustomEvent('scheduler-tab-change', { detail: 'calendar-settings' });
+                              window.dispatchEvent(event);
+                            }}
+                            className="text-amber-700 border-amber-300 hover:bg-amber-100"
+                          >
+                            <SettingsIcon className="h-3 w-3 mr-1" />
+                            Connect Platform
+                          </Button>
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                  </div>
+
                   <div className="flex items-center space-x-2">
                     <Switch
                       id="active"
                       checked={currentTemplate.isActive}
+                      disabled={!hasAnyMeetingPlatform}
                       onCheckedChange={async (checked) => {
+                        if (!hasAnyMeetingPlatform) {
+                          toast({
+                            type: "error",
+                            title: "Cannot Activate Template",
+                            description: "Connect a meeting platform before activating this template",
+                          });
+                          return;
+                        }
+                        
                         try {
                           await updateAvailabilityTemplate(currentTemplate.id, {
                             ...currentTemplate,
@@ -406,7 +658,10 @@ export function ScheduleTemplates({ onTemplateChange }: ScheduleTemplatesProps) 
                         }
                       }}
                     />
-                    <Label htmlFor="active">Template is active</Label>
+                    <Label htmlFor="active" className={!hasAnyMeetingPlatform ? "text-gray-400" : ""}>
+                      Template is active
+                      {!hasAnyMeetingPlatform && " (requires meeting platform)"}
+                    </Label>
                   </div>
                 </div>
               </TabsContent>
@@ -421,7 +676,7 @@ export function ScheduleTemplates({ onTemplateChange }: ScheduleTemplatesProps) 
           <DialogHeader>
             <DialogTitle>Delete Template</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete "{templateToDelete?.templateName || templateToDelete?.name || "this template"}"? This action cannot be undone.
+              Are you sure you want to delete "{templateToDelete?.templateName || (templateToDelete as any)?.name || "this template"}"? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

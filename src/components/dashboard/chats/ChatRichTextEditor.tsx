@@ -90,6 +90,8 @@ export function ChatRichTextEditor({
         blockquote: false,
         codeBlock: false,
         horizontalRule: false,
+        // Disable the built-in link extension from StarterKit
+        link: false,
       }),
       Link.configure({
         openOnClick: false,

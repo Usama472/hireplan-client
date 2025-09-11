@@ -303,34 +303,35 @@ const ChatsPage: React.FC = () => {
 
   return (
     <SubscriptionGuard>
-      <div className="space-y-6 px-6">
-        {/* Enhanced Header */}
-        <div className="flex items-center justify-between bg-white -mx-6 px-6 py-6 border-b border-gray-200 max-h-[80px]">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-gray-100 rounded-xl">
-              <MessageCircle className="h-6 w-6 text-gray-600" />
+      <div className="space-y-4 sm:space-y-6 px-4 sm:px-6">
+        {/* Enhanced Header - Responsive */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-white -mx-4 sm:-mx-6 px-4 sm:px-6 py-4 sm:py-6 border-b border-gray-200 gap-4 sm:gap-0">
+          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+            <div className="p-2 sm:p-3 bg-gray-100 rounded-xl flex-shrink-0">
+              <MessageCircle className="h-5 sm:h-6 w-5 sm:w-6 text-gray-600" />
             </div>
-            <div>
-              <h1 className="text-xl font-bold text-gray-900">Conversations</h1>
-              <p className="text-gray-600 flex items-center gap-2">
-                Manage all your applicant communications
+            <div className="min-w-0">
+              <h1 className="text-lg sm:text-xl font-bold text-gray-900 truncate">Conversations</h1>
+              <div className="text-sm sm:text-base text-gray-600 flex items-center gap-2 flex-wrap">
+                <span className="text-xs sm:text-sm">Manage all your applicant communications</span>
                 <Badge
                   variant="secondary"
-                  className="bg-gray-100 text-gray-700"
+                  className="bg-gray-100 text-gray-700 text-xs"
                 >
                   {filteredGroups.length} active
                 </Badge>
-              </p>
+              </div>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Button
               variant="outline"
               size="sm"
-              className="gap-2 bg-white hover:bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300"
+              className="gap-2 bg-white hover:bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300 flex-1 sm:flex-initial"
             >
-              <Archive className="h-4 w-4" />
-              View Archived
+              <Archive className="h-3 sm:h-4 w-3 sm:w-4" />
+              <span className="hidden sm:inline">View Archived</span>
+              <span className="sm:hidden">Archived</span>
             </Button>
           </div>
         </div>

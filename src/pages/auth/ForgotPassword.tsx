@@ -64,30 +64,30 @@ export default function ForgotPassword() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <Card>
-          <CardHeader>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-sm sm:max-w-md w-full space-y-6 sm:space-y-8">
+        <Card className="shadow-lg">
+          <CardHeader className="space-y-3 sm:space-y-4 px-4 sm:px-6">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => navigate('/login')}
-              className="w-fit p-0 h-auto font-normal text-gray-600 hover:text-gray-900"
+              className="w-fit p-0 h-auto font-normal text-gray-600 hover:text-gray-900 text-sm"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Login
             </Button>
-            <CardTitle className="text-2xl font-bold text-center">
+            <CardTitle className="text-xl sm:text-2xl font-bold text-center">
               Forgot Password
             </CardTitle>
-            <CardDescription className="text-center">
+            <CardDescription className="text-center text-sm sm:text-base">
               Enter your email address and we'll send you instructions to reset your password.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+          <CardContent className="px-4 sm:px-6">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
               <div>
-                <Label htmlFor="email">Email Address</Label>
+                <Label htmlFor="email" className="text-sm font-medium">Email Address</Label>
                 <Input
                   id="email"
                   name="email"
@@ -97,13 +97,13 @@ export default function ForgotPassword() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email address"
-                  className="mt-1"
+                  className="mt-1 h-10 sm:h-11"
                 />
               </div>
 
               <Button
                 type="submit"
-                className="w-full"
+                className="w-full h-10 sm:h-11 text-sm sm:text-base"
                 disabled={isLoading}
               >
                 {isLoading ? (

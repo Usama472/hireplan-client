@@ -31,8 +31,10 @@ import {
 } from "@/http/availability/api";
 import type { AvailabilityTemplate } from "@/interfaces";
 import { useToast } from "@/lib/hooks/use-toast";
+import useCalenderSettings from "@/lib/hooks/use-calender-settings";
+import useMeetingSettings from "@/lib/hooks/use-meeting-settings";
 import { format } from "date-fns";
-import { Calendar, Clock, Edit, Plus, Trash2, Video } from "lucide-react";
+import { Calendar, Clock, Edit, Plus, Trash2, Video, AlertTriangle } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useEffect, useState } from "react";
 import { HolidayPicker } from "./holiday-picker";
@@ -102,6 +104,36 @@ export function ScheduleTemplates({
     useState<string>("America/New_York");
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
+  const { isMeetingPlatformConnected, meetingPlatform } = useCalenderSettings();
+  const { connections } = useMeetingSettings();
+
+  // Check if any meeting platform is connected
+  const hasAnyMeetingPlatform = isMeetingPlatformConnected || 
+    connections?.google || 
+    connections?.microsoft || 
+    connections?.zoom;
+
+  // Get available meeting platforms with their connection status
+  const meetingPlatforms = [
+    {
+      name: "Google Meet",
+      id: "google",
+      connected: connections?.google || meetingPlatform === "google",
+      description: "Integrate with Google Calendar and Meet"
+    },
+    {
+      name: "Microsoft Teams",
+      id: "teams",
+      connected: connections?.microsoft || meetingPlatform === "outlook",
+      description: "Integrate with Outlook and Teams"
+    },
+    {
+      name: "Zoom",
+      id: "zoom", 
+      connected: connections?.zoom,
+      description: "Generate Zoom meeting links"
+    }
+  ];
 
   // Filter templates based on search query
   const filteredTemplates = templates.filter(template =>
@@ -265,6 +297,19 @@ export function ScheduleTemplates({
     loadTemplates();
   }, []);
 
+  // Set default platform when available
+  useEffect(() => {
+    if (meetingPlatform && hasAnyMeetingPlatform) {
+      setSelectedMeetingPlatform(meetingPlatform);
+    } else if (hasAnyMeetingPlatform && connections) {
+      // Auto-select the first connected platform
+      const connectedPlatform = meetingPlatforms.find(p => p.connected);
+      if (connectedPlatform) {
+        setSelectedMeetingPlatform(connectedPlatform.id);
+      }
+    }
+  }, [meetingPlatform, connections, hasAnyMeetingPlatform]);
+
   useEffect(() => {
     if (currentTemplate?.duration) {
       setTemplateDuration(currentTemplate.duration);
@@ -277,7 +322,33 @@ export function ScheduleTemplates({
   }, [currentTemplate]);
 
   const handleCreateTemplate = async () => {
-    if (!newTemplateName.trim()) return;
+    if (!newTemplateName.trim()) {
+      toast({
+        type: "error",
+        title: "Error",
+        description: "Template name is required",
+      });
+      return;
+    }
+
+    if (!hasAnyMeetingPlatform) {
+      toast({
+        type: "error",
+        title: "Error",
+        description: "Please connect a meeting platform before creating templates",
+      });
+      return;
+    }
+
+    const selectedPlatform = meetingPlatforms.find(p => p.id === selectedMeetingPlatform);
+    if (!selectedPlatform?.connected) {
+      toast({
+        type: "error",
+        title: "Error",
+        description: "Please select a connected meeting platform",
+      });
+      return;
+    }
 
     try {
       const response = await createAvailabilityTemplate(
@@ -1461,17 +1532,40 @@ export function ScheduleTemplates({
                 onValueChange={(value) => {
                   setSelectedMeetingPlatform(value);
                 }}
-                defaultValue="google"
+                value={selectedMeetingPlatform}
+                disabled={!hasAnyMeetingPlatform}
               >
                 <SelectTrigger className="mt-2">
-                  <SelectValue placeholder="Select meeting platform" />
+                  <SelectValue placeholder={hasAnyMeetingPlatform ? "Select meeting platform" : "No platforms connected"} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="google">Google Meet</SelectItem>
-                  <SelectItem value="teams">Microsoft Teams</SelectItem>
-                  <SelectItem value="zoom">Zoom</SelectItem>
+                  {meetingPlatforms.map((platform) => (
+                    <SelectItem 
+                      key={platform.id} 
+                      value={platform.id}
+                      disabled={!platform.connected}
+                      className={platform.connected ? "" : "opacity-40 cursor-not-allowed pointer-events-none bg-gray-50"}
+                    >
+                      <div className="flex items-center gap-2 w-full">
+                        <div className={`w-2 h-2 rounded-full ${platform.connected ? 'bg-green-500' : 'bg-gray-400'}`} />
+                        <Video className={`h-4 w-4 ${platform.connected ? '' : 'text-gray-400'}`} />
+                        <span className={platform.connected ? '' : 'text-gray-400 line-through'}>
+                          {platform.name}
+                        </span>
+                        {!platform.connected && (
+                          <span className="text-xs text-gray-400 ml-auto font-medium">(Not connected)</span>
+                        )}
+                      </div>
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
+              {!hasAnyMeetingPlatform && (
+                <p className="text-sm text-amber-600 mt-1 flex items-center gap-1">
+                  <AlertTriangle className="h-3 w-3" />
+                  Connect a meeting platform in Settings first
+                </p>
+              )}
             </div>
              <div>
                <Label htmlFor="booking-window">Booking Window (days ahead)</Label>
@@ -1567,7 +1661,13 @@ export function ScheduleTemplates({
             >
               Cancel
             </Button>
-            <Button onClick={handleCreateTemplate}>Create Booking Page</Button>
+            <Button 
+              onClick={handleCreateTemplate}
+              disabled={!hasAnyMeetingPlatform}
+              title={!hasAnyMeetingPlatform ? "Connect a meeting platform first" : ""}
+            >
+              Create Booking Page
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

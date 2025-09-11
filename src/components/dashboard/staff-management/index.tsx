@@ -291,11 +291,11 @@ export default function StaffManagement() {
   };
 
   return (
-    <div className="min-h-full px-6 py-0">
-      <div className="space-y-6">
-        <div className="bg-white border-b border-gray-200 -mx-6 px-6 py-4 relative overflow-hidden max-h-[80px] mt-0">
+    <div className="min-h-full px-4 sm:px-6 py-0">
+      <div className="space-y-4 sm:space-y-6">
+        <div className="bg-white border-b border-gray-200 -mx-4 sm:-mx-6 px-4 sm:px-6 py-4 relative overflow-hidden mt-0">
           <div className="flex flex-col">
-            <h1 className="text-xl font-semibold text-gray-900 mb-1">
+            <h1 className="text-lg sm:text-xl font-semibold text-gray-900 mb-1">
               Staff Management
             </h1>
             <p className="text-gray-600 text-sm">
@@ -306,9 +306,9 @@ export default function StaffManagement() {
 
         <div className="px-1 max-w-7xl mx-auto">
           {/* Tabs */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 sm:mb-6">
             <div className="flex items-center gap-4">
-              <div className="border-b border-gray-200 flex space-x-8">
+              <div className="border-b border-gray-200 flex space-x-4 sm:space-x-8">
                 <button
                   className={`pb-2 transition-colors ${
                     activeTab === "staff"
@@ -317,9 +317,9 @@ export default function StaffManagement() {
                   }`}
                   onClick={() => setActiveTab("staff")}
                 >
-                  <span className="flex items-center gap-2">
-                    <Users className="h-4 w-4" />
-                    Staff
+                  <span className="flex items-center gap-1 sm:gap-2">
+                    <Users className="h-3 sm:h-4 w-3 sm:w-4" />
+                    <span className="text-sm sm:text-base">Staff</span>
                   </span>
                 </button>
                 <button
@@ -330,9 +330,9 @@ export default function StaffManagement() {
                   }`}
                   onClick={() => setActiveTab("roles")}
                 >
-                  <span className="flex items-center gap-2">
-                    <Shield className="h-4 w-4" />
-                    Roles
+                  <span className="flex items-center gap-1 sm:gap-2">
+                    <Shield className="h-3 sm:h-4 w-3 sm:w-4" />
+                    <span className="text-sm sm:text-base">Roles</span>
                   </span>
                 </button>
               </div>

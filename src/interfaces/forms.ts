@@ -69,6 +69,11 @@ export interface CustomQuestion {
   required: boolean;
   options?: string[];
   placeholder?: string;
+  // AI Scoring properties
+  aiScoringType?: "scored" | "auto-reject";
+  scoringValues?: number[]; // For multiple choice questions
+  yesNoScoring?: { yes: number; no: number }; // For boolean questions
+  autoRejectAnswers?: string[]; // Which answers trigger auto-rejection
 }
 
 export interface CustomQuestionFormData {

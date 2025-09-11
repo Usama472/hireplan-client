@@ -85,19 +85,19 @@ export function SMSOptIn() {
   return (
     <div className="w-full max-w-2xl mx-auto">
       <Card className="bg-white border-2 border-gray-200 shadow-lg">
-        <CardContent className="p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="flex flex-col sm:flex-row gap-4">
+        <CardContent className="p-4 sm:p-6 lg:p-8">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
           <div className="flex-1">
             <div className="relative group">
-              <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 group-focus-within:text-gray-600 transition-colors duration-200 z-10" />
+              <Phone className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 sm:w-5 h-4 sm:h-5 group-focus-within:text-gray-600 transition-colors duration-200 z-10" />
               <Input
                 id="phone"
                 type="tel"
                 value={phoneNumber}
                 onChange={handlePhoneChange}
                 placeholder="(555) 123-4567"
-                className="pl-12 h-14 text-base bg-white border-2 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-gray-900 transition-all duration-200 placeholder:text-gray-500 shadow-sm"
+                className="pl-10 sm:pl-12 h-12 sm:h-14 text-sm sm:text-base bg-white border-2 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-gray-900 transition-all duration-200 placeholder:text-gray-500 shadow-sm"
                 maxLength={14}
                 required
               />
@@ -107,10 +107,10 @@ export function SMSOptIn() {
             type="submit"
             disabled={!phoneNumber || !agreed || isSubmitting}
             variant="secondary"
-            className="h-14 px-8 font-bold bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200 group z-10 shadow-lg hover:shadow-xl"
+            className="h-12 sm:h-14 px-6 sm:px-8 font-bold bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200 group z-10 shadow-lg hover:shadow-xl text-sm sm:text-base"
           >
             {isSubmitting ? "Joining..." : "Join Now"}
-            <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-200" />
+            <ArrowRight className="ml-2 h-4 sm:h-5 w-4 sm:w-5 group-hover:translate-x-1 transition-transform duration-200" />
           </Button>
         </div>
 
@@ -148,19 +148,21 @@ export function SMSOptIn() {
         </div>
           </form>
 
-          <div className="mt-8 text-center">
-            <div className="flex flex-wrap justify-center items-center gap-6 text-sm text-gray-600">
+          <div className="mt-6 sm:mt-8 text-center">
+            <div className="flex flex-wrap justify-center items-center gap-3 sm:gap-6 text-xs sm:text-sm text-gray-600">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
                 <span>Secure & Private</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span>All carriers supported</span>
+                <span className="hidden sm:inline">All carriers supported</span>
+                <span className="sm:hidden">All carriers</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                <span>support@hireplan.co</span>
+                <span className="hidden sm:inline">support@hireplan.co</span>
+                <span className="sm:hidden">Support</span>
               </div>
             </div>
           </div>
