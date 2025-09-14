@@ -11,7 +11,6 @@ import {
   Briefcase,
   Calendar,
   CheckCircle2,
-  Clock,
   FileCheck,
   Mail,
   UserCheck,
@@ -289,140 +288,7 @@ export default function TriggerSection({
         />
       </div>
 
-      {/* Dynamic configuration based on selected trigger */}
-      {selectedTriggerType && (
-        <div className="mt-6 p-4 border border-gray-200 rounded-lg bg-white">
-          <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-200">
-            <Clock className="h-4 w-4 text-primary" />
-            <h3 className="text-sm font-medium text-gray-800">
-              Configure Trigger
-            </h3>
-          </div>
-
-          <div className="p-4">
-            {selectedTriggerType === "application_status_changed" && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-1.5 block">
-                    From Status
-                  </label>
-                  <select className="w-full h-10 px-3 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary">
-                    <option value="">Any status</option>
-                    <option value="applied">Applied</option>
-                    <option value="screening">Screening</option>
-                    <option value="interviewing">Interviewing</option>
-                    <option value="offered">Offered</option>
-                    <option value="rejected">Rejected</option>
-                    <option value="hired">Hired</option>
-                  </select>
-                  <p className="mt-1 text-xs text-gray-500">
-                    Optional: Status before change
-                  </p>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-1.5 block">
-                    To Status
-                  </label>
-                  <select className="w-full h-10 px-3 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary">
-                    <option value="applied">Applied</option>
-                    <option value="screening">Screening</option>
-                    <option value="interviewing">Interviewing</option>
-                    <option value="offered">Offered</option>
-                    <option value="rejected">Rejected</option>
-                    <option value="hired">Hired</option>
-                  </select>
-                  <p className="mt-1 text-xs text-gray-500">
-                    Required: Status after change
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {selectedTriggerType === "cron" && (
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-1.5 block">
-                    Schedule Type
-                  </label>
-                  <select className="w-full h-10 px-3 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary">
-                    <option value="daily">Daily</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="monthly">Monthly</option>
-                    <option value="custom">Custom (CRON)</option>
-                  </select>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-gray-700 mb-1.5 block">
-                      Time
-                    </label>
-                    <input
-                      type="time"
-                      className="w-full h-10 px-3 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary"
-                      defaultValue="09:00"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium text-gray-700 mb-1.5 block">
-                      Timezone
-                    </label>
-                    <select className="w-full h-10 px-3 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary">
-                      <option value="UTC">UTC</option>
-                      <option value="America/New_York">Eastern Time</option>
-                      <option value="America/Chicago">Central Time</option>
-                      <option value="America/Denver">Mountain Time</option>
-                      <option value="America/Los_Angeles">Pacific Time</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {selectedTriggerType === "email_received" && (
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-1.5 block">
-                    From Email Address
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Any email address (leave blank for all)"
-                    className="w-full h-10 px-3 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                  <p className="mt-1 text-xs text-gray-500">
-                    Optional: Filter by sender email address
-                  </p>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-1.5 block">
-                    Subject Contains
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Keywords in subject line"
-                    className="w-full h-10 px-3 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                  <p className="mt-1 text-xs text-gray-500">
-                    Optional: Filter by words in the subject line
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {selectedTriggerType !== "application_status_changed" &&
-              selectedTriggerType !== "cron" &&
-              selectedTriggerType !== "email_received" && (
-                <p className="text-gray-600 text-sm">
-                  No additional configuration needed for this trigger type.
-                </p>
-              )}
-          </div>
-        </div>
-      )}
+      {/* Removed the Dynamic configuration section for triggers */}
     </div>
   );
 }

@@ -25,87 +25,12 @@ import {
 import { Switch } from "@/components/ui/switch";
 import type { AutomationType } from "@/interfaces/automations";
 import { useToast } from "@/lib/hooks/use-toast";
-import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  ArrowRight,
-  Brain,
-  Briefcase,
-  CalendarClock,
-  Check,
-  CheckCircle,
-  ChevronLeft,
-  ChevronRight,
-  Cog,
-  FilterIcon,
-  LightbulbIcon,
-  Mail,
-  PlayIcon,
-  Save,
-  X,
-} from "lucide-react";
+import { Brain, ChevronLeft, ChevronRight, Save, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import ActionsSection from "./actions-section";
-import ConditionsSection from "./conditions-section";
-import SummarySection from "./summary-section";
 import TriggerSection from "./trigger-section";
-
-// Define the automation types
-const AUTOMATION_TYPES = [
-  {
-    id: "email",
-    name: "Email Automation",
-    description:
-      "Automate email communications with candidates at any stage of recruitment",
-    icon: Mail,
-    color: "bg-gradient-to-br from-blue-100 to-blue-200",
-    textColor: "text-blue-700",
-    borderColor: "border-blue-200",
-    hoverBg: "hover:bg-blue-50",
-    highlightColor: "bg-blue-600",
-    detailItems: [
-      "Send automated follow-ups",
-      "Rejection notifications",
-      "Interview confirmations",
-    ],
-  },
-  {
-    id: "job",
-    name: "Job Automation",
-    description:
-      "Streamline job-related workflows and save time on repetitive tasks",
-    icon: Briefcase,
-    color: "bg-gradient-to-br from-emerald-100 to-emerald-200",
-    textColor: "text-emerald-700",
-    borderColor: "border-emerald-200",
-    hoverBg: "hover:bg-emerald-50",
-    highlightColor: "bg-emerald-600",
-    detailItems: [
-      "Auto-update job statuses",
-      "Assign recruiters",
-      "Close expired listings",
-    ],
-  },
-  {
-    id: "schedule",
-    name: "Schedule Automation",
-    description:
-      "Create time-based triggers that run on specific days or intervals",
-    icon: CalendarClock,
-    color: "bg-gradient-to-br from-purple-100 to-purple-200",
-    textColor: "text-purple-700",
-    borderColor: "border-purple-200",
-    hoverBg: "hover:bg-purple-50",
-    highlightColor: "bg-purple-600",
-    detailItems: [
-      "Daily/weekly reports",
-      "Scheduled reminders",
-      "Time-based actions",
-    ],
-  },
-];
 
 // Define the form schema
 const automationSchema = z.object({
@@ -174,6 +99,7 @@ export default function AutomationBuilder({
   const [activeStep, setActiveStep] = useState<string>("trigger");
   const { toast } = useToast();
   const isEditing = !!automation;
+  const [triggerSelected, setTriggerSelected] = useState<boolean>(false);
 
   // Extend the default values to include automationType
   const defaultValues: FormValues = {
@@ -259,6 +185,9 @@ export default function AutomationBuilder({
       } else {
         setValue("automationType", "email", { shouldValidate: true });
       }
+
+      // Reset trigger selected state when type changes
+      setTriggerSelected(false);
     }
   };
 
@@ -295,13 +224,15 @@ export default function AutomationBuilder({
   const validateCurrentStep = async () => {
     switch (activeStep) {
       case "trigger":
-        return await form.trigger(["name", "trigger.type"]);
+        // Only validate trigger type, name will be validated later
+        return await form.trigger(["trigger.type"]);
       case "conditions":
         return true; // Conditions are optional
       case "actions":
         return await form.trigger(["actions"]);
       case "summary":
-        return formState.isValid;
+        // On summary, validate everything including name
+        return await form.trigger(["name", "trigger.type", "actions"]);
       default:
         return false;
     }
@@ -313,6 +244,8 @@ export default function AutomationBuilder({
 
     switch (activeStep) {
       case "trigger":
+        // Mark that user has selected a trigger and wants to continue
+        setTriggerSelected(true);
         setActiveStep("conditions");
         break;
       case "conditions":
@@ -329,6 +262,8 @@ export default function AutomationBuilder({
   const handleBack = () => {
     switch (activeStep) {
       case "conditions":
+        // If going back to trigger, reset trigger selected state
+        setTriggerSelected(false);
         setActiveStep("trigger");
         break;
       case "actions":
@@ -356,85 +291,11 @@ export default function AutomationBuilder({
     }
   };
 
-  // Steps configuration - removed "Type" step
-  const steps = [
-    { id: "trigger", label: "Trigger" },
-    { id: "conditions", label: "Conditions" },
-    { id: "actions", label: "Actions" },
-    { id: "summary", label: "Review" },
-  ];
-
-  // Step Content - Remove container conditional
-  <div className="rounded-lg p-6 min-h-[500px]">
-    {/* Trigger Selection */}
-    {activeStep === "trigger" && (
-      <div>
-        <h3 className="text-lg font-semibold mb-4">
-          When should this automation run?
-        </h3>
-        <TriggerSection
-          form={form}
-          onTriggerTypeChange={handleTriggerTypeChange}
-          selectedAutomationType={undefined} // Show all triggers
-        />
-      </div>
-    )}
-  </div>;
-
-  // Create the main form content that will be used in all modes
   const formContent = (
     <Form {...form}>
       <form className="space-y-6">
-        {/* Progress Indicator */}
-        <div className="mb-8">
-          <ol className="flex items-center w-full">
-            {steps.map((step, i) => (
-              <li
-                key={step.id}
-                className={cn(
-                  "flex items-center",
-                  i < steps.length - 1 ? "w-full" : "",
-                  i < steps.findIndex((s) => s.id === activeStep)
-                    ? "text-blue-600"
-                    : "text-gray-500"
-                )}
-              >
-                <span
-                  className={cn(
-                    "flex items-center justify-center w-8 h-8 rounded-full shrink-0 text-sm font-medium",
-                    activeStep === step.id
-                      ? "bg-blue-600 text-white"
-                      : i < steps.findIndex((s) => s.id === activeStep)
-                      ? "bg-blue-100 text-blue-800"
-                      : "bg-gray-100"
-                  )}
-                >
-                  {i < steps.findIndex((s) => s.id === activeStep) ? (
-                    <Check className="w-4 h-4" />
-                  ) : (
-                    i + 1
-                  )}
-                </span>
-                <span className="ml-2 text-sm font-medium hidden sm:inline">
-                  {step.label}
-                </span>
-                {i < steps.length - 1 && (
-                  <div
-                    className={cn(
-                      "flex-1 h-0.5 mx-2 sm:mx-4",
-                      i < steps.findIndex((s) => s.id === activeStep)
-                        ? "bg-blue-600"
-                        : "bg-gray-200"
-                    )}
-                  ></div>
-                )}
-              </li>
-            ))}
-          </ol>
-        </div>
-
-        {/* Basic Info (Common to all steps) */}
-        {(activeStep === "trigger" || activeStep === "summary") && (
+        {/* Basic Info - Only show when trigger is selected or on summary */}
+        {(triggerSelected || activeStep === "summary") && (
           <div className="bg-gray-50 rounded-lg p-4 mb-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="md:col-span-2">
@@ -495,122 +356,23 @@ export default function AutomationBuilder({
 
         {/* Step Content */}
         <div className="rounded-lg p-6 min-h-[500px]">
-          {/* Trigger Selection */}
-          {activeStep === "trigger" && (
-            <div>
-              <h3 className="text-lg font-semibold mb-4">
-                When should this automation run?
-              </h3>
-              <TriggerSection
-                form={form}
-                onTriggerTypeChange={handleTriggerTypeChange}
-                selectedAutomationType={undefined} // Show all triggers
-              />
-            </div>
-          )}
-
-          {/* Conditions Section */}
-          {activeStep === "conditions" && (
-            <div>
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2.5 bg-gradient-to-br from-amber-100 to-yellow-100 rounded-full shadow-sm">
-                  <FilterIcon className="h-5 w-5 text-amber-600" />
-                </div>
-                <h3 className="text-lg font-semibold">Define conditions</h3>
-              </div>
-
-              <div className="bg-gradient-to-br from-gray-50 to-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <div className="absolute w-24 h-24 -right-4 -top-4 text-gray-50 opacity-10">
-                  <FilterIcon className="h-full w-full" />
-                </div>
-                <ConditionsSection form={form} />
-              </div>
-
-              <div className="mt-5 flex justify-end">
-                <div className="text-sm text-gray-500 bg-gray-50 px-3 py-1.5 rounded-full inline-flex items-center">
-                  <ArrowRight className="h-3.5 w-3.5 mr-1.5" />
-                  <span>Add conditions (optional)</span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Update Actions section to remove border */}
-          {activeStep === "actions" && (
-            <div>
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2.5 bg-gradient-to-br from-green-100 to-emerald-100 rounded-full shadow-sm">
-                  <PlayIcon className="h-5 w-5 text-emerald-600" />
-                </div>
-                <h3 className="text-lg font-semibold">What should happen?</h3>
-              </div>
-
-              <div className="relative overflow-hidden bg-gradient-to-br from-gray-50 to-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <div className="absolute w-32 h-32 -right-10 -top-10 text-gray-50 opacity-10">
-                  <Cog className="h-full w-full" />
-                </div>
-
-                {/* Flow Arrows */}
-                <div className="absolute -left-3 top-1/2 -translate-y-1/2">
-                  <div className="bg-emerald-100 h-20 w-1.5 rounded-full"></div>
-                </div>
-
-                <ActionsSection form={form} automationType={automationType} />
-
-                <div className="mt-4 text-center">
-                  <p className="text-sm text-gray-500 bg-green-50 inline-block px-3 py-1.5 rounded-full">
-                    Actions determine what happens when your automation runs
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Update Summary section to remove border */}
-          {activeStep === "summary" && (
-            <div>
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2.5 bg-gradient-to-br from-purple-100 to-violet-100 rounded-full shadow-sm">
-                  <CheckCircle className="h-5 w-5 text-purple-600" />
-                </div>
-                <h3 className="text-lg font-semibold">
-                  Review Your Automation
-                </h3>
-              </div>
-
-              <div className="relative overflow-hidden bg-gradient-to-br from-gray-50 to-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <div className="absolute w-32 h-32 -right-10 -top-10 text-gray-50 opacity-5">
-                  <CheckCircle className="h-full w-full" />
-                </div>
-
-                {/* Flow Visualization */}
-                <div className="absolute left-10 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-100 via-amber-100 to-green-100"></div>
-
-                <SummarySection form={form} />
-
-                <div className="mt-6 bg-purple-50 rounded-lg p-4 border border-purple-100 flex items-start">
-                  <div className="p-2 bg-white rounded-full shadow-sm mr-3">
-                    <LightbulbIcon className="h-5 w-5 text-amber-500" />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-medium text-purple-800 mb-1">
-                      Automation Tips
-                    </h4>
-                    <ul className="text-xs text-purple-700 space-y-1 list-disc pl-4">
-                      <li>Review all settings carefully before saving</li>
-                      <li>Test your automation with a small group first</li>
-                      <li>Monitor automation performance in the dashboard</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+          {/* Always show trigger selection at the top */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4">
+              When should this automation run?
+            </h3>
+            <TriggerSection
+              form={form}
+              onTriggerTypeChange={handleTriggerTypeChange}
+              selectedAutomationType={undefined} // Show all triggers
+            />
+          </div>
         </div>
 
         {/* Navigation Buttons */}
         <div className="flex justify-between pt-4">
-          {activeStep !== "trigger" ? (
+          {/* Back button - only show if trigger is selected and not on trigger step */}
+          {triggerSelected && activeStep !== "trigger" ? (
             <Button type="button" variant="outline" onClick={handleBack}>
               <ChevronLeft className="h-4 w-4 mr-1" />
               Back
@@ -621,7 +383,8 @@ export default function AutomationBuilder({
             </Button>
           )}
 
-          {activeStep === "summary" ? (
+          {/* Next/Submit button */}
+          {triggerSelected && activeStep === "summary" ? (
             <Button
               type="button"
               onClick={form.handleSubmit(handleSubmit)}
@@ -644,10 +407,10 @@ export default function AutomationBuilder({
             <Button
               type="button"
               onClick={handleNext}
-              disabled={activeStep === "trigger" && !triggerType}
+              disabled={!triggerType}
               className="bg-primary hover:bg-primary/90 text-primary-foreground"
             >
-              Next
+              {!triggerSelected ? "Continue to Configure" : "Next"}
               <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
           )}
