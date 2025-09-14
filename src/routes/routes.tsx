@@ -30,6 +30,7 @@ import CheckoutPage from "@/pages/checkout";
 import AutomationsDashboard from "@/pages/dashboard/automations";
 import CreateAutomationPage from "@/pages/dashboard/automations/create";
 import EditAutomationPage from "@/pages/dashboard/automations/edit";
+import TriggersPage from "@/pages/dashboard/automations/triggers";
 import ChatsPage from "@/pages/dashboard/chats";
 import ConversationPage from "@/pages/dashboard/chats/conversation";
 import EmailTemplatesPage from "@/pages/dashboard/email-template";
@@ -238,6 +239,12 @@ export const appRoutes: AppRoutesType[] = [
     id: "edit-automation",
     url: ROUTES.DASHBOARD.EDIT_AUTOMATION,
     element: <EditAutomationPage />,
+    isPrivate: true,
+  },
+  {
+    id: "create-trigger",
+    url: ROUTES.DASHBOARD.TRIGGER_CREATED,
+    element: <TriggersPage />,
     isPrivate: true,
   },
 ];

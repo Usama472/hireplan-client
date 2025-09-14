@@ -1,31 +1,10 @@
 import AutomationBuilder from "@/components/dashboard/automations/automation-builder";
 import { Button } from "@/components/ui/button";
-import type { AutomationType } from "@/interfaces/automations";
-import { useToast } from "@/lib/hooks/use-toast";
 import { ArrowLeft } from "lucide-react";
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function CreateAutomationPage() {
-  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
-
-  // Handle save automation
-  const handleSaveAutomation = (automation: AutomationType) => {
-    setIsLoading(true);
-
-    // In a real implementation, this would be an API call
-    setTimeout(() => {
-      setIsLoading(false);
-      toast({
-        title: "Automation created",
-        description: `${automation.name} has been created successfully.`,
-        type: "success",
-      });
-      navigate("/dashboard/automations");
-    }, 800);
-  };
 
   // Handle cancel/back
   const handleCancel = () => {
@@ -66,11 +45,7 @@ export default function CreateAutomationPage() {
 
       {/* Main Content */}
       <div className="max-w-[1200px] mx-auto py-8 px-4">
-        <AutomationBuilder
-          mode="standalone"
-          onSave={handleSaveAutomation}
-          isPageLayout={true}
-        />
+        <AutomationBuilder />
       </div>
     </div>
   );

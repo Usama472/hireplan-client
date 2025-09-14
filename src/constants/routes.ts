@@ -20,6 +20,7 @@ export const DASHBOARD_ROUTES = {
   STAFF_MANAGEMENT: `/dashboard/staff-management`,
   AUTOMATIONS: `/dashboard/automations`,
   CREATE_AUTOMATION: `/dashboard/automations/create`,
+  TRIGGER_CREATED: `/dashboard/automations/create/:triggerId`,
   EDIT_AUTOMATION: `/dashboard/automations/edit/:id`,
   AUTOMATION_LOGS: `/dashboard/automations/logs`,
   AVAILABILITY: `/dashboard/availability`,
