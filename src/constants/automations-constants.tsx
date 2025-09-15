@@ -135,3 +135,26 @@ export const allTriggers = [
     iconBg: "bg-purple-100",
   },
 ];
+
+export const applicantConditions = [
+  {
+    id: "totalScore",
+    label: "Resume Score",
+  },
+  {
+    id: "culturalFitScore",
+    label: "Cultural Fit Score",
+  },
+  {
+    id: "educationScore",
+    label: "Education Score",
+  },
+  {
+    id: "experienceScore",
+    label: "Experience Score",
+  },
+  {
+    id: "skillsMatchScore",
+    label: "Skills Match Score",
+  },
+];
