@@ -1,0 +1,377 @@
+import { Badge } from "@/components/ui/badge";
+import { allTriggers } from "@/constants/automations-constants";
+import API from "@/http";
+import {
+  AlertCircle,
+  Briefcase,
+  Calendar,
+  CheckCircle2,
+  FileCheck,
+  Mail,
+  Target,
+  TrendingUp,
+  UserCheck,
+  Zap,
+} from "lucide-react";
+import React, { useEffect, useState } from "react";
+
+interface Automation {
+  id: string;
+  name: string;
+  status: "active" | "inactive";
+  useConditions: boolean;
+  conditions: any[];
+  actions: any[];
+  triggerType: string;
+  companyId: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface AutomationsResponse {
+  success: boolean;
+  results: Automation[];
+  page: number;
+  limit: number;
+  totalPages: number;
+  totalResults: number;
+}
+
+interface CustomAutomationStepProps {
+  title?: string;
+  description?: string;
+  className?: string;
+  automations?: string[];
+  onSelectionChange?: (selectedIds: string[]) => void;
+  isSelectable?: boolean;
+}
+
+export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
+  title = "Custom Automation",
+  description = "Configure automated workflows and rules to streamline your hiring process. Set up triggers, actions, and conditions to automatically handle applications.",
+  className = "",
+  automations: selectedAutomationIds = [],
+  onSelectionChange,
+  isSelectable = false,
+}) => {
+  const [automations, setAutomations] = useState<Automation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedIds, setSelectedIds] = useState<string[]>(
+    selectedAutomationIds
+  );
+
+  const fetchAutomations = async () => {
+    try {
+      setLoading(true);
+      const response: AutomationsResponse =
+        await API.automation.getAutomations();
+      if (response.success) {
+        setAutomations(response.results.filter((a) => a.status === "active"));
+      }
+    } catch (error) {
+      console.error("Error fetching automations:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAutomations();
+  }, []);
+
+  // Sync with external selectedAutomationIds prop
+  useEffect(() => {
+    setSelectedIds(selectedAutomationIds);
+  }, [selectedAutomationIds]);
+
+  const handleSelectionChange = (automationId: string, isSelected: boolean) => {
+    const newSelectedIds = isSelected
+      ? [...selectedIds, automationId]
+      : selectedIds.filter((id) => id !== automationId);
+
+    setSelectedIds(newSelectedIds);
+    onSelectionChange?.(newSelectedIds);
+  };
+
+  const getTriggerInfo = (triggerType: string) => {
+    return allTriggers.find((trigger) => trigger.type === triggerType);
+  };
+
+  const getTriggerIcon = (triggerType: string) => {
+    switch (triggerType) {
+      case "application_created":
+        return <UserCheck className="h-5 w-5 text-blue-600" />;
+      case "application_status_changed":
+        return <FileCheck className="h-5 w-5 text-indigo-600" />;
+      case "resume_score_updated":
+        return <CheckCircle2 className="h-5 w-5 text-green-600" />;
+      case "job_created":
+        return <Briefcase className="h-5 w-5 text-amber-600" />;
+      case "job_published":
+        return <Briefcase className="h-5 w-5 text-emerald-600" />;
+      case "job_expired":
+        return <AlertCircle className="h-5 w-5 text-red-600" />;
+      case "cron":
+        return <Calendar className="h-5 w-5 text-purple-600" />;
+      default:
+        return <Zap className="h-5 w-5 text-gray-600" />;
+    }
+  };
+
+  const getActionTypeIcon = (actionType: string) => {
+    switch (actionType) {
+      case "send_email_applicant":
+      case "send_email_recruiter":
+      case "send_email_recruiter_team":
+      case "send_email_reminders":
+        return <Mail className="h-4 w-4 text-blue-600" />;
+      case "update_job_status":
+        return <FileCheck className="h-4 w-4 text-emerald-600" />;
+      case "send_pipeline_summary":
+        return <TrendingUp className="h-4 w-4 text-purple-600" />;
+      case "auto_expire_jobs":
+        return <AlertCircle className="h-4 w-4 text-red-600" />;
+      default:
+        return <Target className="h-4 w-4 text-gray-600" />;
+    }
+  };
+
+  const getActionTypeLabel = (actionType: string) => {
+    switch (actionType) {
+      case "send_email_applicant":
+        return "Email Applicant";
+      case "send_email_recruiter":
+        return "Email Recruiter";
+      case "send_email_recruiter_team":
+        return "Email Team";
+      case "send_email_reminders":
+        return "Email Reminders";
+      case "update_job_status":
+        return "Update Status";
+      case "send_pipeline_summary":
+        return "Pipeline Summary";
+      case "auto_expire_jobs":
+        return "Auto Expire";
+      default:
+        return actionType;
+    }
+  };
+
+  return (
+    <div className={`space-y-6 ${className}`}>
+      <div className="flex items-start gap-4">
+        <div className="p-3 bg-blue-50 rounded-lg flex-shrink-0">
+          <Zap className="h-6 w-6 text-blue-600" />
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900 mb-1">
+                {title}
+              </h2>
+              <p className="text-sm text-gray-600">{description}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="bg-white border rounded-xl p-6 animate-pulse"
+            >
+              <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
+              <div className="h-3 bg-gray-200 rounded w-1/2 mb-2"></div>
+              <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+            </div>
+          ))}
+        </div>
+      ) : automations.length === 0 ? (
+        <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
+          <div className="text-gray-400 mb-4">
+            <svg
+              className="mx-auto h-12 w-12"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1}
+                d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+              />
+            </svg>
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            No Automations Yet
+          </h3>
+          <p className="text-gray-500 mb-6">
+            Create your first automation to streamline your recruitment process
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="text-green-600 font-medium text-sm">
+                  {automations.filter((a) => a.status === "active").length}{" "}
+                  Active
+                </span>
+              </div>
+              <span className="text-gray-300">•</span>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                <span className="text-gray-600 font-medium text-sm">
+                  {automations.filter((a) => a.status === "inactive").length}{" "}
+                  Paused
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {automations.map((automation) => {
+              const triggerInfo = getTriggerInfo(automation.triggerType);
+
+              return (
+                <div
+                  key={automation.id}
+                  className={`bg-white border rounded-xl transition-all duration-200 p-6 flex flex-col ${
+                    isSelectable
+                      ? selectedIds.includes(automation.id)
+                        ? "border-blue-200 bg-blue-50/30 cursor-pointer"
+                        : "border-gray-100 hover:border-gray-200 cursor-pointer"
+                      : "border-gray-100 hover:border-gray-200"
+                  }`}
+                  onClick={() => {
+                    if (isSelectable) {
+                      handleSelectionChange(
+                        automation.id,
+                        !selectedIds.includes(automation.id)
+                      );
+                    }
+                  }}
+                >
+                  {/* Header */}
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-start gap-3 flex-1 min-w-0">
+                      <div className="p-3 bg-gray-50 rounded-lg flex-shrink-0">
+                        {getTriggerIcon(automation.triggerType)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="text-lg font-semibold text-gray-900 truncate">
+                            {automation.name}
+                          </h3>
+                          <div
+                            className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                              automation.status === "active"
+                                ? "bg-green-500"
+                                : "bg-gray-400"
+                            }`}
+                          ></div>
+                        </div>
+                        <p className="text-sm text-gray-600">
+                          {triggerInfo?.label || automation.triggerType}
+                        </p>
+                      </div>
+                    </div>
+                    {isSelectable && selectedIds.includes(automation.id) && (
+                      <div className="flex-shrink-0">
+                        <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
+                          <svg
+                            className="w-4 h-4 text-white"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Stats */}
+                  <div className="flex items-center justify-between mb-4 text-sm">
+                    <div className="flex items-center gap-1">
+                      <div className="text-gray-500">Conditions:</div>
+                      <div className="font-semibold text-gray-900">
+                        {automation.useConditions
+                          ? automation.conditions.length
+                          : 0}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="text-gray-500">Actions:</div>
+                      <div className="font-semibold text-gray-900">
+                        {automation.actions.length}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions Preview */}
+                  <div className="mb-4 flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Target className="h-4 w-4 text-gray-500" />
+                      <span className="text-sm font-medium text-gray-700">
+                        Actions
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {automation.actions.slice(0, 3).map((action, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center gap-2 px-3 py-1 bg-gray-50 rounded-lg text-xs"
+                        >
+                          {getActionTypeIcon(action.type)}
+                          <span className="text-gray-700">
+                            {getActionTypeLabel(action.type)}
+                          </span>
+                        </div>
+                      ))}
+                      {automation.actions.length > 3 && (
+                        <div className="flex items-center px-3 py-1 bg-gray-100 rounded-lg text-xs text-gray-500">
+                          +{automation.actions.length - 3} more
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Status */}
+                  <div className="pt-4 border-t border-gray-100">
+                    <Badge
+                      variant={
+                        automation.status === "active" ? "default" : "secondary"
+                      }
+                      className={`rounded-full ${
+                        automation.status === "active"
+                          ? "bg-green-100 text-green-700 border-green-200"
+                          : "bg-gray-100 text-gray-600 border-gray-200"
+                      }`}
+                    >
+                      {automation.status === "active" ? "Active" : "Paused"}
+                    </Badge>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default CustomAutomationStep;

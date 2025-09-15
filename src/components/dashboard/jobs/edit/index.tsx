@@ -1,6 +1,7 @@
 "use client";
 
 import { BookingPageStep } from "@/components/dashboard/jobs/common/booking-page-step";
+import { CustomAutomationStep } from "@/components/dashboard/jobs/common/custom-automation-step";
 import { JobAdStep } from "@/components/dashboard/jobs/common/job-ad-step";
 import { PositionDetailsStep } from "@/components/dashboard/jobs/common/position-details-step";
 import { ReviewPublishStep } from "@/components/dashboard/jobs/common/review-publish-step";
@@ -116,6 +117,7 @@ const getJobDefaults = (
 
     // Step 6: AI Ranking & Automation
     automation: job.automation || defaults.automation,
+    automations: job.automations || defaults.automations,
 
     // Step 7: Email Templates
     emailTemplates: job.emailTemplates || defaults.emailTemplates,
@@ -240,18 +242,24 @@ export default function EditJob() {
 
     // Skip validation for CustomQuestionsBuilder step
     if (currentStep === 4) {
-      setCurrentStep((prev) => Math.min(prev + 1, 6));
+      setCurrentStep((prev) => Math.min(prev + 1, 7));
+      return;
+    }
+
+    // Skip validation for Custom Automation step
+    if (currentStep === 5) {
+      setCurrentStep((prev) => Math.min(prev + 1, 7));
       return;
     }
 
     // Special validation for Booking Page step
-    if (currentStep === 5) {
+    if (currentStep === 6) {
       const isValid = await trigger("availabilityId", {
         shouldFocus: true,
       });
 
       if (isValid) {
-        setCurrentStep((prev) => Math.min(prev + 1, 6));
+        setCurrentStep((prev) => Math.min(prev + 1, 7));
       }
       return;
     }
@@ -273,7 +281,7 @@ export default function EditJob() {
   };
 
   const onSubmit = async (data: JobFormSchema) => {
-    if (currentStep !== 6 || !job?.id) return;
+    if (currentStep !== 7 || !job?.id) return;
 
     // Validate the required availabilityId field
     const isValid = await trigger("availabilityId");
@@ -301,6 +309,7 @@ export default function EditJob() {
         ...rest,
         company: job.company,
         automation: automationRest,
+        automations: data.automations,
       };
       const response = await API.job.updateJob(job.id, newData);
       console.log("response", response);
@@ -332,8 +341,18 @@ export default function EditJob() {
           />
         );
       case 5:
-        return <BookingPageStep />;
+        return (
+          <CustomAutomationStep
+            isSelectable={true}
+            automations={getValues("automations") || []}
+            onSelectionChange={(selectedIds) => {
+              form.setValue("automations", selectedIds);
+            }}
+          />
+        );
       case 6:
+        return <BookingPageStep />;
+      case 7:
         return <ReviewPublishStep />;
       default:
         return <JobAdStep />;
@@ -511,7 +530,7 @@ export default function EditJob() {
                     onNext={handleNext}
                     onPrevious={handlePrevious}
                     isFirstStep={currentStep === 1}
-                    isLastStep={currentStep === 6}
+                    isLastStep={currentStep === 7}
                     isValid={true}
                     isSubmitting={isSubmitting}
                   />

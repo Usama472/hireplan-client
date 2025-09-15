@@ -4,11 +4,12 @@ import { AIOverviewStep } from "@/components/dashboard/jobs/common/ai-overview-s
 import { BookingPageStep } from "@/components/dashboard/jobs/common/booking-page-step";
 import { CompanyPositionDetailsStep } from "@/components/dashboard/jobs/common/company-position-details-step";
 import { ComplianceDepartmentStep } from "@/components/dashboard/jobs/common/compliance-department-step";
+import { CustomAutomationStep } from "@/components/dashboard/jobs/common/custom-automation-step";
 import { HoursScheduleBenefitsStep } from "@/components/dashboard/jobs/common/hours-schedule-benefits-step";
 import { JobAdStep } from "@/components/dashboard/jobs/common/job-ad-step";
 import { JobQualificationsStep } from "@/components/dashboard/jobs/common/job-qualifications-step";
-import { ResumeAnalysisStep } from "@/components/dashboard/jobs/common/resume-analysis-step";
 import { PostingScheduleBudgetStep } from "@/components/dashboard/jobs/common/posting-schedule-budget-step";
+import { ResumeAnalysisStep } from "@/components/dashboard/jobs/common/resume-analysis-step";
 import { ReviewPublishStep } from "@/components/dashboard/jobs/common/review-publish-step";
 import { StepNavigation } from "@/components/main/signup/stepNavigation";
 import { Badge } from "@/components/ui/badge";
@@ -207,15 +208,12 @@ export default function CreateJob() {
   const { data: authSession, subscription } = useAuthSessionContext();
   const userId = authSession?.user?.id || "anonymous";
 
-  // Check if user has Professional+ subscription for AI features
   const hasProfessionalFeatures =
     subscription?.planId === "professional" ||
     subscription?.planId === "enterprise";
 
-  // Adjust total steps based on subscription - Resume Analysis (4) and AI step (6) are only for Professional+
-  const totalSteps = hasProfessionalFeatures ? 8 : 7;
+  const totalSteps = hasProfessionalFeatures ? 9 : 8;
 
-  // Log for debugging
   console.log("Current step and total steps:", { currentStep, totalSteps });
 
   const form = useForm({
@@ -252,11 +250,9 @@ export default function CreateJob() {
     toast.success("Draft cleared successfully!");
   };
 
-  // Template handling functions
   const handleSelectTemplate = (template: JobTemplate) => {
     setSelectedTemplate(template);
 
-    // Convert template data to form format
     const templateFormData: Partial<JobFormSchema> = {
       jobTitle: template.jobTitle,
       jobBoardTitle: template.jobBoardTitle || template.jobTitle,
@@ -358,15 +354,11 @@ export default function CreateJob() {
     toast.success(`Template "${template.name}" applied successfully!`);
   };
 
-  // Check for existing draft on component mount and handle template from navigation
   useEffect(() => {
     const draft = loadDraftFromStorage(userId);
     if (draft && !location.state?.editMode) {
-      // Only load draft if we're not in edit mode
       setDraftInfo({ step: draft.currentStep, timestamp: draft.timestamp });
     }
-
-    // Check if we came from template selection or edit mode
     if (location.state?.selectedTemplate) {
       const template = location.state.selectedTemplate as JobTemplate;
       const isEditMode = location.state.editMode;
@@ -377,10 +369,9 @@ export default function CreateJob() {
       }
 
       handleSelectTemplate(template);
-      // Clear the navigation state to prevent re-applying on refresh
       navigate(location.pathname, { replace: true, state: {} });
     }
-  }, [userId]); // Removed dependencies that cause infinite loops
+  }, [userId]);
 
   const loadTestData = () => {
     Object.keys(JOB_FORM_TEST_DATA).forEach((key) => {
@@ -392,7 +383,7 @@ export default function CreateJob() {
   const handleNext = async () => {
     clearErrors();
 
-    // Skip validation for AI Ranking step (5) and Review step (7/6)
+    // Skip validation for AI Ranking step (5), Automation step (7), and Review step (8/7)
     // But require validation for Booking Page step (6/5)
     if (currentStep === 5 && hasProfessionalFeatures) {
       // AI Ranking step - skip validation for Professional+ users
@@ -406,9 +397,15 @@ export default function CreateJob() {
       return;
     }
 
+    if (currentStep === 7 && hasProfessionalFeatures) {
+      // Automation step - skip validation for Professional+ users
+      setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
+      return;
+    }
+
     if (
-      (currentStep === 7 && hasProfessionalFeatures) ||
-      (currentStep === 6 && !hasProfessionalFeatures)
+      (currentStep === 8 && hasProfessionalFeatures) ||
+      (currentStep === 7 && !hasProfessionalFeatures)
     ) {
       // Review step - skip validation
       setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
@@ -492,11 +489,20 @@ export default function CreateJob() {
       // For non-Professional users, step 5 is Booking Page, so go back to step 4
       setCurrentStep(4);
     } else if (currentStep === 6 && !hasProfessionalFeatures) {
-      // For non-Professional users, step 6 is Review, so go back to step 5 (Booking Page)
+      // For non-Professional users, step 6 is Automation, so go back to step 5 (Booking Page)
       setCurrentStep(5);
+    } else if (currentStep === 7 && !hasProfessionalFeatures) {
+      // For non-Professional users, step 7 is Review, so go back to step 6 (Automation)
+      setCurrentStep(6);
     } else if (currentStep === 6 && hasProfessionalFeatures) {
       // For Professional+ users, step 6 is Booking Page, go back to step 5 (AI)
       setCurrentStep(5);
+    } else if (currentStep === 7 && hasProfessionalFeatures) {
+      // For Professional+ users, step 7 is Automation, go back to step 6 (Booking Page)
+      setCurrentStep(6);
+    } else if (currentStep === 8 && hasProfessionalFeatures) {
+      // For Professional+ users, step 8 is Review, go back to step 7 (Automation)
+      setCurrentStep(7);
     } else {
       setCurrentStep((prev) => Math.max(prev - 1, 1));
     }
@@ -546,12 +552,17 @@ export default function CreateJob() {
         questionAutoFail: automation?.questionAutoFail || [],
         questionCriteria: automation?.questionCriteria || {},
         jobRules: automation?.jobRules || [],
-        template: automation?.template || null,
+        templateId: automation?.templateId || undefined,
+        preferredQualScoring: automation?.preferredQualScoring || false,
+        resumeItems: automation?.resumeItems || [],
+        resumeItemScoring: automation?.resumeItemScoring || false,
+        autoRejectThreshold: automation?.autoRejectThreshold || 30,
       };
 
       const newData = {
         ...rest,
         automation: automationData,
+        schedule: rest.schedule || [],
       };
 
       await API.job.createJob(newData);
@@ -634,22 +645,45 @@ export default function CreateJob() {
         if (hasProfessionalFeatures) {
           return <AIOverviewStep />;
         } else {
-          // For non-Professional users, step 6 is the Review step
+          // For non-Professional users, step 6 is the Automation step
+          return (
+            <CustomAutomationStep
+              isSelectable={true}
+              automations={(watch("automations") as string[]) || []}
+              onSelectionChange={(selectedIds) => {
+                setValue("automations", selectedIds);
+              }}
+            />
+          );
+        }
+      case 7:
+        if (hasProfessionalFeatures) {
+          return (
+            <CustomAutomationStep
+              isSelectable={true}
+              automations={(watch("automations") as string[]) || []}
+              onSelectionChange={(selectedIds) => {
+                setValue("automations", selectedIds);
+              }}
+            />
+          );
+        } else {
+          // For non-Professional users, step 7 is the Review step
           return (
             <>
               <ReviewPublishStep mode="publish" />
             </>
           );
         }
-      case 7:
+      case 8:
         if (hasProfessionalFeatures) {
           return <BookingPageStep />;
         } else {
-          // Non-Professional users don't have step 7
+          // Non-Professional users don't have step 8
           return <PostingScheduleBudgetStep />;
         }
-      case 8:
-        // Only for Professional+ users
+      case 9:
+        // Only for Professional+ users - Review step
         return (
           <>
             <ReviewPublishStep mode="publish" />
@@ -740,7 +774,7 @@ export default function CreateJob() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 mt-6">
         {/* Template Status & Actions */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
@@ -801,7 +835,7 @@ export default function CreateJob() {
         <SaveAsTemplateDialog
           isOpen={showSaveTemplateDialog}
           onClose={() => setShowSaveTemplateDialog(false)}
-          formData={form.getValues()}
+          formData={form.getValues() as any}
           isEditMode={isEditingTemplate}
           templateId={editingTemplateId || undefined}
           existingTemplate={

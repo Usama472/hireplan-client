@@ -320,6 +320,7 @@ export const jobFormSchema = z
 
     // Step 7: AI Ranking & Automation
     automation: automationSchema,
+    automations: z.array(z.string()).default([]),
 
     // Step 8: Email Templates
     emailTemplates: z

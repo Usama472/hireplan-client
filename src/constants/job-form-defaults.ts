@@ -97,6 +97,7 @@ export const JOB_FORM_DEFAULT_VALUES: JobFormSchema = {
     jobRules: [],
     templateId: "",
   },
+  automations: [],
 
   // Step 8: Booking Page Selection - Updated field name
   availabilityId: "",
@@ -275,6 +276,7 @@ export const JOB_FORM_TEST_DATA: JobFormSchema = {
     jobRules: [],
     templateId: "technical-role",
   },
+  automations: [],
 
   // Step 8: Booking Page Selection - Updated field name with test data
   availabilityId: "template-12345",

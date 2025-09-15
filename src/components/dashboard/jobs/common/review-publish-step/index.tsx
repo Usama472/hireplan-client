@@ -26,6 +26,7 @@ import { JobAdReview } from "./JobAdReview";
 import { PositionDetailsReview } from "./PositionDetailsReview";
 import { PostingScheduleReview } from "./PostingScheduleReview";
 import { QualificationsReview } from "./QualificationsReview";
+import { SelectedAutomationsPreview } from "./SelectedAutomationsPreview";
 import { ApplicantsSection } from "./applicants-section";
 
 interface ReviewPublishStepProps {
@@ -59,7 +60,8 @@ export function ReviewPublishStep({
     { id: "compliance", label: "Compliance", icon: Building },
     { id: "qualifications", label: "Qualifications", icon: Users },
     { id: "posting", label: "Posting", icon: Calendar },
-    { id: "automation", label: "Automation", icon: Zap },
+    { id: "automation", label: "AI Automation", icon: Zap },
+    { id: "custom-automations", label: "Custom Automations", icon: Zap },
     { id: "availability", label: "Availability", icon: CalendarClock },
     ...(mode === "review"
       ? [{ id: "applicants", label: "Applicants", icon: UserCheck }]
@@ -195,6 +197,7 @@ export function ReviewPublishStep({
             return (
               <button
                 key={tab.id}
+                type="button"
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
                   "flex items-center gap-2 py-4 px-1 font-medium text-sm transition-all duration-200 cursor-pointer border-b-2 relative",
@@ -237,6 +240,11 @@ export function ReviewPublishStep({
           )}
           {activeTab === "automation" && (
             <AutomationReview formData={formData} />
+          )}
+          {activeTab === "custom-automations" && (
+            <SelectedAutomationsPreview
+              automations={formData.automations || []}
+            />
           )}
           {activeTab === "availability" && (
             <AvailabilityReview formData={formData} />
