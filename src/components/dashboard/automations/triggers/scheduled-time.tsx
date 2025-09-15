@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import API from "@/http";
 import {
   AlertCircle,
   ArrowRight,
@@ -20,6 +21,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { useGlobalEmailTemplates } from "../../global-setting/hooks/useGlobalEmailTemplates";
 
 interface ScheduleConfig {
@@ -54,7 +56,7 @@ export default function ScheduledTimeTrigger() {
   });
   const [automationName, setAutomationName] = useState<string>("");
   const [automationStatus, setAutomationStatus] = useState<boolean>(true);
-
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [actions, setActions] = useState<Action[]>([
     {
       id: "1",
@@ -262,8 +264,9 @@ export default function ScheduledTimeTrigger() {
     }
   }, [actions, scheduleConfig, formTouched]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setFormTouched(true);
+    setIsLoading(true);
     if (validateForm()) {
       console.log("Form submitted", {
         name: automationName,
@@ -272,7 +275,23 @@ export default function ScheduledTimeTrigger() {
         actions,
         triggerType: "cron",
       });
+      try {
+        await API.automation.createAutomation({
+          name: automationName,
+          status: automationStatus ? "active" : "inactive",
+          triggerType: "cron",
+          useConditions: true,
+          conditions: [],
+          actions: actions,
+        });
+        navigate("/dashboard/automations");
+      } catch (error: any) {
+        toast.error("Failed to create automation", {
+          description: error.message,
+        });
+      }
     }
+    setIsLoading(false);
   };
 
   const getActionIcon = (type: string) => {
@@ -941,9 +960,12 @@ export default function ScheduledTimeTrigger() {
           </Button>
           <Button
             onClick={handleSave}
-            className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white px-8 py-2"
+            disabled={isLoading}
+            className={`bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white px-8 py-2 ${
+              isLoading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           >
-            Save Automation
+            {isLoading ? "Saving..." : "Save Automation"}
           </Button>
         </div>
       </div>

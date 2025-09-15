@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import API from "@/http";
 import {
   AlertCircle,
   ArrowRight,
@@ -19,8 +20,8 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { useGlobalEmailTemplates } from "../../global-setting/hooks/useGlobalEmailTemplates";
-
 interface Condition {
   id: string;
   field: string;
@@ -63,7 +64,7 @@ export default function JobCreatedTrigger() {
   const [isValid, setIsValid] = useState<boolean>(true);
   const [validationMessage, setValidationMessage] = useState<string>("");
   const [formTouched, setFormTouched] = useState<boolean>(false);
-
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   // Available fields for job-based conditions
   const jobConditionFields = [
     { value: "department", label: "Department" },
@@ -252,8 +253,9 @@ export default function JobCreatedTrigger() {
     }
   }, [actions, formTouched]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setFormTouched(true);
+    setIsLoading(true);
     if (validateForm()) {
       console.log("Form submitted", {
         name: automationName,
@@ -263,7 +265,23 @@ export default function JobCreatedTrigger() {
         actions,
         triggerType: "job_created",
       });
+      try {
+        await API.automation.createAutomation({
+          name: automationName,
+          status: automationStatus ? "active" : "inactive",
+          triggerType: "job_created",
+          useConditions: useConditions,
+          conditions: useConditions ? conditions : [],
+          actions: actions,
+        });
+        navigate("/dashboard/automations");
+      } catch (err: any) {
+        toast.error("Failed to create automation", {
+          description: err.message,
+        });
+      }
     }
+    setIsLoading(false);
   };
 
   const getActionIcon = (type: string) => {
@@ -940,9 +958,12 @@ export default function JobCreatedTrigger() {
           </Button>
           <Button
             onClick={handleSave}
-            className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-8 py-2"
+            disabled={isLoading}
+            className={`bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-8 py-2 ${
+              isLoading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           >
-            Save Automation
+            {isLoading ? "Saving..." : "Save Automation"}
           </Button>
         </div>
       </div>

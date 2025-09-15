@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { applicantConditions } from "@/constants/automations-constants";
+import API from "@/http";
 import {
   AlertCircle,
   ArrowRight,
@@ -20,6 +21,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { useGlobalEmailTemplates } from "../../global-setting/hooks/useGlobalEmailTemplates";
 
 interface Condition {
@@ -64,6 +66,7 @@ export default function ApplicationCreatedTrigger() {
   const [isValid, setIsValid] = useState<boolean>(true);
   const [validationMessage, setValidationMessage] = useState<string>("");
   const [formTouched, setFormTouched] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const getOperators = (field: string) => {
     const scoreFields = [
@@ -267,8 +270,9 @@ export default function ApplicationCreatedTrigger() {
     }
   }, [actions, formTouched]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setFormTouched(true);
+    setIsLoading(true);
     if (validateForm()) {
       console.log("Form submitted", {
         name: automationName,
@@ -278,7 +282,24 @@ export default function ApplicationCreatedTrigger() {
         actions,
         triggerType: "application_created",
       });
+
+      try {
+        await API.automation.createAutomation({
+          name: automationName,
+          status: automationStatus ? "active" : "inactive",
+          triggerType: "application_created",
+          useConditions: useConditions,
+          conditions: useConditions ? conditions : [],
+          actions: actions,
+        });
+        navigate("/dashboard/automations");
+      } catch (error: any) {
+        toast.error("Failed to create automation", {
+          description: error.message,
+        });
+      }
     }
+    setIsLoading(false);
   };
 
   const getActionIcon = (type: string) => {
@@ -1016,9 +1037,12 @@ export default function ApplicationCreatedTrigger() {
           </Button>
           <Button
             onClick={handleSave}
-            className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white px-8 py-2"
+            disabled={isLoading}
+            className={`bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white px-8 py-2 ${
+              isLoading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           >
-            Save Automation
+            {isLoading ? "Saving..." : "Save Automation"}
           </Button>
         </div>
       </div>

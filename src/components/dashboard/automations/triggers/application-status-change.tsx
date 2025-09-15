@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import API from "@/http";
 import {
   AlertCircle,
   ArrowRight,
@@ -18,6 +19,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { useGlobalEmailTemplates } from "../../global-setting/hooks/useGlobalEmailTemplates";
 
 interface Condition {
@@ -60,6 +62,7 @@ export default function ApplicationStatusChangeTrigger() {
   const [isValid, setIsValid] = useState<boolean>(true);
   const [validationMessage, setValidationMessage] = useState<string>("");
   const [formTouched, setFormTouched] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // Available fields for status-based conditions
   const statusConditionFields = [
@@ -268,16 +271,25 @@ export default function ApplicationStatusChangeTrigger() {
     }
   }, [actions, conditions, formTouched]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setFormTouched(true);
     if (validateForm()) {
-      console.log("Form submitted", {
-        name: automationName,
-        status: automationStatus ? "active" : "inactive",
-        conditions,
-        actions,
-        triggerType: "application_status_changed",
-      });
+      try {
+        setIsLoading(true);
+        await API.automation.createAutomation({
+          name: automationName,
+          status: automationStatus ? "active" : "inactive",
+          triggerType: "application_status_changed",
+          conditions,
+          actions,
+        });
+        navigate("/dashboard/automations");
+      } catch (error: any) {
+        toast.error("Failed to create automation", {
+          description: error.message,
+        });
+      }
+      setIsLoading(false);
     }
   };
 
@@ -938,9 +950,12 @@ export default function ApplicationStatusChangeTrigger() {
           </Button>
           <Button
             onClick={handleSave}
-            className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-8 py-2"
+            disabled={isLoading}
+            className={`bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-8 py-2 ${
+              isLoading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           >
-            Save Automation
+            {isLoading ? "Saving..." : "Save Automation"}
           </Button>
         </div>
       </div>
