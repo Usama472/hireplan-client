@@ -1,11 +1,11 @@
-import { del, get, patch, post } from "../apiHelper";
+import { del, get, post, put } from "../apiHelper";
 
 export const createAutomation = async (automationData: any) => {
   return await post(`/automations`, automationData);
 };
 
 export const getAutomations = async () => {
-  return await get(`/automations`);
+  return await get(`/automations?page=1&limit=100`);
 };
 
 export const getAutomationById = async (id: string) => {
@@ -13,7 +13,7 @@ export const getAutomationById = async (id: string) => {
 };
 
 export const updateAutomation = async (id: string, automationData: any) => {
-  return await patch(`/automations/${id}`, automationData);
+  return await put(`/automations/${id}`, automationData);
 };
 
 export const deleteAutomation = async (id: string) => {
