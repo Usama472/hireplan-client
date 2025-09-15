@@ -7,16 +7,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { applicantConditions } from "@/constants/automations-constants";
 import {
   AlertCircle,
   ArrowRight,
-  ClipboardList,
+  Briefcase,
   Clock,
   Mail,
   Plus,
   Trash2,
-  UserCheck,
+  Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -34,7 +33,6 @@ interface Action {
   type: string;
   config: {
     templateId?: string;
-    status?: string;
     delay: {
       value: number;
       unit: "minutes" | "hours" | "days";
@@ -43,12 +41,12 @@ interface Action {
   };
 }
 
-export default function ApplicationCreatedTrigger() {
+export default function JobPublishedTrigger() {
   const [useConditions, setUseConditions] = useState<boolean>(false);
   const { availableTemplates } = useGlobalEmailTemplates();
   const navigate = useNavigate();
   const [conditions, setConditions] = useState<Condition[]>([
-    { id: "1", field: "totalScore", operator: "equals", value: "" },
+    { id: "1", field: "department", operator: "equals", value: "" },
   ]);
   const [automationName, setAutomationName] = useState<string>("");
   const [automationStatus, setAutomationStatus] = useState<boolean>(true);
@@ -56,7 +54,7 @@ export default function ApplicationCreatedTrigger() {
   const [actions, setActions] = useState<Action[]>([
     {
       id: "1",
-      type: "send_email_applicant",
+      type: "send_email_recruiter",
       config: { templateId: "", delay: { value: 0, unit: "minutes" } },
     },
   ]);
@@ -65,21 +63,21 @@ export default function ApplicationCreatedTrigger() {
   const [validationMessage, setValidationMessage] = useState<string>("");
   const [formTouched, setFormTouched] = useState<boolean>(false);
 
-  const getOperators = (field: string) => {
-    const scoreFields = [
-      "totalScore",
-      "culturalFitScore",
-      "educationScore",
-      "experienceScore",
-      "skillsMatchScore",
-    ];
+  // Available fields for job-based conditions
+  const jobConditionFields = [
+    { value: "department", label: "Department" },
+    { value: "job_type", label: "Job Type" },
+    { value: "experience_level", label: "Experience Level" },
+    { value: "location", label: "Job Location" },
+    { value: "salary_range", label: "Salary Range" },
+  ];
 
-    if (scoreFields.includes(field)) {
+  const getOperators = (field: string) => {
+    if (field === "salary_range") {
       return [
-        { value: "equals", label: "Equals" },
-        { value: "not_equals", label: "Not Equals" },
         { value: "greater_than", label: "Greater Than" },
         { value: "less_than", label: "Less Than" },
+        { value: "equals", label: "Equals" },
         { value: "between", label: "Between" },
       ];
     }
@@ -92,29 +90,24 @@ export default function ApplicationCreatedTrigger() {
     ];
   };
 
-  // Available action types
+  // Available action types for job published
   const actionTypes = [
-    {
-      value: "send_email_applicant",
-      label: "Send Email to Applicant",
-      icon: <Mail className="h-4 w-4 text-blue-500" />,
-    },
     {
       value: "send_email_recruiter",
       label: "Send Email to Recruiter",
       icon: <Mail className="h-4 w-4 text-indigo-500" />,
     },
     {
-      value: "update_job_status",
-      label: "Update Application Status",
-      icon: <ClipboardList className="h-4 w-4" />,
+      value: "send_email_recruiter_team",
+      label: "Send Email to Recruiter Team",
+      icon: <Users className="h-4 w-4 text-purple-500" />,
     },
   ];
 
   const addCondition = () => {
     const newCondition: Condition = {
       id: `condition-${Date.now()}`,
-      field: "totalScore",
+      field: "department",
       operator: "equals",
       value: "",
     };
@@ -148,7 +141,7 @@ export default function ApplicationCreatedTrigger() {
   const addAction = () => {
     const newAction: Action = {
       id: `action-${Date.now()}`,
-      type: "send_email_applicant",
+      type: "send_email_recruiter",
       config: { templateId: "", delay: { value: 0, unit: "minutes" } },
     };
     setActions([...actions, newAction]);
@@ -215,7 +208,6 @@ export default function ApplicationCreatedTrigger() {
     );
   };
 
-  // Update the validateForm function to handle both email action types
   const validateForm = () => {
     if (!automationName.trim()) {
       setIsValid(false);
@@ -231,25 +223,17 @@ export default function ApplicationCreatedTrigger() {
 
     for (const action of actions) {
       if (
-        action.type === "send_email_applicant" ||
-        action.type === "send_email_recruiter"
+        action.type === "send_email_recruiter" ||
+        action.type === "send_email_recruiter_team"
       ) {
         if (!action.config.templateId || action.config.templateId === "") {
           setIsValid(false);
           const recipient =
-            action.type === "send_email_applicant" ? "applicant" : "recruiter";
+            action.type === "send_email_recruiter"
+              ? "recruiter"
+              : "recruiter team";
           setValidationMessage(
             `Please select an email template for the ${recipient} email action`
-          );
-          return false;
-        }
-      }
-
-      if (action.type === "update_job_status") {
-        if (!action.config.status || action.config.status === "") {
-          setIsValid(false);
-          setValidationMessage(
-            "Please select a status for all status update actions"
           );
           return false;
         }
@@ -276,7 +260,7 @@ export default function ApplicationCreatedTrigger() {
         useConditions,
         conditions: useConditions ? conditions : [],
         actions,
-        triggerType: "application_created",
+        triggerType: "job_published",
       });
     }
   };
@@ -287,22 +271,22 @@ export default function ApplicationCreatedTrigger() {
   };
 
   const isNumericField = (fieldId: string) => {
-    return fieldId.toLowerCase().includes("score");
+    return fieldId === "salary_range";
   };
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
-      <div className="bg-gradient-to-r from-blue-50 to-transparent rounded-lg p-6 border-l-4 border-blue-500">
+      <div className="bg-gradient-to-r from-emerald-50 to-transparent rounded-lg p-6 border-l-4 border-emerald-500">
         <div className="flex items-center gap-4">
-          <div className="bg-blue-100 p-3 rounded-full">
-            <UserCheck className="h-6 w-6 text-blue-600" />
+          <div className="bg-emerald-100 p-3 rounded-full">
+            <Briefcase className="h-6 w-6 text-emerald-600" />
           </div>
           <div>
             <h1 className="text-2xl font-semibold text-gray-900">
-              New Application Trigger
+              Job Published Trigger
             </h1>
             <p className="text-gray-600">
-              This automation runs when a new candidate applies to a job
+              This automation runs when a job posting goes live publicly
             </p>
           </div>
         </div>
@@ -444,9 +428,9 @@ export default function ApplicationCreatedTrigger() {
 
       {/* Conditions Section */}
       <div className="rounded-lg overflow-hidden bg-white border border-gray-100">
-        <div className="bg-gradient-to-r from-indigo-50 to-white p-4 flex justify-between items-center border-b border-gray-100">
+        <div className="bg-gradient-to-r from-emerald-50 to-white p-4 flex justify-between items-center border-b border-gray-100">
           <h2 className="text-lg font-medium text-gray-800 flex items-center">
-            <span className="bg-indigo-100 p-1.5 rounded-md mr-2">
+            <span className="bg-emerald-100 p-1.5 rounded-md mr-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
@@ -455,7 +439,7 @@ export default function ApplicationCreatedTrigger() {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="w-4 h-4 text-indigo-600"
+                className="w-4 h-4 text-emerald-600"
               >
                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                 <polyline points="22 4 12 14.01 9 11.01"></polyline>
@@ -482,7 +466,7 @@ export default function ApplicationCreatedTrigger() {
               <label
                 htmlFor="use-conditions"
                 className={`block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer ${
-                  useConditions ? "bg-indigo-500" : ""
+                  useConditions ? "bg-emerald-500" : ""
                 }`}
               >
                 <span
@@ -509,7 +493,7 @@ export default function ApplicationCreatedTrigger() {
               {conditions.map((condition) => (
                 <div
                   key={condition.id}
-                  className="flex items-start gap-3 bg-indigo-50/50 p-4 rounded-lg"
+                  className="flex items-start gap-3 bg-emerald-50/50 p-4 rounded-lg"
                 >
                   <div className="flex-1 grid grid-cols-3 gap-3">
                     <Select
@@ -522,8 +506,8 @@ export default function ApplicationCreatedTrigger() {
                         <SelectValue placeholder="Select key" />
                       </SelectTrigger>
                       <SelectContent>
-                        {applicantConditions.map((field) => (
-                          <SelectItem key={field.id} value={field.id}>
+                        {jobConditionFields.map((field) => (
+                          <SelectItem key={field.value} value={field.value}>
                             {field.label}
                           </SelectItem>
                         ))}
@@ -552,7 +536,11 @@ export default function ApplicationCreatedTrigger() {
                     </Select>
 
                     <Input
-                      placeholder="Enter value"
+                      placeholder={
+                        condition.field === "salary_range"
+                          ? "Enter amount"
+                          : "Enter value"
+                      }
                       value={condition.value}
                       onChange={(e) =>
                         updateCondition(condition.id, "value", e.target.value)
@@ -578,23 +566,23 @@ export default function ApplicationCreatedTrigger() {
                   variant="outline"
                   size="sm"
                   onClick={addCondition}
-                  className="flex items-center gap-1 border-indigo-200 text-indigo-600 hover:bg-indigo-50"
+                  className="flex items-center gap-1 border-emerald-200 text-emerald-600 hover:bg-emerald-50"
                 >
                   <Plus className="h-4 w-4" /> Add Condition
                 </Button>
               </div>
             </div>
           ) : (
-            <div className="flex items-center justify-center p-8 bg-indigo-50/30 rounded-lg">
+            <div className="flex items-center justify-center p-8 bg-emerald-50/30 rounded-lg">
               <div className="text-center">
                 <p className="text-gray-500 mb-2">No conditions specified</p>
                 <p className="text-sm text-gray-400">
-                  This automation will run for every new application
+                  This automation will run for every published job
                 </p>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="mt-3 border-indigo-200 text-indigo-600 hover:bg-indigo-50"
+                  className="mt-3 border-emerald-200 text-emerald-600 hover:bg-emerald-50"
                   onClick={() => setUseConditions(true)}
                 >
                   Add Conditions
@@ -607,9 +595,9 @@ export default function ApplicationCreatedTrigger() {
 
       {/* Actions Section */}
       <div className="rounded-lg overflow-hidden bg-white border border-gray-100">
-        <div className="bg-gradient-to-r from-emerald-50 to-white p-4 border-b border-gray-100">
+        <div className="bg-gradient-to-r from-blue-50 to-white p-4 border-b border-gray-100">
           <h2 className="text-lg font-medium text-gray-800 flex items-center">
-            <span className="bg-emerald-100 p-1.5 rounded-md mr-2">
+            <span className="bg-blue-100 p-1.5 rounded-md mr-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
@@ -618,7 +606,7 @@ export default function ApplicationCreatedTrigger() {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="w-4 h-4 text-emerald-600"
+                className="w-4 h-4 text-blue-600"
               >
                 <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
               </svg>
@@ -633,33 +621,30 @@ export default function ApplicationCreatedTrigger() {
               key={action.id}
               className={`rounded-lg overflow-hidden border ${
                 formTouched &&
-                ((action.type === "send_email_applicant" &&
-                  (!action.config.templateId ||
-                    action.config.templateId === "")) ||
-                  (action.type === "send_email_recruiter" &&
-                    (!action.config.templateId ||
-                      action.config.templateId === "")) ||
-                  (action.type === "update_job_status" &&
-                    (!action.config.status || action.config.status === "")))
+                (action.type === "send_email_recruiter" ||
+                  action.type === "send_email_recruiter_team") &&
+                (!action.config.templateId || action.config.templateId === "")
                   ? "border-red-200 bg-red-50/10"
                   : "border-gray-200 bg-white"
               }`}
             >
               <div
                 className={`p-3 flex items-center justify-between border-b ${
-                  action.type === "send_email_applicant" ||
                   action.type === "send_email_recruiter"
-                    ? "bg-blue-50/50"
-                    : "bg-emerald-50/50"
+                    ? "bg-indigo-50/50"
+                    : action.type === "send_email_recruiter_team"
+                    ? "bg-purple-50/50"
+                    : "bg-blue-50/50"
                 }`}
               >
                 <div className="flex items-center gap-3">
                   <div
                     className={`w-7 h-7 rounded-full flex items-center justify-center ${
-                      action.type === "send_email_applicant" ||
                       action.type === "send_email_recruiter"
-                        ? "bg-blue-100"
-                        : "bg-emerald-100"
+                        ? "bg-indigo-100"
+                        : action.type === "send_email_recruiter_team"
+                        ? "bg-purple-100"
+                        : "bg-blue-100"
                     }`}
                   >
                     {getActionIcon(action.type)}
@@ -667,11 +652,11 @@ export default function ApplicationCreatedTrigger() {
                   <span className="font-medium text-gray-700 flex items-center">
                     Action {i + 1}
                     <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
-                      {action.type === "send_email_applicant"
-                        ? "Email to Applicant"
-                        : action.type === "send_email_recruiter"
+                      {action.type === "send_email_recruiter"
                         ? "Email to Recruiter"
-                        : "Status Update"}
+                        : action.type === "send_email_recruiter_team"
+                        ? "Email to Team"
+                        : "Email"}
                     </span>
                   </span>
                 </div>
@@ -714,71 +699,6 @@ export default function ApplicationCreatedTrigger() {
                     </Select>
                   </div>
 
-                  {action.type === "send_email_applicant" && (
-                    <div
-                      className={`bg-blue-50/30 p-4 rounded-lg ${
-                        formTouched &&
-                        (!action.config.templateId ||
-                          action.config.templateId === "")
-                          ? "border border-red-300"
-                          : "border border-blue-100"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 mb-3">
-                        <Mail className="h-4 w-4 text-blue-500" />
-                        <h3 className="text-sm font-medium text-gray-700">
-                          Email to Applicant
-                        </h3>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-700 mb-1 block">
-                          Email Template <span className="text-red-500">*</span>
-                        </label>
-                        <Select
-                          value={action.config.templateId || ""}
-                          onValueChange={(value) =>
-                            updateAction(action.id, "config.templateId", value)
-                          }
-                        >
-                          <SelectTrigger
-                            className={`bg-white ${
-                              formTouched &&
-                              (!action.config.templateId ||
-                                action.config.templateId === "")
-                                ? "border-red-300"
-                                : ""
-                            }`}
-                          >
-                            <SelectValue placeholder="Select applicant email template" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {availableTemplates
-                              .filter(
-                                (template) =>
-                                  template.name
-                                    ?.toLowerCase()
-                                    .includes("applicant") ||
-                                  !template.name
-                                    ?.toLowerCase()
-                                    .includes("recruiter")
-                              )
-                              .map((template) => (
-                                <SelectItem
-                                  key={template.id}
-                                  value={template.id || ""}
-                                >
-                                  {template.name}
-                                </SelectItem>
-                              ))}
-                          </SelectContent>
-                        </Select>
-                        <p className="text-xs text-gray-500 mt-1">
-                          This email will be sent to the job applicant
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
                   {action.type === "send_email_recruiter" && (
                     <div
                       className={`bg-indigo-50/30 p-4 rounded-lg ${
@@ -817,24 +737,14 @@ export default function ApplicationCreatedTrigger() {
                             <SelectValue placeholder="Select recruiter email template" />
                           </SelectTrigger>
                           <SelectContent>
-                            {availableTemplates
-                              .filter(
-                                (template) =>
-                                  template.name
-                                    ?.toLowerCase()
-                                    .includes("recruiter") ||
-                                  !template.name
-                                    ?.toLowerCase()
-                                    .includes("applicant")
-                              )
-                              .map((template) => (
-                                <SelectItem
-                                  key={template.id}
-                                  value={template.id || ""}
-                                >
-                                  {template.name}
-                                </SelectItem>
-                              ))}
+                            {availableTemplates.map((template) => (
+                              <SelectItem
+                                key={template.id}
+                                value={template.id || ""}
+                              >
+                                {template.name}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                         <p className="text-xs text-gray-500 mt-1">
@@ -844,56 +754,61 @@ export default function ApplicationCreatedTrigger() {
                     </div>
                   )}
 
-                  {action.type === "update_job_status" && (
+                  {action.type === "send_email_recruiter_team" && (
                     <div
-                      className={`bg-emerald-50/30 p-4 rounded-lg ${
+                      className={`bg-purple-50/30 p-4 rounded-lg ${
                         formTouched &&
-                        (!action.config.status || action.config.status === "")
+                        (!action.config.templateId ||
+                          action.config.templateId === "")
                           ? "border border-red-300"
-                          : "border border-emerald-100"
+                          : "border border-purple-100"
                       }`}
                     >
                       <div className="flex items-center gap-2 mb-3">
-                        <ClipboardList className="h-4 w-4 text-emerald-500" />
+                        <Users className="h-4 w-4 text-purple-500" />
                         <h3 className="text-sm font-medium text-gray-700">
-                          Status Configuration
+                          Email to Recruiter Team
                         </h3>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700 mb-1 block">
-                          New Status <span className="text-red-500">*</span>
+                          Email Template <span className="text-red-500">*</span>
                         </label>
                         <Select
-                          value={action.config.status || ""}
+                          value={action.config.templateId || ""}
                           onValueChange={(value) =>
-                            updateAction(action.id, "config.status", value)
+                            updateAction(action.id, "config.templateId", value)
                           }
                         >
                           <SelectTrigger
                             className={`bg-white ${
                               formTouched &&
-                              (!action.config.status ||
-                                action.config.status === "")
+                              (!action.config.templateId ||
+                                action.config.templateId === "")
                                 ? "border-red-300"
                                 : ""
                             }`}
                           >
-                            <SelectValue placeholder="Select new status" />
+                            <SelectValue placeholder="Select team email template" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="pending">Pending</SelectItem>
-                            <SelectItem value="shortlisted">
-                              Shortlisted
-                            </SelectItem>
-                            <SelectItem value="rejected">Rejected</SelectItem>
-                            <SelectItem value="hired">Hired</SelectItem>
+                            {availableTemplates.map((template) => (
+                              <SelectItem
+                                key={template.id}
+                                value={template.id || ""}
+                              >
+                                {template.name}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
+                        <p className="text-xs text-gray-500 mt-1">
+                          This email will be sent to the entire recruiter team
+                        </p>
                       </div>
                     </div>
                   )}
 
-                  {/* Delay settings for all action types */}
                   <div className="mt-2 pt-4 border-t border-dashed">
                     <div className="flex items-center gap-2 mb-2">
                       <Clock className="h-4 w-4 text-gray-400" />
@@ -1016,7 +931,7 @@ export default function ApplicationCreatedTrigger() {
           </Button>
           <Button
             onClick={handleSave}
-            className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white px-8 py-2"
+            className="bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white px-8 py-2"
           >
             Save Automation
           </Button>

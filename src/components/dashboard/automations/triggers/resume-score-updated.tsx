@@ -11,12 +11,12 @@ import { applicantConditions } from "@/constants/automations-constants";
 import {
   AlertCircle,
   ArrowRight,
+  CheckCircle2,
   ClipboardList,
   Clock,
   Mail,
   Plus,
   Trash2,
-  UserCheck,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -43,12 +43,11 @@ interface Action {
   };
 }
 
-export default function ApplicationCreatedTrigger() {
-  const [useConditions, setUseConditions] = useState<boolean>(false);
+export default function ResumeScoreUpdatedTrigger() {
   const { availableTemplates } = useGlobalEmailTemplates();
   const navigate = useNavigate();
   const [conditions, setConditions] = useState<Condition[]>([
-    { id: "1", field: "totalScore", operator: "equals", value: "" },
+    { id: "1", field: "totalScore", operator: "greater_than", value: "" },
   ]);
   const [automationName, setAutomationName] = useState<string>("");
   const [automationStatus, setAutomationStatus] = useState<boolean>(true);
@@ -65,34 +64,24 @@ export default function ApplicationCreatedTrigger() {
   const [validationMessage, setValidationMessage] = useState<string>("");
   const [formTouched, setFormTouched] = useState<boolean>(false);
 
-  const getOperators = (field: string) => {
-    const scoreFields = [
-      "totalScore",
-      "culturalFitScore",
-      "educationScore",
-      "experienceScore",
-      "skillsMatchScore",
-    ];
+  // Available fields for resume score conditions
+  const scoreConditionFields = applicantConditions.filter((field) =>
+    field.id.toLowerCase().includes("score")
+  );
 
-    if (scoreFields.includes(field)) {
-      return [
-        { value: "equals", label: "Equals" },
-        { value: "not_equals", label: "Not Equals" },
-        { value: "greater_than", label: "Greater Than" },
-        { value: "less_than", label: "Less Than" },
-        { value: "between", label: "Between" },
-      ];
-    }
-
+  const getOperators = () => {
     return [
       { value: "equals", label: "Equals" },
       { value: "not_equals", label: "Not Equals" },
-      { value: "contains", label: "Contains" },
-      { value: "not_contains", label: "Does Not Contain" },
+      { value: "greater_than", label: "Greater Than" },
+      { value: "less_than", label: "Less Than" },
+      { value: "between", label: "Between" },
+      { value: "increased_by", label: "Increased By" },
+      { value: "decreased_by", label: "Decreased By" },
     ];
   };
 
-  // Available action types
+  // Available action types for resume score update
   const actionTypes = [
     {
       value: "send_email_applicant",
@@ -107,7 +96,7 @@ export default function ApplicationCreatedTrigger() {
     {
       value: "update_job_status",
       label: "Update Application Status",
-      icon: <ClipboardList className="h-4 w-4" />,
+      icon: <ClipboardList className="h-4 w-4 text-emerald-500" />,
     },
   ];
 
@@ -115,7 +104,7 @@ export default function ApplicationCreatedTrigger() {
     const newCondition: Condition = {
       id: `condition-${Date.now()}`,
       field: "totalScore",
-      operator: "equals",
+      operator: "greater_than",
       value: "",
     };
     setConditions([...conditions, newCondition]);
@@ -135,7 +124,7 @@ export default function ApplicationCreatedTrigger() {
             return {
               ...condition,
               [field]: value,
-              operator: "equals",
+              operator: "greater_than",
             };
           }
           return { ...condition, [field]: value };
@@ -215,12 +204,27 @@ export default function ApplicationCreatedTrigger() {
     );
   };
 
-  // Update the validateForm function to handle both email action types
   const validateForm = () => {
     if (!automationName.trim()) {
       setIsValid(false);
       setValidationMessage("Please enter an automation name");
       return false;
+    }
+
+    if (conditions.length === 0) {
+      setIsValid(false);
+      setValidationMessage(
+        "At least one condition is required for resume score triggers"
+      );
+      return false;
+    }
+
+    for (const condition of conditions) {
+      if (!condition.value.trim()) {
+        setIsValid(false);
+        setValidationMessage("Please provide values for all conditions");
+        return false;
+      }
     }
 
     if (actions.length === 0) {
@@ -265,7 +269,7 @@ export default function ApplicationCreatedTrigger() {
     if (formTouched) {
       validateForm();
     }
-  }, [actions, formTouched]);
+  }, [actions, conditions, formTouched]);
 
   const handleSave = () => {
     setFormTouched(true);
@@ -273,10 +277,9 @@ export default function ApplicationCreatedTrigger() {
       console.log("Form submitted", {
         name: automationName,
         status: automationStatus ? "active" : "inactive",
-        useConditions,
-        conditions: useConditions ? conditions : [],
+        conditions,
         actions,
-        triggerType: "application_created",
+        triggerType: "resume_score_updated",
       });
     }
   };
@@ -286,23 +289,19 @@ export default function ApplicationCreatedTrigger() {
     return actionType?.icon || <ArrowRight className="h-4 w-4" />;
   };
 
-  const isNumericField = (fieldId: string) => {
-    return fieldId.toLowerCase().includes("score");
-  };
-
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
-      <div className="bg-gradient-to-r from-blue-50 to-transparent rounded-lg p-6 border-l-4 border-blue-500">
+      <div className="bg-gradient-to-r from-green-50 to-transparent rounded-lg p-6 border-l-4 border-green-500">
         <div className="flex items-center gap-4">
-          <div className="bg-blue-100 p-3 rounded-full">
-            <UserCheck className="h-6 w-6 text-blue-600" />
+          <div className="bg-green-100 p-3 rounded-full">
+            <CheckCircle2 className="h-6 w-6 text-green-600" />
           </div>
           <div>
             <h1 className="text-2xl font-semibold text-gray-900">
-              New Application Trigger
+              Resume Score Updated Trigger
             </h1>
             <p className="text-gray-600">
-              This automation runs when a new candidate applies to a job
+              This automation runs when a candidate's resume score changes
             </p>
           </div>
         </div>
@@ -444,9 +443,9 @@ export default function ApplicationCreatedTrigger() {
 
       {/* Conditions Section */}
       <div className="rounded-lg overflow-hidden bg-white border border-gray-100">
-        <div className="bg-gradient-to-r from-indigo-50 to-white p-4 flex justify-between items-center border-b border-gray-100">
+        <div className="bg-gradient-to-r from-green-50 to-white p-4 flex justify-between items-center border-b border-gray-100">
           <h2 className="text-lg font-medium text-gray-800 flex items-center">
-            <span className="bg-indigo-100 p-1.5 rounded-md mr-2">
+            <span className="bg-green-100 p-1.5 rounded-md mr-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
@@ -455,153 +454,104 @@ export default function ApplicationCreatedTrigger() {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="w-4 h-4 text-indigo-600"
+                className="w-4 h-4 text-green-600"
               >
                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                 <polyline points="22 4 12 14.01 9 11.01"></polyline>
               </svg>
             </span>
             Conditions{" "}
-            <span className="text-gray-500 text-sm ml-2">(Optional)</span>
+            <span className="text-red-500 text-sm ml-2">(Required)</span>
           </h2>
-          <div className="flex items-center gap-3">
-            <label
-              htmlFor="use-conditions"
-              className="text-sm font-medium text-gray-700"
-            >
-              Use conditions
-            </label>
-            <div className="relative inline-block w-12 h-6 transition duration-200 ease-in-out">
-              <input
-                type="checkbox"
-                id="use-conditions"
-                className="opacity-0 absolute w-0 h-0"
-                checked={useConditions}
-                onChange={(e) => setUseConditions(e.target.checked)}
-              />
-              <label
-                htmlFor="use-conditions"
-                className={`block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer ${
-                  useConditions ? "bg-indigo-500" : ""
-                }`}
-              >
-                <span
-                  className={`block h-6 w-6 rounded-full bg-white transform transition-transform duration-200 ease-in-out ${
-                    useConditions ? "translate-x-6" : "translate-x-0"
-                  }`}
-                ></span>
-              </label>
-            </div>
-          </div>
         </div>
 
         <div className="p-5 bg-white">
-          {useConditions ? (
-            <div className="space-y-4">
-              <div className="grid grid-cols-3 gap-3 mb-2">
-                <div className="text-sm font-medium text-gray-500">Key</div>
-                <div className="text-sm font-medium text-gray-500">
-                  Condition
-                </div>
-                <div className="text-sm font-medium text-gray-500">Value</div>
+          <div className="space-y-4">
+            <div className="grid grid-cols-3 gap-3 mb-2">
+              <div className="text-sm font-medium text-gray-500">
+                Score Type
               </div>
+              <div className="text-sm font-medium text-gray-500">Condition</div>
+              <div className="text-sm font-medium text-gray-500">Value</div>
+            </div>
 
-              {conditions.map((condition) => (
-                <div
-                  key={condition.id}
-                  className="flex items-start gap-3 bg-indigo-50/50 p-4 rounded-lg"
-                >
-                  <div className="flex-1 grid grid-cols-3 gap-3">
-                    <Select
-                      value={condition.field}
-                      onValueChange={(value) =>
-                        updateCondition(condition.id, "field", value)
-                      }
-                    >
-                      <SelectTrigger className="bg-white">
-                        <SelectValue placeholder="Select key" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {applicantConditions.map((field) => (
-                          <SelectItem key={field.id} value={field.id}>
-                            {field.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-
-                    <Select
-                      value={condition.operator}
-                      onValueChange={(value) =>
-                        updateCondition(condition.id, "operator", value)
-                      }
-                    >
-                      <SelectTrigger className="bg-white">
-                        <SelectValue placeholder="Select condition" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {getOperators(condition.field).map((operator) => (
-                          <SelectItem
-                            key={operator.value}
-                            value={operator.value}
-                          >
-                            {operator.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-
-                    <Input
-                      placeholder="Enter value"
-                      value={condition.value}
-                      onChange={(e) =>
-                        updateCondition(condition.id, "value", e.target.value)
-                      }
-                      type={isNumericField(condition.field) ? "number" : "text"}
-                      className="bg-white"
-                    />
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeCondition(condition.id)}
-                    disabled={conditions.length <= 1}
-                    className="mt-1 hover:bg-red-50 hover:text-red-500 transition-colors"
+            {conditions.map((condition) => (
+              <div
+                key={condition.id}
+                className="flex items-start gap-3 bg-green-50/50 p-4 rounded-lg"
+              >
+                <div className="flex-1 grid grid-cols-3 gap-3">
+                  <Select
+                    value={condition.field}
+                    onValueChange={(value) =>
+                      updateCondition(condition.id, "field", value)
+                    }
                   >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
+                    <SelectTrigger className="bg-white">
+                      <SelectValue placeholder="Select score type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {scoreConditionFields.map((field) => (
+                        <SelectItem key={field.id} value={field.id}>
+                          {field.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
 
-              <div className="mt-4">
+                  <Select
+                    value={condition.operator}
+                    onValueChange={(value) =>
+                      updateCondition(condition.id, "operator", value)
+                    }
+                  >
+                    <SelectTrigger className="bg-white">
+                      <SelectValue placeholder="Select condition" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {getOperators().map((operator) => (
+                        <SelectItem key={operator.value} value={operator.value}>
+                          {operator.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <Input
+                    placeholder="Enter score value (0-100)"
+                    value={condition.value}
+                    onChange={(e) =>
+                      updateCondition(condition.id, "value", e.target.value)
+                    }
+                    type="number"
+                    min="0"
+                    max="100"
+                    className="bg-white"
+                  />
+                </div>
                 <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={addCondition}
-                  className="flex items-center gap-1 border-indigo-200 text-indigo-600 hover:bg-indigo-50"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => removeCondition(condition.id)}
+                  disabled={conditions.length <= 1}
+                  className="mt-1 hover:bg-red-50 hover:text-red-500 transition-colors"
                 >
-                  <Plus className="h-4 w-4" /> Add Condition
+                  <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
+            ))}
+
+            <div className="mt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={addCondition}
+                className="flex items-center gap-1 border-green-200 text-green-600 hover:bg-green-50"
+              >
+                <Plus className="h-4 w-4" /> Add Condition
+              </Button>
             </div>
-          ) : (
-            <div className="flex items-center justify-center p-8 bg-indigo-50/30 rounded-lg">
-              <div className="text-center">
-                <p className="text-gray-500 mb-2">No conditions specified</p>
-                <p className="text-sm text-gray-400">
-                  This automation will run for every new application
-                </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="mt-3 border-indigo-200 text-indigo-600 hover:bg-indigo-50"
-                  onClick={() => setUseConditions(true)}
-                >
-                  Add Conditions
-                </Button>
-              </div>
-            </div>
-          )}
+          </div>
         </div>
       </div>
 
@@ -633,12 +583,10 @@ export default function ApplicationCreatedTrigger() {
               key={action.id}
               className={`rounded-lg overflow-hidden border ${
                 formTouched &&
-                ((action.type === "send_email_applicant" &&
+                (((action.type === "send_email_applicant" ||
+                  action.type === "send_email_recruiter") &&
                   (!action.config.templateId ||
                     action.config.templateId === "")) ||
-                  (action.type === "send_email_recruiter" &&
-                    (!action.config.templateId ||
-                      action.config.templateId === "")) ||
                   (action.type === "update_job_status" &&
                     (!action.config.status || action.config.status === "")))
                   ? "border-red-200 bg-red-50/10"
@@ -647,18 +595,20 @@ export default function ApplicationCreatedTrigger() {
             >
               <div
                 className={`p-3 flex items-center justify-between border-b ${
-                  action.type === "send_email_applicant" ||
-                  action.type === "send_email_recruiter"
+                  action.type === "send_email_applicant"
                     ? "bg-blue-50/50"
+                    : action.type === "send_email_recruiter"
+                    ? "bg-indigo-50/50"
                     : "bg-emerald-50/50"
                 }`}
               >
                 <div className="flex items-center gap-3">
                   <div
                     className={`w-7 h-7 rounded-full flex items-center justify-center ${
-                      action.type === "send_email_applicant" ||
-                      action.type === "send_email_recruiter"
+                      action.type === "send_email_applicant"
                         ? "bg-blue-100"
+                        : action.type === "send_email_recruiter"
+                        ? "bg-indigo-100"
                         : "bg-emerald-100"
                     }`}
                   >
@@ -889,11 +839,13 @@ export default function ApplicationCreatedTrigger() {
                             <SelectItem value="hired">Hired</SelectItem>
                           </SelectContent>
                         </Select>
+                        <p className="text-xs text-gray-500 mt-1">
+                          The application status will be updated to this value
+                        </p>
                       </div>
                     </div>
                   )}
 
-                  {/* Delay settings for all action types */}
                   <div className="mt-2 pt-4 border-t border-dashed">
                     <div className="flex items-center gap-2 mb-2">
                       <Clock className="h-4 w-4 text-gray-400" />
@@ -1016,7 +968,7 @@ export default function ApplicationCreatedTrigger() {
           </Button>
           <Button
             onClick={handleSave}
-            className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white px-8 py-2"
+            className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-8 py-2"
           >
             Save Automation
           </Button>

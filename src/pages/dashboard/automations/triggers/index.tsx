@@ -1,12 +1,15 @@
 import ApplicationCreatedTrigger from "@/components/dashboard/automations/triggers/application-created-trigger";
-import { Button } from "@/components/ui/button";
+import ApplicationStatusChangeTrigger from "@/components/dashboard/automations/triggers/application-status-change";
+import JobCreatedTrigger from "@/components/dashboard/automations/triggers/job-created";
+import JobExpiredTrigger from "@/components/dashboard/automations/triggers/job-expired";
+import JobPublishedTrigger from "@/components/dashboard/automations/triggers/job-published";
+import ResumeScoreUpdatedTrigger from "@/components/dashboard/automations/triggers/resume-score-updated";
+import ScheduledTimeTrigger from "@/components/dashboard/automations/triggers/scheduled-time";
 import { allTriggers } from "@/constants/automations-constants";
-import { ArrowLeft } from "lucide-react";
-import { useNavigate, useParams } from "react-router";
+import { useParams } from "react-router";
 
 function TriggersPage() {
   const { triggerId } = useParams();
-  const navigate = useNavigate();
 
   const trigger = allTriggers.find((t) => t.type === triggerId);
 
@@ -18,6 +21,18 @@ function TriggersPage() {
     switch (trigger.type) {
       case "application_created":
         return <ApplicationCreatedTrigger />;
+      case "application_status_changed":
+        return <ApplicationStatusChangeTrigger />;
+      case "resume_score_updated":
+        return <ResumeScoreUpdatedTrigger />;
+      case "job_created":
+        return <JobCreatedTrigger />;
+      case "job_published":
+        return <JobPublishedTrigger />;
+      case "job_expired":
+        return <JobExpiredTrigger />;
+      case "cron":
+        return <ScheduledTimeTrigger />;
       default:
         return (
           <div>
@@ -30,21 +45,7 @@ function TriggersPage() {
     }
   };
 
-  return (
-    <div className="p-6">
-      <div className="mb-4">
-        <Button
-          variant="ghost"
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-gray-500 hover:text-gray-700"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back
-        </Button>
-      </div>
-      {renderTriggerComponent()}
-    </div>
-  );
+  return <div className="p-6">{renderTriggerComponent()}</div>;
 }
 
 export default TriggersPage;

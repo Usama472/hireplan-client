@@ -7,26 +7,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { applicantConditions } from "@/constants/automations-constants";
 import {
   AlertCircle,
   ArrowRight,
-  ClipboardList,
+  Calendar,
   Clock,
   Mail,
+  PieChart,
   Plus,
   Trash2,
-  UserCheck,
+  XCircle,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGlobalEmailTemplates } from "../../global-setting/hooks/useGlobalEmailTemplates";
 
-interface Condition {
-  id: string;
-  field: string;
-  operator: string;
-  value: string;
+interface ScheduleConfig {
+  frequency: "daily" | "weekly" | "monthly" | "";
+  time: string;
+  dayOfWeek?: string;
+  dayOfMonth?: string;
 }
 
 interface Action {
@@ -34,7 +34,7 @@ interface Action {
   type: string;
   config: {
     templateId?: string;
-    status?: string;
+    daysOld?: number;
     delay: {
       value: number;
       unit: "minutes" | "hours" | "days";
@@ -43,21 +43,23 @@ interface Action {
   };
 }
 
-export default function ApplicationCreatedTrigger() {
-  const [useConditions, setUseConditions] = useState<boolean>(false);
+export default function ScheduledTimeTrigger() {
   const { availableTemplates } = useGlobalEmailTemplates();
   const navigate = useNavigate();
-  const [conditions, setConditions] = useState<Condition[]>([
-    { id: "1", field: "totalScore", operator: "equals", value: "" },
-  ]);
+  const [scheduleConfig, setScheduleConfig] = useState<ScheduleConfig>({
+    frequency: "",
+    time: "",
+    dayOfWeek: "",
+    dayOfMonth: "",
+  });
   const [automationName, setAutomationName] = useState<string>("");
   const [automationStatus, setAutomationStatus] = useState<boolean>(true);
 
   const [actions, setActions] = useState<Action[]>([
     {
       id: "1",
-      type: "send_email_applicant",
-      config: { templateId: "", delay: { value: 0, unit: "minutes" } },
+      type: "send_pipeline_summary",
+      config: { delay: { value: 0, unit: "minutes" } },
     },
   ]);
 
@@ -65,91 +67,66 @@ export default function ApplicationCreatedTrigger() {
   const [validationMessage, setValidationMessage] = useState<string>("");
   const [formTouched, setFormTouched] = useState<boolean>(false);
 
-  const getOperators = (field: string) => {
-    const scoreFields = [
-      "totalScore",
-      "culturalFitScore",
-      "educationScore",
-      "experienceScore",
-      "skillsMatchScore",
-    ];
+  // Available frequencies
+  const frequencies = [
+    { value: "daily", label: "Daily" },
+    { value: "weekly", label: "Weekly" },
+    { value: "monthly", label: "Monthly" },
+  ];
 
-    if (scoreFields.includes(field)) {
-      return [
-        { value: "equals", label: "Equals" },
-        { value: "not_equals", label: "Not Equals" },
-        { value: "greater_than", label: "Greater Than" },
-        { value: "less_than", label: "Less Than" },
-        { value: "between", label: "Between" },
-      ];
-    }
+  // Days of the week
+  const daysOfWeek = [
+    { value: "monday", label: "Monday" },
+    { value: "tuesday", label: "Tuesday" },
+    { value: "wednesday", label: "Wednesday" },
+    { value: "thursday", label: "Thursday" },
+    { value: "friday", label: "Friday" },
+    { value: "saturday", label: "Saturday" },
+    { value: "sunday", label: "Sunday" },
+  ];
 
-    return [
-      { value: "equals", label: "Equals" },
-      { value: "not_equals", label: "Not Equals" },
-      { value: "contains", label: "Contains" },
-      { value: "not_contains", label: "Does Not Contain" },
-    ];
-  };
+  // Days of the month
+  const daysOfMonth = Array.from({ length: 31 }, (_, i) => ({
+    value: (i + 1).toString(),
+    label: `${i + 1}${i === 0 ? "st" : i === 1 ? "nd" : i === 2 ? "rd" : "th"}`,
+  }));
 
-  // Available action types
+  // Available action types for scheduled time
   const actionTypes = [
     {
-      value: "send_email_applicant",
-      label: "Send Email to Applicant",
-      icon: <Mail className="h-4 w-4 text-blue-500" />,
+      value: "send_pipeline_summary",
+      label: "Send Pipeline Summary to Recruiter",
+      icon: <PieChart className="h-4 w-4 text-blue-500" />,
     },
     {
-      value: "send_email_recruiter",
-      label: "Send Email to Recruiter",
-      icon: <Mail className="h-4 w-4 text-indigo-500" />,
+      value: "auto_expire_jobs",
+      label: "Auto-Expire Old Jobs",
+      icon: <XCircle className="h-4 w-4 text-red-500" />,
     },
     {
-      value: "update_job_status",
-      label: "Update Application Status",
-      icon: <ClipboardList className="h-4 w-4" />,
+      value: "send_email_reminders",
+      label: "Send Email Reminders to Candidates",
+      icon: <Mail className="h-4 w-4 text-green-500" />,
     },
   ];
 
-  const addCondition = () => {
-    const newCondition: Condition = {
-      id: `condition-${Date.now()}`,
-      field: "totalScore",
-      operator: "equals",
-      value: "",
-    };
-    setConditions([...conditions, newCondition]);
-  };
-
-  const removeCondition = (id: string) => {
-    if (conditions.length > 1) {
-      setConditions(conditions.filter((condition) => condition.id !== id));
-    }
-  };
-
-  const updateCondition = (id: string, field: string, value: any) => {
-    setConditions(
-      conditions.map((condition) => {
-        if (condition.id === id) {
-          if (field === "field") {
-            return {
-              ...condition,
-              [field]: value,
-              operator: "equals",
-            };
-          }
-          return { ...condition, [field]: value };
-        }
-        return condition;
-      })
-    );
+  const updateScheduleConfig = (field: keyof ScheduleConfig, value: any) => {
+    setScheduleConfig((prev) => ({
+      ...prev,
+      [field]: value,
+      // Reset dependent fields when frequency changes
+      ...(field === "frequency" && {
+        dayOfWeek: "",
+        dayOfMonth: "",
+      }),
+    }));
   };
 
   const addAction = () => {
     const newAction: Action = {
       id: `action-${Date.now()}`,
-      type: "send_email_applicant",
-      config: { templateId: "", delay: { value: 0, unit: "minutes" } },
+      type: "send_pipeline_summary",
+      config: { delay: { value: 0, unit: "minutes" } },
     };
     setActions([...actions, newAction]);
     setFormTouched(true);
@@ -215,11 +192,34 @@ export default function ApplicationCreatedTrigger() {
     );
   };
 
-  // Update the validateForm function to handle both email action types
   const validateForm = () => {
     if (!automationName.trim()) {
       setIsValid(false);
       setValidationMessage("Please enter an automation name");
+      return false;
+    }
+
+    if (!scheduleConfig.frequency) {
+      setIsValid(false);
+      setValidationMessage("Please select a frequency");
+      return false;
+    }
+
+    if (!scheduleConfig.time) {
+      setIsValid(false);
+      setValidationMessage("Please select a time");
+      return false;
+    }
+
+    if (scheduleConfig.frequency === "weekly" && !scheduleConfig.dayOfWeek) {
+      setIsValid(false);
+      setValidationMessage("Please select a day of the week");
+      return false;
+    }
+
+    if (scheduleConfig.frequency === "monthly" && !scheduleConfig.dayOfMonth) {
+      setIsValid(false);
+      setValidationMessage("Please select a day of the month");
       return false;
     }
 
@@ -230,26 +230,21 @@ export default function ApplicationCreatedTrigger() {
     }
 
     for (const action of actions) {
-      if (
-        action.type === "send_email_applicant" ||
-        action.type === "send_email_recruiter"
-      ) {
+      if (action.type === "send_email_reminders") {
         if (!action.config.templateId || action.config.templateId === "") {
           setIsValid(false);
-          const recipient =
-            action.type === "send_email_applicant" ? "applicant" : "recruiter";
           setValidationMessage(
-            `Please select an email template for the ${recipient} email action`
+            "Please select an email template for email reminder actions"
           );
           return false;
         }
       }
 
-      if (action.type === "update_job_status") {
-        if (!action.config.status || action.config.status === "") {
+      if (action.type === "auto_expire_jobs") {
+        if (!action.config.daysOld || action.config.daysOld <= 0) {
           setIsValid(false);
           setValidationMessage(
-            "Please select a status for all status update actions"
+            "Please specify how many days old jobs should be to auto-expire"
           );
           return false;
         }
@@ -265,7 +260,7 @@ export default function ApplicationCreatedTrigger() {
     if (formTouched) {
       validateForm();
     }
-  }, [actions, formTouched]);
+  }, [actions, scheduleConfig, formTouched]);
 
   const handleSave = () => {
     setFormTouched(true);
@@ -273,10 +268,9 @@ export default function ApplicationCreatedTrigger() {
       console.log("Form submitted", {
         name: automationName,
         status: automationStatus ? "active" : "inactive",
-        useConditions,
-        conditions: useConditions ? conditions : [],
+        schedule: scheduleConfig,
         actions,
-        triggerType: "application_created",
+        triggerType: "cron",
       });
     }
   };
@@ -286,23 +280,20 @@ export default function ApplicationCreatedTrigger() {
     return actionType?.icon || <ArrowRight className="h-4 w-4" />;
   };
 
-  const isNumericField = (fieldId: string) => {
-    return fieldId.toLowerCase().includes("score");
-  };
-
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
-      <div className="bg-gradient-to-r from-blue-50 to-transparent rounded-lg p-6 border-l-4 border-blue-500">
+      <div className="bg-gradient-to-r from-purple-50 to-transparent rounded-lg p-6 border-l-4 border-purple-500">
         <div className="flex items-center gap-4">
-          <div className="bg-blue-100 p-3 rounded-full">
-            <UserCheck className="h-6 w-6 text-blue-600" />
+          <div className="bg-purple-100 p-3 rounded-full">
+            <Calendar className="h-6 w-6 text-purple-600" />
           </div>
           <div>
             <h1 className="text-2xl font-semibold text-gray-900">
-              New Application Trigger
+              Scheduled Time Trigger
             </h1>
             <p className="text-gray-600">
-              This automation runs when a new candidate applies to a job
+              This automation runs on a recurring schedule (daily, weekly,
+              monthly)
             </p>
           </div>
         </div>
@@ -434,7 +425,7 @@ export default function ApplicationCreatedTrigger() {
               </div>
               <p className="text-xs text-gray-500 mt-2">
                 {automationStatus
-                  ? "This automation will run when conditions are met"
+                  ? "This automation will run on schedule"
                   : "This automation is currently disabled"}
               </p>
             </div>
@@ -442,166 +433,152 @@ export default function ApplicationCreatedTrigger() {
         </div>
       </div>
 
-      {/* Conditions Section */}
+      {/* Schedule Configuration */}
       <div className="rounded-lg overflow-hidden bg-white border border-gray-100">
-        <div className="bg-gradient-to-r from-indigo-50 to-white p-4 flex justify-between items-center border-b border-gray-100">
+        <div className="bg-gradient-to-r from-purple-50 to-white p-4 border-b border-gray-100">
           <h2 className="text-lg font-medium text-gray-800 flex items-center">
-            <span className="bg-indigo-100 p-1.5 rounded-md mr-2">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="w-4 h-4 text-indigo-600"
-              >
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-              </svg>
+            <span className="bg-purple-100 p-1.5 rounded-md mr-2">
+              <Clock className="h-4 w-4 text-purple-600" />
             </span>
-            Conditions{" "}
-            <span className="text-gray-500 text-sm ml-2">(Optional)</span>
+            Schedule Configuration{" "}
+            <span className="text-red-500 text-sm ml-2">(Required)</span>
           </h2>
-          <div className="flex items-center gap-3">
-            <label
-              htmlFor="use-conditions"
-              className="text-sm font-medium text-gray-700"
-            >
-              Use conditions
-            </label>
-            <div className="relative inline-block w-12 h-6 transition duration-200 ease-in-out">
-              <input
-                type="checkbox"
-                id="use-conditions"
-                className="opacity-0 absolute w-0 h-0"
-                checked={useConditions}
-                onChange={(e) => setUseConditions(e.target.checked)}
-              />
-              <label
-                htmlFor="use-conditions"
-                className={`block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer ${
-                  useConditions ? "bg-indigo-500" : ""
-                }`}
-              >
-                <span
-                  className={`block h-6 w-6 rounded-full bg-white transform transition-transform duration-200 ease-in-out ${
-                    useConditions ? "translate-x-6" : "translate-x-0"
-                  }`}
-                ></span>
-              </label>
-            </div>
-          </div>
         </div>
 
         <div className="p-5 bg-white">
-          {useConditions ? (
-            <div className="space-y-4">
-              <div className="grid grid-cols-3 gap-3 mb-2">
-                <div className="text-sm font-medium text-gray-500">Key</div>
-                <div className="text-sm font-medium text-gray-500">
-                  Condition
-                </div>
-                <div className="text-sm font-medium text-gray-500">Value</div>
-              </div>
-
-              {conditions.map((condition) => (
-                <div
-                  key={condition.id}
-                  className="flex items-start gap-3 bg-indigo-50/50 p-4 rounded-lg"
+          <div className="space-y-6">
+            {/* Frequency Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Frequency <span className="text-red-500">*</span>
+              </label>
+              <Select
+                value={scheduleConfig.frequency}
+                onValueChange={(value) =>
+                  updateScheduleConfig("frequency", value)
+                }
+              >
+                <SelectTrigger
+                  className={`bg-white ${
+                    formTouched && !scheduleConfig.frequency
+                      ? "border-red-300"
+                      : ""
+                  }`}
                 >
-                  <div className="flex-1 grid grid-cols-3 gap-3">
-                    <Select
-                      value={condition.field}
-                      onValueChange={(value) =>
-                        updateCondition(condition.id, "field", value)
-                      }
-                    >
-                      <SelectTrigger className="bg-white">
-                        <SelectValue placeholder="Select key" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {applicantConditions.map((field) => (
-                          <SelectItem key={field.id} value={field.id}>
-                            {field.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                  <SelectValue placeholder="Select frequency" />
+                </SelectTrigger>
+                <SelectContent>
+                  {frequencies.map((freq) => (
+                    <SelectItem key={freq.value} value={freq.value}>
+                      {freq.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-                    <Select
-                      value={condition.operator}
-                      onValueChange={(value) =>
-                        updateCondition(condition.id, "operator", value)
-                      }
-                    >
-                      <SelectTrigger className="bg-white">
-                        <SelectValue placeholder="Select condition" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {getOperators(condition.field).map((operator) => (
-                          <SelectItem
-                            key={operator.value}
-                            value={operator.value}
-                          >
-                            {operator.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+            {/* Time Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Time <span className="text-red-500">*</span>
+              </label>
+              <Input
+                type="time"
+                value={scheduleConfig.time}
+                onChange={(e) => updateScheduleConfig("time", e.target.value)}
+                className={`bg-white max-w-xs ${
+                  formTouched && !scheduleConfig.time ? "border-red-300" : ""
+                }`}
+              />
+            </div>
 
-                    <Input
-                      placeholder="Enter value"
-                      value={condition.value}
-                      onChange={(e) =>
-                        updateCondition(condition.id, "value", e.target.value)
-                      }
-                      type={isNumericField(condition.field) ? "number" : "text"}
-                      className="bg-white"
-                    />
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeCondition(condition.id)}
-                    disabled={conditions.length <= 1}
-                    className="mt-1 hover:bg-red-50 hover:text-red-500 transition-colors"
+            {/* Day of Week Selection (for weekly) */}
+            {scheduleConfig.frequency === "weekly" && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Day of Week <span className="text-red-500">*</span>
+                </label>
+                <Select
+                  value={scheduleConfig.dayOfWeek || ""}
+                  onValueChange={(value) =>
+                    updateScheduleConfig("dayOfWeek", value)
+                  }
+                >
+                  <SelectTrigger
+                    className={`bg-white max-w-xs ${
+                      formTouched && !scheduleConfig.dayOfWeek
+                        ? "border-red-300"
+                        : ""
+                    }`}
                   >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
+                    <SelectValue placeholder="Select day of week" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {daysOfWeek.map((day) => (
+                      <SelectItem key={day.value} value={day.value}>
+                        {day.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
-              <div className="mt-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={addCondition}
-                  className="flex items-center gap-1 border-indigo-200 text-indigo-600 hover:bg-indigo-50"
+            {/* Day of Month Selection (for monthly) */}
+            {scheduleConfig.frequency === "monthly" && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Day of Month <span className="text-red-500">*</span>
+                </label>
+                <Select
+                  value={scheduleConfig.dayOfMonth || ""}
+                  onValueChange={(value) =>
+                    updateScheduleConfig("dayOfMonth", value)
+                  }
                 >
-                  <Plus className="h-4 w-4" /> Add Condition
-                </Button>
+                  <SelectTrigger
+                    className={`bg-white max-w-xs ${
+                      formTouched && !scheduleConfig.dayOfMonth
+                        ? "border-red-300"
+                        : ""
+                    }`}
+                  >
+                    <SelectValue placeholder="Select day of month" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {daysOfMonth.map((day) => (
+                      <SelectItem key={day.value} value={day.value}>
+                        {day.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            </div>
-          ) : (
-            <div className="flex items-center justify-center p-8 bg-indigo-50/30 rounded-lg">
-              <div className="text-center">
-                <p className="text-gray-500 mb-2">No conditions specified</p>
-                <p className="text-sm text-gray-400">
-                  This automation will run for every new application
+            )}
+
+            {/* Schedule Preview */}
+            {scheduleConfig.frequency && scheduleConfig.time && (
+              <div className="bg-purple-50/30 p-4 rounded-lg border border-purple-100">
+                <h3 className="text-sm font-medium text-gray-700 mb-2 flex items-center">
+                  <Calendar className="h-4 w-4 text-purple-500 mr-1" />
+                  Schedule Preview
+                </h3>
+                <p className="text-sm text-gray-600">
+                  This automation will run{" "}
+                  <span className="font-medium">
+                    {scheduleConfig.frequency === "daily" &&
+                      `daily at ${scheduleConfig.time}`}
+                    {scheduleConfig.frequency === "weekly" &&
+                      scheduleConfig.dayOfWeek &&
+                      `every ${scheduleConfig.dayOfWeek} at ${scheduleConfig.time}`}
+                    {scheduleConfig.frequency === "monthly" &&
+                      scheduleConfig.dayOfMonth &&
+                      `on the ${scheduleConfig.dayOfMonth} of each month at ${scheduleConfig.time}`}
+                  </span>
                 </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="mt-3 border-indigo-200 text-indigo-600 hover:bg-indigo-50"
-                  onClick={() => setUseConditions(true)}
-                >
-                  Add Conditions
-                </Button>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
@@ -633,33 +610,36 @@ export default function ApplicationCreatedTrigger() {
               key={action.id}
               className={`rounded-lg overflow-hidden border ${
                 formTouched &&
-                ((action.type === "send_email_applicant" &&
+                ((action.type === "send_email_reminders" &&
                   (!action.config.templateId ||
                     action.config.templateId === "")) ||
-                  (action.type === "send_email_recruiter" &&
-                    (!action.config.templateId ||
-                      action.config.templateId === "")) ||
-                  (action.type === "update_job_status" &&
-                    (!action.config.status || action.config.status === "")))
+                  (action.type === "auto_expire_jobs" &&
+                    (!action.config.daysOld || action.config.daysOld <= 0)))
                   ? "border-red-200 bg-red-50/10"
                   : "border-gray-200 bg-white"
               }`}
             >
               <div
                 className={`p-3 flex items-center justify-between border-b ${
-                  action.type === "send_email_applicant" ||
-                  action.type === "send_email_recruiter"
+                  action.type === "send_pipeline_summary"
                     ? "bg-blue-50/50"
-                    : "bg-emerald-50/50"
+                    : action.type === "auto_expire_jobs"
+                    ? "bg-red-50/50"
+                    : action.type === "send_email_reminders"
+                    ? "bg-green-50/50"
+                    : "bg-gray-50/50"
                 }`}
               >
                 <div className="flex items-center gap-3">
                   <div
                     className={`w-7 h-7 rounded-full flex items-center justify-center ${
-                      action.type === "send_email_applicant" ||
-                      action.type === "send_email_recruiter"
+                      action.type === "send_pipeline_summary"
                         ? "bg-blue-100"
-                        : "bg-emerald-100"
+                        : action.type === "auto_expire_jobs"
+                        ? "bg-red-100"
+                        : action.type === "send_email_reminders"
+                        ? "bg-green-100"
+                        : "bg-gray-100"
                     }`}
                   >
                     {getActionIcon(action.type)}
@@ -667,11 +647,13 @@ export default function ApplicationCreatedTrigger() {
                   <span className="font-medium text-gray-700 flex items-center">
                     Action {i + 1}
                     <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
-                      {action.type === "send_email_applicant"
-                        ? "Email to Applicant"
-                        : action.type === "send_email_recruiter"
-                        ? "Email to Recruiter"
-                        : "Status Update"}
+                      {action.type === "send_pipeline_summary"
+                        ? "Pipeline Summary"
+                        : action.type === "auto_expire_jobs"
+                        ? "Auto Expire"
+                        : action.type === "send_email_reminders"
+                        ? "Email Reminders"
+                        : "Action"}
                     </span>
                   </span>
                 </div>
@@ -714,20 +696,87 @@ export default function ApplicationCreatedTrigger() {
                     </Select>
                   </div>
 
-                  {action.type === "send_email_applicant" && (
+                  {action.type === "send_pipeline_summary" && (
+                    <div className="bg-blue-50/30 p-4 rounded-lg border border-blue-100">
+                      <div className="flex items-center gap-2 mb-3">
+                        <PieChart className="h-4 w-4 text-blue-500" />
+                        <h3 className="text-sm font-medium text-gray-700">
+                          Pipeline Summary Configuration
+                        </h3>
+                      </div>
+                      <p className="text-sm text-gray-600">
+                        A comprehensive pipeline summary will be automatically
+                        generated and sent to recruiters, including application
+                        statistics, top candidates, and performance metrics.
+                      </p>
+                    </div>
+                  )}
+
+                  {action.type === "auto_expire_jobs" && (
                     <div
-                      className={`bg-blue-50/30 p-4 rounded-lg ${
+                      className={`bg-red-50/30 p-4 rounded-lg ${
+                        formTouched &&
+                        (!action.config.daysOld || action.config.daysOld <= 0)
+                          ? "border border-red-300"
+                          : "border border-red-100"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-3">
+                        <XCircle className="h-4 w-4 text-red-500" />
+                        <h3 className="text-sm font-medium text-gray-700">
+                          Auto-Expire Configuration
+                        </h3>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 mb-1 block">
+                          Expire jobs older than{" "}
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            type="number"
+                            min="1"
+                            placeholder="30"
+                            value={action.config.daysOld || ""}
+                            onChange={(e) =>
+                              updateAction(
+                                action.id,
+                                "config.daysOld",
+                                parseInt(e.target.value) || 0
+                              )
+                            }
+                            className={`w-24 bg-white ${
+                              formTouched &&
+                              (!action.config.daysOld ||
+                                action.config.daysOld <= 0)
+                                ? "border-red-300"
+                                : ""
+                            }`}
+                          />
+                          <span className="text-sm text-gray-500">days</span>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Jobs that have been active for more than this number
+                          of days will be automatically expired
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {action.type === "send_email_reminders" && (
+                    <div
+                      className={`bg-green-50/30 p-4 rounded-lg ${
                         formTouched &&
                         (!action.config.templateId ||
                           action.config.templateId === "")
                           ? "border border-red-300"
-                          : "border border-blue-100"
+                          : "border border-green-100"
                       }`}
                     >
                       <div className="flex items-center gap-2 mb-3">
-                        <Mail className="h-4 w-4 text-blue-500" />
+                        <Mail className="h-4 w-4 text-green-500" />
                         <h3 className="text-sm font-medium text-gray-700">
-                          Email to Applicant
+                          Email Reminder Configuration
                         </h3>
                       </div>
                       <div>
@@ -749,151 +798,27 @@ export default function ApplicationCreatedTrigger() {
                                 : ""
                             }`}
                           >
-                            <SelectValue placeholder="Select applicant email template" />
+                            <SelectValue placeholder="Select reminder email template" />
                           </SelectTrigger>
                           <SelectContent>
-                            {availableTemplates
-                              .filter(
-                                (template) =>
-                                  template.name
-                                    ?.toLowerCase()
-                                    .includes("applicant") ||
-                                  !template.name
-                                    ?.toLowerCase()
-                                    .includes("recruiter")
-                              )
-                              .map((template) => (
-                                <SelectItem
-                                  key={template.id}
-                                  value={template.id || ""}
-                                >
-                                  {template.name}
-                                </SelectItem>
-                              ))}
+                            {availableTemplates.map((template) => (
+                              <SelectItem
+                                key={template.id}
+                                value={template.id || ""}
+                              >
+                                {template.name}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                         <p className="text-xs text-gray-500 mt-1">
-                          This email will be sent to the job applicant
+                          This reminder email will be sent to candidates who
+                          haven't completed their applications
                         </p>
                       </div>
                     </div>
                   )}
 
-                  {action.type === "send_email_recruiter" && (
-                    <div
-                      className={`bg-indigo-50/30 p-4 rounded-lg ${
-                        formTouched &&
-                        (!action.config.templateId ||
-                          action.config.templateId === "")
-                          ? "border border-red-300"
-                          : "border border-indigo-100"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 mb-3">
-                        <Mail className="h-4 w-4 text-indigo-500" />
-                        <h3 className="text-sm font-medium text-gray-700">
-                          Email to Recruiter
-                        </h3>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-700 mb-1 block">
-                          Email Template <span className="text-red-500">*</span>
-                        </label>
-                        <Select
-                          value={action.config.templateId || ""}
-                          onValueChange={(value) =>
-                            updateAction(action.id, "config.templateId", value)
-                          }
-                        >
-                          <SelectTrigger
-                            className={`bg-white ${
-                              formTouched &&
-                              (!action.config.templateId ||
-                                action.config.templateId === "")
-                                ? "border-red-300"
-                                : ""
-                            }`}
-                          >
-                            <SelectValue placeholder="Select recruiter email template" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {availableTemplates
-                              .filter(
-                                (template) =>
-                                  template.name
-                                    ?.toLowerCase()
-                                    .includes("recruiter") ||
-                                  !template.name
-                                    ?.toLowerCase()
-                                    .includes("applicant")
-                              )
-                              .map((template) => (
-                                <SelectItem
-                                  key={template.id}
-                                  value={template.id || ""}
-                                >
-                                  {template.name}
-                                </SelectItem>
-                              ))}
-                          </SelectContent>
-                        </Select>
-                        <p className="text-xs text-gray-500 mt-1">
-                          This email will be sent to the assigned recruiter
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {action.type === "update_job_status" && (
-                    <div
-                      className={`bg-emerald-50/30 p-4 rounded-lg ${
-                        formTouched &&
-                        (!action.config.status || action.config.status === "")
-                          ? "border border-red-300"
-                          : "border border-emerald-100"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 mb-3">
-                        <ClipboardList className="h-4 w-4 text-emerald-500" />
-                        <h3 className="text-sm font-medium text-gray-700">
-                          Status Configuration
-                        </h3>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-700 mb-1 block">
-                          New Status <span className="text-red-500">*</span>
-                        </label>
-                        <Select
-                          value={action.config.status || ""}
-                          onValueChange={(value) =>
-                            updateAction(action.id, "config.status", value)
-                          }
-                        >
-                          <SelectTrigger
-                            className={`bg-white ${
-                              formTouched &&
-                              (!action.config.status ||
-                                action.config.status === "")
-                                ? "border-red-300"
-                                : ""
-                            }`}
-                          >
-                            <SelectValue placeholder="Select new status" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="pending">Pending</SelectItem>
-                            <SelectItem value="shortlisted">
-                              Shortlisted
-                            </SelectItem>
-                            <SelectItem value="rejected">Rejected</SelectItem>
-                            <SelectItem value="hired">Hired</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Delay settings for all action types */}
                   <div className="mt-2 pt-4 border-t border-dashed">
                     <div className="flex items-center gap-2 mb-2">
                       <Clock className="h-4 w-4 text-gray-400" />
@@ -974,7 +899,7 @@ export default function ApplicationCreatedTrigger() {
                           </SelectContent>
                         </Select>
                         <span className="text-sm text-gray-500">
-                          after trigger
+                          after scheduled time
                         </span>
                       </div>
                     )}
@@ -1016,7 +941,7 @@ export default function ApplicationCreatedTrigger() {
           </Button>
           <Button
             onClick={handleSave}
-            className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white px-8 py-2"
+            className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white px-8 py-2"
           >
             Save Automation
           </Button>
