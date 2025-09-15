@@ -1,9 +1,11 @@
 import {
   AlertCircle,
+  Brain,
   Briefcase,
   Calendar,
   CheckCircle2,
   FileCheck,
+  MessageSquare,
   UserCheck,
   type LucideIcon,
 } from "lucide-react";

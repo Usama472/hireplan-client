@@ -19,7 +19,7 @@ if (!window.ResizeObserver) {
     constructor(callback: ResizeObserverCallback) {
       // Basic implementation - just call callback once
       setTimeout(() => callback([], this), 0);
-    }
+    } 
     observe() {}
     unobserve() {}
     disconnect() {}
