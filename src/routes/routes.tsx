@@ -27,6 +27,7 @@ import Home from "@/pages/home";
 
 // Auth Pages
 import CheckoutPage from "@/pages/checkout";
+import AIFollowupPage from "@/pages/dashboard/ai-followup";
 import AutomationsDashboard from "@/pages/dashboard/automations";
 import CreateAutomationPage from "@/pages/dashboard/automations/create";
 import EditAutomationPage from "@/pages/dashboard/automations/edit";
@@ -245,6 +246,12 @@ export const appRoutes: AppRoutesType[] = [
     id: "create-trigger",
     url: ROUTES.DASHBOARD.TRIGGER_CREATED,
     element: <TriggersPage />,
+    isPrivate: true,
+  },
+  {
+    id: "ai-followup",
+    url: ROUTES.DASHBOARD.AI_FOLLOWUP,
+    element: <AIFollowupPage />,
     isPrivate: true,
   },
 ];

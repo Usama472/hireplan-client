@@ -127,20 +127,14 @@ const StatsCard = ({
   value: number;
   color: string;
 }) => (
-  <div className="p-6 bg-gray-50 border border-gray-200 rounded-lg">
-    <div className="flex items-center justify-between">
-      <div>
-        <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">
-          {title}
-        </p>
-        <p className="text-3xl font-bold mt-2 text-gray-900">{value}</p>
-      </div>
-      <div
-        className={`w-12 h-12 rounded-xl flex items-center justify-center ${color}`}
-      >
-        <Icon className="w-6 h-6" />
-      </div>
+  <div className="p-6 bg-gray-50 border border-gray-200 rounded-lg text-center">
+    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${color} mx-auto mb-3`}>
+      <Icon className="w-6 h-6" />
     </div>
+    <p className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-2">
+      {title}
+    </p>
+    <p className="text-3xl font-bold text-gray-900">{value}</p>
   </div>
 );
 
@@ -462,7 +456,7 @@ export function ApplicantsSection({
   }
 
   return (
-    <div className="space-y-8">
+    <div className="w-full max-w-none space-y-6">
       {/* Section Header */}
       <div className="space-y-2">
         <h2 className="text-2xl font-bold text-gray-900">Applicants</h2>
@@ -473,8 +467,8 @@ export function ApplicantsSection({
       </div>
 
       {/* Stats Overview */}
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
+      <div className="space-y-4 w-full">
+        <div className="flex items-center justify-between w-full">
           <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
             Applicant Overview
           </h3>
@@ -485,7 +479,7 @@ export function ApplicantsSection({
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
           <StatsCard
             icon={Users}
             title="Total Applicants"
@@ -514,35 +508,33 @@ export function ApplicantsSection({
       </div>
 
       {/* Filters and Search */}
-      <div className="space-y-6">
+      <div className="space-y-4 w-full">
         <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
           Search & Filters
         </h3>
-        <div className="p-6 bg-gray-50 border border-gray-200 rounded-lg">
-          <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-            <div className="flex flex-col sm:flex-row gap-4 flex-1 w-full">
-              <div className="relative flex-1 max-w-md border-gray-300 border rounded-md">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <Input
-                  placeholder="Search applicants..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 focus:border-gray-400 focus:ring-gray-400 border-none h-full"
-                />
-              </div>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full sm:w-48 h-10 border-gray-300 focus:border-gray-400 focus:ring-gray-400">
-                  <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="reviewed">Reviewed</SelectItem>
-                  <SelectItem value="shortlisted">Shortlisted</SelectItem>
-                  <SelectItem value="rejected">Rejected</SelectItem>
-                </SelectContent>
-              </Select>
+        <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg w-full">
+          <div className="flex flex-wrap gap-4 items-center w-full">
+            <div className="relative flex-1 min-w-64">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                placeholder="Search applicants..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
             </div>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="reviewed">Reviewed</SelectItem>
+                <SelectItem value="shortlisted">Shortlisted</SelectItem>
+                <SelectItem value="rejected">Rejected</SelectItem>
+              </SelectContent>
+            </Select>
             <Button
               variant="outline-destructive"
               onClick={handleClearFilters}

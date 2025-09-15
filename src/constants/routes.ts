@@ -23,6 +23,7 @@ export const DASHBOARD_ROUTES = {
   TRIGGER_CREATED: `/dashboard/automations/create/:triggerId`,
   EDIT_AUTOMATION: `/dashboard/automations/edit/:id`,
   AUTOMATION_LOGS: `/dashboard/automations/logs`,
+  AI_FOLLOWUP: `/dashboard/ai-followup`,
   AVAILABILITY: `/dashboard/availability`,
   MEETING_SETTINGS: `/dashboard/meeting-settings`,
 };

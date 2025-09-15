@@ -1,3 +1,14 @@
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  CheckCircle,
+  FileText,
+  MessageSquare,
+  Brain,
+  Star,
+} from "lucide-react";
 import type { JobFormData } from "@/interfaces";
 
 interface AutomationReviewProps {
@@ -5,427 +16,231 @@ interface AutomationReviewProps {
 }
 
 export function AutomationReview({ formData }: AutomationReviewProps) {
-  const automation = formData.automation;
+  // Get data from all sections (same as ai-overview-step)
+  const qualifications = formData.qualifications || [];
+  const customQuestions = formData.customQuestions || [];
+  const resumeAnalysisMode = formData.resumeAnalysisMode || "simple";
+  const resumeCriteria = formData.resumeCriteria || [];
 
-  const formatThreshold = (threshold: number) => {
-    return `${threshold}%`;
+  // Calculate statistics
+  const qualStats = {
+    total: qualifications.length,
+    required: qualifications.filter((q: any) => q.isRequired).length,
+    preferred: qualifications.filter((q: any) => !q.isRequired).length,
+    need: qualifications.filter((q: any) => q.aiCategory === 'need').length,
+    should: qualifications.filter((q: any) => q.aiCategory === 'should').length,
+    nice: qualifications.filter((q: any) => q.aiCategory === 'nice').length,
   };
 
-  const getScoringWeightsTotal = () => {
-    if (!automation?.scoringWeights) return 0;
-    return Object.values(automation.scoringWeights).reduce(
-      (sum, weight) => sum + weight,
-      0
-    );
+  const questionStats = {
+    total: customQuestions.length,
+    required: customQuestions.filter((q: any) => q.required).length,
+    autoReject: customQuestions.filter((q: any) => q.autoReject).length,
   };
 
-  const getCategoryWeightsTotal = () => {
-    if (!automation?.aiRankingCategories) return 0;
-    return automation.aiRankingCategories.reduce(
-      (sum, category) => sum + (category.weight || 0),
-      0
-    );
-  };
-
-  const formatDataSource = (dataSource: any) => {
-    const sources = [];
-    if (dataSource.qualifications) sources.push("Qualifications");
-    if (dataSource.screeningQuestions) sources.push("Screening Questions");
-    if (dataSource.resume) sources.push("Resume");
-    return sources.length > 0 ? sources.join(", ") : "None";
+  const resumeStats = {
+    mode: resumeAnalysisMode,
+    criteriaCount: resumeCriteria.length,
+    skillsCriteria: resumeCriteria.filter((c: any) => c.type === 'skill').length,
+    experienceCriteria: resumeCriteria.filter((c: any) => c.type === 'experience').length,
   };
 
   return (
-    <div className="space-y-8">
-      {/* Section Header */}
-      <div className="space-y-2">
-        <h2 className="text-2xl font-bold text-gray-900">AI Automation</h2>
-        <p className="text-gray-600">
-          Review automation settings, scoring thresholds, and AI ranking
-          configuration.
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold text-gray-900">AI Overview</h2>
+        <p className="text-gray-600 mt-1">
+          Review your AI configuration across all sections. This is how candidates will be evaluated.
         </p>
       </div>
 
-      {/* Automation Overview */}
-      <div className="space-y-6">
-        <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
-          Automation Overview
-        </h3>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
-              Enabled Rules
-            </h4>
-            <div className="text-gray-700 text-sm font-medium">
-              {automation?.enabledRules?.length || 0} rules enabled
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
-              Template
-            </h4>
-            <div className="text-gray-700 text-sm font-medium">
-              {automation?.templateId || "Default template"}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Scoring Thresholds */}
-      <div className="space-y-6">
-        <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
-          Scoring Thresholds
-        </h3>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
-              Acceptance Threshold
-            </h4>
-            <div className="text-gray-700 text-sm font-medium">
-              {formatThreshold(automation?.acceptanceThreshold || 76)}
-            </div>
-            <div className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 border border-green-200 rounded-full">
-              <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-              <span className="text-xs font-medium text-green-700">
-                Auto-accept above this score
-              </span>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
-              Manual Review Threshold
-            </h4>
-            <div className="text-gray-700 text-sm font-medium">
-              {formatThreshold(automation?.manualReviewThreshold || 41)}
-            </div>
-            <div className="inline-flex items-center gap-1 px-2 py-1 bg-amber-50 border border-amber-200 rounded-full">
-              <div className="w-1.5 h-1.5 bg-amber-500 rounded-full"></div>
-              <span className="text-xs font-medium text-amber-700">
-                Manual review required
-              </span>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
-              Auto Reject Threshold
-            </h4>
-            <div className="text-gray-700 text-sm font-medium">
-              {formatThreshold(automation?.autoRejectThreshold || 40)}
-            </div>
-            <div className="inline-flex items-center gap-1 px-2 py-1 bg-red-50 border border-red-200 rounded-full">
-              <div className="w-1.5 h-1.5 bg-red-500 rounded-full"></div>
-              <span className="text-xs font-medium text-red-700">
-                Auto-reject below this score
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Threshold Flow Visualization */}
-        {automation && (
-          <div className="space-y-3">
-            <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
-              Threshold Flow
-            </h4>
-            <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-              <div className="flex items-center justify-between text-sm mb-2">
-                <span className="text-red-600 font-medium">Auto Reject</span>
-                <span className="text-amber-600 font-medium">
-                  Manual Review
-                </span>
-                <span className="text-green-600 font-medium">Auto Accept</span>
-              </div>
-              <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  className="h-full"
-                  style={{
-                    background: `linear-gradient(to right, #ef4444 0%, #ef4444 ${automation.autoRejectThreshold}%, #eab308 ${automation.autoRejectThreshold}%, #eab308 ${automation.manualReviewThreshold}%, #22c55e ${automation.manualReviewThreshold}%, #22c55e 100%)`,
-                  }}
-                />
-              </div>
-              <div className="flex justify-between text-xs text-gray-500 mt-2">
-                <span>0%</span>
-                <span>{formatThreshold(automation.autoRejectThreshold)}</span>
-                <span>{formatThreshold(automation.manualReviewThreshold)}</span>
-                <span>{formatThreshold(automation.acceptanceThreshold)}</span>
-                <span>100%</span>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Scoring Weights */}
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
-            Scoring Weights
-          </h3>
-          <div
-            className={`inline-flex items-center gap-1 px-2 py-1 rounded-full ${
-              getScoringWeightsTotal() === 100
-                ? "bg-emerald-50 border border-emerald-200"
-                : "bg-red-50 border border-red-200"
-            }`}
-          >
-            <div
-              className={`w-1.5 h-1.5 rounded-full ${
-                getScoringWeightsTotal() === 100
-                  ? "bg-emerald-500"
-                  : "bg-red-500"
-              }`}
-            ></div>
-            <span
-              className={`text-xs font-medium ${
-                getScoringWeightsTotal() === 100
-                  ? "text-emerald-700"
-                  : "text-red-700"
-              }`}
-            >
-              {getScoringWeightsTotal()}%
-            </span>
-          </div>
-        </div>
-
-        {automation?.scoringWeights && (
-          <div className="space-y-4">
-            {Object.entries(automation.scoringWeights).map(([key, weight]) => (
-              <div key={key} className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide capitalize">
-                    {key.replace(/([A-Z])/g, " $1").trim()}
-                  </h4>
-                  <span className="text-gray-700 text-sm font-medium">
-                    {weight}%
-                  </span>
-                </div>
-                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-blue-500 transition-all duration-300"
-                    style={{ width: `${weight}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {getScoringWeightsTotal() !== 100 && (
-          <div className="flex justify-end">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-full shadow-sm">
-              <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-              <span className="text-sm font-medium text-amber-800">
-                Scoring weights total {getScoringWeightsTotal()}% - Should equal
-                100% for optimal scoring
-              </span>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* AI Ranking Categories */}
-      {automation?.aiRankingCategories &&
-        automation.aiRankingCategories.length > 0 && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
-                AI Ranking Categories
-              </h3>
-              <div
-                className={`inline-flex items-center gap-1 px-2 py-1 rounded-full ${
-                  getCategoryWeightsTotal() === 100
-                    ? "bg-emerald-50 border border-emerald-200"
-                    : "bg-red-50 border border-red-200"
-                }`}
-              >
-                <div
-                  className={`w-1.5 h-1.5 rounded-full ${
-                    getCategoryWeightsTotal() === 100
-                      ? "bg-emerald-500"
-                      : "bg-red-500"
-                  }`}
-                ></div>
-                <span
-                  className={`text-xs font-medium ${
-                    getCategoryWeightsTotal() === 100
-                      ? "text-emerald-700"
-                      : "text-red-700"
-                  }`}
-                >
-                  {getCategoryWeightsTotal()}%
-                </span>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              {automation.aiRankingCategories.map((category, index) => (
-                <div
-                  key={index}
-                  className="p-4 bg-gray-50 border border-gray-200 rounded-lg"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <h4 className="text-gray-700 text-sm font-medium">
-                        {category.name}
-                      </h4>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Weight: {category.weight || 0}%
-                      </p>
-                    </div>
-                    <div className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 border border-blue-200 rounded-full">
-                      <span className="text-xs font-medium text-blue-700">
-                        {category.weight || 0}%
-                      </span>
-                    </div>
+      {/* Overall AI Configuration Summary */}
+      <Card className="border border-purple-200 bg-gradient-to-br from-purple-50/50 to-blue-50/50">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg font-medium text-purple-600">
+            🤖 AI Evaluation Summary
+          </CardTitle>
+          <p className="text-sm text-gray-600">
+            Your complete AI scoring configuration for this position.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Section Breakdown */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Qualifications */}
+            <Card className="border border-blue-200">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-sm font-medium text-blue-600">
+                  <CheckCircle className="w-4 h-4" />
+                  Qualifications ({qualStats.total})
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-gray-600">Need (Auto-reject if missing)</span>
+                    <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+                      {qualStats.need}
+                    </Badge>
                   </div>
-
-                  <div className="space-y-2">
-                    <h5 className="text-xs text-gray-500 uppercase tracking-wide">
-                      Data Sources:
-                    </h5>
-                    <p className="text-gray-700 text-sm font-medium">
-                      {formatDataSource(category.dataSource)}
-                    </p>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-gray-600">Should Have (High weight)</span>
+                    <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
+                      {qualStats.should}
+                    </Badge>
                   </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-gray-600">Nice to Have (Bonus)</span>
+                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                      {qualStats.nice}
+                    </Badge>
+                  </div>
+                </div>
+                <Progress value={qualStats.total > 0 ? 100 : 0} className="h-2" />
+                <p className="text-xs text-gray-500">{qualStats.total} qualifications defined</p>
+              </CardContent>
+            </Card>
 
-                  {category.customQuestions &&
-                    category.customQuestions.length > 0 && (
-                      <div className="mt-3">
-                        <h5 className="text-xs text-gray-500 uppercase tracking-wide mb-2">
-                          Custom Questions:
-                        </h5>
-                        <div className="space-y-1">
-                          {category.customQuestions.map((question, qIndex) => (
-                            <div
-                              key={qIndex}
-                              className="text-xs text-gray-600 bg-white px-3 py-2 rounded border border-gray-200"
-                            >
-                              {question}
-                            </div>
-                          ))}
-                        </div>
+            {/* Custom Questions */}
+            <Card className="border border-green-200">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-sm font-medium text-green-600">
+                  <MessageSquare className="w-4 h-4" />
+                  Custom Questions ({questionStats.total})
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-gray-600">Required Questions</span>
+                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                      {questionStats.required}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-gray-600">Auto-reject Questions</span>
+                    <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+                      {questionStats.autoReject}
+                    </Badge>
+                  </div>
+                </div>
+                <Progress value={questionStats.total > 0 ? 100 : 0} className="h-2" />
+                <p className="text-xs text-gray-500">{questionStats.total} questions configured</p>
+              </CardContent>
+            </Card>
+
+            {/* Resume Analysis */}
+            <Card className="border border-purple-200">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-sm font-medium text-purple-600">
+                  <FileText className="w-4 h-4" />
+                  Resume Analysis
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-gray-600">Analysis Mode</span>
+                    <Badge variant="outline" className={resumeStats.mode === 'simple' ? "bg-blue-50 text-blue-700 border-blue-200" : "bg-purple-50 text-purple-700 border-purple-200"}>
+                      {resumeStats.mode === 'simple' ? 'Simple' : 'Detailed'}
+                    </Badge>
+                  </div>
+                  {resumeStats.mode === 'detailed' && (
+                    <>
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-gray-600">Skills Criteria</span>
+                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                          {resumeStats.skillsCriteria}
+                        </Badge>
                       </div>
-                    )}
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-gray-600">Experience Criteria</span>
+                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                          {resumeStats.experienceCriteria}
+                        </Badge>
+                      </div>
+                    </>
+                  )}
                 </div>
-              ))}
-            </div>
-
-            {getCategoryWeightsTotal() !== 100 && (
-              <div className="flex justify-end">
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-full shadow-sm">
-                  <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-                  <span className="text-sm font-medium text-amber-800">
-                    Category weights total {getCategoryWeightsTotal()}% - Should
-                    equal 100% for optimal ranking
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-      {/* Custom Rules */}
-      {automation?.customRules && automation.customRules.length > 0 && (
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
-              Custom Rules
-            </h3>
-            <div className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 border border-blue-200 rounded-full">
-              <span className="text-xs font-medium text-blue-700">
-                {automation.customRules.length}
-              </span>
-            </div>
+                <Progress value={resumeStats.mode === 'simple' ? 100 : (resumeStats.criteriaCount / 10) * 100} className="h-2" />
+                {resumeStats.mode === 'detailed' && (
+                  <p className="text-xs text-gray-500">{resumeStats.criteriaCount} criteria defined</p>
+                )}
+              </CardContent>
+            </Card>
           </div>
 
-          <div className="space-y-4">
-            {automation.customRules.map((rule, index) => (
-              <div
-                key={index}
-                className="relative p-4 bg-gray-50 border border-gray-200 rounded-lg"
-              >
-                {/* Rule Number Badge */}
-                <div className="absolute -top-2 -left-2 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold">
-                  {index + 1}
-                </div>
-
-                <div className="space-y-4">
-                  {/* Condition Section */}
-                  <div className="space-y-2">
-                    <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
-                      Condition
-                    </h4>
-                    <div className="p-3 bg-white border border-gray-200 rounded-lg">
-                      <p className="text-gray-700 text-sm font-medium">
-                        {rule.condition}
-                      </p>
-                    </div>
+          {/* AI Scoring Flow */}
+          <Card className="border border-gray-200">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-sm font-medium text-gray-800">
+                <Brain className="w-5 h-5" />
+                How AI Will Evaluate Candidates
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="text-center p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <span className="text-white font-bold text-sm">1</span>
                   </div>
+                  <h4 className="font-medium text-blue-900 mb-1">Qualifications Check</h4>
+                  <p className="text-xs text-blue-700">
+                    Auto-reject if missing "Need" qualifications, score "Should" and "Nice" categories
+                  </p>
+                  <div className="text-lg font-bold text-blue-600 mt-2">40%</div>
+                </div>
 
-                  {/* Action Section */}
-                  <div className="space-y-2">
-                    <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
-                      Action
-                    </h4>
-                    <div className="inline-flex items-center gap-1 px-3 py-1 bg-green-50 border border-green-200 rounded-full">
-                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-                      <span className="text-xs font-medium text-green-700">
-                        {rule.action}
-                      </span>
-                    </div>
+                <div className="text-center p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                  <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <span className="text-white font-bold text-sm">2</span>
                   </div>
+                  <h4 className="font-medium text-purple-900 mb-1">Resume Analysis</h4>
+                  <p className="text-xs text-purple-700">
+                    {resumeStats.mode === 'simple' ? 'Contextual AI analysis' : 'Custom criteria matching'}
+                  </p>
+                  <div className="text-lg font-bold text-purple-600 mt-2">30%</div>
+                </div>
 
-                  {/* Template Section */}
-                  <div className="space-y-2">
-                    <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
-                      Email Template
-                    </h4>
-                    <div className="p-3 bg-white border border-gray-200 rounded-lg">
-                      <p className="text-gray-700 text-sm font-medium">
-                        {rule.template}
-                      </p>
-                    </div>
+                <div className="text-center p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <span className="text-white font-bold text-sm">3</span>
                   </div>
+                  <h4 className="font-medium text-green-900 mb-1">Custom Questions</h4>
+                  <p className="text-xs text-green-700">
+                    Score based on question type and expected answers
+                  </p>
+                  <div className="text-lg font-bold text-green-600 mt-2">30%</div>
                 </div>
               </div>
-            ))}
-          </div>
 
-          {/* Summary Stats */}
-          <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                <span className="text-sm font-medium text-gray-700">
-                  Automation Summary
-                </span>
+              <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                <h4 className="font-medium text-gray-900 mb-2">Final Evaluation Process:</h4>
+                <ol className="text-xs text-gray-700 space-y-1">
+                  <li>1. <strong>Auto-reject check:</strong> Candidates missing "Need" qualifications or failing auto-reject questions are immediately rejected</li>
+                  <li>2. <strong>Section scoring:</strong> Each section (Qualifications, Resume, Questions) is scored independently</li>
+                  <li>3. <strong>Weighted combination:</strong> Scores are combined using the 40/30/30 weighting system</li>
+                  <li>4. <strong>Recommendation:</strong> Final score determines recommendation level (Strong No to Strong Yes)</li>
+                  <li>5. <strong>Human review:</strong> You review AI recommendations and make final hiring decisions</li>
+                </ol>
               </div>
-              <div className="flex items-center gap-4 text-xs text-gray-600">
-                <span>• {automation.customRules.length} rules configured</span>
-                <span>• Automated workflow enabled</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+            </CardContent>
+          </Card>
 
-      {/* Automation Recommendations */}
-      {(!automation || Object.keys(automation).length === 0) && (
-        <div className="flex justify-end">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-full shadow-sm">
-            <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-            <span className="text-sm font-medium text-amber-800">
-              No automation configured - Consider setting up AI automation to
-              streamline your hiring process
-            </span>
-          </div>
-        </div>
-      )}
+          {/* Configuration Summary */}
+          {(qualStats.total > 0 || questionStats.total > 0 || resumeStats.mode === 'detailed') && (
+            <Alert>
+              <Star className="h-4 w-4" />
+              <AlertDescription>
+                <strong>Your AI is configured and ready!</strong> Candidates will be automatically evaluated using your qualifications ({qualStats.total}), 
+                {questionStats.total > 0 && ` custom questions (${questionStats.total}),`}
+                {resumeStats.mode === 'detailed' && ` and detailed resume criteria (${resumeStats.criteriaCount}).`}
+                {resumeStats.mode === 'simple' && ' and contextual resume analysis.'}
+              </AlertDescription>
+            </Alert>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
