@@ -11,6 +11,9 @@ const PublicRoutes = ['/', '/contact', '/privacy', '/terms', '/company', '/apply
 const AuthRedirection = ({ children }: PropsWithChildren) => {
   const [isReloading, setReloading] = useState(false)
   
+  // Always call hooks first (Rules of Hooks)
+  const { status } = useAuthSessionContext()
+  
   // Check if current route is public
   const isPublicRoute = PublicRoutes.some(route => 
     window.location.pathname === route || 
@@ -21,9 +24,6 @@ const AuthRedirection = ({ children }: PropsWithChildren) => {
   if (isPublicRoute) {
     return <>{children}</>
   }
-
-  // Only use auth context for private routes
-  const { status } = useAuthSessionContext()
 
   useEffect(() => {
     if (AuthVerificationRoutes.includes(window.location.pathname)) {

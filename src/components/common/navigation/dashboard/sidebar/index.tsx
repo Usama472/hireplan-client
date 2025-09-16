@@ -1,6 +1,7 @@
 import {
   Briefcase,
   Calendar,
+  FileText,
   Filter,
   LifeBuoy,
   Mail,
@@ -73,6 +74,11 @@ export const DashboardSidebar = ({
       name: "Create Job",
       url: ROUTES.DASHBOARD.CREATE_JOB,
       icon: PlusCircle,
+    });
+    staticData.projects.push({
+      name: "Drafts",
+      url: ROUTES.DASHBOARD.DRAFTS,
+      icon: FileText,
     });
   }
   if (userPermissions.includes(PERMISSIONS.CHAT_ACCESS)) {

@@ -178,7 +178,7 @@ export const CreateEmailTemplate = () => {
   }, [bodyValue]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background">
+    <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Header Section - Enhanced */}
         <div className="mb-8">
@@ -192,8 +192,8 @@ export const CreateEmailTemplate = () => {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-primary/10 text-primary">
-                  <Zap className="h-6 w-6" />
+                <div className="p-2 rounded-lg bg-blue-50">
+                  <Zap className="h-6 w-6 text-blue-600" />
                 </div>
                 <div>
                   <h1 className="text-3xl font-bold text-foreground tracking-tight">
@@ -299,11 +299,11 @@ export const CreateEmailTemplate = () => {
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
               {/* Main Form - Enhanced Design */}
               <div className="lg:col-span-3">
-                <Card className="bg-card/50 backdrop-blur-sm border-border/50 shadow-xl shadow-primary/5 rounded-2xl overflow-hidden">
-                  <CardHeader className="pb-6 bg-gradient-to-r from-primary/10 to-accent/10 border-b border-border/50">
+                <Card className="bg-white border border-gray-200 shadow-sm rounded-lg overflow-hidden">
+                  <CardHeader className="pb-6 bg-white border-b border-gray-200">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                        <Sparkles className="h-5 w-5" />
+                      <div className="p-2 rounded-lg bg-blue-50">
+                        <Sparkles className="h-5 w-5 text-blue-600" />
                       </div>
                       <div>
                         <CardTitle className="text-xl font-semibold text-card-foreground">
@@ -317,35 +317,28 @@ export const CreateEmailTemplate = () => {
                     </div>
                   </CardHeader>
                   <CardContent className="p-8 space-y-8">
-                    {/* Template Status - Enhanced */}
-                    <div className="flex items-center justify-between p-6 bg-gradient-to-r from-muted/50 to-muted/30 rounded-xl border border-border/50">
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-3">
-                          <Label className="text-sm font-medium text-card-foreground">
-                            Template Status
-                          </Label>
-                          <Switch
-                            checked={form.watch("isActive")}
-                            onCheckedChange={(checked) =>
-                              form.setValue("isActive", checked)
-                            }
-                            disabled={isSubmitting}
-                          />
-                        </div>
-                        <Badge
-                          variant={
-                            form.watch("isActive") ? "default" : "secondary"
+                    {/* Template Status */}
+                    <div className="space-y-3">
+                      <Label className="text-sm font-medium">
+                        Template Status
+                      </Label>
+                      <div className="flex items-center gap-3">
+                        <Switch
+                          checked={form.watch("isActive")}
+                          onCheckedChange={(checked) =>
+                            form.setValue("isActive", checked)
                           }
-                          className="px-3 py-1 rounded-full"
-                        >
+                          disabled={isSubmitting}
+                        />
+                        <span className="text-sm font-medium">
                           {form.watch("isActive") ? "Active" : "Inactive"}
-                        </Badge>
+                        </span>
+                        <span className="text-xs ml-2">
+                          {form.watch("isActive")
+                            ? "Template is available for use"
+                            : "Template is hidden from users"}
+                        </span>
                       </div>
-                      <p className="text-sm text-muted-foreground">
-                        {form.watch("isActive")
-                          ? "Template is available for use"
-                          : "Template is hidden from users"}
-                      </p>
                     </div>
 
                     {/* Template Name & Category - Enhanced Grid */}

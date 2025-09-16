@@ -25,7 +25,7 @@ export interface AutomationType {
     value: string;
   }>;
   actions: Array<{
-    type: "send_email" | "webhook" | "slack" | "update_job_status" | "assign_recruiter" | "ai_follow_up" | "custom";
+    type: "send_email" | "webhook" | "slack" | "update_job_status" | "assign_recruiter" | "ai_follow_up" | "send_rejection" | "custom";
     config: {
       templateId?: string;
       delay?: {

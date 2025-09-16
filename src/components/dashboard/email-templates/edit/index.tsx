@@ -371,35 +371,28 @@ export const EditEmailTemplate = () => {
                     </div>
                   </CardHeader>
                   <CardContent className="p-8 space-y-8">
-                    {/* Template Status - Enhanced */}
-                    <div className="flex items-center justify-between p-6 bg-gradient-to-r from-muted/50 to-muted/30 rounded-xl border border-border/50">
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-3">
-                          <Label className="text-sm font-medium text-card-foreground">
-                            Template Status
-                          </Label>
-                          <Switch
-                            checked={form.watch("isActive")}
-                            onCheckedChange={(checked) =>
-                              form.setValue("isActive", checked)
-                            }
-                            disabled={isViewMode || isLoading}
-                          />
-                        </div>
-                        <Badge
-                          variant={
-                            form.watch("isActive") ? "default" : "secondary"
+                    {/* Template Status */}
+                    <div className="space-y-3">
+                      <Label className="text-sm font-medium">
+                        Template Status
+                      </Label>
+                      <div className="flex items-center gap-3">
+                        <Switch
+                          checked={form.watch("isActive")}
+                          onCheckedChange={(checked) =>
+                            form.setValue("isActive", checked)
                           }
-                          className="px-3 py-1 rounded-full"
-                        >
+                          disabled={isViewMode || isLoading}
+                        />
+                        <span className="text-sm font-medium">
                           {form.watch("isActive") ? "Active" : "Inactive"}
-                        </Badge>
+                        </span>
+                        <span className="text-xs ml-2">
+                          {form.watch("isActive")
+                            ? "Template is available for use"
+                            : "Template is hidden from users"}
+                        </span>
                       </div>
-                      <p className="text-sm text-muted-foreground">
-                        {form.watch("isActive")
-                          ? "Template is available for use"
-                          : "Template is hidden from users"}
-                      </p>
                     </div>
 
                     {/* Template Name & Category - Enhanced Grid */}

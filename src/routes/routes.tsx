@@ -16,6 +16,7 @@ import JobApplicationPage from "@/pages/company/apply";
 import ContactPage from "@/pages/contact";
 import DashboardPage from "@/pages/dashboard/jobs";
 import CreateJobPage from "@/pages/dashboard/jobs/create";
+import JobDraftsPage from "@/pages/dashboard/jobs/drafts";
 import JobDetailPage from "@/pages/dashboard/jobs/view";
 import SchedulerPage from "@/pages/dashboard/scheduler";
 import StaffManagementPage from "@/pages/dashboard/staff-management";
@@ -138,6 +139,12 @@ export const appRoutes: AppRoutesType[] = [
     id: CREATE_JOB,
     url: ROUTES.DASHBOARD.CREATE_JOB,
     element: <CreateJobPage />,
+    isPrivate: true,
+  },
+  {
+    id: "job-drafts",
+    url: ROUTES.DASHBOARD.DRAFTS,
+    element: <JobDraftsPage />,
     isPrivate: true,
   },
   {

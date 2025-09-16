@@ -52,17 +52,17 @@ export const VariableSection = ({ onInsertVariable }: VariableSectionProps) => {
   );
 
   return (
-    <Card className="bg-card/50 backdrop-blur-sm border-border/50 shadow-xl shadow-primary/5 rounded-2xl overflow-hidden">
-      <CardHeader className="pb-4 bg-gradient-to-r from-accent/10 to-primary/10 border-b border-border/50">
+    <Card className="bg-white border border-gray-200 shadow-sm rounded-lg overflow-hidden">
+      <CardHeader className="pb-4 bg-white border-b border-gray-200">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-accent/10 text-accent">
-            <Copy className="h-4 w-4" />
+          <div className="p-2 rounded-lg bg-blue-50">
+            <Copy className="h-4 w-4 text-blue-600" />
           </div>
           <div>
-            <CardTitle className="text-base font-semibold text-card-foreground">
+            <CardTitle className="text-base font-semibold">
               Job Template Variables
             </CardTitle>
-            <CardDescription className="text-xs text-muted-foreground">
+            <CardDescription className="text-xs">
               Click any variable to copy to clipboard
             </CardDescription>
           </div>
@@ -72,13 +72,13 @@ export const VariableSection = ({ onInsertVariable }: VariableSectionProps) => {
       {/* Search Bar */}
       <div className="px-4 pt-4 pb-2">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <input
             type="text"
             placeholder="Search variables..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-background/80 border border-border/50 rounded-lg text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200"
+            className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
           {searchQuery && (
             <button

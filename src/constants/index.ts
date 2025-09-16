@@ -631,6 +631,7 @@ export const EMAIL_TEMPLATE_CATEGORIES = [
   { value: "job-offer", label: "Job Offer", icon: "🎉" },
   { value: "rejection", label: "Rejection", icon: "📤" },
   { value: "follow-up", label: "Follow Up", icon: "🔄" },
+  { value: "chat", label: "Chat", icon: "💬" },
   { value: "general", label: "General", icon: "📧" },
 ] as const;
 

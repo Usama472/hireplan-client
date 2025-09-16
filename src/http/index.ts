@@ -12,6 +12,7 @@ import * as holidaysApi from "./holidays/api";
 import * as interviewApi from "./interview/api";
 import * as jobTemplateApi from "./job-template/api";
 import * as jobApi from "./job/api";
+import * as jobDraftApi from "./job-draft/api";
 import * as meetingApi from "./meeting/api";
 import * as microsoftApi from "./microsoft/api";
 import * as roleApi from "./role/api";
@@ -23,6 +24,7 @@ const API = {
   auth: authApi,
   user: userApi,
   job: jobApi,
+  jobDraft: jobDraftApi,
   jobTemplate: jobTemplateApi,
   company: companyApi,
   attachment: attachmentApi,

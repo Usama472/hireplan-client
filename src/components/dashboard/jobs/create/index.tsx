@@ -43,86 +43,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { SaveAsTemplateDialog } from "./SaveAsTemplateDialog";
 
-// Draft Management Constants
-const DRAFT_STORAGE_KEY = "job_creation_draft";
-const DRAFT_TIMESTAMP_KEY = "job_creation_draft_timestamp";
 
-// Helper function to get user-specific storage keys
-const getDraftStorageKey = (userId: string) => `${DRAFT_STORAGE_KEY}_${userId}`;
-const getDraftTimestampKey = (userId: string) =>
-  `${DRAFT_TIMESTAMP_KEY}_${userId}`;
 
-interface DraftData {
-  formData: JobFormSchema;
-  currentStep: number;
-  timestamp: number;
-  userId: string;
-}
-
-// Draft Management Functions
-const saveDraftToStorage = (
-  formData: JobFormSchema,
-  currentStep: number,
-  userId: string
-) => {
-  try {
-    const draftData: DraftData = {
-      formData,
-      currentStep,
-      timestamp: Date.now(),
-      userId,
-    };
-    const storageKey = getDraftStorageKey(userId);
-    const timestampKey = getDraftTimestampKey(userId);
-    localStorage.setItem(storageKey, JSON.stringify(draftData));
-    localStorage.setItem(timestampKey, Date.now().toString());
-  } catch (error) {
-    console.warn("Failed to save draft to localStorage:", error);
-  }
-};
-
-const loadDraftFromStorage = (userId: string): DraftData | null => {
-  try {
-    const storageKey = getDraftStorageKey(userId);
-    const timestampKey = getDraftTimestampKey(userId);
-    const draftData = localStorage.getItem(storageKey);
-    const timestamp = localStorage.getItem(timestampKey);
-
-    if (!draftData || !timestamp) return null;
-
-    const parsed: DraftData = JSON.parse(draftData);
-
-    // Verify the draft belongs to the current user
-    if (parsed.userId !== userId) {
-      clearDraftFromStorage(userId);
-      return null;
-    }
-
-    const draftAge = Date.now() - parseInt(timestamp);
-
-    // Auto-delete drafts older than 7 days
-    if (draftAge > 7 * 24 * 60 * 60 * 1000) {
-      clearDraftFromStorage(userId);
-      return null;
-    }
-
-    return parsed;
-  } catch (error) {
-    console.warn("Failed to load draft from localStorage:", error);
-    return null;
-  }
-};
-
-const clearDraftFromStorage = (userId: string) => {
-  try {
-    const storageKey = getDraftStorageKey(userId);
-    const timestampKey = getDraftTimestampKey(userId);
-    localStorage.removeItem(storageKey);
-    localStorage.removeItem(timestampKey);
-  } catch (error) {
-    console.warn("Failed to clear draft from localStorage:", error);
-  }
-};
 
 // Load Draft Button Component
 function LoadDraftButton({
@@ -194,10 +116,6 @@ export default function CreateJob() {
   const [selectedTemplate, setSelectedTemplate] = useState<JobTemplate | null>(
     null
   );
-  const [draftInfo, setDraftInfo] = useState<{
-    step: number;
-    timestamp: number;
-  } | null>(null);
   const [showSaveTemplateDialog, setShowSaveTemplateDialog] = useState(false);
   const [isEditingTemplate, setIsEditingTemplate] = useState(false);
   const [editingTemplateId, setEditingTemplateId] = useState<string | null>(
@@ -223,32 +141,101 @@ export default function CreateJob() {
   });
 
   const { trigger, clearErrors, setValue, watch, reset } = form;
+  const [draftId, setDraftId] = useState<string | null>(null);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
-  // Auto-save draft on form data changes
-  useEffect(() => {
-    const subscription = watch((formData) => {
-      if (Object.keys(formData).length > 0) {
-        saveDraftToStorage(formData as JobFormSchema, currentStep, userId);
+  // Auto-save draft functionality
+  const autoSaveDraft = async (formData: JobFormSchema) => {
+    try {
+      const draftData = {
+        title: formData.jobTitle || `Untitled Job - ${new Date().toLocaleDateString()}`,
+        formData,
+        completedSections: getCompletedSections(formData),
+      };
+
+      if (draftId) {
+        // Update existing draft
+        await API.jobDraft.updateJobDraft(draftId, draftData);
+      } else {
+        // Create new draft
+        const response = await API.jobDraft.createJobDraft(draftData);
+        setDraftId(response.data.draft.id);
       }
-    });
-    return () => subscription.unsubscribe();
-  }, [watch, currentStep, userId]);
-
-  const loadDraft = () => {
-    const draft = loadDraftFromStorage(userId);
-    if (draft) {
-      reset(draft.formData);
-      setCurrentStep(draft.currentStep);
-      setDraftInfo(null);
-      toast.success(`Draft loaded from step ${draft.currentStep}!`);
+      
+      setLastSaved(new Date());
+    } catch (error) {
+      console.error('Auto-save failed:', error);
+      // Don't show error toast for auto-save failures
     }
   };
 
-  const clearDraft = () => {
-    clearDraftFromStorage(userId);
-    setDraftInfo(null);
-    toast.success("Draft cleared successfully!");
+  const getCompletedSections = (formData: JobFormSchema) => {
+    const sections = [];
+    if (formData.jobTitle && formData.jobBoardTitle && formData.jobDescription) {
+      sections.push('job-ad');
+    }
+    if (formData.department && formData.payRate && formData.positionsToHire) {
+      sections.push('position');
+    }
+    if (formData.qualifications && formData.qualifications.length > 0) {
+      sections.push('qualifications');
+    }
+    if (formData.startDate && formData.endDate) {
+      sections.push('schedule');
+    }
+    if (formData.applicationDeadline) {
+      sections.push('posting');
+    }
+    return sections;
   };
+
+  // Auto-save on step navigation and page unload (much better performance)
+  useEffect(() => {
+    // Save when user navigates between steps
+    if (currentStep > 1) {
+      const formData = watch();
+      if (formData.jobTitle || formData.jobBoardTitle) { // Only if meaningful data
+        autoSaveDraft(formData);
+      }
+    }
+  }, [currentStep]);
+
+  // Save on page unload/navigation away
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      const formData = watch();
+      if (formData.jobTitle || formData.jobBoardTitle) {
+        // Use localStorage for immediate save on page unload
+        localStorage.setItem('temp_job_draft', JSON.stringify({
+          title: formData.jobTitle || `Untitled Job - ${new Date().toLocaleDateString()}`,
+          formData,
+          completedSections: getCompletedSections(formData),
+          timestamp: Date.now(),
+        }));
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, []);
+
+  // Process temp draft on component mount
+  useEffect(() => {
+    const tempDraft = localStorage.getItem('temp_job_draft');
+    if (tempDraft) {
+      try {
+        const draftData = JSON.parse(tempDraft);
+        // Save to backend API
+        autoSaveDraft(draftData.formData);
+        localStorage.removeItem('temp_job_draft');
+      } catch (error) {
+        console.error('Failed to process temp draft:', error);
+        localStorage.removeItem('temp_job_draft');
+      }
+    }
+  }, []);
+
+
 
   const handleSelectTemplate = (template: JobTemplate) => {
     setSelectedTemplate(template);
@@ -355,10 +342,6 @@ export default function CreateJob() {
   };
 
   useEffect(() => {
-    const draft = loadDraftFromStorage(userId);
-    if (draft && !location.state?.editMode) {
-      setDraftInfo({ step: draft.currentStep, timestamp: draft.timestamp });
-    }
     if (location.state?.selectedTemplate) {
       const template = location.state.selectedTemplate as JobTemplate;
       const isEditMode = location.state.editMode;
@@ -566,7 +549,16 @@ export default function CreateJob() {
       };
 
       await API.job.createJob(newData);
-      clearDraftFromStorage(userId);
+      
+      // Delete the draft since job was successfully created
+      if (draftId) {
+        try {
+          await API.jobDraft.deleteJobDraft(draftId);
+        } catch (error) {
+          console.error('Failed to delete draft:', error);
+        }
+      }
+      
       toast.success("Job created successfully!");
       navigate(ROUTES.DASHBOARD.MAIN);
     } catch (err) {
@@ -795,11 +787,13 @@ export default function CreateJob() {
               </div>
             )}
 
-            <LoadDraftButton
-              onLoadDraft={loadDraft}
-              onClearDraft={clearDraft}
-              draftInfo={draftInfo}
-            />
+            {/* Auto-save status indicator */}
+            {lastSaved && (
+              <div className="text-xs text-gray-500 flex items-center gap-1">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                Auto-saved {lastSaved.toLocaleTimeString()}
+              </div>
+            )}
           </div>
         </div>
 
