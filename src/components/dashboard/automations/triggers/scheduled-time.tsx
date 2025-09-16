@@ -283,6 +283,7 @@ export default function ScheduledTimeTrigger() {
           useConditions: true,
           conditions: [],
           actions: actions,
+          schedule: scheduleConfig,
         });
         navigate("/dashboard/automations");
       } catch (error: any) {
