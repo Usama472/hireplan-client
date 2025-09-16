@@ -152,7 +152,7 @@ export function ChatRichTextEditor({
     editable: !disabled,
   });
 
-  // Load email templates
+  // Load email templates (only chat category)
   const loadTemplates = async () => {
     if (loadingTemplates) return;
     
@@ -163,8 +163,18 @@ export function ChatRichTextEditor({
         limit: 50,
       });
       
-      if (response.success) {
-        setTemplates(response.data.results || []);
+      console.log('📧 Email templates API response:', response);
+      
+      if (response.status) {
+        const allTemplates = response.emailTemplates?.results || [];
+        console.log('📋 All templates:', allTemplates.map((t: any) => ({ name: t.name, category: t.category })));
+        
+        // Filter to only show chat category templates
+        const chatTemplates = allTemplates.filter(
+          (template: any) => template.category === 'chat'
+        );
+        console.log('💬 Chat templates found:', chatTemplates.length, chatTemplates.map((t: any) => t.name));
+        setTemplates(chatTemplates);
       }
     } catch (error) {
       console.error("Error loading email templates:", error);
@@ -359,7 +369,10 @@ export function ChatRichTextEditor({
                 {templates.length === 0 && !loadingTemplates && (
                   <div className="p-4 text-center text-sm text-gray-500">
                     <FileText className="h-8 w-8 mx-auto mb-2 text-gray-300" />
-                    No templates available
+                    <div>No chat templates available</div>
+                    <div className="text-xs text-gray-400 mt-1">
+                      Create templates with "Chat" category to see them here
+                    </div>
                   </div>
                 )}
               </ScrollArea>
