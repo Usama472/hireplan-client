@@ -103,13 +103,13 @@ export const DashboardSidebar = ({
     });
   }
 
-  if (userPermissions.includes(PERMISSIONS.EMAIL_TEMPLATE_CREATE)) {
-    staticData.projects.push({
-      name: "Email Templates",
-      url: ROUTES.DASHBOARD.EMAIL_TEMPLATES,
-      icon: Mail,
-    });
-  }
+  // if (userPermissions.includes(PERMISSIONS.EMAIL_TEMPLATE_CREATE)) {
+  //   staticData.projects.push({
+  //     name: "Email Templates",
+  //     url: ROUTES.DASHBOARD.EMAIL_TEMPLATES,
+  //     icon: Mail,
+  //   });
+  // }
 
   // Add Automations menu item
   // if (userPermissions.includes(PERMISSIONS.AUTOMATION_ACCESS)) {
@@ -175,7 +175,7 @@ export const DashboardSidebar = ({
 
       <SidebarContent className="bg-white px-4 py-6 relative z-10">
         <NavProjects
-          name="Navigation"
+          name=""
           projects={filteredProjects}
           currentPath={location.pathname}
         />

@@ -49,6 +49,10 @@ import Login from "@pages/auth/Login";
 import ResetPassword from "@pages/auth/ResetPassword";
 import Signup from "@pages/auth/Signup";
 
+// Applicant Pages
+import ApplicantLogin from "@/pages/applicant/login";
+import ApplicantDashboard from "@/pages/applicant/dashboard";
+
 export const appRoutes: AppRoutesType[] = [
   {
     id: HOME_TEXT,
@@ -260,5 +264,18 @@ export const appRoutes: AppRoutesType[] = [
     url: ROUTES.DASHBOARD.AI_FOLLOWUP,
     element: <AIFollowupPage />,
     isPrivate: true,
+  },
+  // Applicant routes
+  {
+    id: "applicant-login",
+    url: ROUTES.APPLICANT.LOGIN,
+    element: <ApplicantLogin />,
+    isPrivate: false,
+  },
+  {
+    id: "applicant-dashboard",
+    url: ROUTES.APPLICANT.DASHBOARD,
+    element: <ApplicantDashboard />,
+    isPrivate: false, // We'll handle auth inside the component
   },
 ];

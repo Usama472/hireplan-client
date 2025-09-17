@@ -11,7 +11,8 @@ import { JobQualificationsStep } from "@/components/dashboard/jobs/common/job-qu
 import { PostingScheduleBudgetStep } from "@/components/dashboard/jobs/common/posting-schedule-budget-step";
 import { ResumeAnalysisStep } from "@/components/dashboard/jobs/common/resume-analysis-step";
 import { ReviewPublishStep } from "@/components/dashboard/jobs/common/review-publish-step";
-import { StepNavigation } from "@/components/main/signup/stepNavigation";
+import { StepControls } from "@/components/main/signup/stepNavigation";
+import { EnhancedProgressStepper, type Step } from "@/components/ui/enhanced-progress-stepper";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -36,7 +37,20 @@ import {
 } from "@/lib/validations/forms/job-form-schema";
 import type { JobTemplate } from "@/types/job-template";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Database, FileText, Layers, RotateCcw, Sparkles } from "lucide-react";
+import { 
+  Database, 
+  FileText, 
+  Layers, 
+  RotateCcw, 
+  Sparkles, 
+  Briefcase, 
+  Users, 
+  Brain, 
+  Calendar, 
+  Zap, 
+  Clock, 
+  CheckCircle 
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -134,6 +148,37 @@ export default function CreateJob() {
 
   console.log("Current step and total steps:", { currentStep, totalSteps });
 
+  // Define steps for the progress stepper
+  const getSteps = (): Step[] => {
+    const baseSteps: Step[] = [
+      { id: "job-ad", title: "Job Details", description: "Basic job information", icon: FileText },
+      { id: "position", title: "Position & Company", description: "Role details and company info", icon: Briefcase },
+      { id: "qualifications", title: "Requirements", description: "Skills and qualifications", icon: Users },
+    ];
+
+    if (hasProfessionalFeatures) {
+      baseSteps.push(
+        { id: "resume-analysis", title: "Resume Analysis", description: "AI-powered resume screening", optional: true, icon: Brain },
+        { id: "posting", title: "Schedule & Budget", description: "Posting timeline and budget", icon: Calendar },
+        { id: "ai-overview", title: "AI Overview", description: "AI ranking and scoring", optional: true, icon: Sparkles },
+        { id: "automation", title: "Automation", description: "Automated workflows", optional: true, icon: Zap },
+        { id: "booking", title: "Interview Booking", description: "Schedule interviews", icon: Clock },
+        { id: "review", title: "Review & Publish", description: "Final review and publish", icon: CheckCircle }
+      );
+    } else {
+      baseSteps.push(
+        { id: "posting", title: "Schedule & Budget", description: "Posting timeline and budget", icon: Calendar },
+        { id: "booking", title: "Interview Booking", description: "Schedule interviews", icon: Clock },
+        { id: "automation", title: "Automation", description: "Automated workflows", optional: true, icon: Zap },
+        { id: "review", title: "Review & Publish", description: "Final review and publish", icon: CheckCircle }
+      );
+    }
+
+    return baseSteps;
+  };
+
+  const steps = getSteps();
+
   const form = useForm({
     resolver: zodResolver(jobFormSchema),
     defaultValues: JOB_FORM_DEFAULT_VALUES,
@@ -177,13 +222,13 @@ export default function CreateJob() {
     if (formData.department && formData.payRate && formData.positionsToHire) {
       sections.push('position');
     }
-    if (formData.qualifications && formData.qualifications.length > 0) {
+    if (formData.requiredQualifications && formData.requiredQualifications.length > 0) {
       sections.push('qualifications');
     }
     if (formData.startDate && formData.endDate) {
       sections.push('schedule');
     }
-    if (formData.applicationDeadline) {
+    if (formData.startDate) {
       sections.push('posting');
     }
     return sections;
@@ -195,7 +240,11 @@ export default function CreateJob() {
     if (currentStep > 1) {
       const formData = watch();
       if (formData.jobTitle || formData.jobBoardTitle) { // Only if meaningful data
-        autoSaveDraft(formData);
+        autoSaveDraft({
+          ...formData, 
+          schedule: formData.schedule || [],
+          benefits: formData.benefits || []
+        });
       }
     }
   }, [currentStep]);
@@ -226,7 +275,11 @@ export default function CreateJob() {
       try {
         const draftData = JSON.parse(tempDraft);
         // Save to backend API
-        autoSaveDraft(draftData.formData);
+        autoSaveDraft({
+          ...draftData.formData, 
+          schedule: draftData.formData.schedule || [],
+          benefits: draftData.formData.benefits || []
+        });
         localStorage.removeItem('temp_job_draft');
       } catch (error) {
         console.error('Failed to process temp draft:', error);
@@ -363,6 +416,13 @@ export default function CreateJob() {
     toast.success("Test data loaded successfully!");
   };
 
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
   const handleNext = async () => {
     clearErrors();
 
@@ -371,18 +431,21 @@ export default function CreateJob() {
     if (currentStep === 5 && hasProfessionalFeatures) {
       // AI Ranking step - skip validation for Professional+ users
       setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
+      scrollToTop();
       return;
     }
 
     if (currentStep === 4 && !hasProfessionalFeatures) {
       // For non-Professional users, skip AI step (5) and go directly to Booking Page (6->5)
       setCurrentStep(5); // This will be the Booking Page for non-Professional users
+      scrollToTop();
       return;
     }
 
     if (currentStep === 7 && hasProfessionalFeatures) {
       // Automation step - skip validation for Professional+ users
       setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
+      scrollToTop();
       return;
     }
 
@@ -392,6 +455,7 @@ export default function CreateJob() {
     ) {
       // Review step - skip validation
       setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
+      scrollToTop();
       return;
     }
 
@@ -449,6 +513,7 @@ export default function CreateJob() {
         }
 
         setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
+        scrollToTop();
       }
       return;
     }
@@ -461,6 +526,7 @@ export default function CreateJob() {
     if (isStepValid) {
       setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
       clearErrors();
+      scrollToTop();
     }
   };
 
@@ -491,10 +557,7 @@ export default function CreateJob() {
     }
 
     // Scroll to top when going to previous step
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
+    scrollToTop();
   };
 
   // Add debugging for the submission condition
@@ -688,10 +751,62 @@ export default function CreateJob() {
 
   return (
     <main className="pb-16">
-      {/* Enhanced Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4 relative overflow-hidden max-h-[80px]">
+      {/* Enhanced Header - Mobile Optimized */}
+      <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 sm:py-6 relative overflow-hidden">
         <div className="relative z-10">
-          <div className="flex items-center justify-between">
+          {/* Mobile Header */}
+          <div className="block sm:hidden mb-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gray-100 rounded-lg">
+                  <FileText className="h-5 w-5 text-gray-600" />
+                </div>
+                <div>
+                  <h1 className="text-lg font-bold text-gray-900">
+                    Create Job
+                  </h1>
+                  <p className="text-xs text-gray-600">
+                    Step {currentStep} of {totalSteps}
+                  </p>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-lg font-bold text-gray-900">
+                  {Math.round(((currentStep - 1) / (totalSteps - 1)) * 100)}%
+                </div>
+                <p className="text-xs text-gray-600">Done</p>
+              </div>
+            </div>
+            
+            {/* Mobile Action Buttons */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowSaveTemplateDialog(true)}
+                className="bg-white hover:bg-gray-50 border-gray-200 text-gray-600 hover:text-gray-700 rounded-lg h-8 px-3 text-xs font-medium whitespace-nowrap flex-shrink-0"
+              >
+                <FileText className="h-3 w-3 mr-1" />
+                Save Template
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  navigate(ROUTES.DASHBOARD.JOB_TEMPLATES, {
+                    state: { fromJobCreation: true },
+                  })
+                }
+                className="bg-white hover:bg-gray-50 border-gray-200 text-gray-600 hover:text-gray-700 rounded-lg h-8 px-3 text-xs font-medium whitespace-nowrap flex-shrink-0"
+              >
+                <Layers className="h-3 w-3 mr-1" />
+                Templates
+              </Button>
+            </div>
+          </div>
+
+          {/* Desktop Header */}
+          <div className="hidden sm:flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-gray-100 rounded-xl">
                 <FileText className="h-6 w-6 text-gray-600" />
@@ -748,57 +863,57 @@ export default function CreateJob() {
                 </div>
                 <p className="text-sm text-gray-600 font-medium">Complete</p>
               </div>
-              {/* Progress Bar */}
-              <div className="w-32">
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="bg-gradient-to-r from-primary to-secondary h-2 rounded-full transition-all duration-300 ease-out"
-                    style={{
-                      width: `${Math.round(
-                        ((currentStep - 1) / (totalSteps - 1)) * 100
-                      )}%`,
-                    }}
-                  />
-                </div>
-              </div>
             </div>
+          </div>
+          
+          {/* Progress Stepper */}
+          <div className="w-full">
+            <EnhancedProgressStepper
+              steps={steps}
+              currentStep={currentStep}
+              completedSteps={Array.from({ length: currentStep - 1 }, (_, i) => i + 1)}
+              variant="horizontal"
+              size="md"
+              showProgress={true}
+              animated={true}
+              clickable={false}
+              className="max-w-6xl mx-auto"
+            />
           </div>
         </div>
       </div>
 
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 mt-6">
-        {/* Template Status & Actions */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            {selectedTemplate && (
-              <div className="flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-lg px-3 py-2">
-                <Sparkles className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium text-primary">
-                  Using template: {selectedTemplate.name}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigate(ROUTES.DASHBOARD.JOB_TEMPLATES)}
-                  className="h-6 w-6 p-0 text-primary hover:text-primary/80 hover:bg-primary/10"
-                >
-                  <RotateCcw className="h-3 w-3" />
-                </Button>
-              </div>
-            )}
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 mt-4 sm:mt-6">
+        {/* Template Status & Actions - Mobile Optimized */}
+        <div className="mb-4 sm:mb-6">
+          {selectedTemplate && (
+            <div className="flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-lg px-3 py-2 mb-3">
+              <Sparkles className="h-4 w-4 text-primary flex-shrink-0" />
+              <span className="text-sm font-medium text-primary truncate">
+                Using template: {selectedTemplate.name}
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate(ROUTES.DASHBOARD.JOB_TEMPLATES)}
+                className="h-6 w-6 p-0 text-primary hover:text-primary/80 hover:bg-primary/10 flex-shrink-0"
+              >
+                <RotateCcw className="h-3 w-3" />
+              </Button>
+            </div>
+          )}
 
-            {/* Auto-save status indicator */}
-            {lastSaved && (
-              <div className="text-xs text-gray-500 flex items-center gap-1">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                Auto-saved {lastSaved.toLocaleTimeString()}
-              </div>
-            )}
-          </div>
+          {/* Auto-save status indicator */}
+          {lastSaved && (
+            <div className="text-xs text-gray-500 flex items-center gap-1 justify-center sm:justify-start">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              Auto-saved {lastSaved.toLocaleTimeString()}
+            </div>
+          )}
         </div>
 
-        <Card className="shadow-none border-0 bg-white p-3">
-          <CardContent className="px-8 pt-4 pb-4">
+        <Card className="shadow-none border-0 bg-white p-2 sm:p-3">
+          <CardContent className="px-4 sm:px-8 pt-4 pb-4">
             <FormProvider {...form}>
               <form
                 onSubmit={(e) => {
@@ -811,7 +926,7 @@ export default function CreateJob() {
                 className="space-y-8"
               >
                 {renderCurrentStep()}
-                <StepNavigation
+                <StepControls
                   onNext={handleNext}
                   onPrevious={handlePrevious}
                   isFirstStep={currentStep === 1}

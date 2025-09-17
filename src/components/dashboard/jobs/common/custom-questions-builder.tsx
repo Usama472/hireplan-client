@@ -139,22 +139,6 @@ const QUESTION_TYPES = [
     description: "Date picker",
     placeholder: "Select a date...",
   },
-  {
-    id: "time",
-    label: "Time",
-    icon: Clock,
-    color: "bg-yellow-100 text-yellow-700",
-    description: "Time picker",
-    placeholder: "Select a time...",
-  },
-  {
-    id: "file",
-    label: "File Upload",
-    icon: Upload,
-    color: "bg-gray-100 text-gray-700",
-    description: "File upload field",
-    placeholder: "Choose file...",
-  },
 ];
 
 interface CustomQuestionsBuilderProps {
@@ -179,6 +163,7 @@ export function CustomQuestionsBuilder({
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [globalScoringMode, setGlobalScoringMode] = useState<'simple' | 'detailed'>('simple');
   const [questionForm, setQuestionForm] = useState<CustomQuestion>({
     type: "text",
     question: "",
@@ -187,6 +172,9 @@ export function CustomQuestionsBuilder({
     placeholder: "",
     aiScoringType: "scored",
     aiScoreValues: {},
+    scoringType: "exact",
+    scoringMode: "simple",
+    weight: 5,
   });
 
   const [showPreview, setShowPreview] = useState(false);
@@ -201,6 +189,9 @@ export function CustomQuestionsBuilder({
       placeholder: "",
       aiScoringType: "scored",
       aiScoreValues: {},
+      scoringType: "exact",
+      scoringMode: "simple",
+      weight: 5,
     });
     setEditingIndex(null);
   };
@@ -282,55 +273,147 @@ export function CustomQuestionsBuilder({
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <Label className="text-sm font-medium">{label}</Label>
-          {description && (
-            <p className="text-xs text-gray-500 mt-1">{description}</p>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => setShowPreview(!showPreview)}
-            className="text-xs"
-          >
-            {showPreview ? (
-              <>
-                <EyeOff className="w-3 h-3 mr-1" />
-                Hide Preview
-              </>
-            ) : (
-              <>
-                <Eye className="w-3 h-3 mr-1" />
-                Show Preview
-              </>
+    <div className="space-y-6">
+      {/* Enhanced Header Section */}
+      <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-6">
+        <div className="flex flex-col space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <MessageSquare className="w-5 h-5 text-blue-600" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-gray-900">{label}</h3>
+              {description && (
+                <p className="text-sm text-gray-600 mt-1">{description}</p>
+              )}
+            </div>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            {/* Enhanced AI Scoring Mode Selector */}
+            {hasAIFeatures && (
+              <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 bg-purple-100 rounded-lg">
+                      <Star className="w-4 h-4 text-purple-600" />
+                    </div>
+                    <Label className="text-sm font-semibold text-gray-900">AI Scoring Mode</Label>
+                  </div>
+                  
+                  <div className="flex flex-1 justify-center">
+                    <div className="grid grid-cols-2 gap-1 bg-gray-100 rounded-lg p-1 w-full max-w-sm">
+                      <button
+                        type="button"
+                        onClick={() => setGlobalScoringMode('simple')}
+                        className={`px-4 py-3 text-sm font-medium rounded-md transition-all duration-200 ${
+                          globalScoringMode === 'simple'
+                            ? 'bg-white text-blue-600 shadow-md border border-blue-200'
+                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                        }`}
+                      >
+                        <div className="flex flex-col items-center gap-1">
+                          <span>🤖</span>
+                          <span>Simple</span>
+                        </div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setGlobalScoringMode('detailed')}
+                        className={`px-4 py-3 text-sm font-medium rounded-md transition-all duration-200 ${
+                          globalScoringMode === 'detailed'
+                            ? 'bg-white text-blue-600 shadow-md border border-blue-200'
+                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                        }`}
+                      >
+                        <div className="flex flex-col items-center gap-1">
+                          <span>⚙️</span>
+                          <span>Detailed</span>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-center sm:justify-end">
+                    <div className={`text-xs font-medium px-4 py-2 rounded-full border ${
+                      globalScoringMode === 'simple' 
+                        ? 'bg-green-50 text-green-700 border-green-200' 
+                        : 'bg-blue-50 text-blue-700 border-blue-200'
+                    }`}>
+                      {globalScoringMode === 'simple' ? 'AI decides automatically' : 'Manual configuration'}
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Mode Description */}
+                <div className="mt-3 pt-3 border-t border-gray-100">
+                  <p className="text-xs text-gray-600 leading-relaxed">
+                    {globalScoringMode === 'simple' 
+                      ? '🎯 AI will automatically determine the best answers and weight all questions equally. Perfect for quick setup.'
+                      : '🔧 You configure what the AI should look for in each answer and set custom question weights. More control and precision.'
+                    }
+                  </p>
+                </div>
+              </div>
             )}
-          </Button>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
+            
+            <div className="flex items-center gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowPreview(!showPreview)}
+                className="gap-2 bg-white hover:bg-gray-50 border-gray-200 text-gray-600"
+              >
+                {showPreview ? (
+                  <>
+                    <EyeOff className="w-4 h-4" />
+                    Hide Preview
+                  </>
+                ) : (
+                  <>
+                    <Eye className="w-4 h-4" />
+                    Show Preview
+                  </>
+                )}
+              </Button>
+              
               <Button
                 type="button"
                 size="sm"
-                onClick={resetForm}
+                onClick={() => {
+                  resetForm();
+                  setIsDialogOpen(true);
+                }}
                 disabled={questions.length >= 5}
-                className="text-xs"
+                className="gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
               >
-                <Plus className="w-3 h-3 mr-1" />
+                <Plus className="w-4 h-4" />
                 Add Question
+                {questions.length > 0 && (
+                  <span className="ml-1 text-xs bg-blue-500 px-2 py-0.5 rounded-full">
+                    {questions.length}/5
+                  </span>
+                )}
               </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogTrigger asChild>
+          <div className="hidden"></div>
+        </DialogTrigger>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>
                   {editingIndex !== null ? "Edit Question" : "Add New Question"}
                 </DialogTitle>
                 <DialogDescription>
                   Create custom questions to gather specific information from applicants.
-                  {hasAIFeatures && " Configure AI scoring to automatically evaluate responses."}
+                  {hasAIFeatures && globalScoringMode === 'detailed' && " Configure AI scoring to automatically evaluate responses."}
+                  {hasAIFeatures && globalScoringMode === 'simple' && " AI will automatically score responses."}
                 </DialogDescription>
               </DialogHeader>
 
@@ -366,132 +449,6 @@ export function CustomQuestionsBuilder({
                   </div>
                 </div>
 
-                {/* AI Scoring Configuration - Only for Professional/Enterprise */}
-                {hasAIFeatures && (
-                  <div className="p-4 bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200/50 rounded-lg space-y-3">
-                    <div className="flex items-center gap-2">
-                      <Star className="w-4 h-4 text-blue-600" />
-                      <Label className="text-sm font-medium text-blue-800">AI Scoring Configuration</Label>
-                    </div>
-                    
-                    <div className="space-y-3">
-                      {/* Multiple Choice Questions */}
-                      {(questionForm.type === "select" || questionForm.type === "radio") && (
-                        <>
-                          <div className="space-y-2">
-                            <Label className="text-xs text-blue-700">Correct/Best Answer</Label>
-                            <Select 
-                              value={questionForm.correctAnswer || ""} 
-                              onValueChange={(value) => setQuestionForm({...questionForm, correctAnswer: value})}
-                            >
-                              <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Select the correct/best answer" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {questionForm.options.filter(option => option.trim()).map((option, index) => (
-                                  <SelectItem key={index} value={option}>
-                                    {option}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          
-                          <div className="flex items-center justify-between">
-                            <Label className="text-xs text-blue-700">Auto-reject wrong answers?</Label>
-                            <Switch
-                              checked={questionForm.autoReject || false}
-                              onCheckedChange={(checked) => setQuestionForm({...questionForm, autoReject: checked})}
-                              size="sm"
-                            />
-                          </div>
-                        </>
-                      )}
-
-                      {/* Yes/No Questions */}
-                      {questionForm.type === "select" && questionForm.options.length === 2 && 
-                       questionForm.options.some(opt => opt.toLowerCase().includes('yes')) &&
-                       questionForm.options.some(opt => opt.toLowerCase().includes('no')) && (
-                        <>
-                          <div className="space-y-2">
-                            <Label className="text-xs text-blue-700">Expected Answer</Label>
-                            <Select 
-                              value={questionForm.expectedYesNo || ""} 
-                              onValueChange={(value) => setQuestionForm({...questionForm, expectedYesNo: value})}
-                            >
-                              <SelectTrigger className="w-full">
-                                <SelectValue placeholder="What answer do you expect?" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="yes">Yes (positive response)</SelectItem>
-                                <SelectItem value="no">No (negative response)</SelectItem>
-                                <SelectItem value="either">Either (no preference)</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          
-                          <div className="flex items-center justify-between">
-                            <Label className="text-xs text-blue-700">Auto-reject wrong answers?</Label>
-                            <Switch
-                              checked={questionForm.autoReject || false}
-                              onCheckedChange={(checked) => setQuestionForm({...questionForm, autoReject: checked})}
-                              size="sm"
-                            />
-                          </div>
-                        </>
-                      )}
-
-                      {/* Text Questions */}
-                      {(questionForm.type === "text" || questionForm.type === "textarea") && (
-                        <div className="space-y-2">
-                          <Label className="text-xs text-blue-700">AI Evaluation Focus</Label>
-                          <Textarea
-                            value={questionForm.evaluationCriteria || ""}
-                            onChange={(e) => setQuestionForm({...questionForm, evaluationCriteria: e.target.value})}
-                            placeholder="What should AI look for in the answer? e.g., 'Look for specific examples of leadership, team management experience, and problem-solving skills'"
-                            className="text-xs min-h-[60px]"
-                          />
-                          <p className="text-xs text-blue-600">
-                            Guide AI on what makes a good answer to this question.
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Number Questions */}
-                      {questionForm.type === "number" && (
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="space-y-1">
-                            <Label className="text-xs text-blue-700">Minimum Value</Label>
-                            <Input
-                              type="number"
-                              value={questionForm.minValue || ""}
-                              onChange={(e) => setQuestionForm({...questionForm, minValue: parseInt(e.target.value) || undefined})}
-                              placeholder="Min"
-                              className="h-7 text-xs"
-                            />
-                          </div>
-                          <div className="space-y-1">
-                            <Label className="text-xs text-blue-700">Ideal Value</Label>
-                            <Input
-                              type="number"
-                              value={questionForm.idealValue || ""}
-                              onChange={(e) => setQuestionForm({...questionForm, idealValue: parseInt(e.target.value) || undefined})}
-                              placeholder="Ideal"
-                              className="h-7 text-xs"
-                            />
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="text-xs text-blue-600 bg-blue-100 p-2 rounded">
-                        <strong>Multiple Choice:</strong> Set correct answer and auto-reject option<br/>
-                        <strong>Text Questions:</strong> AI evaluates based on your criteria<br/>
-                        <strong>Number Questions:</strong> Scored based on minimum and ideal values
-                      </div>
-                    </div>
-                  </div>
-                )}
-
                 {/* Question Text */}
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Question</Label>
@@ -522,17 +479,33 @@ export function CustomQuestionsBuilder({
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <Label className="text-sm font-medium">Options</Label>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={addOption}
-                        className="text-xs"
-                      >
-                        <Plus className="w-3 h-3 mr-1" />
-                        Add Option
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setQuestionForm({...questionForm, scoringType: questionForm.scoringType === 'greater_than' ? 'exact' : 'greater_than'})}
+                          className="text-xs"
+                        >
+                          {questionForm.scoringType === 'greater_than' ? 'Exact Match' : 'Greater Than'}
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={addOption}
+                          className="text-xs"
+                        >
+                          <Plus className="w-3 h-3 mr-1" />
+                          Add Option
+                        </Button>
+                      </div>
                     </div>
+                    {questionForm.scoringType === 'greater_than' && (
+                      <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded">
+                        <strong>Greater Than Mode:</strong> Options with higher values will score better than lower values
+                      </div>
+                    )}
                     <div className="space-y-2">
                       {questionForm.options.map((option, index) => (
                         <div key={index} className="flex items-center gap-2">
@@ -639,20 +612,6 @@ export function CustomQuestionsBuilder({
                           className="bg-white"
                         />
                       )}
-                      {questionForm.type === "time" && (
-                        <Input
-                          type="time"
-                          disabled
-                          className="bg-white"
-                        />
-                      )}
-                      {questionForm.type === "file" && (
-                        <Input
-                          type="file"
-                          disabled
-                          className="bg-white"
-                        />
-                      )}
                       {questionForm.type === "select" && (
                         <Select disabled>
                           <SelectTrigger className="bg-white py-1.5">
@@ -679,6 +638,120 @@ export function CustomQuestionsBuilder({
                     </div>
                   </div>
                 </div>
+
+                {/* AI Scoring Configuration - Only for Detailed Mode */}
+                {hasAIFeatures && globalScoringMode === 'detailed' && questionForm.type !== "date" && (
+                  <div className="p-4 bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200/50 rounded-lg space-y-4">
+                    <div className="flex items-center gap-2">
+                      <Star className="w-4 h-4 text-blue-600" />
+                      <Label className="text-sm font-medium text-blue-800">AI Scoring Configuration</Label>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      {/* Multiple Choice Questions */}
+                      {(questionForm.type === "select" || questionForm.type === "radio") && (
+                        <>
+                          <div className="space-y-2">
+                            <Label className="text-xs text-blue-700">Correct/Best Answer</Label>
+                            <Select 
+                              value={questionForm.correctAnswer || ""} 
+                              onValueChange={(value) => setQuestionForm({...questionForm, correctAnswer: value})}
+                            >
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select the correct/best answer" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {questionForm.options.filter(option => option.trim()).map((option, index) => (
+                                  <SelectItem key={index} value={option}>
+                                    {option}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                            <Label className="text-xs text-blue-700">Auto-reject wrong answers?</Label>
+                            <Switch
+                              checked={questionForm.autoReject || false}
+                              onCheckedChange={(checked) => setQuestionForm({...questionForm, autoReject: checked})}
+                              size="sm"
+                            />
+                          </div>
+                        </>
+                      )}
+
+                      {/* Text Questions */}
+                      {(questionForm.type === "text" || questionForm.type === "textarea") && (
+                        <div className="space-y-2">
+                          <Label className="text-xs text-blue-700">AI Evaluation Focus</Label>
+                          <Textarea
+                            value={questionForm.evaluationCriteria || ""}
+                            onChange={(e) => setQuestionForm({...questionForm, evaluationCriteria: e.target.value})}
+                            placeholder="What should AI look for in the answer? e.g., 'Look for specific examples of leadership, team management experience, and problem-solving skills'"
+                            className="text-xs min-h-[60px]"
+                          />
+                          <p className="text-xs text-blue-600">
+                            Tell the AI what makes a good answer to this question.
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Number Questions */}
+                      {questionForm.type === "number" && (
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-1">
+                            <Label className="text-xs text-blue-700">Minimum Value</Label>
+                            <Input
+                              type="number"
+                              value={questionForm.minValue || ""}
+                              onChange={(e) => setQuestionForm({...questionForm, minValue: parseInt(e.target.value) || undefined})}
+                              placeholder="Min"
+                              className="h-7 text-xs"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-xs text-blue-700">Ideal Value</Label>
+                            <Input
+                              type="number"
+                              value={questionForm.idealValue || ""}
+                              onChange={(e) => setQuestionForm({...questionForm, idealValue: parseInt(e.target.value) || undefined})}
+                              placeholder="Ideal"
+                              className="h-7 text-xs"
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Question Weight Slider */}
+                      <div className="space-y-2">
+                        <Label className="text-xs text-blue-700">Question Weight</Label>
+                        <div className="space-y-2">
+                          <input
+                            type="range"
+                            min="1"
+                            max="10"
+                            value={questionForm.weight || 5}
+                            onChange={(e) => setQuestionForm({...questionForm, weight: parseInt(e.target.value)})}
+                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                          />
+                          <div className="flex justify-between text-xs text-gray-500">
+                            <span>Low Impact (1)</span>
+                            <span className="font-medium text-blue-600">Weight: {questionForm.weight || 5}</span>
+                            <span>High Impact (10)</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Simple Mode Info */}
+                {hasAIFeatures && globalScoringMode === 'simple' && (
+                  <div className="text-xs text-blue-600 bg-blue-50 p-3 rounded border border-blue-200">
+                    <strong>Simple Mode:</strong> AI will automatically determine the best answers and weight all questions equally.
+                  </div>
+                )}
               </div>
 
               <DialogFooter>
@@ -700,9 +773,6 @@ export function CustomQuestionsBuilder({
               </DialogFooter>
             </DialogContent>
           </Dialog>
-        </div>
-      </div>
-
 
       {/* Current Questions List */}
       {questions.length > 0 && (

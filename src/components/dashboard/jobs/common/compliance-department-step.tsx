@@ -26,15 +26,15 @@ export function ComplianceDepartmentStep() {
   const customDepartment = watch("customDepartment");
 
   const departmentOptions = [
-    { value: "engineering", label: "🔧 TODO: Pull from Settings - Engineering" },
-    { value: "sales", label: "🔧 TODO: Pull from Settings - Sales" },
-    { value: "marketing", label: "🔧 TODO: Pull from Settings - Marketing" },
-    { value: "hr", label: "🔧 TODO: Pull from Settings - Human Resources" },
-    { value: "finance", label: "🔧 TODO: Pull from Settings - Finance" },
-    { value: "operations", label: "🔧 TODO: Pull from Settings - Operations" },
-    { value: "customer-success", label: "🔧 TODO: Pull from Settings - Customer Success" },
-    { value: "product", label: "🔧 TODO: Pull from Settings - Product" },
-    { value: "design", label: "🔧 TODO: Pull from Settings - Design" },
+    { value: "engineering", label: "Engineering" },
+    { value: "sales", label: "Sales" },
+    { value: "marketing", label: "Marketing" },
+    { value: "hr", label: "Human Resources" },
+    { value: "finance", label: "Finance" },
+    { value: "operations", label: "Operations" },
+    { value: "customer-success", label: "Customer Success" },
+    { value: "product", label: "Product" },
+    { value: "design", label: "Design" },
     { value: "custom", label: "Add Custom Department" },
   ];
 
@@ -102,8 +102,8 @@ export function ComplianceDepartmentStep() {
               selectOptions={[
                 { value: "administrative-support-workers", label: "Administrative Support Workers" },
                 { value: "craft-workers", label: "Craft Workers" },
-                { value: "executive-senior-level-officials-and-managers", label: "Executive/Senior Level Officials And Managers" },
-                { value: "first-mid-level-officials-and-managers", label: "First/Mid Level Officials And Managers" },
+                { value: "executive-senior-level-officials-and-managers", label: "Executive/Senior Level Officials" },
+                { value: "first-mid-level-officials-and-managers", label: "First/Mid Level Officials" },
                 { value: "laborers-and-helpers", label: "Laborers And Helpers" },
                 { value: "operatives", label: "Operatives" },
                 { value: "professionals", label: "Professionals" },

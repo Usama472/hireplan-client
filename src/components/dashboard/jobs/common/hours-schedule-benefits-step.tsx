@@ -89,10 +89,10 @@ export function HoursScheduleBenefitsStep() {
                   type={INPUT_TYPES.SELECT}
                   placeholder="Select hours type"
                   selectOptions={[
-                    { value: "fixed-hours", label: "Fixed Hours (Write in Amount) Per Week" },
-                    { value: "range", label: "Range (Write in Min. & Max.) Per Week" },
-                    { value: "minimum", label: "Minimum (Write in Amount) Per Week" },
-                    { value: "maximum", label: "Maximum (Write in Amount) Per Week" },
+                    { value: "fixed-hours", label: "Fixed Hours Per Week" },
+                    { value: "range", label: "Range Per Week" },
+                    { value: "minimum", label: "Minimum Per Week" },
+                    { value: "maximum", label: "Maximum Per Week" },
                   ]}
                 />
               </div>

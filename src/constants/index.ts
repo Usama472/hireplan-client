@@ -799,3 +799,6 @@ export const TEST_EMAIL_TEMPLATES = [
       "Professional application confirmation with application details and next steps",
   },
 ] as const;
+
+// Export theme
+export * from './theme';

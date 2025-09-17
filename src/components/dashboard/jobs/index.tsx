@@ -121,21 +121,22 @@ export default function JobsPage() {
 
   return (
     <div className="min-h-full">
-      <div className="space-y-6">
-        {/* Enhanced Header - Responsive */}
-        <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 relative overflow-hidden">
+      <div className="space-y-4 sm:space-y-6">
+        {/* Enhanced Header - Mobile Optimized */}
+        <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 sm:py-5 relative overflow-hidden">
           <div className="relative z-10">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+            <div className="flex flex-col gap-4">
+              {/* Title and Description */}
+              <div className="flex items-center gap-3 min-w-0">
                 <div className="p-2 sm:p-3 bg-gray-100 rounded-xl flex-shrink-0">
                   <Briefcase className="h-5 sm:h-6 w-5 sm:w-6 text-gray-600" />
                 </div>
-                <div className="flex flex-col min-w-0">
-                  <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 truncate">
+                <div className="flex flex-col min-w-0 flex-1">
+                  <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">
                     Job Postings
                   </h1>
-                  <div className="text-sm sm:text-base text-gray-600 flex items-center gap-2 flex-wrap">
-                    <span className="text-xs sm:text-sm">Manage and track your job postings and applications</span>
+                  <div className="text-gray-600 flex items-center gap-2 flex-wrap">
+                    <span className="text-xs sm:text-sm">Manage and track your job postings</span>
                     <Badge
                       variant="secondary"
                       className="bg-gray-100 text-gray-700 text-xs"
@@ -145,11 +146,13 @@ export default function JobsPage() {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+              
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2 w-full">
                 <Button
                   onClick={() => navigate(`/company/${company?.slug}`)}
                   variant="outline"
-                  className="bg-white hover:bg-gray-50 text-gray-600 border border-gray-200 hover:border-gray-300 gap-2 px-3 sm:px-5 font-medium transition-all duration-200 text-sm shadow-sm flex-1 sm:flex-initial"
+                  className="bg-white hover:bg-gray-50 text-gray-600 border border-gray-200 hover:border-gray-300 gap-2 px-3 sm:px-4 font-medium transition-all duration-200 text-sm shadow-sm flex-1 sm:flex-initial"
                 >
                   <span className="hidden sm:inline">Website View</span>
                   <span className="sm:hidden">View Site</span>
@@ -157,7 +160,7 @@ export default function JobsPage() {
                 {canCreateJob && (
                   <Button
                     onClick={() => navigate(ROUTES.DASHBOARD.CREATE_JOB)}
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground border-0 shadow-lg hover:shadow-xl hover:shadow-primary/25 transition-all duration-300 gap-2 flex-1 sm:flex-initial"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground border-0 shadow-lg hover:shadow-xl hover:shadow-primary/25 transition-all duration-300 gap-2 px-3 sm:px-4 flex-1 sm:flex-initial"
                   >
                     <Plus className="w-4 h-4" />
                     <span className="hidden sm:inline">Create Job</span>
@@ -169,9 +172,9 @@ export default function JobsPage() {
           </div>
         </div>
 
-        {/* Stats Cards Section */}
+        {/* Stats Cards Section - Mobile Optimized */}
         <div className="px-4 sm:px-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
             {/* Active Jobs Card */}
             <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 hover:border-primary/20 transition-all duration-300">
               <div className="flex items-center justify-between">
@@ -260,13 +263,13 @@ export default function JobsPage() {
             </div>
 
             {/* Average Applications Card */}
-            <div className="bg-white border border-gray-200 rounded-xl p-6 hover:border-primary/20 transition-all duration-300">
+            <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 hover:border-primary/20 transition-all duration-300">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600 mb-1">
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1">
                     Avg Applications
                   </p>
-                  <p className="text-3xl font-bold text-gray-900">
+                  <p className="text-2xl sm:text-3xl font-bold text-gray-900">
                     {jobs.length > 0
                       ? Math.round(
                           jobs.reduce(
@@ -278,9 +281,9 @@ export default function JobsPage() {
                   </p>
                   <p className="text-xs text-gray-500 mt-1">Per job posting</p>
                 </div>
-                <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                <div className="w-10 sm:w-12 h-10 sm:h-12 bg-orange-100 rounded-xl flex items-center justify-center flex-shrink-0">
                   <svg
-                    className="h-6 w-6 text-orange-600"
+                    className="h-5 sm:h-6 w-5 sm:w-6 text-orange-600"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -298,20 +301,20 @@ export default function JobsPage() {
           </div>
         </div>
 
-        <div className="px-6">
-          {/* Search and Controls Section */}
-          <div className="mb-8">
+        <div className="px-4 sm:px-6">
+          {/* Search and Controls Section - Mobile Optimized */}
+          <div className="mb-6 sm:mb-8">
             <Tabs
               value={viewMode}
               onValueChange={(value) => setViewMode(value as "grid" | "list")}
             >
               {/* Enhanced Search and View Controls */}
-              <div className="mb-6">
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+              <div className="mb-4 sm:mb-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                   {/* Search Bar */}
-                  <div className="flex-1 max-w-lg">
+                  <div className="flex-1 max-w-full sm:max-w-lg">
                     <SearchBar
-                      placeholder="Search jobs by title, company, or location..."
+                      placeholder="Search jobs..."
                       onSearch={handleSearch}
                       onClear={handleClearSearch}
                       searchQuery={searchQuery as string}
@@ -319,27 +322,27 @@ export default function JobsPage() {
                   </div>
 
                   {/* View Mode Tabs */}
-                  <div className="flex items-center justify-between lg:justify-end">
+                  <div className="flex items-center justify-center sm:justify-end">
                     <div className="flex bg-white border border-gray-200 rounded-lg p-1 gap-1">
                       <button
                         onClick={() => setViewMode("grid")}
-                        className={`p-2 rounded-md transition-all duration-300 ease-in-out transform ${
+                        className={`p-2 rounded-md transition-all duration-300 ease-in-out ${
                           viewMode === "grid"
-                            ? "bg-primary text-primary-foreground scale-105"
-                            : "text-muted-foreground hover:text-foreground hover:bg-muted hover:scale-105"
+                            ? "bg-primary text-primary-foreground"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted"
                         }`}
                       >
-                        <Grid3X3 className="w-4 h-4 transition-transform duration-300" />
+                        <Grid3X3 className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => setViewMode("list")}
-                        className={`p-2 rounded-md transition-all duration-300 ease-in-out transform ${
+                        className={`p-2 rounded-md transition-all duration-300 ease-in-out ${
                           viewMode === "list"
-                            ? "bg-primary text-primary-foreground shadow-sm scale-105"
-                            : "text-muted-foreground hover:text-foreground hover:bg-muted hover:scale-105"
+                            ? "bg-primary text-primary-foreground shadow-sm"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted"
                         }`}
                       >
-                        <List className="w-4 h-4 transition-transform duration-300" />
+                        <List className="w-4 h-4" />
                       </button>
                     </div>
                   </div>

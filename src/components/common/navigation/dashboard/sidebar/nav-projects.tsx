@@ -23,9 +23,11 @@ export function NavProjects({
 }) {
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel className=" font-medium text-gray-600 dark:text-white/60 uppercase tracking-wider mb-4 px-3">
-        {name}
-      </SidebarGroupLabel>
+      {name && (
+        <SidebarGroupLabel className=" font-medium text-gray-600 dark:text-white/60 uppercase tracking-wider mb-4 px-3">
+          {name}
+        </SidebarGroupLabel>
+      )}
       <SidebarMenu className="space-y-1">
         {projects.map((item) => {
           const isActive = currentPath === item.url;

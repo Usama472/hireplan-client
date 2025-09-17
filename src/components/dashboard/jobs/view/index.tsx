@@ -190,14 +190,15 @@ export default function JobDetails() {
   if (loadingState.error && !job) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
           <Button
             variant="ghost"
             onClick={() => navigate("/dashboard/jobs")}
-            className="mb-6 text-gray-600 hover:text-gray-900"
+            className="mb-4 sm:mb-6 text-gray-600 hover:text-gray-900"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Jobs
+            <span className="hidden sm:inline">Back to Jobs</span>
+            <span className="sm:hidden">Back</span>
           </Button>
 
           <div className="flex items-center justify-center min-h-[400px]">
@@ -239,14 +240,15 @@ export default function JobDetails() {
   if (!job) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
           <Button
             variant="ghost"
             onClick={() => navigate("/dashboard/jobs")}
-            className="mb-6 text-gray-600 hover:text-gray-900"
+            className="mb-4 sm:mb-6 text-gray-600 hover:text-gray-900"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Jobs
+            <span className="hidden sm:inline">Back to Jobs</span>
+            <span className="sm:hidden">Back</span>
           </Button>
 
           <div className="flex items-center justify-center min-h-[400px]">
@@ -286,10 +288,47 @@ export default function JobDetails() {
           </Alert>
         )}
 
-        {/* Professional Header */}
-        <div className="bg-white border-b border-gray-200 px-6 py-3 relative overflow-hidden mb-6">
+        {/* Professional Header - Mobile Optimized */}
+        <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 sm:py-5 relative overflow-hidden mb-4 sm:mb-6">
           <div className="relative z-10">
-            <div className="flex items-center justify-between">
+            {/* Mobile Header */}
+            <div className="block sm:hidden">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200">
+                  <Edit className="h-4 w-4 text-gray-600" />
+                </div>
+                <div className="flex flex-col min-w-0 flex-1">
+                  <h1 className="text-base font-semibold text-gray-900 leading-tight truncate">
+                    {job.jobTitle || "Job Review"}
+                  </h1>
+                  <span className="text-xs text-gray-600">
+                    Review and manage job details
+                  </span>
+                </div>
+              </div>
+              
+              {/* Mobile Action Buttons */}
+              <div className="flex items-center gap-2 w-full">
+                <Button
+                  onClick={handleEdit}
+                  className="bg-white hover:bg-gray-50 text-gray-600 border border-gray-200 hover:border-gray-300 gap-2 px-3 py-2 font-medium transition-all duration-200 text-sm flex-1"
+                >
+                  <Edit className="w-4 h-4" />
+                  <span>Edit Job</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowDeleteModal(true)}
+                  className="bg-red-50 text-red-600 border border-red-200 hover:border-red-300 gap-2 px-3 py-2 font-medium transition-all duration-200 text-sm"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  <span>Delete</span>
+                </Button>
+              </div>
+            </div>
+
+            {/* Desktop Header */}
+            <div className="hidden sm:flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200">
                   <Edit className="h-4 w-4 text-gray-600" />
@@ -341,8 +380,8 @@ export default function JobDetails() {
           </div>
         </div>
 
-        {/* Main Content */}
-        <div className="max-w-7xl mx-auto px-6 pb-8">
+        {/* Main Content - Mobile Optimized */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-6 sm:pb-8">
           <FormProvider {...form}>
             <ReviewPublishStep
               mode="review"

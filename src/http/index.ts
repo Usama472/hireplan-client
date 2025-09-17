@@ -1,4 +1,5 @@
 import * as applicantApi from "./applicant/api";
+import * as applicantAuthApi from "./applicant-auth/api";
 import * as attachmentApi from "./attachment/api";
 import * as authApi from "./auth/api";
 import * as automationApi from "./automation/api";
@@ -29,6 +30,7 @@ const API = {
   company: companyApi,
   attachment: attachmentApi,
   applicant: applicantApi,
+  applicantAuth: applicantAuthApi,
   availability: availabilityApi,
   google: googleApi,
   microsoft: microsoftApi,

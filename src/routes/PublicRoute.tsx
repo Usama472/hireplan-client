@@ -18,7 +18,7 @@ const PublicRoute: FC<PublicRouteProps> = ({ children }) => {
   const hideLayoutFor = ["/signup"];
   
   // Skip loading for landing page and other critical public pages
-  const skipLoadingFor = ["/", "/contact", "/privacy", "/terms", "/company", "/apply", "/interview"];
+  const skipLoadingFor = ["/", "/contact", "/privacy", "/terms", "/company", "/apply", "/interview", "/applicant"];
   const shouldSkipLoading = skipLoadingFor.some(route => 
     path === route || path.startsWith(route + '/')
   );
@@ -29,7 +29,7 @@ const PublicRoute: FC<PublicRouteProps> = ({ children }) => {
   }
 
   // Hide layout for specific routes and all company routes
-  const shouldHideLayout = hideLayoutFor.includes(path) || path.startsWith("/company/");
+  const shouldHideLayout = hideLayoutFor.includes(path) || path.startsWith("/company/") || path.startsWith("/applicant/");
 
   return shouldHideLayout ? (
     <>

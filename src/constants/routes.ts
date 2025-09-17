@@ -29,6 +29,11 @@ export const DASHBOARD_ROUTES = {
   MEETING_SETTINGS: `/dashboard/meeting-settings`,
 };
 
+export const APPLICANT_ROUTES = {
+  LOGIN: `/applicant/login`,
+  DASHBOARD: `/applicant/dashboard`,
+};
+
 export const ROUTES = {
   HOME: "/",
   LOGIN: "/login",
@@ -44,4 +49,5 @@ export const ROUTES = {
   COMPANY: "/company/:slug",
   APPLY_JOB: "/company/:slug/job/:jobId/apply",
   INTERVIEW_SCHEDULE: "/interview/schedule/:token",
+  APPLICANT: APPLICANT_ROUTES,
 };

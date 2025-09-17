@@ -6,7 +6,8 @@ import { JobAdStep } from "@/components/dashboard/jobs/common/job-ad-step";
 import { PositionDetailsStep } from "@/components/dashboard/jobs/common/position-details-step";
 import { ReviewPublishStep } from "@/components/dashboard/jobs/common/review-publish-step";
 import { SettingsNotificationsStep } from "@/components/dashboard/jobs/common/settings-notifications-step";
-import { StepNavigation } from "@/components/main/signup/stepNavigation";
+import { StepControls } from "@/components/main/signup/stepNavigation";
+import { EnhancedProgressStepper, type Step } from "@/components/ui/enhanced-progress-stepper";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -167,6 +168,17 @@ export default function EditJob() {
   });
   const navigate = useNavigate();
 
+  // Define steps for the progress stepper
+  const steps: Step[] = [
+    { id: "job-ad", title: "Job Details", description: "Basic job information" },
+    { id: "position", title: "Position Details", description: "Role details and company info" },
+    { id: "settings", title: "Settings", description: "Job settings and notifications" },
+    { id: "questions", title: "Questions", description: "Custom screening questions", optional: true },
+    { id: "automation", title: "Automation", description: "Automated workflows", optional: true },
+    { id: "booking", title: "Interview Booking", description: "Schedule interviews" },
+    { id: "review", title: "Review & Update", description: "Final review and update" },
+  ];
+
   const form = useForm({
     resolver: zodResolver(jobFormSchema),
     defaultValues: JOB_FORM_DEFAULT_VALUES,
@@ -237,18 +249,27 @@ export default function EditJob() {
     fetchJobDetails(true);
   };
 
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
   const handleNext = async () => {
     clearErrors();
 
     // Skip validation for CustomQuestionsBuilder step
     if (currentStep === 4) {
       setCurrentStep((prev) => Math.min(prev + 1, 7));
+      scrollToTop();
       return;
     }
 
     // Skip validation for Custom Automation step
     if (currentStep === 5) {
       setCurrentStep((prev) => Math.min(prev + 1, 7));
+      scrollToTop();
       return;
     }
 
@@ -260,6 +281,7 @@ export default function EditJob() {
 
       if (isValid) {
         setCurrentStep((prev) => Math.min(prev + 1, 7));
+        scrollToTop();
       }
       return;
     }
@@ -272,12 +294,14 @@ export default function EditJob() {
     if (isStepValid) {
       setCurrentStep((prev) => Math.min(prev + 1, 6));
       clearErrors();
+      scrollToTop();
     }
   };
 
   const handlePrevious = () => {
     clearErrors();
     setCurrentStep((prev) => Math.max(prev - 1, 1));
+    scrollToTop();
   };
 
   const onSubmit = async (data: JobFormSchema) => {
@@ -308,7 +332,15 @@ export default function EditJob() {
       const newData = {
         ...rest,
         company: job.company,
-        automation: automationRest,
+        automation: {
+          ...automationRest,
+          enabledRules: enabledRules || [],
+          questionAutoFail: questionAutoFail || [],
+          questionCriteria: questionCriteria || {},
+          jobRules: jobRules || [],
+          acceptanceThreshold: acceptanceThreshold || 80,
+          manualReviewThreshold: manualReviewThreshold || 50,
+        },
         automations: data.automations,
       };
       const response = await API.job.updateJob(job.id, newData);
@@ -499,8 +531,28 @@ export default function EditJob() {
           </Button>
         </div>
 
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
+        <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 sm:py-6 mb-6 sm:mb-8">
+          {/* Mobile Header */}
+          <div className="block sm:hidden mb-4">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h1 className="text-lg font-bold text-gray-900">
+                  Edit Job
+                </h1>
+                <p className="text-xs text-gray-600 truncate max-w-[200px]">
+                  {job.jobTitle}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-gray-500">
+                  Updated: {new Date(job.updatedAt).toLocaleDateString()}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop Header */}
+          <div className="hidden sm:flex items-center justify-between mb-6">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
                 Edit Job Posting
@@ -518,21 +570,37 @@ export default function EditJob() {
               </p>
             </div>
           </div>
+          
+          {/* Progress Stepper */}
+          <div className="w-full">
+            <EnhancedProgressStepper
+              steps={steps}
+              currentStep={currentStep}
+              completedSteps={Array.from({ length: currentStep - 1 }, (_, i) => i + 1)}
+              variant="horizontal"
+              size="md"
+              showProgress={true}
+              animated={true}
+              clickable={false}
+              className="max-w-6xl mx-auto"
+            />
+          </div>
         </div>
 
         <Card className="shadow-sm border-0 bg-white">
-          <CardContent className="p-8 sm:p-12">
+          <CardContent className="p-4 sm:p-8 lg:p-12">
             <FormProvider {...form}>
               <Form {...form}>
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
                   {renderCurrentStep()}
-                  <StepNavigation
+                  <StepControls
                     onNext={handleNext}
                     onPrevious={handlePrevious}
                     isFirstStep={currentStep === 1}
                     isLastStep={currentStep === 7}
                     isValid={true}
                     isSubmitting={isSubmitting}
+                    finalStepText="Update Job"
                   />
                 </form>
               </Form>

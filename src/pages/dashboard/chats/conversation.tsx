@@ -37,7 +37,10 @@ import {
   Globe,
   Linkedin,
   Calendar,
-  CheckCircle
+  CheckCircle,
+  UserCheck,
+  UserX,
+  HelpCircle
 } from 'lucide-react';
 import { SubscriptionGuard } from '@/components/common/SubscriptionGuard';
 import useAuthSessionContext from '@/lib/context/AuthSessionContext';
@@ -339,6 +342,41 @@ const ConversationPage: React.FC = () => {
     } catch (error) {
       toast.error('Failed to close conversation');
     }
+  };
+
+  const handleShortlist = async () => {
+    if (!conversation?.applicantId) return;
+
+    try {
+      await API.applicant.updateApplicantStatus(conversation.applicantId._id, 'shortlisted');
+      toast.success('Applicant shortlisted successfully!');
+      // Reload conversation to update status
+      await loadConversation();
+    } catch (error) {
+      console.error('Error shortlisting applicant:', error);
+      toast.error('Failed to shortlist applicant');
+    }
+  };
+
+  const handleReject = async () => {
+    if (!conversation?.applicantId) return;
+
+    try {
+      await API.applicant.updateApplicantStatus(conversation.applicantId._id, 'rejected');
+      toast.success('Applicant rejected');
+      // Reload conversation to update status
+      await loadConversation();
+    } catch (error) {
+      console.error('Error rejecting applicant:', error);
+      toast.error('Failed to reject applicant');
+    }
+  };
+
+  const handleAskQuestion = () => {
+    // Set a predefined question template in the editor
+    const questionTemplate = "Hi! I'd like to ask you a quick question about your application. ";
+    setReplyContent(questionTemplate);
+    toast.info('Question template added - please complete your question');
   };
 
 
@@ -683,6 +721,77 @@ const ConversationPage: React.FC = () => {
                 <div ref={messagesEndRef} />
               </div>
           </div>
+
+          {/* Action Buttons - Mobile Responsive */}
+          {conversation.status === 'active' && conversation.applicantId && (
+            <div className="bg-gray-50 border-t border-gray-200 px-4 py-3">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                  <span className="text-sm font-medium text-gray-700">Quick Actions:</span>
+                  <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleShortlist}
+                      disabled={conversation.applicantId.status === 'shortlisted'}
+                      className={`gap-2 whitespace-nowrap flex-shrink-0 ${
+                        conversation.applicantId.status === 'shortlisted'
+                          ? 'bg-green-50 text-green-700 border-green-200'
+                          : 'hover:bg-green-50 hover:text-green-700 hover:border-green-300'
+                      }`}
+                    >
+                      <UserCheck className="h-4 w-4" />
+                      <span className="hidden sm:inline">
+                        {conversation.applicantId.status === 'shortlisted' ? 'Shortlisted' : 'Shortlist'}
+                      </span>
+                      <span className="sm:hidden">
+                        {conversation.applicantId.status === 'shortlisted' ? '✓' : 'Shortlist'}
+                      </span>
+                    </Button>
+{/* <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleAskQuestion}
+                      className="gap-2 whitespace-nowrap flex-shrink-0 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300"
+                    >
+                      <HelpCircle className="h-4 w-4" />
+                      <span className="hidden sm:inline">Ask Question</span>
+                      <span className="sm:hidden">Question</span>
+                    </Button> */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleReject}
+                      disabled={conversation.applicantId.status === 'rejected'}
+                      className={`gap-2 whitespace-nowrap flex-shrink-0 ${
+                        conversation.applicantId.status === 'rejected'
+                          ? 'bg-red-50 text-red-700 border-red-200'
+                          : 'hover:bg-red-50 hover:text-red-700 hover:border-red-300'
+                      }`}
+                    >
+                      <UserX className="h-4 w-4" />
+                      <span className="hidden sm:inline">
+                        {conversation.applicantId.status === 'rejected' ? 'Rejected' : 'Reject'}
+                      </span>
+                      <span className="sm:hidden">
+                        {conversation.applicantId.status === 'rejected' ? '✗' : 'Reject'}
+                      </span>
+                    </Button>
+                  </div>
+                </div>
+                
+                {/* Current Status Display */}
+                {conversation.applicantId.status && (
+                  <div className="flex items-center gap-2 justify-center sm:justify-end">
+                    <span className="text-xs text-gray-500">Status:</span>
+                    <div className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(conversation.applicantId.status)}`}>
+                      {conversation.applicantId.status.charAt(0).toUpperCase() + conversation.applicantId.status.slice(1)}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Chat Input - Rich Text Editor */}
           {conversation.status === 'active' && (

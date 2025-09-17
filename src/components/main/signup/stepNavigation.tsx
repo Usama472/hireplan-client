@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 
-interface StepNavigationProps {
+interface StepControlsProps {
   onNext: () => void;
   onPrevious: () => void;
   isFirstStep: boolean;
@@ -13,7 +13,7 @@ interface StepNavigationProps {
   finalStepText?: string;
 }
 
-export function StepNavigation({
+export function StepControls({
   onNext,
   onPrevious,
   isFirstStep,
@@ -21,7 +21,7 @@ export function StepNavigation({
   isValid,
   isSubmitting = false,
   finalStepText = "Create Account",
-}: StepNavigationProps) {
+}: StepControlsProps) {
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
@@ -86,3 +86,6 @@ export function StepNavigation({
     </div>
   );
 }
+
+// Export with original name for backward compatibility
+export const StepNavigation = StepControls;

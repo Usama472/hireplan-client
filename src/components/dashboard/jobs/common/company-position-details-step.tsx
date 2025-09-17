@@ -65,10 +65,10 @@ export function CompanyPositionDetailsStep() {
                 type={INPUT_TYPES.SELECT}
                 placeholder="Select company"
                 selectOptions={[
-                  { value: "company-1", label: "🔧 TODO: Pull from Settings - Acme Corporation" },
-                  { value: "company-2", label: "🔧 TODO: Pull from Settings - TechStart Inc." },
-                  { value: "company-3", label: "🔧 TODO: Pull from Settings - Global Solutions LLC" },
-                  { value: "company-4", label: "🔧 TODO: Pull from Settings - Innovation Labs" },
+                  { value: "company-1", label: "Acme Corporation" },
+                  { value: "company-2", label: "TechStart Inc." },
+                  { value: "company-3", label: "Global Solutions LLC" },
+                  { value: "company-4", label: "Innovation Labs" },
                 ]}
               />
             </div>
@@ -154,12 +154,12 @@ export function CompanyPositionDetailsStep() {
                   name="payRate.type"
                   type={INPUT_TYPES.SELECT}
                   placeholder="Select pay type"
-                  selectOptions={[
-                    { value: "range", label: "Range (Write in Min. & Max.)" },
-                    { value: "starting-amount", label: "Starting Amount (Write in Amount)" },
-                    { value: "maximum-amount", label: "Maximum Amount (Write in Amount)" },
-                    { value: "exact-amount", label: "Exact Amount (Write in Amount)" },
-                  ]}
+                selectOptions={[
+                  { value: "range", label: "Range" },
+                  { value: "starting-amount", label: "Starting Amount" },
+                  { value: "maximum-amount", label: "Maximum Amount" },
+                  { value: "exact-amount", label: "Exact Amount" },
+                ]}
                 />
               </div>
 

@@ -6,15 +6,12 @@ import useAuthSessionContext from '../context/AuthSessionContext'
 const UnauthenticatedRoutes = ['/login', '/signup']
 const AuthVerificationRoutes = ['/verification']
 const AuthenticatedRoutes = ['/dashboard'] as string[]
-const PublicRoutes = ['/', '/contact', '/privacy', '/terms', '/company', '/apply', '/interview', '/outlook/auth', '/zoom/auth']
+const PublicRoutes = ['/', '/contact', '/privacy', '/terms', '/company', '/apply', '/interview', '/outlook/auth', '/zoom/auth', '/applicant']
 
 const AuthRedirection = ({ children }: PropsWithChildren) => {
   const [isReloading, setReloading] = useState(false)
   
-  // Always call hooks first (Rules of Hooks)
-  const { status } = useAuthSessionContext()
-  
-  // Check if current route is public
+  // Check if current route is public first
   const isPublicRoute = PublicRoutes.some(route => 
     window.location.pathname === route || 
     window.location.pathname.startsWith(route + '/')
@@ -24,6 +21,9 @@ const AuthRedirection = ({ children }: PropsWithChildren) => {
   if (isPublicRoute) {
     return <>{children}</>
   }
+  
+  // Only use auth context for non-public routes
+  const { status } = useAuthSessionContext()
 
   useEffect(() => {
     if (AuthVerificationRoutes.includes(window.location.pathname)) {
