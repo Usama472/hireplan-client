@@ -163,7 +163,7 @@ export function CustomQuestionsBuilder({
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [globalScoringMode, setGlobalScoringMode] = useState<'simple' | 'detailed'>('simple');
+  const [globalScoringMode, setGlobalScoringMode] = useState<'simple' | 'advanced'>('simple');
   const [questionForm, setQuestionForm] = useState<CustomQuestion>({
     type: "text",
     question: "",
@@ -203,6 +203,15 @@ export function CustomQuestionsBuilder({
       ...questionForm,
       question: questionForm.question.trim(),
       placeholder: questionForm.placeholder?.trim() || "",
+      scoringMode: globalScoringMode, // Save the global scoring mode with the question
+      // Only include AI configuration if detailed mode
+      ...(globalScoringMode === 'simple' && {
+        // Clear detailed configs for simple mode
+        correctAnswer: undefined,
+        autoReject: undefined,
+        evaluationCriteria: undefined,
+        weight: undefined,
+      }),
     };
 
     // Ensure options are provided for select/radio types
@@ -319,16 +328,16 @@ export function CustomQuestionsBuilder({
                       </button>
                       <button
                         type="button"
-                        onClick={() => setGlobalScoringMode('detailed')}
+                        onClick={() => setGlobalScoringMode('advanced')}
                         className={`px-4 py-3 text-sm font-medium rounded-md transition-all duration-200 ${
-                          globalScoringMode === 'detailed'
+                          globalScoringMode === 'advanced'
                             ? 'bg-white text-blue-600 shadow-md border border-blue-200'
                             : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                         }`}
                       >
                         <div className="flex flex-col items-center gap-1">
                           <span>⚙️</span>
-                          <span>Detailed</span>
+                          <span>Advanced</span>
                         </div>
                       </button>
                     </div>
@@ -412,7 +421,7 @@ export function CustomQuestionsBuilder({
                 </DialogTitle>
                 <DialogDescription>
                   Create custom questions to gather specific information from applicants.
-                  {hasAIFeatures && globalScoringMode === 'detailed' && " Configure AI scoring to automatically evaluate responses."}
+                  {hasAIFeatures && globalScoringMode === 'advanced' && " Configure AI scoring to automatically evaluate responses."}
                   {hasAIFeatures && globalScoringMode === 'simple' && " AI will automatically score responses."}
                 </DialogDescription>
               </DialogHeader>
@@ -824,16 +833,24 @@ export function CustomQuestionsBuilder({
                                   Required
                                 </Badge>
                               )}
-                              {hasAIFeatures && question.aiScoringType && (
+                              {hasAIFeatures && (
                                 <Badge
                                   variant="outline"
                                   className={`text-xs border-0 ${
-                                    question.aiScoringType === "auto-reject"
-                                      ? "bg-orange-100 text-orange-800"
-                                      : "bg-purple-100 text-purple-800"
+                                    question.scoringMode === 'simple'
+                                      ? "bg-green-100 text-green-800"
+                                      : "bg-blue-100 text-blue-800"
                                   }`}
                                 >
-                                  {question.aiScoringType === "auto-reject" ? "Auto-reject" : "Scored"}
+                                  {question.scoringMode === 'simple' ? '🤖 Simple AI' : '⚙️ Detailed AI'}
+                                </Badge>
+                              )}
+                              {hasAIFeatures && question.scoringMode === 'detailed' && question.weight && (
+                                <Badge
+                                  variant="outline"
+                                  className="text-xs border-0 bg-purple-100 text-purple-800"
+                                >
+                                  Weight: {question.weight}
                                 </Badge>
                               )}
                             </div>
@@ -855,9 +872,9 @@ export function CustomQuestionsBuilder({
                                         className="text-xs bg-gray-50 text-gray-700 border-gray-200"
                                       >
                                         {option}
-                                        {hasAIFeatures && question.aiScoreValues?.[option] && (
-                                          <span className="ml-1 text-purple-600">
-                                            ({question.aiScoreValues[option]})
+                                        {hasAIFeatures && question.scoringMode === 'detailed' && question.correctAnswer === option && (
+                                          <span className="ml-1 text-green-600 font-medium">
+                                            ✓ Best
                                           </span>
                                         )}
                                       </Badge>

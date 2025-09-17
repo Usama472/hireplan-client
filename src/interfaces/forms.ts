@@ -64,16 +64,30 @@ export interface SelectOption {
 
 export interface CustomQuestion {
   id: string;
-  type: "boolean" | "string" | "select";
+  type: "text" | "textarea" | "number" | "email" | "phone" | "date" | "select" | "radio";
   question: string;
   required: boolean;
   options?: string[];
   placeholder?: string;
+  
   // AI Scoring properties
   aiScoringType?: "scored" | "auto-reject";
   scoringValues?: number[]; // For multiple choice questions
   yesNoScoring?: { yes: number; no: number }; // For boolean questions
   autoRejectAnswers?: string[]; // Which answers trigger auto-rejection
+  
+  // New scoring mode properties
+  scoringMode?: "simple" | "advanced";
+  weight?: number; // 1-10 scale for advanced mode
+  scoringType?: "exact" | "greater_than"; // For multiple choice scoring
+  
+  // Advanced mode configuration
+  correctAnswer?: string; // For multiple choice questions
+  autoReject?: boolean; // Auto-reject wrong answers
+  evaluationCriteria?: string; // For text questions - what AI should look for
+  minValue?: number; // For number questions
+  idealValue?: number; // For number questions
+  expectedYesNo?: "yes" | "no" | "either"; // For yes/no questions
 }
 
 export interface CustomQuestionFormData {

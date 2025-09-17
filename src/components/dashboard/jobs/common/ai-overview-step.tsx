@@ -45,6 +45,9 @@ export function AIOverviewStep() {
     total: customQuestions.length,
     required: customQuestions.filter((q: any) => q.required).length,
     autoReject: customQuestions.filter((q: any) => q.autoReject).length,
+    simpleMode: customQuestions.filter((q: any) => q.scoringMode === 'simple').length,
+    detailedMode: customQuestions.filter((q: any) => q.scoringMode === 'detailed').length,
+    withWeights: customQuestions.filter((q: any) => q.scoringMode === 'detailed' && q.weight).length,
   };
 
   const resumeStats = {
@@ -144,9 +147,15 @@ export function AIOverviewStep() {
               <CardContent className="space-y-3">
                 <div className="space-y-2">
                   <div className="flex justify-between text-xs">
-                    <span className="text-red-600">Auto-reject</span>
-                    <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
-                      {questionStats.autoReject}
+                    <span className="text-green-600">Simple AI Mode</span>
+                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                      {questionStats.simpleMode}
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-blue-600">Detailed AI Mode</span>
+                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                      {questionStats.detailedMode}
                     </Badge>
                   </div>
                   <div className="flex justify-between text-xs">
@@ -155,15 +164,21 @@ export function AIOverviewStep() {
                       {questionStats.required}
                     </Badge>
                   </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-gray-600">Optional</span>
-                    <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">
-                      {questionStats.total - questionStats.required}
-                    </Badge>
-                  </div>
+                  {questionStats.withWeights > 0 && (
+                    <div className="flex justify-between text-xs">
+                      <span className="text-orange-600">Custom Weights</span>
+                      <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
+                        {questionStats.withWeights}
+                      </Badge>
+                    </div>
+                  )}
                 </div>
                 <Progress value={(questionStats.total / 5) * 100} className="h-2" />
-                <p className="text-xs text-gray-500">{questionStats.total}/5 questions</p>
+                <p className="text-xs text-gray-500">
+                  {questionStats.total}/5 questions
+                  {questionStats.simpleMode > 0 && ` (${questionStats.simpleMode} auto)`}
+                  {questionStats.detailedMode > 0 && ` (${questionStats.detailedMode} manual)`}
+                </p>
               </CardContent>
             </Card>
 

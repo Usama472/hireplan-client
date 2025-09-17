@@ -36,6 +36,9 @@ export function AutomationReview({ formData }: AutomationReviewProps) {
     total: customQuestions.length,
     required: customQuestions.filter((q: any) => q.required).length,
     autoReject: customQuestions.filter((q: any) => q.autoReject).length,
+    simpleMode: customQuestions.filter((q: any) => q.scoringMode === 'simple').length,
+    detailedMode: customQuestions.filter((q: any) => q.scoringMode === 'detailed').length,
+    withWeights: customQuestions.filter((q: any) => q.scoringMode === 'detailed' && q.weight).length,
   };
 
   const resumeStats = {
@@ -118,14 +121,32 @@ export function AutomationReview({ formData }: AutomationReviewProps) {
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-gray-600">Auto-reject Questions</span>
-                    <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
-                      {questionStats.autoReject}
+                    <span className="text-gray-600">Simple AI Mode</span>
+                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                      {questionStats.simpleMode}
                     </Badge>
                   </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-gray-600">Detailed AI Mode</span>
+                    <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                      {questionStats.detailedMode}
+                    </Badge>
+                  </div>
+                  {questionStats.withWeights > 0 && (
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-gray-600">Custom Weights</span>
+                      <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
+                        {questionStats.withWeights}
+                      </Badge>
+                    </div>
+                  )}
                 </div>
                 <Progress value={questionStats.total > 0 ? 100 : 0} className="h-2" />
-                <p className="text-xs text-gray-500">{questionStats.total} questions configured</p>
+                <p className="text-xs text-gray-500">
+                  {questionStats.total} questions configured 
+                  {questionStats.simpleMode > 0 && ` (${questionStats.simpleMode} simple)`}
+                  {questionStats.detailedMode > 0 && ` (${questionStats.detailedMode} detailed)`}
+                </p>
               </CardContent>
             </Card>
 
