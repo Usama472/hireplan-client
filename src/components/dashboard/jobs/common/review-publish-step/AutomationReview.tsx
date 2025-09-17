@@ -37,8 +37,8 @@ export function AutomationReview({ formData }: AutomationReviewProps) {
     required: customQuestions.filter((q: any) => q.required).length,
     autoReject: customQuestions.filter((q: any) => q.autoReject).length,
     simpleMode: customQuestions.filter((q: any) => q.scoringMode === 'simple').length,
-    detailedMode: customQuestions.filter((q: any) => q.scoringMode === 'detailed').length,
-    withWeights: customQuestions.filter((q: any) => q.scoringMode === 'detailed' && q.weight).length,
+    advancedMode: customQuestions.filter((q: any) => q.scoringMode === 'advanced').length,
+    withWeights: customQuestions.filter((q: any) => q.scoringMode === 'advanced' && q.weight).length,
   };
 
   const resumeStats = {
@@ -127,9 +127,9 @@ export function AutomationReview({ formData }: AutomationReviewProps) {
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-gray-600">Detailed AI Mode</span>
+                    <span className="text-gray-600">Advanced AI Mode</span>
                     <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
-                      {questionStats.detailedMode}
+                      {questionStats.advancedMode}
                     </Badge>
                   </div>
                   {questionStats.withWeights > 0 && (
@@ -145,7 +145,7 @@ export function AutomationReview({ formData }: AutomationReviewProps) {
                 <p className="text-xs text-gray-500">
                   {questionStats.total} questions configured 
                   {questionStats.simpleMode > 0 && ` (${questionStats.simpleMode} simple)`}
-                  {questionStats.detailedMode > 0 && ` (${questionStats.detailedMode} detailed)`}
+                  {questionStats.advancedMode > 0 && ` (${questionStats.advancedMode} advanced)`}
                 </p>
               </CardContent>
             </Card>

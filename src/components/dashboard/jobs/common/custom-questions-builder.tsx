@@ -204,9 +204,9 @@ export function CustomQuestionsBuilder({
       question: questionForm.question.trim(),
       placeholder: questionForm.placeholder?.trim() || "",
       scoringMode: globalScoringMode, // Save the global scoring mode with the question
-      // Only include AI configuration if detailed mode
+                      // Only include AI configuration if advanced mode
       ...(globalScoringMode === 'simple' && {
-        // Clear detailed configs for simple mode
+        // Clear advanced configs for simple mode
         correctAnswer: undefined,
         autoReject: undefined,
         evaluationCriteria: undefined,
@@ -648,8 +648,8 @@ export function CustomQuestionsBuilder({
                   </div>
                 </div>
 
-                {/* AI Scoring Configuration - Only for Detailed Mode */}
-                {hasAIFeatures && globalScoringMode === 'detailed' && questionForm.type !== "date" && (
+                {/* AI Scoring Configuration - Only for Advanced Mode */}
+                {hasAIFeatures && globalScoringMode === 'advanced' && questionForm.type !== "date" && (
                   <div className="p-4 bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200/50 rounded-lg space-y-4">
                     <div className="flex items-center gap-2">
                       <Star className="w-4 h-4 text-blue-600" />
@@ -842,10 +842,10 @@ export function CustomQuestionsBuilder({
                                       : "bg-blue-100 text-blue-800"
                                   }`}
                                 >
-                                  {question.scoringMode === 'simple' ? '🤖 Simple AI' : '⚙️ Detailed AI'}
+                                  {question.scoringMode === 'simple' ? '🤖 Simple AI' : '⚙️ Advanced AI'}
                                 </Badge>
                               )}
-                              {hasAIFeatures && question.scoringMode === 'detailed' && question.weight && (
+                              {hasAIFeatures && question.scoringMode === 'advanced' && question.weight && (
                                 <Badge
                                   variant="outline"
                                   className="text-xs border-0 bg-purple-100 text-purple-800"
@@ -872,7 +872,7 @@ export function CustomQuestionsBuilder({
                                         className="text-xs bg-gray-50 text-gray-700 border-gray-200"
                                       >
                                         {option}
-                                        {hasAIFeatures && question.scoringMode === 'detailed' && question.correctAnswer === option && (
+                                        {hasAIFeatures && question.scoringMode === 'advanced' && question.correctAnswer === option && (
                                           <span className="ml-1 text-green-600 font-medium">
                                             ✓ Best
                                           </span>

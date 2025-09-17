@@ -46,8 +46,8 @@ export function AIOverviewStep() {
     required: customQuestions.filter((q: any) => q.required).length,
     autoReject: customQuestions.filter((q: any) => q.autoReject).length,
     simpleMode: customQuestions.filter((q: any) => q.scoringMode === 'simple').length,
-    detailedMode: customQuestions.filter((q: any) => q.scoringMode === 'detailed').length,
-    withWeights: customQuestions.filter((q: any) => q.scoringMode === 'detailed' && q.weight).length,
+    advancedMode: customQuestions.filter((q: any) => q.scoringMode === 'advanced').length,
+    withWeights: customQuestions.filter((q: any) => q.scoringMode === 'advanced' && q.weight).length,
   };
 
   const resumeStats = {
@@ -153,9 +153,9 @@ export function AIOverviewStep() {
                     </Badge>
                   </div>
                   <div className="flex justify-between text-xs">
-                    <span className="text-blue-600">Detailed AI Mode</span>
+                    <span className="text-blue-600">Advanced AI Mode</span>
                     <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                      {questionStats.detailedMode}
+                      {questionStats.advancedMode}
                     </Badge>
                   </div>
                   <div className="flex justify-between text-xs">
@@ -177,7 +177,7 @@ export function AIOverviewStep() {
                 <p className="text-xs text-gray-500">
                   {questionStats.total}/5 questions
                   {questionStats.simpleMode > 0 && ` (${questionStats.simpleMode} auto)`}
-                  {questionStats.detailedMode > 0 && ` (${questionStats.detailedMode} manual)`}
+                  {questionStats.advancedMode > 0 && ` (${questionStats.advancedMode} manual)`}
                 </p>
               </CardContent>
             </Card>
