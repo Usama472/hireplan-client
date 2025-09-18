@@ -50,9 +50,40 @@ export function ProfileTabs({
 
   return (
     <div className="w-full">
-      {/* Clean Tab Navigation */}
-      <div className="border-b border-gray-200 mb-8">
-        <nav className="flex space-x-8">
+      {/* Mobile-First Tab Navigation */}
+      <div className="border-b border-gray-200 mb-4 sm:mb-6 lg:mb-8">
+        {/* Mobile: Horizontal Scroll Tabs */}
+        <div className="block lg:hidden">
+          <div className="overflow-x-auto scrollbar-hide">
+            <nav className="flex gap-1 px-1 pb-2 min-w-max">
+              {tabsToRender.map((tab) => {
+                const isActive = activeTab === tab.id;
+                const IconComponent = tab.icon;
+
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={(e) => handleTabClick(e, tab.id)}
+                    className={cn(
+                      "flex items-center gap-2 px-3 py-2 rounded-lg font-medium text-xs transition-all duration-200 whitespace-nowrap flex-shrink-0",
+                      isActive
+                        ? "bg-blue-50 text-blue-700 border border-blue-200"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    )}
+                  >
+                    <IconComponent className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">{tab.label}</span>
+                    <span className="sm:hidden">{tab.label.split(" ")[0]}</span>
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+        </div>
+
+        {/* Desktop: Traditional Tab Layout */}
+        <nav className="hidden lg:flex space-x-6 xl:space-x-8">
           {tabsToRender.map((tab) => {
             const isActive = activeTab === tab.id;
             const IconComponent = tab.icon;
@@ -60,10 +91,10 @@ export function ProfileTabs({
             return (
               <button
                 key={tab.id}
-                type="button" // Explicitly set type to button to prevent form submission
+                type="button"
                 onClick={(e) => handleTabClick(e, tab.id)}
                 className={cn(
-                  "flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200",
+                  "flex items-center gap-2 py-3 lg:py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200",
                   isActive
                     ? "border-blue-500 text-blue-600"
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"

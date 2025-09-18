@@ -159,29 +159,29 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
   };
 
   return (
-    <div className={`space-y-6 ${className}`}>
-      <div className="flex items-start gap-4">
-        <div className="p-3 bg-blue-50 rounded-lg flex-shrink-0">
-          <Zap className="h-6 w-6 text-blue-600" />
+    <div className={`space-y-4 sm:space-y-6 ${className}`}>
+      <div className="flex items-start gap-3 sm:gap-4 px-1">
+        <div className="p-2 sm:p-3 bg-blue-50 rounded-lg flex-shrink-0">
+          <Zap className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
         </div>
-        <div className="flex-1">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-1">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between">
+            <div className="min-w-0 flex-1">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-1">
                 {title}
               </h2>
-              <p className="text-sm text-gray-600">{description}</p>
+              <p className="text-xs sm:text-sm text-gray-600">{description}</p>
             </div>
           </div>
         </div>
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="bg-white border rounded-xl p-6 animate-pulse"
+              className="bg-white border rounded-xl p-4 sm:p-6 animate-pulse"
             >
               <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
               <div className="h-3 bg-gray-200 rounded w-1/2 mb-2"></div>
@@ -190,7 +190,7 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
           ))}
         </div>
       ) : automations.length === 0 ? (
-        <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
+        <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-8 sm:p-12 text-center">
           <div className="text-gray-400 mb-4">
             <svg
               className="mx-auto h-12 w-12"
@@ -214,20 +214,20 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
           </p>
         </div>
       ) : (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+        <div className="space-y-3 sm:space-y-4">
+          <div className="flex items-center justify-between px-1">
+            <div className="flex items-center gap-3 sm:gap-4">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-green-600 font-medium text-sm">
+                <span className="text-green-600 font-medium text-xs sm:text-sm">
                   {automations.filter((a) => a.status === "active").length}{" "}
                   Active
                 </span>
               </div>
-              <span className="text-gray-300">•</span>
+              <span className="text-gray-300 hidden sm:inline">•</span>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                <span className="text-gray-600 font-medium text-sm">
+                <span className="text-gray-600 font-medium text-xs sm:text-sm">
                   {automations.filter((a) => a.status === "inactive").length}{" "}
                   Paused
                 </span>
@@ -235,14 +235,14 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {automations.map((automation) => {
               const triggerInfo = getTriggerInfo(automation.triggerType);
 
               return (
                 <div
                   key={automation.id}
-                  className={`bg-white border rounded-xl transition-all duration-200 p-6 flex flex-col ${
+                  className={`bg-white border rounded-xl transition-all duration-200 p-4 sm:p-6 flex flex-col ${
                     isSelectable
                       ? selectedIds.includes(automation.id)
                         ? "border-blue-200 bg-blue-50/30 cursor-pointer"
@@ -259,14 +259,14 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
                   }}
                 >
                   {/* Header */}
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-start gap-3 flex-1 min-w-0">
-                      <div className="p-3 bg-gray-50 rounded-lg flex-shrink-0">
+                  <div className="flex items-start justify-between mb-3 sm:mb-4">
+                    <div className="flex items-start gap-2 sm:gap-3 flex-1 min-w-0">
+                      <div className="p-2 sm:p-3 bg-gray-50 rounded-lg flex-shrink-0">
                         {getTriggerIcon(automation.triggerType)}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <h3 className="text-lg font-semibold text-gray-900 truncate">
+                          <h3 className="text-sm sm:text-lg font-semibold text-gray-900 truncate">
                             {automation.name}
                           </h3>
                           <div

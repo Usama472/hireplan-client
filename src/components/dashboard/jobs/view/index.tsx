@@ -277,7 +277,7 @@ export default function JobDetails() {
 
   return (
     <TooltipProvider>
-      <div className="min-h-screen">
+      <div className="min-h-screen px-3">
         {/* Retry indicator */}
         {loadingState.isRetrying && (
           <Alert className="mb-4 border-blue-200 bg-blue-50 rounded-lg">
@@ -288,68 +288,89 @@ export default function JobDetails() {
           </Alert>
         )}
 
-        {/* Professional Header - Mobile Optimized */}
-        <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 sm:py-5 relative overflow-hidden mb-4 sm:mb-6">
-          <div className="relative z-10">
-            {/* Mobile Header */}
-            <div className="block sm:hidden">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200">
-                  <Edit className="h-4 w-4 text-gray-600" />
-                </div>
-                <div className="flex flex-col min-w-0 flex-1">
-                  <h1 className="text-base font-semibold text-gray-900 leading-tight truncate">
-                    {job.jobTitle || "Job Review"}
-                  </h1>
-                  <span className="text-xs text-gray-600">
-                    Review and manage job details
-                  </span>
-                </div>
+        {/* Professional Header - Fully Mobile Optimized */}
+        <div className="bg-white border-b border-gray-200 sticky top-0 z-20 shadow-sm">
+          <div className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4">
+            {/* Back Button - Mobile */}
+            <div className="flex sm:hidden items-center gap-3 mb-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate("/dashboard/jobs")}
+                className="p-1.5 h-auto text-gray-600 hover:text-gray-900"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+              <div className="flex-1 min-w-0">
+                <h1 className="text-base font-semibold text-gray-900 leading-tight truncate">
+                  {job.jobTitle || "Job Review"}
+                </h1>
+                <span className="text-xs text-gray-500">
+                  Review and manage details
+                </span>
               </div>
-              
-              {/* Mobile Action Buttons */}
+            </div>
+
+            {/* Mobile Header Content */}
+            <div className="block sm:hidden">
+              {/* Mobile Action Buttons - Full width with better spacing */}
               <div className="flex items-center gap-2 w-full">
                 <Button
                   onClick={handleEdit}
-                  className="bg-white hover:bg-gray-50 text-gray-600 border border-gray-200 hover:border-gray-300 gap-2 px-3 py-2 font-medium transition-all duration-200 text-sm flex-1"
+                  size="sm"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white gap-2 py-2.5 font-medium transition-all duration-200 text-sm shadow-sm"
                 >
                   <Edit className="w-4 h-4" />
                   <span>Edit Job</span>
                 </Button>
                 <Button
                   variant="outline"
+                  size="sm"
                   onClick={() => setShowDeleteModal(true)}
-                  className="bg-red-50 text-red-600 border border-red-200 hover:border-red-300 gap-2 px-3 py-2 font-medium transition-all duration-200 text-sm"
+                  className="bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 hover:border-red-300 gap-2 px-4 py-2.5 font-medium transition-all duration-200 text-sm"
                 >
                   <Trash2 className="w-4 h-4" />
-                  <span>Delete</span>
                 </Button>
               </div>
             </div>
 
             {/* Desktop Header */}
             <div className="hidden sm:flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200">
-                  <Edit className="h-4 w-4 text-gray-600" />
-                </div>
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate("/dashboard/jobs")}
+                  className="text-gray-600 hover:text-gray-900 gap-2"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span className="hidden lg:inline">Back to Jobs</span>
+                  <span className="lg:hidden">Back</span>
+                </Button>
 
-                <div className="flex flex-col">
-                  <h1 className="text-lg font-semibold text-gray-900 leading-tight">
-                    {job.jobTitle || "Job Review"}
-                  </h1>
-                  <span className="text-xs text-gray-600 mt-0.5">
-                    Review and manage job details
-                  </span>
+                <div className="w-px h-6 bg-gray-300" />
+
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                    <Edit className="h-4 w-4 text-white" />
+                  </div>
+
+                  <div className="flex flex-col">
+                    <h1 className="text-lg font-semibold text-gray-900 leading-tight">
+                      {job.jobTitle || "Job Review"}
+                    </h1>
+                    <span className="text-sm text-gray-600">
+                      Review and manage job details
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
                       onClick={handleEdit}
-                      className="bg-white hover:bg-gray-50 text-gray-600 border border-gray-200 hover:border-gray-300 gap-2 px-4 py-2 font-medium transition-all duration-200 text-sm"
+                      className="bg-blue-600 hover:bg-blue-700 text-white gap-2 px-4 py-2 font-medium transition-all duration-200 text-sm shadow-sm"
                     >
                       <Edit className="w-4 h-4" />
                       Edit Job
@@ -365,7 +386,7 @@ export default function JobDetails() {
                     <Button
                       variant="outline"
                       onClick={() => setShowDeleteModal(true)}
-                      className="bg-red-50 text-red-600 border border-red-200 hover:border-red-300 gap-2 px-4 py-2 font-medium transition-all duration-200 text-sm"
+                      className="bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 hover:border-red-300 gap-2 px-4 py-2 font-medium transition-all duration-200 text-sm"
                     >
                       <Trash2 className="w-4 h-4" />
                       Delete
@@ -380,8 +401,8 @@ export default function JobDetails() {
           </div>
         </div>
 
-        {/* Main Content - Mobile Optimized */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-6 sm:pb-8">
+        {/* Main Content - Fully Mobile Optimized */}
+        <div className="max-w-7xl mx-auto px-0 md:px-4 lg:px-6 pb-6 sm:pb-8">
           <FormProvider {...form}>
             <ReviewPublishStep
               mode="review"

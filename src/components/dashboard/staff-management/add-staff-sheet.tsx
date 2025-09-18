@@ -430,7 +430,7 @@ export default function AddStaffSheet({
           <SheetFooter className="pt-4 border-t mt-6 flex justify-end">
             <Button
               type="submit"
-              className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white gap-2 px-6 py-2 h-11"
+              variant="secondary"
               disabled={isCreatingStaff}
             >
               <UserPlus className="h-4 w-4" />

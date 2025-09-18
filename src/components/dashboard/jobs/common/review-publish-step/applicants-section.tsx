@@ -115,7 +115,7 @@ const getScoreColor = (score: number) => {
   return "bg-red-100 text-red-800 border-red-300";
 };
 
-// Stats Card Component
+// Stats Card Component - Mobile Optimized
 const StatsCard = ({
   icon: Icon,
   title,
@@ -127,18 +127,22 @@ const StatsCard = ({
   value: number;
   color: string;
 }) => (
-  <div className="p-6 bg-gray-50 border border-gray-200 rounded-lg text-center">
-    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${color} mx-auto mb-3`}>
-      <Icon className="w-6 h-6" />
+  <div className="p-3 sm:p-4 lg:p-6 bg-gray-50 border border-gray-200 rounded-lg text-center">
+    <div
+      className={`w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl flex items-center justify-center ${color} mx-auto mb-2 sm:mb-3`}
+    >
+      <Icon className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
     </div>
-    <p className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-2">
+    <p className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wide mb-1 sm:mb-2">
       {title}
     </p>
-    <p className="text-3xl font-bold text-gray-900">{value}</p>
+    <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
+      {value}
+    </p>
   </div>
 );
 
-// Applicant Card Component
+// Applicant Card Component - Mobile Optimized
 const ApplicantCard = ({
   applicant,
   onClick,
@@ -147,19 +151,72 @@ const ApplicantCard = ({
   onClick: () => void;
 }) => (
   <div
-    className="p-6 bg-gray-50 border border-gray-200 rounded-lg transition-all duration-200 cursor-pointer group"
+    className="p-3 sm:p-4 lg:p-6 bg-gray-50 border border-gray-200 rounded-lg transition-all duration-200 cursor-pointer group hover:shadow-md hover:border-gray-300"
     onClick={onClick}
   >
-    <div className="flex items-start gap-4">
-      {/* Avatar */}
-      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-semibold text-lg flex-shrink-0">
-        {applicant.firstName[0]}
-        {applicant.lastName[0]}
+    <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4">
+      {/* Mobile Header with Avatar and Actions */}
+      <div className="flex items-center justify-between sm:hidden">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
+            {applicant.firstName[0]}
+            {applicant.lastName[0]}
+          </div>
+          <div>
+            <h3 className="font-semibold text-base text-gray-900 group-hover:text-blue-600 transition-colors">
+              {applicant.firstName} {applicant.lastName}
+            </h3>
+            <p className="text-xs text-gray-600 truncate max-w-48">
+              {applicant.email}
+            </p>
+          </div>
+        </div>
+
+        {/* Mobile Action Buttons */}
+        <div className="flex items-center gap-1 flex-shrink-0">
+          <Button
+            size="sm"
+            variant="outline"
+            className="px-2 py-1 h-auto bg-blue-50 border-blue-100 text-blue-600 hover:bg-blue-100 text-xs"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClick();
+            }}
+          >
+            <Eye className="w-3 h-3" />
+          </Button>
+          {applicant.resume && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="px-2 py-1 h-auto bg-green-50 border-green-100 text-green-600 hover:bg-green-100 text-xs"
+              asChild
+              onClick={(e) => e.stopPropagation()}
+            >
+              <a
+                href={applicant.resume}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Download className="w-3 h-3" />
+              </a>
+            </Button>
+          )}
+        </div>
       </div>
 
-      {/* Main Content */}
+      {/* Desktop Layout */}
+      <div className="hidden sm:block">
+        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-semibold text-lg flex-shrink-0">
+          {applicant.firstName[0]}
+          {applicant.lastName[0]}
+        </div>
+      </div>
+
+      {/* Content Area */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-start justify-between mb-3">
+        {/* Desktop Header */}
+        <div className="hidden sm:flex items-start justify-between mb-3">
           <div>
             <h3 className="font-semibold text-lg text-gray-900 group-hover:text-blue-600 transition-colors">
               {applicant.firstName} {applicant.lastName}
@@ -167,8 +224,8 @@ const ApplicantCard = ({
             <p className="text-sm text-gray-600">{applicant.email}</p>
           </div>
 
-          {/* Action Buttons - Moved to top right */}
-          <div className="flex items-center gap-2">
+          {/* Desktop Action Buttons */}
+          <div className="flex items-center gap-2 flex-shrink-0">
             <Button
               size="sm"
               variant="outline"
@@ -203,11 +260,11 @@ const ApplicantCard = ({
           </div>
         </div>
 
-        {/* Details Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+        {/* Details - Mobile Optimized */}
+        <div className="space-y-2 mb-3">
           {(applicant.city || applicant.state) && (
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <MapPin className="w-4 h-4" />
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
+              <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
               <span className="truncate">
                 {applicant.city && applicant.state
                   ? `${applicant.city}, ${applicant.state}`
@@ -216,15 +273,15 @@ const ApplicantCard = ({
             </div>
           )}
 
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <Calendar className="w-4 h-4" />
+          <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
+            <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
             <span>Applied {formatDate(applicant.createdAt)}</span>
           </div>
 
           {applicant.interviewScheduled && applicant.interview && (
-            <div className="flex items-center gap-2 text-sm text-purple-600 font-medium">
-              <CalendarCheck className="w-4 h-4" />
-              <span>
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-purple-600 font-medium">
+              <CalendarCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+              <span className="truncate">
                 Interview:{" "}
                 {formatInterviewTime(
                   applicant.interview.scheduledDate,
@@ -235,8 +292,8 @@ const ApplicantCard = ({
           )}
 
           {applicant.invitationSent && !applicant.interviewScheduled && (
-            <div className="flex items-center gap-2 text-sm text-orange-600 font-medium">
-              <Calendar className="w-4 h-4" />
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-orange-600 font-medium">
+              <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
               <span>
                 Invitation sent:{" "}
                 {formatInvitationDate(applicant.invitationSentAt || "")}
@@ -245,39 +302,38 @@ const ApplicantCard = ({
           )}
         </div>
 
-        {/* Status Badges */}
-        <div className="flex justify-end items-center">
-          <div className="flex items-center gap-2">
-            {applicant.aiScore && (
-              <div
-                className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getScoreColor(
-                  applicant.aiScore
-                )}`}
-              >
-                <Star className="w-3 h-3" />
-                {applicant.aiScore}%
-              </div>
-            )}
+        {/* Status Badges - Mobile Optimized */}
+        <div className="flex flex-wrap gap-1.5 sm:gap-2">
+          {applicant.aiScore && (
             <div
-              className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                applicant.status
+              className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getScoreColor(
+                applicant.aiScore
               )}`}
             >
-              {applicant.status || "pending"}
+              <Star className="w-3 h-3" />
+              {applicant.aiScore}%
             </div>
-            {applicant.interviewScheduled && applicant.interview && (
-              <div className="inline-flex items-center gap-1 px-2 py-1 bg-purple-50 text-purple-700 border border-purple-200 rounded-full text-xs font-medium">
-                <Video className="w-3 h-3" />
-                Interview Scheduled
-              </div>
-            )}
-            {applicant.invitationSent && !applicant.interviewScheduled && (
-              <div className="inline-flex items-center gap-1 px-2 py-1 bg-orange-50 text-orange-700 border border-orange-200 rounded-full text-xs font-medium">
-                <Calendar className="w-3 h-3" />
-                Invited
-              </div>
-            )}
+          )}
+          <div
+            className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+              applicant.status
+            )}`}
+          >
+            {applicant.status || "pending"}
           </div>
+          {applicant.interviewScheduled && applicant.interview && (
+            <div className="inline-flex items-center gap-1 px-2 py-1 bg-purple-50 text-purple-700 border border-purple-200 rounded-full text-xs font-medium">
+              <Video className="w-3 h-3" />
+              <span className="hidden sm:inline">Interview Scheduled</span>
+              <span className="sm:hidden">Interview</span>
+            </div>
+          )}
+          {applicant.invitationSent && !applicant.interviewScheduled && (
+            <div className="inline-flex items-center gap-1 px-2 py-1 bg-orange-50 text-orange-700 border border-orange-200 rounded-full text-xs font-medium">
+              <Calendar className="w-3 h-3" />
+              Invited
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -355,7 +411,9 @@ export function ApplicantsSection({
 }: ApplicantsSectionProps) {
   const navigate = useNavigate();
   const [applicants, setApplicants] = useState<Applicant[]>([]);
-  const [selectedApplicant, setSelectedApplicant] = useState<Applicant | null>(null);
+  const [selectedApplicant, setSelectedApplicant] = useState<Applicant | null>(
+    null
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [stats, setStats] = useState({
     total: 0,
@@ -457,29 +515,31 @@ export function ApplicantsSection({
 
   return (
     <div className="w-full max-w-none space-y-6">
-      {/* Section Header */}
+      {/* Section Header - Mobile Optimized */}
       <div className="space-y-2">
-        <h2 className="text-2xl font-bold text-gray-900">Applicants</h2>
-        <p className="text-gray-600">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+            Applicants
+          </h2>
+          <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500">
+            <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span>{jobViews} job views</span>
+          </div>
+        </div>
+        <p className="text-sm sm:text-base text-gray-600">
           Review and manage job applications, track candidate progress, and
           schedule interviews.
         </p>
       </div>
 
-      {/* Stats Overview */}
-      <div className="space-y-4 w-full">
-        <div className="flex items-center justify-between w-full">
-          <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
-            Applicant Overview
-          </h3>
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <Eye className="w-4 h-4" />
-            <span>{jobViews} job views</span>
-          </div>
-        </div>
+      {/* Stats Overview - Mobile Optimized */}
+      <div className="space-y-3 sm:space-y-4 w-full">
+        <h3 className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wide">
+          Applicant Overview
+        </h3>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+        {/* Stats Grid - Responsive */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4 w-full">
           <StatsCard
             icon={Users}
             title="Total Applicants"
@@ -507,65 +567,80 @@ export function ApplicantsSection({
         </div>
       </div>
 
-      {/* Filters and Search */}
-      <div className="space-y-4 w-full">
-        <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+      {/* Filters and Search - Mobile Optimized */}
+      <div className="space-y-3 sm:space-y-4 w-full">
+        <h3 className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wide">
           Search & Filters
         </h3>
-        <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg w-full">
-          <div className="flex flex-wrap gap-4 items-center w-full">
-            <div className="relative flex-1 min-w-64">
+        <div className="p-3 sm:p-4 bg-gray-50 border border-gray-200 rounded-lg w-full">
+          <div className="space-y-3 sm:space-y-0 sm:flex sm:flex-wrap sm:gap-3 sm:items-center w-full">
+            {/* Search Input */}
+            <div className="relative flex-1 min-w-0 sm:min-w-64">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
                 placeholder="Search applicants..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                className="pl-10 text-sm"
               />
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="reviewed">Reviewed</SelectItem>
-                <SelectItem value="shortlisted">Shortlisted</SelectItem>
-                <SelectItem value="rejected">Rejected</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button
-              variant="outline-destructive"
-              onClick={handleClearFilters}
-              className="text-sm h-10 px-4 whitespace-nowrap"
-            >
-              Clear Filters
-            </Button>
+
+            {/* Filters Row */}
+            <div className="flex gap-2 sm:gap-3 items-center">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-44 text-sm">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="reviewed">Reviewed</SelectItem>
+                  <SelectItem value="shortlisted">Shortlisted</SelectItem>
+                  <SelectItem value="rejected">Rejected</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Button
+                variant="outline"
+                onClick={handleClearFilters}
+                className="text-xs sm:text-sm h-9 sm:h-10 px-3 sm:px-4 whitespace-nowrap text-gray-600 hover:text-gray-900 border-gray-300"
+              >
+                Clear
+              </Button>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Applicants List */}
-      <div className="space-y-6">
-        <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
-          Applicants ({filteredApplicants.length})
-        </h3>
+      {/* Applicants List - Mobile Optimized */}
+      <div className="space-y-4 sm:space-y-6">
+        <div className="flex items-center justify-between">
+          <h3 className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wide">
+            Applicants ({filteredApplicants.length})
+          </h3>
+          {filteredApplicants.length > 0 && (
+            <span className="text-xs text-gray-400">
+              {searchQuery || statusFilter !== "all"
+                ? "Filtered results"
+                : "All applicants"}
+            </span>
+          )}
+        </div>
 
         {filteredApplicants.length === 0 ? (
-          <div className="text-center py-12">
-            <Users className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+          <div className="text-center py-8 sm:py-12">
+            <Users className="w-10 h-10 sm:w-12 sm:h-12 text-gray-300 mx-auto mb-3 sm:mb-4" />
+            <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">
               No applicants found
             </h3>
-            <p className="text-gray-600">
+            <p className="text-sm sm:text-base text-gray-600 max-w-sm mx-auto">
               {searchQuery || statusFilter !== "all"
-                ? "Try adjusting your filters"
-                : "No applications have been submitted yet"}
+                ? "Try adjusting your filters to see more results"
+                : "No applications have been submitted yet. Share your job posting to attract candidates."}
             </p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-2 sm:space-y-3 lg:space-y-4">
             {filteredApplicants.map((applicant) => (
               <ApplicantCard
                 key={applicant.id}
@@ -576,7 +651,7 @@ export function ApplicantsSection({
           </div>
         )}
       </div>
-      
+
       {/* Applicant Detail Modal */}
       {selectedApplicant && (
         <ApplicantDetailModal
@@ -588,11 +663,9 @@ export function ApplicantsSection({
           }}
           onStatusUpdate={(applicantId: string, status: string) => {
             // Handle status update
-            setApplicants(prev => 
-              prev.map(app => 
-                app.id === applicantId 
-                  ? { ...app, status } 
-                  : app
+            setApplicants((prev) =>
+              prev.map((app) =>
+                app.id === applicantId ? { ...app, status } : app
               )
             );
             // Refresh data

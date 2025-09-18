@@ -3,7 +3,13 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -34,7 +40,15 @@ import { useToast } from "@/lib/hooks/use-toast";
 import useCalenderSettings from "@/lib/hooks/use-calender-settings";
 import useMeetingSettings from "@/lib/hooks/use-meeting-settings";
 import { format } from "date-fns";
-import { Calendar, Clock, Edit, Plus, Trash2, Video, AlertTriangle } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  Edit,
+  Plus,
+  Trash2,
+  Video,
+  AlertTriangle,
+} from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useEffect, useState } from "react";
 import { HolidayPicker } from "./holiday-picker";
@@ -81,24 +95,36 @@ export function ScheduleTemplates({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [templateToDelete, setTemplateToDelete] =
     useState<AvailabilityTemplate | null>(null);
-  const [templateToEdit, setTemplateToEdit] = 
+  const [templateToEdit, setTemplateToEdit] =
     useState<AvailabilityTemplate | null>(null);
   const [newTemplateName, setNewTemplateName] = useState("");
   const [templateDuration, setTemplateDuration] = useState(30);
-  const [selectedMeetingPlatform, setSelectedMeetingPlatform] = useState("google");
+  const [selectedMeetingPlatform, setSelectedMeetingPlatform] =
+    useState("google");
   const [bookingWindowDays, setBookingWindowDays] = useState(30);
   const [excludeFederalHolidays, setExcludeFederalHolidays] = useState(true);
-  const [excludeReligiousHolidays, setExcludeReligiousHolidays] = useState(false);
-  const [customExcludedFederalHolidays, setCustomExcludedFederalHolidays] = useState<string[]>([]);
-  const [customExcludedReligiousHolidays, setCustomExcludedReligiousHolidays] = useState<string[]>([]);
+  const [excludeReligiousHolidays, setExcludeReligiousHolidays] =
+    useState(false);
+  const [customExcludedFederalHolidays, setCustomExcludedFederalHolidays] =
+    useState<string[]>([]);
+  const [customExcludedReligiousHolidays, setCustomExcludedReligiousHolidays] =
+    useState<string[]>([]);
   const [editTemplateName, setEditTemplateName] = useState("");
   const [editTemplateDuration, setEditTemplateDuration] = useState(30);
   const [editMeetingPlatform, setEditMeetingPlatform] = useState("google");
   const [editBookingWindowDays, setEditBookingWindowDays] = useState(30);
-  const [editExcludeFederalHolidays, setEditExcludeFederalHolidays] = useState(true);
-  const [editExcludeReligiousHolidays, setEditExcludeReligiousHolidays] = useState(false);
-  const [editCustomExcludedFederalHolidays, setEditCustomExcludedFederalHolidays] = useState<string[]>([]);
-  const [editCustomExcludedReligiousHolidays, setEditCustomExcludedReligiousHolidays] = useState<string[]>([]);
+  const [editExcludeFederalHolidays, setEditExcludeFederalHolidays] =
+    useState(true);
+  const [editExcludeReligiousHolidays, setEditExcludeReligiousHolidays] =
+    useState(false);
+  const [
+    editCustomExcludedFederalHolidays,
+    setEditCustomExcludedFederalHolidays,
+  ] = useState<string[]>([]);
+  const [
+    editCustomExcludedReligiousHolidays,
+    setEditCustomExcludedReligiousHolidays,
+  ] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [currentTimezone, setCurrentTimezone] =
     useState<string>("America/New_York");
@@ -108,9 +134,10 @@ export function ScheduleTemplates({
   const { connections } = useMeetingSettings();
 
   // Check if any meeting platform is connected
-  const hasAnyMeetingPlatform = isMeetingPlatformConnected || 
-    connections?.google || 
-    connections?.microsoft || 
+  const hasAnyMeetingPlatform =
+    isMeetingPlatformConnected ||
+    connections?.google ||
+    connections?.microsoft ||
     connections?.zoom;
 
   // Get available meeting platforms with their connection status
@@ -119,26 +146,30 @@ export function ScheduleTemplates({
       name: "Google Meet",
       id: "google",
       connected: connections?.google || meetingPlatform === "google",
-      description: "Integrate with Google Calendar and Meet"
+      description: "Integrate with Google Calendar and Meet",
     },
     {
       name: "Microsoft Teams",
       id: "teams",
       connected: connections?.microsoft || meetingPlatform === "outlook",
-      description: "Integrate with Outlook and Teams"
+      description: "Integrate with Outlook and Teams",
     },
     {
       name: "Zoom",
-      id: "zoom", 
+      id: "zoom",
       connected: connections?.zoom,
-      description: "Generate Zoom meeting links"
-    }
+      description: "Generate Zoom meeting links",
+    },
   ];
 
   // Filter templates based on search query
-  const filteredTemplates = templates.filter(template =>
-    template.templateName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (template.templateName === "default" && "default".includes(searchQuery.toLowerCase()))
+  const filteredTemplates = templates.filter(
+    (template) =>
+      template.templateName
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      (template.templateName === "default" &&
+        "default".includes(searchQuery.toLowerCase()))
   );
 
   // Add handleTimezoneChange function
@@ -170,7 +201,6 @@ export function ScheduleTemplates({
       });
     }
   };
-
 
   // Load templates from backend
   const loadTemplates = async () => {
@@ -303,7 +333,7 @@ export function ScheduleTemplates({
       setSelectedMeetingPlatform(meetingPlatform);
     } else if (hasAnyMeetingPlatform && connections) {
       // Auto-select the first connected platform
-      const connectedPlatform = meetingPlatforms.find(p => p.connected);
+      const connectedPlatform = meetingPlatforms.find((p) => p.connected);
       if (connectedPlatform) {
         setSelectedMeetingPlatform(connectedPlatform.id);
       }
@@ -335,12 +365,15 @@ export function ScheduleTemplates({
       toast({
         type: "error",
         title: "Error",
-        description: "Please connect a meeting platform before creating templates",
+        description:
+          "Please connect a meeting platform before creating templates",
       });
       return;
     }
 
-    const selectedPlatform = meetingPlatforms.find(p => p.id === selectedMeetingPlatform);
+    const selectedPlatform = meetingPlatforms.find(
+      (p) => p.id === selectedMeetingPlatform
+    );
     if (!selectedPlatform?.connected) {
       toast({
         type: "error",
@@ -406,16 +439,19 @@ export function ScheduleTemplates({
         customExcludedReligiousHolidays: editCustomExcludedReligiousHolidays,
       };
 
-      const response = await updateAvailabilityTemplate(templateToEdit.id, updatedTemplate);
+      const response = await updateAvailabilityTemplate(
+        templateToEdit.id,
+        updatedTemplate
+      );
       if (response.status) {
-        setTemplates((prev) => 
-          prev.map(template => 
-            template.id === templateToEdit.id 
+        setTemplates((prev) =>
+          prev.map((template) =>
+            template.id === templateToEdit.id
               ? { ...template, ...updatedTemplate }
               : template
           )
         );
-        
+
         if (currentTemplate?.id === templateToEdit.id) {
           setCurrentTemplate({ ...currentTemplate, ...updatedTemplate });
         }
@@ -447,10 +483,22 @@ export function ScheduleTemplates({
     setEditTemplateDuration(template.duration || 30);
     setEditMeetingPlatform(template.selectedMeetingPlatform || "google");
     setEditBookingWindowDays(template.bookingWindowDays || 30);
-    setEditExcludeFederalHolidays(template.excludeFederalHolidays !== undefined ? template.excludeFederalHolidays : true);
-    setEditExcludeReligiousHolidays(template.excludeReligiousHolidays !== undefined ? template.excludeReligiousHolidays : false);
-    setEditCustomExcludedFederalHolidays(template.customExcludedFederalHolidays || []);
-    setEditCustomExcludedReligiousHolidays(template.customExcludedReligiousHolidays || []);
+    setEditExcludeFederalHolidays(
+      template.excludeFederalHolidays !== undefined
+        ? template.excludeFederalHolidays
+        : true
+    );
+    setEditExcludeReligiousHolidays(
+      template.excludeReligiousHolidays !== undefined
+        ? template.excludeReligiousHolidays
+        : false
+    );
+    setEditCustomExcludedFederalHolidays(
+      template.customExcludedFederalHolidays || []
+    );
+    setEditCustomExcludedReligiousHolidays(
+      template.customExcludedReligiousHolidays || []
+    );
     setIsEditDialogOpen(true);
   };
 
@@ -785,7 +833,6 @@ export function ScheduleTemplates({
     }
   };
 
-
   const handleDeleteTimeSlot = async (day: string, slotId: string) => {
     if (!currentTemplate) return;
 
@@ -953,11 +1000,12 @@ export function ScheduleTemplates({
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header with template selection */}
-      <div className="flex items-center justify-between mb-6">
+    <div className="space-y-4 sm:space-y-6">
+      {/* Mobile-First Header */}
+      <div className="space-y-4">
+        {/* Title Section */}
         <div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-1 sm:mb-2">
             Schedule Templates
           </h2>
           <p className="text-sm text-gray-600">
@@ -965,50 +1013,107 @@ export function ScheduleTemplates({
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* Mobile Search & Actions */}
+        <div className="block sm:hidden space-y-3">
           <div className="relative">
             <input
               type="text"
               placeholder="Search templates..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-48 px-3 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery("")}
                 className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             )}
           </div>
           <Button
-            size="sm"
-            variant="outline"
+            className="w-full"
             onClick={() => setIsCreateDialogOpen(true)}
           >
             <Plus className="w-4 h-4 mr-2" />
             New Template
           </Button>
         </div>
+
+        {/* Desktop Search & Actions */}
+        <div className="hidden sm:flex items-center justify-between">
+          <div className="flex-1"></div>
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search templates..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-48 px-3 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              )}
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setIsCreateDialogOpen(true)}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              New Template
+            </Button>
+          </div>
+        </div>
       </div>
 
-      {/* Template Cards Grid */}
+      {/* Mobile-Optimized Template Cards Grid */}
       {templates.length === 0 ? (
-        <Card className="p-8 text-center">
+        <Card className="p-6 sm:p-8 text-center">
           <div className="flex flex-col items-center gap-4">
-            <Calendar className="h-12 w-12 text-gray-400" />
+            <Calendar className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400" />
             <div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">
                 No templates yet
               </h3>
-              <p className="text-gray-600 mb-4">
+              <p className="text-sm sm:text-base text-gray-600 mb-4">
                 Create your first schedule template to get started
               </p>
-              <Button onClick={() => setIsCreateDialogOpen(true)}>
+              <Button
+                onClick={() => setIsCreateDialogOpen(true)}
+                className="w-full sm:w-auto"
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Create Template
               </Button>
@@ -1016,19 +1121,20 @@ export function ScheduleTemplates({
           </div>
         </Card>
       ) : filteredTemplates.length === 0 ? (
-        <Card className="p-8 text-center">
+        <Card className="p-6 sm:p-8 text-center">
           <div className="flex flex-col items-center gap-4">
-            <Calendar className="h-12 w-12 text-gray-400" />
+            <Calendar className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400" />
             <div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">
                 No templates found
               </h3>
-              <p className="text-gray-600 mb-4">
+              <p className="text-sm sm:text-base text-gray-600 mb-4">
                 Try adjusting your search terms
               </p>
-              <Button 
+              <Button
                 variant="outline"
                 onClick={() => setSearchQuery("")}
+                className="w-full sm:w-auto"
               >
                 Clear Search
               </Button>
@@ -1038,105 +1144,242 @@ export function ScheduleTemplates({
       ) : (
         <div>
           {searchQuery && (
-            <div className="mb-4 text-sm text-gray-600">
+            <div className="mb-3 sm:mb-4 text-sm text-gray-600 text-center sm:text-left">
               Showing {filteredTemplates.length} of {templates.length} templates
             </div>
           )}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+          {/* Mobile: Flowing List Design */}
+          <div className="block sm:hidden space-y-3">
             {filteredTemplates.map((template) => (
-            <Card 
-              key={template.id} 
-              className={`hover:shadow-md transition-all duration-200 cursor-pointer border-l-4 ${
-                currentTemplate?.id === template.id 
-                  ? 'border-l-blue-500 bg-blue-50/50 shadow-md' 
-                  : 'border-l-gray-300 hover:border-l-blue-400'
-              }`}
-              onClick={() => handleTemplateChange(template.id)}
-            >
-              <CardHeader className="pb-2">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 min-w-0">
-                    <CardTitle className="text-sm font-semibold text-gray-900 mb-1 truncate">
-                      {template.templateName || "Untitled Template"}
-                    </CardTitle>
-                    <CardDescription className="text-xs text-gray-600">
-                      {template.templateName === "default" ? "Default template" : "Custom template"}
-                    </CardDescription>
+              <div
+                key={template.id}
+                className={`relative overflow-hidden rounded-2xl transition-all duration-300 cursor-pointer ${
+                  currentTemplate?.id === template.id
+                    ? "bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 shadow-lg scale-[1.02]"
+                    : "bg-white border border-gray-100 hover:border-gray-200 hover:shadow-md"
+                }`}
+                onClick={() => handleTemplateChange(template.id)}
+              >
+                {/* Gradient accent */}
+                <div
+                  className={`absolute top-0 left-0 right-0 h-1 ${
+                    currentTemplate?.id === template.id
+                      ? "bg-gradient-to-r from-blue-500 to-purple-500"
+                      : "bg-gradient-to-r from-gray-200 to-gray-300"
+                  }`}
+                />
+
+                <div className="p-4">
+                  {/* Header with floating badge */}
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-base font-semibold text-gray-900 mb-1 truncate">
+                        {template.templateName || "Untitled Template"}
+                      </h3>
+                      <p className="text-sm text-gray-500">
+                        {template.templateName === "default"
+                          ? "Default template"
+                          : "Custom template"}
+                      </p>
+                    </div>
+                    <div
+                      className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        template.templateName === "default"
+                          ? "bg-blue-100 text-blue-700"
+                          : "bg-gray-100 text-gray-700"
+                      }`}
+                    >
+                      {template.templateName === "default"
+                        ? "Default"
+                        : "Custom"}
+                    </div>
                   </div>
-                  <Badge 
-                    variant={template.templateName === "default" ? "default" : "secondary"} 
-                    className="shrink-0 text-xs"
-                  >
-                    {template.templateName === "default" ? "Default" : "Custom"}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-1 text-xs font-medium text-blue-600">
-                    <Clock className="h-3 w-3" />
-                    <span>{template.duration || 30} min</span>
+
+                  {/* Stats with icons in a flowing layout */}
+                  <div className="flex flex-wrap gap-3 mb-4">
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 rounded-full">
+                      <Clock className="h-4 w-4 text-blue-600" />
+                      <span className="text-sm font-medium text-blue-700">
+                        {template.duration || 30} min
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 rounded-full">
+                      <Calendar className="h-4 w-4 text-green-600" />
+                      <span className="text-sm font-medium text-green-700">
+                        {template.availabilities?.[0]?.daysAvailability?.filter(
+                          (d: any) => d.isAvailable
+                        ).length || 0}{" "}
+                        days
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-50 rounded-full">
+                      <Video className="h-4 w-4 text-purple-600" />
+                      <span className="text-sm font-medium text-purple-700">
+                        {template.selectedMeetingPlatform === "google" &&
+                          "Meet"}
+                        {template.selectedMeetingPlatform === "teams" &&
+                          "Teams"}
+                        {template.selectedMeetingPlatform === "zoom" && "Zoom"}
+                        {!template.selectedMeetingPlatform && "Meet"}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1 text-xs text-gray-600">
-                    <Calendar className="h-3 w-3" />
-                    <span>
-                      {template.availabilities?.[0]?.daysAvailability?.filter((d: any) => d.isAvailable).length || 0} days
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1 text-xs text-gray-600">
-                    <Video className="h-3 w-3" />
-                    <span>
-                      {template.selectedMeetingPlatform === 'google' && 'Google Meet'}
-                      {template.selectedMeetingPlatform === 'teams' && 'Microsoft Teams'}
-                      {template.selectedMeetingPlatform === 'zoom' && 'Zoom'}
-                      {!template.selectedMeetingPlatform && 'Google Meet'}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1 pt-1">
-                    <Button
-                      variant="outline"
-                      size="sm"
+
+                  {/* Action buttons - flowing design */}
+                  <div className="flex gap-2">
+                    <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleTemplateChange(template.id);
                       }}
-                      className="flex-1 h-7 text-xs"
+                      className={`flex-1 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 ${
+                        currentTemplate?.id === template.id
+                          ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
                     >
-                      <Edit className="h-3 w-3 mr-1" />
-                      {currentTemplate?.id === template.id ? 'Selected' : 'Select'}
-                    </Button>
-                    <>
+                      {currentTemplate?.id === template.id
+                        ? "✓ Selected"
+                        : "Select"}
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openEditDialog(template);
+                      }}
+                      className="p-2.5 rounded-xl text-blue-600 bg-blue-50 hover:bg-blue-100 transition-colors"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </button>
+                    {template.templateName !== "default" && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setTemplateToDelete(template);
+                          setIsDeleteDialogOpen(true);
+                        }}
+                        className="p-2.5 rounded-xl text-red-600 bg-red-50 hover:bg-red-100 transition-colors"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop: Card Grid */}
+          <div className="hidden sm:grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {filteredTemplates.map((template) => (
+              <Card
+                key={template.id}
+                className={`hover:shadow-md transition-all duration-200 cursor-pointer border-l-4 ${
+                  currentTemplate?.id === template.id
+                    ? "border-l-blue-500 bg-blue-50/50 shadow-md"
+                    : "border-l-gray-300 hover:border-l-blue-400"
+                }`}
+                onClick={() => handleTemplateChange(template.id)}
+              >
+                <CardHeader className="pb-2">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 min-w-0">
+                      <CardTitle className="text-sm font-semibold text-gray-900 mb-1 truncate">
+                        {template.templateName || "Untitled Template"}
+                      </CardTitle>
+                      <CardDescription className="text-xs text-gray-600">
+                        {template.templateName === "default"
+                          ? "Default template"
+                          : "Custom template"}
+                      </CardDescription>
+                    </div>
+                    <Badge
+                      variant={
+                        template.templateName === "default"
+                          ? "default"
+                          : "secondary"
+                      }
+                      className="shrink-0 text-xs"
+                    >
+                      {template.templateName === "default"
+                        ? "Default"
+                        : "Custom"}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-1 text-xs font-medium text-blue-600">
+                      <Clock className="h-3 w-3" />
+                      <span>{template.duration || 30} min</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-xs text-gray-600">
+                      <Calendar className="h-3 w-3" />
+                      <span>
+                        {template.availabilities?.[0]?.daysAvailability?.filter(
+                          (d: any) => d.isAvailable
+                        ).length || 0}{" "}
+                        days
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 text-xs text-gray-600">
+                      <Video className="h-3 w-3" />
+                      <span>
+                        {template.selectedMeetingPlatform === "google" &&
+                          "Google Meet"}
+                        {template.selectedMeetingPlatform === "teams" &&
+                          "Microsoft Teams"}
+                        {template.selectedMeetingPlatform === "zoom" && "Zoom"}
+                        {!template.selectedMeetingPlatform && "Google Meet"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 pt-1">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={(e) => {
                           e.stopPropagation();
-                          openEditDialog(template);
+                          handleTemplateChange(template.id);
                         }}
-                        className="h-7 w-7 p-0 text-blue-500 hover:text-blue-600 hover:bg-blue-50"
-                        title="Edit Template"
+                        className="flex-1 h-7 text-xs"
                       >
-                        <Edit className="h-3 w-3" />
+                        <Edit className="h-3 w-3 mr-1" />
+                        {currentTemplate?.id === template.id
+                          ? "Selected"
+                          : "Select"}
                       </Button>
-                      {template.templateName !== "default" && (
+                      <>
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setTemplateToDelete(template);
-                            setIsDeleteDialogOpen(true);
+                            openEditDialog(template);
                           }}
-                          className="h-7 w-7 p-0 text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
+                          className="h-7 w-7 p-0 text-blue-500 hover:text-blue-600 hover:bg-blue-50"
+                          title="Edit Template"
                         >
-                          <Trash2 className="h-3 w-3" />
+                          <Edit className="h-3 w-3" />
                         </Button>
-                      )}
-                    </>
+                        {template.templateName !== "default" && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setTemplateToDelete(template);
+                              setIsDeleteDialogOpen(true);
+                            }}
+                            className="h-7 w-7 p-0 text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        )}
+                      </>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
@@ -1163,8 +1406,12 @@ export function ScheduleTemplates({
                 </svg>
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-gray-900">Timezone</h3>
-                <p className="text-xs text-gray-500">Set your local timezone for scheduling</p>
+                <h3 className="text-sm font-semibold text-gray-900">
+                  Timezone
+                </h3>
+                <p className="text-xs text-gray-500">
+                  Set your local timezone for scheduling
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-3 w-80">
@@ -1216,11 +1463,10 @@ export function ScheduleTemplates({
         </CardContent>
       </Card>
 
-
       {/* Main layout - side by side Weekly and Date-specific */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
         {/* Weekly hours - left side */}
-        <Card className="p-3">
+        <Card>
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
               <div className="p-1.5 bg-blue-100 rounded-md">
@@ -1241,18 +1487,21 @@ export function ScheduleTemplates({
             <div className="space-y-1">
               {getWeeklyAvailabilityData()?.daysAvailability.map(
                 (day: DayAvailability) => (
-                  <div key={day.day} className="flex items-center gap-2 p-1.5 border border-gray-200 rounded-md hover:border-gray-300 transition-colors">
+                  <div
+                    key={day.day}
+                    className="flex items-center gap-2 p-1.5 border border-gray-200 rounded-md hover:border-gray-300 transition-colors"
+                  >
                     {/* Day indicator */}
                     <div
                       className={`w-6 h-6 rounded-full ${
-                        day.isAvailable 
-                          ? "bg-gradient-to-r from-blue-500 to-purple-600" 
+                        day.isAvailable
+                          ? "bg-gradient-to-r from-blue-500 to-purple-600"
                           : "bg-gray-200"
                       } text-white flex items-center justify-center text-xs font-semibold flex-shrink-0`}
                     >
                       {getDayLabel(day.day)}
                     </div>
-                    
+
                     {/* Day name */}
                     <div className="flex-1 min-w-0">
                       <span className="text-sm font-medium text-gray-900">
@@ -1260,7 +1509,8 @@ export function ScheduleTemplates({
                       </span>
                       {day.isAvailable && (
                         <div className="text-xs text-gray-500">
-                          {day.timeSlots.length} slot{day.timeSlots.length !== 1 ? 's' : ''}
+                          {day.timeSlots.length} slot
+                          {day.timeSlots.length !== 1 ? "s" : ""}
                         </div>
                       )}
                     </div>
@@ -1269,7 +1519,10 @@ export function ScheduleTemplates({
                     {day.isAvailable && day.timeSlots.length > 0 && (
                       <div className="flex flex-wrap gap-1 flex-1">
                         {day.timeSlots.map((slot: TimeSlot) => {
-                          const hasSlotOverlap = hasOverlaps(slot, day.timeSlots);
+                          const hasSlotOverlap = hasOverlaps(
+                            slot,
+                            day.timeSlots
+                          );
                           return (
                             <div
                               key={slot.id}
@@ -1281,11 +1534,14 @@ export function ScheduleTemplates({
                             >
                               <div className="flex flex-col">
                                 <span className="font-medium">
-                                  {formatTime(slot.startTime)}-{formatTime(slot.endTime)}
+                                  {formatTime(slot.startTime)}-
+                                  {formatTime(slot.endTime)}
                                 </span>
                               </div>
                               <button
-                                onClick={() => handleDeleteTimeSlot(day.day, slot.id)}
+                                onClick={() =>
+                                  handleDeleteTimeSlot(day.day, slot.id)
+                                }
                                 className="text-gray-400 hover:text-red-500"
                               >
                                 <Trash2 className="h-3 w-3" />
@@ -1328,7 +1584,7 @@ export function ScheduleTemplates({
         </Card>
 
         {/* Date specific hours - right side */}
-        <Card className="p-4">
+        <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -1356,90 +1612,94 @@ export function ScheduleTemplates({
             </div>
           </CardHeader>
           <CardContent className="pt-0">
-
-          <div className="space-y-3">
-            {getDateSpecificAvailabilityData()?.dates?.map(
-              (date: DateSpecificSettings) => (
-                <div key={date.id} className="border border-gray-200 rounded-lg p-3 hover:border-gray-300 transition-colors">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center text-white text-sm font-semibold shadow-sm">
-                        {format(date.date, "d")}
-                      </div>
-                      <div>
-                        <div className="text-sm font-semibold text-gray-900">
-                          {format(date.date, "MMM d, yyyy")}
+            <div className="space-y-3">
+              {getDateSpecificAvailabilityData()?.dates?.map(
+                (date: DateSpecificSettings) => (
+                  <div
+                    key={date.id}
+                    className="border border-gray-200 rounded-lg p-3 hover:border-gray-300 transition-colors"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center text-white text-sm font-semibold shadow-sm">
+                          {format(date.date, "d")}
                         </div>
-                        <div className="text-xs text-gray-500">
-                          {format(date.date, "EEEE")}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {date.timeSlots.length} time slot{date.timeSlots.length !== 1 ? 's' : ''}
-                    </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    {date.timeSlots.map((slot: TimeSlot) => (
-                      <div key={slot.id} className="flex items-center gap-2">
-                        <div className="bg-white border border-gray-200 rounded-lg px-2 py-1 flex items-center justify-between gap-2 flex-1 hover:bg-gray-50 transition-colors">
-                          <div className="flex items-center gap-2">
-                            <Clock className="w-4 h-4 text-gray-400" />
-                            <div className="flex flex-col">
-                              <span className="text-sm font-medium text-gray-900">
-                                {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
-                              </span>
-                            </div>
+                        <div>
+                          <div className="text-sm font-semibold text-gray-900">
+                            {format(date.date, "MMM d, yyyy")}
                           </div>
-                          <button
-                            onClick={() =>
-                              handleDeleteDateSlot(
-                                date.id || date.date.toISOString(),
-                                slot.id
-                              )
-                            }
-                            className="text-gray-400 hover:text-red-500 p-1 rounded transition-colors"
-                            title="Remove time slot"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          <div className="text-xs text-gray-500">
+                            {format(date.date, "EEEE")}
+                          </div>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )
-            )}
+                      <div className="text-xs text-gray-500">
+                        {date.timeSlots.length} time slot
+                        {date.timeSlots.length !== 1 ? "s" : ""}
+                      </div>
+                    </div>
 
-            {(!getDateSpecificAvailabilityData()?.dates ||
-              getDateSpecificAvailabilityData()?.dates.length === 0) && (
-              <div className="text-center py-6">
-                <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Calendar className="w-6 h-6 text-gray-400" />
+                    <div className="space-y-1">
+                      {date.timeSlots.map((slot: TimeSlot) => (
+                        <div key={slot.id} className="flex items-center gap-2">
+                          <div className="bg-white border border-gray-200 rounded-lg px-2 py-1 flex items-center justify-between gap-2 flex-1 hover:bg-gray-50 transition-colors">
+                            <div className="flex items-center gap-2">
+                              <Clock className="w-4 h-4 text-gray-400" />
+                              <div className="flex flex-col">
+                                <span className="text-sm font-medium text-gray-900">
+                                  {formatTime(slot.startTime)} -{" "}
+                                  {formatTime(slot.endTime)}
+                                </span>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() =>
+                                handleDeleteDateSlot(
+                                  date.id || date.date.toISOString(),
+                                  slot.id
+                                )
+                              }
+                              className="text-gray-400 hover:text-red-500 p-1 rounded transition-colors"
+                              title="Remove time slot"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )
+              )}
+
+              {(!getDateSpecificAvailabilityData()?.dates ||
+                getDateSpecificAvailabilityData()?.dates.length === 0) && (
+                <div className="text-center py-6">
+                  <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Calendar className="w-6 h-6 text-gray-400" />
+                  </div>
+                  <h3 className="text-base font-medium text-gray-900 mb-1">
+                    No date-specific hours set
+                  </h3>
+                  <p className="text-sm text-gray-500 mb-3">
+                    Add availability for specific dates to override your weekly
+                    schedule
+                  </p>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setIsAddHoursDialogOpen(true)}
+                    className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add First Date
+                  </Button>
                 </div>
-                <h3 className="text-base font-medium text-gray-900 mb-1">
-                  No date-specific hours set
-                </h3>
-                <p className="text-sm text-gray-500 mb-3">
-                  Add availability for specific dates to override your weekly schedule
-                </p>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setIsAddHoursDialogOpen(true)}
-                  className="text-blue-600 border-blue-200 hover:bg-blue-50"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add First Date
-                </Button>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>
-
 
       {/* Add Hours Dialog */}
       <Dialog
@@ -1510,22 +1770,26 @@ export function ScheduleTemplates({
                 className="mt-2"
               />
             </div>
-             <div>
-               <Label htmlFor="interview-duration">Interview Duration (minutes)</Label>
-               <Input
-                 id="interview-duration"
-                 type="number"
-                 min="15"
-                 max="240"
-                 value={templateDuration}
-                 onChange={(e) => setTemplateDuration(parseInt(e.target.value) || 30)}
-                 placeholder="30"
-                 className="mt-2"
-               />
-               <div className="text-xs text-muted-foreground mt-1">
-                 Recommended: 30-60 minutes for most interviews
-               </div>
-             </div>
+            <div>
+              <Label htmlFor="interview-duration">
+                Interview Duration (minutes)
+              </Label>
+              <Input
+                id="interview-duration"
+                type="number"
+                min="15"
+                max="240"
+                value={templateDuration}
+                onChange={(e) =>
+                  setTemplateDuration(parseInt(e.target.value) || 30)
+                }
+                placeholder="30"
+                className="mt-2"
+              />
+              <div className="text-xs text-muted-foreground mt-1">
+                Recommended: 30-60 minutes for most interviews
+              </div>
+            </div>
             <div>
               <Label htmlFor="meeting-platform">Meeting Platform</Label>
               <Select
@@ -1536,24 +1800,50 @@ export function ScheduleTemplates({
                 disabled={!hasAnyMeetingPlatform}
               >
                 <SelectTrigger className="mt-2">
-                  <SelectValue placeholder={hasAnyMeetingPlatform ? "Select meeting platform" : "No platforms connected"} />
+                  <SelectValue
+                    placeholder={
+                      hasAnyMeetingPlatform
+                        ? "Select meeting platform"
+                        : "No platforms connected"
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {meetingPlatforms.map((platform) => (
-                    <SelectItem 
-                      key={platform.id} 
+                    <SelectItem
+                      key={platform.id}
                       value={platform.id}
                       disabled={!platform.connected}
-                      className={platform.connected ? "" : "opacity-40 cursor-not-allowed pointer-events-none bg-gray-50"}
+                      className={
+                        platform.connected
+                          ? ""
+                          : "opacity-40 cursor-not-allowed pointer-events-none bg-gray-50"
+                      }
                     >
                       <div className="flex items-center gap-2 w-full">
-                        <div className={`w-2 h-2 rounded-full ${platform.connected ? 'bg-green-500' : 'bg-gray-400'}`} />
-                        <Video className={`h-4 w-4 ${platform.connected ? '' : 'text-gray-400'}`} />
-                        <span className={platform.connected ? '' : 'text-gray-400 line-through'}>
+                        <div
+                          className={`w-2 h-2 rounded-full ${
+                            platform.connected ? "bg-green-500" : "bg-gray-400"
+                          }`}
+                        />
+                        <Video
+                          className={`h-4 w-4 ${
+                            platform.connected ? "" : "text-gray-400"
+                          }`}
+                        />
+                        <span
+                          className={
+                            platform.connected
+                              ? ""
+                              : "text-gray-400 line-through"
+                          }
+                        >
                           {platform.name}
                         </span>
                         {!platform.connected && (
-                          <span className="text-xs text-gray-400 ml-auto font-medium">(Not connected)</span>
+                          <span className="text-xs text-gray-400 ml-auto font-medium">
+                            (Not connected)
+                          </span>
                         )}
                       </div>
                     </SelectItem>
@@ -1567,28 +1857,35 @@ export function ScheduleTemplates({
                 </p>
               )}
             </div>
-             <div>
-               <Label htmlFor="booking-window">Booking Window (days ahead)</Label>
-               <Input
-                 id="booking-window"
-                 type="number"
-                 min="1"
-                 max="365"
-                 value={bookingWindowDays}
-                 onChange={(e) => setBookingWindowDays(parseInt(e.target.value) || 30)}
-                 placeholder="30"
-                 className="mt-2"
-               />
-               <div className="text-xs text-muted-foreground mt-1">
-                 How far in advance candidates can book (1-365 days)
-               </div>
-             </div>
+            <div>
+              <Label htmlFor="booking-window">
+                Booking Window (days ahead)
+              </Label>
+              <Input
+                id="booking-window"
+                type="number"
+                min="1"
+                max="365"
+                value={bookingWindowDays}
+                onChange={(e) =>
+                  setBookingWindowDays(parseInt(e.target.value) || 30)
+                }
+                placeholder="30"
+                className="mt-2"
+              />
+              <div className="text-xs text-muted-foreground mt-1">
+                How far in advance candidates can book (1-365 days)
+              </div>
+            </div>
             {/* Federal Holidays Section */}
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label htmlFor="exclude-federal-holidays">Exclude Federal Holidays</Label>
+                <Label htmlFor="exclude-federal-holidays">
+                  Exclude Federal Holidays
+                </Label>
                 <div className="text-sm text-muted-foreground">
-                  Automatically exclude US federal holidays from available booking slots
+                  Automatically exclude US federal holidays from available
+                  booking slots
                 </div>
               </div>
               <Switch
@@ -1602,7 +1899,7 @@ export function ScheduleTemplates({
                 }}
               />
             </div>
-            
+
             {excludeFederalHolidays && (
               <div className="border rounded-lg p-6 bg-gray-50">
                 <HolidayPicker
@@ -1617,7 +1914,9 @@ export function ScheduleTemplates({
             {/* Religious Holidays Section */}
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label htmlFor="exclude-religious-holidays">Exclude Religious Holidays</Label>
+                <Label htmlFor="exclude-religious-holidays">
+                  Exclude Religious Holidays
+                </Label>
                 <div className="text-sm text-muted-foreground">
                   Exclude religious holidays from available booking slots
                 </div>
@@ -1633,7 +1932,7 @@ export function ScheduleTemplates({
                 }}
               />
             </div>
-            
+
             {excludeReligiousHolidays && (
               <div className="border rounded-lg p-6 bg-gray-50">
                 <HolidayPicker
@@ -1661,10 +1960,12 @@ export function ScheduleTemplates({
             >
               Cancel
             </Button>
-            <Button 
+            <Button
               onClick={handleCreateTemplate}
               disabled={!hasAnyMeetingPlatform}
-              title={!hasAnyMeetingPlatform ? "Connect a meeting platform first" : ""}
+              title={
+                !hasAnyMeetingPlatform ? "Connect a meeting platform first" : ""
+              }
             >
               Create Booking Page
             </Button>
@@ -1693,14 +1994,18 @@ export function ScheduleTemplates({
               />
             </div>
             <div>
-              <Label htmlFor="edit-interview-duration">Interview Duration (minutes)</Label>
+              <Label htmlFor="edit-interview-duration">
+                Interview Duration (minutes)
+              </Label>
               <Input
                 id="edit-interview-duration"
                 type="number"
                 min="15"
                 max="240"
                 value={editTemplateDuration}
-                onChange={(e) => setEditTemplateDuration(parseInt(e.target.value) || 30)}
+                onChange={(e) =>
+                  setEditTemplateDuration(parseInt(e.target.value) || 30)
+                }
                 placeholder="30"
                 className="mt-2"
               />
@@ -1727,14 +2032,18 @@ export function ScheduleTemplates({
               </Select>
             </div>
             <div>
-              <Label htmlFor="edit-booking-window">Booking Window (days ahead)</Label>
+              <Label htmlFor="edit-booking-window">
+                Booking Window (days ahead)
+              </Label>
               <Input
                 id="edit-booking-window"
                 type="number"
                 min="1"
                 max="365"
                 value={editBookingWindowDays}
-                onChange={(e) => setEditBookingWindowDays(parseInt(e.target.value) || 30)}
+                onChange={(e) =>
+                  setEditBookingWindowDays(parseInt(e.target.value) || 30)
+                }
                 placeholder="30"
                 className="mt-2"
               />
@@ -1745,9 +2054,12 @@ export function ScheduleTemplates({
             {/* Federal Holidays Section */}
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label htmlFor="edit-exclude-federal-holidays">Exclude Federal Holidays</Label>
+                <Label htmlFor="edit-exclude-federal-holidays">
+                  Exclude Federal Holidays
+                </Label>
                 <div className="text-sm text-muted-foreground">
-                  Automatically exclude US federal holidays from available booking slots
+                  Automatically exclude US federal holidays from available
+                  booking slots
                 </div>
               </div>
               <Switch
@@ -1761,7 +2073,7 @@ export function ScheduleTemplates({
                 }}
               />
             </div>
-            
+
             {editExcludeFederalHolidays && (
               <div className="border rounded-lg p-6 bg-gray-50">
                 <HolidayPicker
@@ -1776,7 +2088,9 @@ export function ScheduleTemplates({
             {/* Religious Holidays Section */}
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label htmlFor="edit-exclude-religious-holidays">Exclude Religious Holidays</Label>
+                <Label htmlFor="edit-exclude-religious-holidays">
+                  Exclude Religious Holidays
+                </Label>
                 <div className="text-sm text-muted-foreground">
                   Exclude religious holidays from available booking slots
                 </div>
@@ -1792,7 +2106,7 @@ export function ScheduleTemplates({
                 }}
               />
             </div>
-            
+
             {editExcludeReligiousHolidays && (
               <div className="border rounded-lg p-6 bg-gray-50">
                 <HolidayPicker

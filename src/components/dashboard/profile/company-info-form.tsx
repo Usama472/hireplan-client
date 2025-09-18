@@ -116,56 +116,60 @@ export function CompanyInfoForm() {
 
   return (
     <Card className="border-0 shadow-lg shadow-gray-100/50">
-      <CardHeader className="pb-6">
-        <CardTitle className="flex items-center gap-2 text-xl">
-          <div className="p-2 bg-blue-50 rounded-lg">
-            <Building2 className="h-5 w-5 text-blue-600" />
+      <CardHeader className="pb-4 sm:pb-6 px-4 sm:px-6">
+        <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+          <div className="p-2 bg-blue-50 rounded-lg flex-shrink-0">
+            <Building2 className="h-4 sm:h-5 w-4 sm:w-5 text-blue-600" />
           </div>
-          Company Information
+          <span className="truncate">Company Information</span>
         </CardTitle>
-        <CardDescription className="text-base">
+        <CardDescription className="text-sm sm:text-base">
           Manage your company details and business information
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-          <div className="col-span-2">
-            <InputField
-              name="company.companyName"
-              type={INPUT_TYPES.TEXT}
-              placeholder="Enter company name"
-              label="Company Name"
-            />
-          </div>
+      <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-6">
+        {/* Company Name - Full width on all devices */}
+        <InputField
+          name="company.companyName"
+          type={INPUT_TYPES.TEXT}
+          placeholder="Enter company name"
+          label="Company Name"
+        />
 
-          <div className="col-span-2">
-            <InputField
-              name="company.websiteUrl"
-              type={INPUT_TYPES.TEXT}
-              placeholder="https://example.com"
-              label="Website URL"
+        {/* Website URL with Refresh Button */}
+        <div className="space-y-3">
+          <InputField
+            name="company.websiteUrl"
+            type={INPUT_TYPES.TEXT}
+            placeholder="https://example.com"
+            label="Website URL"
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleRefreshWebsiteData}
+            disabled={isRefreshing}
+            className="w-full sm:w-auto"
+          >
+            <RefreshCw
+              className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
             />
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleRefreshWebsiteData}
-              disabled={isRefreshing}
-              className="w-full sm:w-auto"
-            >
-              <RefreshCw
-                className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
-              />
+            <span className="hidden sm:inline">
               {isRefreshing ? "Refreshing..." : "Refresh Website Data"}
-            </Button>
-            <p className="text-xs text-gray-500 mt-2">
-              This will update your company page with the latest website design
-              and content
-            </p>
-          </div>
+            </span>
+            <span className="sm:hidden">
+              {isRefreshing ? "Refreshing..." : "Refresh Data"}
+            </span>
+          </Button>
+          <p className="text-xs text-gray-500">
+            This will update your company page with the latest website design
+            and content
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        {/* Industry and Company Size - Responsive Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           <InputField
             type={INPUT_TYPES.SELECT}
             name="company.industry"
@@ -182,6 +186,7 @@ export function CompanyInfoForm() {
           />
         </div>
 
+        {/* Address - Full width */}
         <InputField
           name="company.address"
           type={INPUT_TYPES.TEXT}
@@ -189,7 +194,8 @@ export function CompanyInfoForm() {
           label="Address"
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+        {/* City, State, Zip - Responsive Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           <InputField
             name="company.city"
             type={INPUT_TYPES.TEXT}
@@ -210,8 +216,10 @@ export function CompanyInfoForm() {
           />
         </div>
 
+        {/* Country - Full width */}
         <InputField
           name="company.country"
+          type={INPUT_TYPES.SELECT}
           label="Country"
           placeholder="Select country"
           selectOptions={countryOptions}

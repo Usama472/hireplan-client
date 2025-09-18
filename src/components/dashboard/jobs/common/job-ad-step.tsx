@@ -106,28 +106,32 @@ export function JobAdStep() {
   };
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900">Job Advertisement</h2>
-        <p className="text-gray-600 mt-1">
+    <div className="space-y-6 sm:space-y-8">
+      <div className="px-1">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+          Job Advertisement
+        </h2>
+        <p className="text-gray-600 mt-1 text-sm sm:text-base">
           Create compelling job posting content that attracts the right
           candidates
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
         {/* Main Form */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-4 sm:space-y-6">
           {/* Internal Job Title */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Internal Job Title</CardTitle>
-              <p className="text-sm text-gray-600">
+          <Card className="shadow-none border border-gray-200 rounded-xl">
+            <CardHeader className="pb-3 sm:pb-4">
+              <CardTitle className="text-base sm:text-lg">
+                Internal Job Title
+              </CardTitle>
+              <p className="text-xs sm:text-sm text-gray-600">
                 For internal use - include location, department, or other
                 identifiers <span className="text-red-500">*</span>
               </p>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0">
               <div className="space-y-1">
                 <InputField
                   name="jobTitle"
@@ -144,15 +148,17 @@ export function JobAdStep() {
           </Card>
 
           {/* External Job Board Title */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Job Board Title</CardTitle>
-              <p className="text-sm text-gray-600">
+          <Card className="shadow-none border border-gray-200 rounded-xl">
+            <CardHeader className="pb-3 sm:pb-4">
+              <CardTitle className="text-base sm:text-lg">
+                Job Board Title
+              </CardTitle>
+              <p className="text-xs sm:text-sm text-gray-600">
                 Public-facing title that appears on job boards{" "}
                 <span className="text-red-500">*</span>
               </p>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0">
               <div className="space-y-1">
                 <InputField
                   name="jobBoardTitle"
@@ -179,14 +185,16 @@ export function JobAdStep() {
           </Card>
 
           {/* Job Description */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Job Description</CardTitle>
-              <p className="text-sm text-gray-600">
+          <Card className="shadow-none border border-gray-200 rounded-xl">
+            <CardHeader className="pb-3 sm:pb-4">
+              <CardTitle className="text-base sm:text-lg">
+                Job Description
+              </CardTitle>
+              <p className="text-xs sm:text-sm text-gray-600">
                 Detailed description of the role and requirements
               </p>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0">
               <div className="space-y-3">
                 <TiptapEditor
                   name="jobDescription"
@@ -205,8 +213,8 @@ export function JobAdStep() {
           </Card>
 
           {/* Background Screening Disclaimer */}
-          <Card>
-            <CardContent className="pt-6">
+          <Card className="shadow-none border border-gray-200 rounded-xl">
+            <CardContent className="pt-4 sm:pt-6">
               <div className="flex items-start space-x-3">
                 <Checkbox
                   id="backgroundScreeningDisclaimer"
@@ -233,14 +241,14 @@ export function JobAdStep() {
         </div>
 
         {/* Guidelines Sidebar */}
-        <div className="space-y-6">
-          <Card className="bg-blue-50 border-blue-200">
-            <CardHeader>
-              <CardTitle className="text-lg text-blue-900">
+        <div className="space-y-4 sm:space-y-6">
+          <Card className="bg-blue-50 border-blue-200 shadow-none rounded-xl">
+            <CardHeader className="pb-3 sm:pb-4">
+              <CardTitle className="text-base sm:text-lg text-blue-900">
                 Job Title Guidelines
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3 text-sm">
+            <CardContent className="space-y-3 text-xs sm:text-sm pt-0">
               <div className="space-y-2">
                 <h4 className="font-medium text-blue-900">Best Practices:</h4>
                 <ul className="space-y-1 text-blue-800">
@@ -255,13 +263,13 @@ export function JobAdStep() {
             </CardContent>
           </Card>
 
-          <Card className="bg-green-50 border-green-200">
-            <CardHeader>
-              <CardTitle className="text-lg text-green-900">
+          <Card className="bg-green-50 border-green-200 shadow-none rounded-xl">
+            <CardHeader className="pb-3 sm:pb-4">
+              <CardTitle className="text-base sm:text-lg text-green-900">
                 Description Guidelines
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3 text-sm">
+            <CardContent className="space-y-3 text-xs sm:text-sm pt-0">
               <div className="space-y-2">
                 <h4 className="font-medium text-green-900">Optimal Length:</h4>
                 <p className="text-green-800">
@@ -289,11 +297,13 @@ export function JobAdStep() {
           </Card>
 
           {/* Character Counters */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Character Counts</CardTitle>
+          <Card className="shadow-none border border-gray-200 rounded-xl">
+            <CardHeader className="pb-3 sm:pb-4">
+              <CardTitle className="text-base sm:text-lg">
+                Character Counts
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-3 pt-0">
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span>Internal Title:</span>

@@ -19,7 +19,7 @@ import { useFormContext } from "react-hook-form";
 
 export function PostingScheduleBudgetStep() {
   const { watch, setValue } = useFormContext();
-  
+
   const runIndefinitely = watch("runIndefinitely") || false;
   const startDate = watch("startDate");
   const endDate = watch("endDate");
@@ -28,41 +28,46 @@ export function PostingScheduleBudgetStep() {
   const indeedBudget = watch("indeedBudget") || 0;
   const zipRecruiterBudget = watch("zipRecruiterBudget") || 0;
 
-  const totalBudget = dailyBudget + monthlyBudget + indeedBudget + zipRecruiterBudget;
+  const totalBudget =
+    dailyBudget + monthlyBudget + indeedBudget + zipRecruiterBudget;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold text-gray-900">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="px-1">
+        <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
           Posting Schedule & Ad Budget
         </h2>
-        <p className="text-sm text-gray-600 mt-1">
+        <p className="text-xs sm:text-sm text-gray-600 mt-1">
           Configure when your job posting runs and set advertising budgets
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Posting Schedule */}
-        <Card className="border border-gray-200">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-2 text-lg font-medium text-blue-600">
-              <Calendar className="w-5 h-5" />
+        <Card className="border border-gray-200 shadow-none rounded-xl">
+          <CardHeader className="pb-3 sm:pb-4">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg font-medium text-blue-600">
+              <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />
               Posting Schedule
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3 sm:space-y-4 pt-0">
             {/* Run Indefinitely Toggle */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <Label className="text-sm font-medium">Run Indefinitely</Label>
+            <div className="space-y-2 sm:space-y-3">
+              <div className="flex items-start sm:items-center justify-between gap-3">
+                <div className="space-y-1 flex-1">
+                  <Label className="text-xs sm:text-sm font-medium">
+                    Run Indefinitely
+                  </Label>
                   <p className="text-xs text-gray-500">
                     Keep posting active until manually stopped
                   </p>
                 </div>
                 <Switch
                   checked={runIndefinitely}
-                  onCheckedChange={(checked) => setValue("runIndefinitely", checked)}
+                  onCheckedChange={(checked) =>
+                    setValue("runIndefinitely", checked)
+                  }
                 />
               </div>
 
@@ -75,7 +80,8 @@ export function PostingScheduleBudgetStep() {
                     </span>
                   </div>
                   <p className="text-xs text-green-600 mt-1">
-                    Your job will remain active until you manually pause or close it
+                    Your job will remain active until you manually pause or
+                    close it
                   </p>
                 </div>
               )}
@@ -83,18 +89,22 @@ export function PostingScheduleBudgetStep() {
 
             {/* Date Range (only show if not running indefinitely) */}
             {!runIndefinitely && (
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Start Date</Label>
+              <div className="space-y-3 sm:space-y-4">
+                <div className="space-y-1.5 sm:space-y-2">
+                  <Label className="text-xs sm:text-sm font-medium">
+                    Start Date
+                  </Label>
                   <InputField
                     name="startDate"
                     type={INPUT_TYPES.DATE}
                     placeholder="Select start date"
                   />
                 </div>
-                
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">End Date</Label>
+
+                <div className="space-y-1.5 sm:space-y-2">
+                  <Label className="text-xs sm:text-sm font-medium">
+                    End Date
+                  </Label>
                   <InputField
                     name="endDate"
                     type={INPUT_TYPES.DATE}
@@ -111,7 +121,9 @@ export function PostingScheduleBudgetStep() {
                       </span>
                     </div>
                     <p className="text-xs text-blue-600 mt-1">
-                      Your job will be active from {new Date(startDate).toLocaleDateString()} to {new Date(endDate).toLocaleDateString()}
+                      Your job will be active from{" "}
+                      {new Date(startDate).toLocaleDateString()} to{" "}
+                      {new Date(endDate).toLocaleDateString()}
                     </p>
                   </div>
                 )}
@@ -120,9 +132,14 @@ export function PostingScheduleBudgetStep() {
 
             {/* Current Posting Settings */}
             <div className="p-3 bg-gray-50 border border-gray-200 rounded-md space-y-2">
-              <h4 className="text-sm font-medium text-gray-900">Current Settings</h4>
+              <h4 className="text-sm font-medium text-gray-900">
+                Current Settings
+              </h4>
               <div className="space-y-1 text-xs text-gray-600">
-                <p>• Schedule: {runIndefinitely ? "Indefinite" : "Fixed Duration"}</p>
+                <p>
+                  • Schedule:{" "}
+                  {runIndefinitely ? "Indefinite" : "Fixed Duration"}
+                </p>
                 <p>• Status: Will be set to "Active" upon publishing</p>
                 <p>• Auto-renewal: {runIndefinitely ? "Yes" : "No"}</p>
               </div>
@@ -131,21 +148,23 @@ export function PostingScheduleBudgetStep() {
         </Card>
 
         {/* Ad Budget */}
-        <Card className="border border-gray-200">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-2 text-lg font-medium text-green-600">
-              <DollarSign className="w-5 h-5" />
+        <Card className="border border-gray-200 shadow-none rounded-xl">
+          <CardHeader className="pb-3 sm:pb-4">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg font-medium text-green-600">
+              <DollarSign className="w-4 h-4 sm:w-5 sm:h-5" />
               Advertising Budget
             </CardTitle>
-            <p className="text-sm text-gray-500">
+            <p className="text-xs sm:text-sm text-gray-500">
               Set budgets for job board promotions (optional)
             </p>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3 sm:space-y-4 pt-0">
             {/* General Budgets */}
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Daily Budget</Label>
+            <div className="space-y-3 sm:space-y-4">
+              <div className="space-y-1.5 sm:space-y-2">
+                <Label className="text-xs sm:text-sm font-medium">
+                  Daily Budget
+                </Label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">
                     $
@@ -164,8 +183,10 @@ export function PostingScheduleBudgetStep() {
                 </p>
               </div>
 
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Monthly Budget</Label>
+              <div className="space-y-1.5 sm:space-y-2">
+                <Label className="text-xs sm:text-sm font-medium">
+                  Monthly Budget
+                </Label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">
                     $
@@ -186,15 +207,19 @@ export function PostingScheduleBudgetStep() {
             </div>
 
             {/* Platform-Specific Budgets */}
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-gray-600" />
-                <Label className="text-sm font-medium text-gray-900">Platform Budgets</Label>
+                <Label className="text-xs sm:text-sm font-medium text-gray-900">
+                  Platform Budgets
+                </Label>
               </div>
 
-              <div className="space-y-3">
-                <div className="space-y-2">
-                  <Label className="text-sm text-gray-700">Indeed Budget</Label>
+              <div className="space-y-2 sm:space-y-3">
+                <div className="space-y-1.5 sm:space-y-2">
+                  <Label className="text-xs sm:text-sm text-gray-700">
+                    Indeed Budget
+                  </Label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">
                       $
@@ -210,8 +235,10 @@ export function PostingScheduleBudgetStep() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label className="text-sm text-gray-700">ZipRecruiter Budget</Label>
+                <div className="space-y-1.5 sm:space-y-2">
+                  <Label className="text-xs sm:text-sm text-gray-700">
+                    ZipRecruiter Budget
+                  </Label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">
                       $
@@ -242,9 +269,13 @@ export function PostingScheduleBudgetStep() {
                   {dailyBudget > 0 && <p>Daily: ${dailyBudget}</p>}
                   {monthlyBudget > 0 && <p>Monthly: ${monthlyBudget}</p>}
                   {indeedBudget > 0 && <p>Indeed: ${indeedBudget}</p>}
-                  {zipRecruiterBudget > 0 && <p>ZipRecruiter: ${zipRecruiterBudget}</p>}
+                  {zipRecruiterBudget > 0 && (
+                    <p>ZipRecruiter: ${zipRecruiterBudget}</p>
+                  )}
                   <hr className="border-green-300 my-1" />
-                  <p className="font-semibold">Total Allocated: ${totalBudget}</p>
+                  <p className="font-semibold">
+                    Total Allocated: ${totalBudget}
+                  </p>
                 </div>
               </div>
             )}
@@ -272,10 +303,22 @@ export function PostingScheduleBudgetStep() {
               Budget Information
             </h4>
             <ul className="text-xs text-yellow-800 space-y-1">
-              <li>• <strong>Budgets are optional:</strong> Jobs will post for free on your career page regardless</li>
-              <li>• <strong>Platform budgets:</strong> Used for paid promotions on job boards like Indeed and ZipRecruiter</li>
-              <li>• <strong>Daily vs Monthly:</strong> Daily budgets provide more control, monthly budgets offer flexibility</li>
-              <li>• <strong>Budget tracking:</strong> Monitor spending and performance in your dashboard analytics</li>
+              <li>
+                • <strong>Budgets are optional:</strong> Jobs will post for free
+                on your career page regardless
+              </li>
+              <li>
+                • <strong>Platform budgets:</strong> Used for paid promotions on
+                job boards like Indeed and ZipRecruiter
+              </li>
+              <li>
+                • <strong>Daily vs Monthly:</strong> Daily budgets provide more
+                control, monthly budgets offer flexibility
+              </li>
+              <li>
+                • <strong>Budget tracking:</strong> Monitor spending and
+                performance in your dashboard analytics
+              </li>
             </ul>
           </div>
         </div>

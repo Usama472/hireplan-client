@@ -1,16 +1,16 @@
 import { LoadingScreen } from "@/components/common/LoadingScreen";
 import { DashboardSidebar } from "@/components/common/navigation/dashboard/sidebar";
+import { MobileHeader } from "@/components/common/MobileHeader";
 import type { DefaultLayoutProps } from "@/interfaces";
 import useAuthSessionContext from "@/lib/context/AuthSessionContext";
 import { ScrollToTop } from "@/lib/hooks/ScrollToTop";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { SubscriptionStatusAlert } from "@/components/common/SubscriptionStatusAlert";
 
 export const PrivateRoute = ({ children }: DefaultLayoutProps) => {
-  const { status, subscription, refreshSubscription } = useAuthSessionContext();
+  const { status } = useAuthSessionContext();
 
   // Show loading state for private routes
-  if (status === 'loading') {
+  if (status === "loading") {
     return <LoadingScreen message="Loading dashboard..." />;
   }
 
@@ -43,7 +43,10 @@ export const PrivateRoute = ({ children }: DefaultLayoutProps) => {
       <ScrollToTop />
       <DashboardSidebar />
       <SidebarInset className="min-h-screen max-h-screen bg-blue-50/30 flex flex-col">
-        <div className="flex-1 overflow-y-auto w-full px-2 sm:px-4 lg:px-6 py-4">{children}</div>
+        <MobileHeader />
+        <div className="flex-1 overflow-y-auto w-full px-2 sm:px-4 lg:px-6 py-4">
+          {children}
+        </div>
       </SidebarInset>
     </SidebarProvider>
   );

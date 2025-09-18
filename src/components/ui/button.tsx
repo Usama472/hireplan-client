@@ -14,12 +14,12 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         secondary:
-          "bg-secondary text-secondary-foreground shadow-lg hover:shadow-xl hover:shadow-secondary/25 transition-all duration-300",
+          "bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white shadow-lg hover:shadow-xl transition-all duration-300",
         outline: "",
         "outline-primary":
           "bg-transparent text-primary border border-primary hover:bg-primary hover:text-white dark:hover:bg-primary/10",
         "outline-secondary":
-          "bg-transparent text-secondary border border-secondary/30 hover:bg-secondary/5 dark:hover:bg-secondary/10",
+          "bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white border border-transparent hover:opacity-90 transition-all duration-300",
         "outline-destructive":
           "bg-transparent text-destructive border border-destructive/30 hover:bg-destructive/5 dark:hover:bg-destructive/10",
         ghost: "hover:bg-accent/10 hover:text-primary dark:hover:bg-accent/20 ",
@@ -50,7 +50,7 @@ const buttonVariants = cva(
         variant: "outline",
         outline: "secondary",
         className:
-          "bg-transparent text-secondary border border-secondary/30 hover:bg-secondary/5 dark:hover:bg-secondary/10",
+          "bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white border border-transparent hover:opacity-90 transition-all duration-300",
       },
       {
         variant: "outline",

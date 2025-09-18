@@ -64,16 +64,16 @@ export function BookingPageStep() {
   };
 
   return (
-    <div>
-      <Card className="mb-6">
+    <div className="space-y-4 sm:space-y-6">
+      <Card className="mb-4 sm:mb-6 shadow-none border border-gray-200 rounded-xl">
         <CardHeader className="pb-3">
-          <CardTitle className="text-xl flex items-center gap-2">
-            <CalendarClock className="h-5 w-5 text-blue-600" />
+          <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
+            <CalendarClock className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
             Booking Page Selection
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <p className="text-sm text-gray-600 mb-4">
+        <CardContent className="pt-0">
+          <p className="text-xs sm:text-sm text-gray-600 mb-4">
             Select an availability template that candidates will use to schedule
             interviews. Each template contains its own schedule, event types,
             and availability settings.
@@ -116,21 +116,21 @@ export function BookingPageStep() {
             </Alert>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
             {templates.map((template) => (
               <div
                 key={template.id}
-                className={`cursor-pointer transition-all duration-200 border rounded-lg p-4 hover:shadow-md ${
+                className={`cursor-pointer transition-all duration-200 border rounded-lg p-3 sm:p-4 hover:shadow-md ${
                   selectedTemplateId === template.id
                     ? "border-blue-500 bg-blue-50 shadow"
                     : "border-gray-200 bg-white hover:border-gray-300"
                 }`}
                 onClick={() => handleSelectTemplate(template.id)}
               >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-blue-600" />
-                    <h3 className="text-sm font-medium">
+                <div className="flex items-start sm:items-center justify-between mb-2 gap-2">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <Calendar className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                    <h3 className="text-xs sm:text-sm font-medium truncate">
                       {template.templateName}
                     </h3>
                   </div>

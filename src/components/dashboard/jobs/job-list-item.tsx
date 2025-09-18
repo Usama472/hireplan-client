@@ -172,25 +172,25 @@ export function JobListItem({
     <>
       <Card
         onClick={handleCardClick}
-        className="group bg-white border border-gray-200 hover:border-primary/20 transition-all duration-200 rounded-lg overflow-hidden cursor-pointer hover:bg-gray-50/50"
+        className="group bg-white border border-gray-100 hover:border-primary/30 hover:shadow-xl transition-all duration-300 rounded-xl overflow-hidden cursor-pointer hover:bg-gray-50/30 active:scale-[0.99]"
       >
-        <CardContent className="p-5">
-          <div className="flex items-start gap-5">
-            {/* Left Section - Main Content */}
-            <div className="flex-1 min-w-0 space-y-3">
+        <CardContent className="p-4 sm:p-5 lg:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-6">
+            {/* Main Content */}
+            <div className="flex-1 min-w-0 space-y-3 sm:space-y-4">
               {/* Header Row */}
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="font-semibold text-lg text-gray-900 group-hover:text-primary transition-colors line-clamp-2 leading-tight">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
+                    <h3 className="font-semibold text-lg sm:text-xl text-gray-900 group-hover:text-primary transition-colors line-clamp-2 leading-tight">
                       {job.jobTitle || job.jobBoardTitle}
                     </h3>
 
-                    {/* Deadline Badge - Inline with Title */}
+                    {/* Deadline Badge */}
                     {daysLeft !== null && (
                       <div
                         className={cn(
-                          "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-xs font-medium flex-shrink-0",
+                          "inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded border text-xs font-medium flex-shrink-0",
                           daysLeft <= 7 &&
                             daysLeft > 0 &&
                             "bg-amber-50 text-amber-700 border-amber-200",
@@ -208,7 +208,7 @@ export function JobListItem({
                             daysLeft > 7 && "text-gray-600"
                           )}
                         />
-                        <span>
+                        <span className="text-xs">
                           {daysLeft > 0
                             ? `${daysLeft}d left`
                             : daysLeft === 0
@@ -220,40 +220,40 @@ export function JobListItem({
                   </div>
 
                   {/* Location & Workplace Type */}
-                  <div className="flex items-center gap-3 text-sm text-gray-600 mb-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-sm text-gray-600 mb-2 sm:mb-3">
                     <div className="flex items-center">
-                      <MapPin className="w-4 h-4 text-primary mr-1.5" />
-                      <span>{location}</span>
+                      <MapPin className="w-3 sm:w-4 h-3 sm:h-4 text-primary mr-1 sm:mr-1.5" />
+                      <span className="text-xs sm:text-sm">{location}</span>
                     </div>
-                    <div className="h-1 w-1 rounded-full bg-gray-300" />
-                    <span className="font-medium text-gray-700">
+                    <div className="hidden sm:block h-1 w-1 rounded-full bg-gray-300" />
+                    <span className="font-medium text-gray-700 text-xs sm:text-sm">
                       {formatText(job.workplaceType, "Remote")}
                     </span>
                   </div>
                 </div>
 
                 {/* Status & Priority Badges */}
-                <div className="flex items-center gap-2 flex-shrink-0">
+                <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0 order-first sm:order-last">
                   <div
                     className={cn(
-                      "px-2.5 py-1 rounded-md border text-xs font-medium",
+                      "px-2 sm:px-2.5 py-0.5 sm:py-1 rounded border text-xs font-medium",
                       statusConfig.bg,
                       statusConfig.text,
                       statusConfig.border
                     )}
                   >
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1 sm:gap-1.5">
                       <StatusIcon
                         className={cn("w-3 h-3", statusConfig.iconColor)}
                       />
-                      <span className="capitalize">{job.status}</span>
+                      <span className="capitalize text-xs">{job.status}</span>
                     </div>
                   </div>
 
                   {priorityConfig && (
                     <div
                       className={cn(
-                        "px-2 py-1 rounded-md border text-xs font-medium",
+                        "px-2 py-0.5 sm:py-1 rounded border text-xs font-medium",
                         priorityConfig.bg,
                         priorityConfig.text,
                         priorityConfig.border
@@ -266,18 +266,24 @@ export function JobListItem({
               </div>
 
               {/* Key Information Row */}
-              <div className="flex items-center gap-6 text-sm">
+              <div className="grid grid-cols-2 sm:flex sm:items-center gap-3 sm:gap-6 text-sm">
                 {/* Salary */}
-                <div className="flex items-center gap-2">
-                  <DollarSign className="w-4 h-4 text-green-600" />
-                  <span className="font-medium text-gray-900">{salary}</span>
-                  <span className="text-gray-500">{salaryPeriod}</span>
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <DollarSign className="w-3 sm:w-4 h-3 sm:h-4 text-green-600" />
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:gap-1">
+                    <span className="font-medium text-gray-900 text-xs sm:text-sm">
+                      {salary}
+                    </span>
+                    <span className="text-gray-500 text-xs">
+                      {salaryPeriod}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Employment Type */}
-                <div className="flex items-center gap-2">
-                  <Briefcase className="w-4 h-4 text-primary" />
-                  <span className="text-gray-700">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <Briefcase className="w-3 sm:w-4 h-3 sm:h-4 text-primary" />
+                  <span className="text-gray-700 text-xs sm:text-sm">
                     {job.employmentType
                       ?.replace("-", " ")
                       .replace(/\b\w/g, (l) => l.toUpperCase())}
@@ -285,18 +291,18 @@ export function JobListItem({
                 </div>
 
                 {/* Positions */}
-                <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4 text-primary" />
-                  <span className="text-gray-700">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <Users className="w-3 sm:w-4 h-3 sm:h-4 text-primary" />
+                  <span className="text-gray-700 text-xs sm:text-sm">
                     {job.positionsToHire || 1} position
                     {job.positionsToHire !== 1 ? "s" : ""}
                   </span>
                 </div>
 
                 {/* Applicants */}
-                <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4 text-blue-600" />
-                  <span className="text-gray-700">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <Users className="w-3 sm:w-4 h-3 sm:h-4 text-blue-600" />
+                  <span className="text-gray-700 text-xs sm:text-sm">
                     {job.applicantsCount || 0} applicant
                     {job.applicantsCount !== 1 ? "s" : ""}
                   </span>
@@ -304,11 +310,11 @@ export function JobListItem({
               </div>
 
               {/* Additional Details Row */}
-              <div className="flex items-center gap-6 text-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 text-sm">
                 {/* Posted Date */}
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-gray-500" />
-                  <span className="text-gray-700">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <Calendar className="w-3 sm:w-4 h-3 sm:h-4 text-gray-500" />
+                  <span className="text-gray-700 text-xs sm:text-sm">
                     Posted{" "}
                     {job.createdAt
                       ? new Date(job.createdAt).toLocaleDateString("en-US", {
@@ -321,9 +327,9 @@ export function JobListItem({
 
                 {/* Education Requirement */}
                 {job.educationRequirement && (
-                  <div className="flex items-center gap-2">
-                    <GraduationCap className="w-4 h-4 text-secondary" />
-                    <span className="text-gray-700">
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <GraduationCap className="w-3 sm:w-4 h-3 sm:h-4 text-secondary" />
+                    <span className="text-gray-700 text-xs sm:text-sm">
                       {formatText(job.educationRequirement)}
                     </span>
                   </div>
@@ -332,7 +338,7 @@ export function JobListItem({
 
               {/* Job Description Preview */}
               {job.jobDescription && (
-                <div className="pt-1">
+                <div className="pt-1 hidden sm:block">
                   <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
                     {job.jobDescription.length > 120
                       ? job.jobDescription.substring(0, 120) + "..."
@@ -342,21 +348,22 @@ export function JobListItem({
               )}
             </div>
 
-            {/* Right Section - Actions */}
-            <div className="flex flex-col items-end gap-4 flex-shrink-0">
+            {/* Actions Section - Professional Mobile Design */}
+            <div className="flex sm:flex-col items-center sm:items-end gap-3 sm:gap-4 flex-shrink-0 w-full sm:w-auto justify-between sm:justify-start mt-4 sm:mt-0">
               {/* Action Buttons */}
-              <div className="flex flex-col gap-3 w-32">
+              <div className="flex sm:flex-col gap-3 w-full sm:w-36">
                 <Button
-                  variant="outline-primary"
+                  variant="outline"
                   size="sm"
-                  className="w-full h-9 font-medium transition-all duration-200 hover:scale-105 active:scale-95"
+                  className="flex-1 sm:w-full h-11 sm:h-10 font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] text-sm border-primary/20 text-primary hover:bg-primary/5 hover:border-primary/40 rounded-lg"
                   onClick={(e) => {
                     e.stopPropagation();
                     onEdit?.(job);
                   }}
                 >
                   <Edit3 className="w-4 h-4 mr-2" />
-                  Edit Job
+                  <span className="hidden sm:inline">Edit Job</span>
+                  <span className="sm:hidden">Edit</span>
                 </Button>
                 <Button
                   size="sm"
@@ -364,16 +371,16 @@ export function JobListItem({
                     e.stopPropagation();
                     onViewDetails?.(job);
                   }}
-                  variant="secondary"
-                  className="w-full h-9 font-medium transition-all duration-200 hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
+                  className="flex-1 sm:w-full h-11 sm:h-10 font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] bg-primary hover:bg-primary/90 text-white shadow-sm hover:shadow-md text-sm rounded-lg"
                 >
                   <ArrowRight className="w-4 h-4 mr-2" />
-                  View Details
+                  <span className="hidden sm:inline">View Details</span>
+                  <span className="sm:hidden">View</span>
                 </Button>
               </div>
 
-              {/* Hover Indicator */}
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+              {/* Hover Indicator - Desktop Only */}
+              <div className="hidden sm:block opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
                 <div className="flex items-center gap-1 text-xs text-primary font-medium bg-white/80 backdrop-blur-sm px-2 py-1 rounded-md">
                   Click for details
                   <ArrowRight className="w-3 h-3" />

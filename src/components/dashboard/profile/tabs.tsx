@@ -78,9 +78,38 @@ export function ProfileTabs({
 
   return (
     <div className="w-full">
-      {/* Clean Tab Navigation */}
-      <div className="border-b border-gray-200 mb-8">
-        <nav className="flex space-x-8">
+      {/* Mobile-First Tab Navigation */}
+      <div className="border-b border-gray-200 mb-4 sm:mb-6 lg:mb-8">
+        {/* Mobile: Horizontal Scroll Tabs */}
+        <div className="block sm:hidden">
+          <div className="overflow-x-auto scrollbar-hide">
+            <nav className="flex gap-1 px-1 pb-2 min-w-max">
+              {tabs.map((tab) => {
+                const isActive = activeTab === tab.id;
+                const IconComponent = tab.icon;
+
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => onTabChange(tab.id)}
+                    className={cn(
+                      "flex items-center gap-2 px-3 py-2 rounded-lg font-medium text-xs transition-all duration-200 whitespace-nowrap flex-shrink-0",
+                      isActive
+                        ? "bg-blue-50 text-blue-700 border border-blue-200"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    )}
+                  >
+                    <IconComponent className="w-3.5 h-3.5" />
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+        </div>
+
+        {/* Desktop: Traditional Tab Layout */}
+        <nav className="hidden sm:flex space-x-6 lg:space-x-8">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
             const IconComponent = tab.icon;
@@ -90,14 +119,19 @@ export function ProfileTabs({
                 key={tab.id}
                 onClick={() => onTabChange(tab.id)}
                 className={cn(
-                  "flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 cursor-pointer",
+                  "flex items-center gap-2 py-3 lg:py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 cursor-pointer",
                   isActive
-                    ? "border-blue-600 text-blue-600 dark:border-purple-400 dark:text-purple-400"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300"
+                    ? "border-blue-600 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 )}
               >
                 <IconComponent className="w-4 h-4" />
-                {tab.label}
+                <span className="hidden md:inline">{tab.label}</span>
+                <span className="md:hidden">
+                  {variant === "global-settings"
+                    ? tab.label
+                    : tab.label.split(" ")[0]}
+                </span>
               </button>
             );
           })}

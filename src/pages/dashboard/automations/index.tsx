@@ -262,30 +262,35 @@ export default function AutomationsDashboard() {
   if (loading) {
     return (
       <div className="min-h-full bg-gray-50">
-        <div className="space-y-6">
-          <div className="bg-white border-b px-8 py-6">
+        <div className="space-y-4 sm:space-y-6">
+          {/* Mobile-Optimized Loading Header */}
+          <div className="bg-white border-b px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-blue-50 rounded-xl">
-                  <Zap className="h-6 w-6 text-blue-600" />
+              <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+                <div className="p-2 sm:p-3 bg-blue-50 rounded-xl flex-shrink-0">
+                  <Zap className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
                 </div>
-                <div>
-                  <h1 className="text-2xl font-semibold text-gray-900">
+                <div className="min-w-0 flex-1">
+                  <h1 className="text-lg sm:text-2xl font-semibold text-gray-900 truncate">
                     Automations
                   </h1>
-                  <p className="text-gray-600">Loading automations...</p>
+                  <p className="text-sm sm:text-base text-gray-600 truncate">
+                    Loading automations...
+                  </p>
                 </div>
               </div>
             </div>
           </div>
-          <div className="px-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+          {/* Mobile-Optimized Loading Cards */}
+          <div className="px-3 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {[1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className="bg-white border rounded-xl p-6 animate-pulse"
+                  className="bg-white border rounded-xl p-4 sm:p-6 animate-pulse"
                 >
-                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-3 sm:mb-4"></div>
                   <div className="h-3 bg-gray-200 rounded w-1/2 mb-2"></div>
                   <div className="h-3 bg-gray-200 rounded w-2/3"></div>
                 </div>
@@ -299,10 +304,37 @@ export default function AutomationsDashboard() {
 
   return (
     <div className="min-h-full bg-gray-50">
-      <div className="space-y-6">
-        {/* Clean Header */}
-        <div className="bg-white border-b px-8 py-6">
-          <div className="flex items-center justify-between">
+      <div className="space-y-4 sm:space-y-6">
+        {/* Mobile-First Responsive Header */}
+        <div className="bg-white border-b px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
+          {/* Mobile Layout */}
+          <div className="block sm:hidden">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-blue-50 rounded-xl flex-shrink-0">
+                <Zap className="h-5 w-5 text-blue-600" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h1 className="text-lg font-semibold text-gray-900 truncate">
+                  Automations
+                </h1>
+                <p className="text-sm text-gray-600 truncate">
+                  Streamline your recruitment workflow
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-blue-600 font-medium">
+                {automations.length} automations
+              </span>
+              <Button onClick={handleCreateAutomation} variant="secondary">
+                <Plus className="h-4 w-4 mr-1" />
+                Create
+              </Button>
+            </div>
+          </div>
+
+          {/* Desktop Layout */}
+          <div className="hidden sm:flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-blue-50 rounded-xl">
                 <Zap className="h-6 w-6 text-blue-600" />
@@ -320,21 +352,74 @@ export default function AutomationsDashboard() {
               </div>
             </div>
 
-            <Button
-              onClick={handleCreateAutomation}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
-            >
+            <Button onClick={handleCreateAutomation} variant="secondary">
               <Plus className="h-4 w-4 mr-2" />
               Create Automation
             </Button>
           </div>
         </div>
 
-        {/* Filters */}
-        <div className="px-8">
-          <div className=" rounded-xl p-6">
-            <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-              <div className="flex items-center gap-4 flex-1 w-full md:w-auto">
+        {/* Mobile-First Filters Section */}
+        <div className="px-3 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm">
+            {/* Mobile Layout */}
+            <div className="block lg:hidden space-y-4">
+              {/* Search Bar - Mobile */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search automations..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 pr-4 py-3 w-full border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
+                />
+              </div>
+
+              {/* Status Filters - Mobile */}
+              <div className="flex items-center gap-1 border rounded-lg overflow-hidden">
+                {["all", "active", "inactive"].map((status) => (
+                  <button
+                    key={status}
+                    onClick={() =>
+                      setStatusFilter(status as "all" | "active" | "inactive")
+                    }
+                    className={`flex-1 px-3 py-2.5 text-sm font-medium transition-colors ${
+                      statusFilter === status
+                        ? "bg-blue-600 text-white"
+                        : "text-gray-600 hover:bg-gray-50"
+                    }`}
+                  >
+                    {status === "all"
+                      ? "All"
+                      : status.charAt(0).toUpperCase() + status.slice(1)}
+                  </button>
+                ))}
+              </div>
+
+              {/* Stats - Mobile */}
+              <div className="flex items-center justify-center gap-6 text-sm">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-green-600 font-medium">
+                    {automations.filter((a) => a.status === "active").length}{" "}
+                    Active
+                  </span>
+                </div>
+                <span className="text-gray-300">•</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                  <span className="text-gray-600 font-medium">
+                    {automations.filter((a) => a.status === "inactive").length}{" "}
+                    Paused
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Desktop Layout */}
+            <div className="hidden lg:flex items-center justify-between">
+              <div className="flex items-center gap-4 flex-1">
                 <div className="relative flex-1 max-w-md">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <input
@@ -388,134 +473,146 @@ export default function AutomationsDashboard() {
           </div>
         </div>
 
-        {/* Automations Grid */}
-        <div className="px-8 pb-8">
+        {/* Mobile-Optimized Automations Grid */}
+        <div className="px-3 sm:px-6 lg:px-8 pb-6 sm:pb-8">
           {filteredAutomations.length === 0 ? (
-            <div className="bg-white  rounded-xl p-12 text-center">
+            <div className="bg-white rounded-xl p-6 sm:p-12 text-center shadow-sm">
               <div className="flex flex-col items-center max-w-md mx-auto">
-                <div className="p-4 bg-gray-100 rounded-full mb-4">
-                  <Sparkles className="h-8 w-8 text-gray-400" />
+                <div className="p-3 sm:p-4 bg-gray-100 rounded-full mb-4">
+                  <Sparkles className="h-6 w-6 sm:h-8 sm:w-8 text-gray-400" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
                   {searchTerm || statusFilter !== "all"
                     ? "No automations found"
                     : "No automations yet"}
                 </h3>
-                <p className="text-gray-600 mb-6">
+                <p className="text-sm sm:text-base text-gray-600 mb-6 text-center">
                   {searchTerm || statusFilter !== "all"
                     ? "Try adjusting your search or filter criteria"
                     : "Create your first automation to streamline your recruitment process"}
                 </p>
                 {!searchTerm && statusFilter === "all" && (
-                  <Button
-                    onClick={handleCreateAutomation}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
-                  >
+                  <Button onClick={handleCreateAutomation} variant="secondary">
                     <Plus className="h-4 w-4 mr-2" />
-                    Create Your First Automation
+                    <span className="hidden sm:inline">
+                      Create Your First Automation
+                    </span>
+                    <span className="sm:hidden">Create Automation</span>
                   </Button>
                 )}
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {filteredAutomations.map((automation) => {
                 const triggerInfo = getTriggerInfo(automation.triggerType);
 
                 return (
                   <div
                     key={automation.id}
-                    className="bg-white border border-gray-100 rounded-xl hover:border-gray-200 transition-all duration-200 p-6 flex flex-col"
+                    className="bg-white border border-gray-100 rounded-xl hover:border-gray-200 transition-all duration-200 p-4 sm:p-6 flex flex-col shadow-sm hover:shadow-md"
                   >
-                    {/* Header */}
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-start gap-3 flex-1 min-w-0">
-                        <div className="p-3 bg-gray-50 rounded-lg flex-shrink-0">
-                          {getTriggerIcon(automation.triggerType)}
+                    {/* Mobile-First Header */}
+                    <div className="flex items-start gap-3 mb-4">
+                      <div className="p-2 sm:p-3 bg-gray-50 rounded-lg flex-shrink-0">
+                        {getTriggerIcon(automation.triggerType)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">
+                            {automation.name}
+                          </h3>
+                          <div
+                            className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                              automation.status === "active"
+                                ? "bg-green-500"
+                                : "bg-gray-400"
+                            }`}
+                          ></div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="text-lg font-semibold text-gray-900 truncate">
-                              {automation.name}
-                            </h3>
-                            <div
-                              className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                                automation.status === "active"
-                                  ? "bg-green-500"
-                                  : "bg-gray-400"
-                              }`}
-                            ></div>
-                          </div>
-                          <p className="text-sm text-gray-600">
-                            {triggerInfo?.label || automation.triggerType}
-                          </p>
-                        </div>
+                        <p className="text-xs sm:text-sm text-gray-600 truncate">
+                          {triggerInfo?.label || automation.triggerType}
+                        </p>
                       </div>
                     </div>
 
-                    {/* Stats */}
-                    <div className="flex items-center justify-between mb-4 text-sm">
+                    {/* Mobile-Optimized Stats */}
+                    <div className="flex items-center justify-between mb-4 text-xs sm:text-sm bg-gray-50 rounded-lg p-3">
                       <div className="flex items-center gap-1">
-                        <div className="text-gray-500">Conditions:</div>
-                        <div className="font-semibold text-gray-900">
+                        <span className="text-gray-500">Conditions:</span>
+                        <span className="font-semibold text-gray-900">
                           {automation.useConditions
                             ? automation.conditions.length
                             : 0}
-                        </div>
+                        </span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <div className="text-gray-500">Actions:</div>
-                        <div className="font-semibold text-gray-900">
+                        <span className="text-gray-500">Actions:</span>
+                        <span className="font-semibold text-gray-900">
                           {automation.actions.length}
-                        </div>
+                        </span>
                       </div>
                     </div>
 
-                    {/* Actions Preview */}
+                    {/* Mobile-Friendly Actions Preview */}
                     <div className="mb-4 flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Target className="h-4 w-4 text-gray-500" />
-                        <span className="text-sm font-medium text-gray-700">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Target className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-500" />
+                        <span className="text-xs sm:text-sm font-medium text-gray-700">
                           Actions
                         </span>
                       </div>
-                      <div className="flex flex-wrap gap-2">
-                        {automation.actions.slice(0, 3).map((action, index) => (
+                      <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                        {automation.actions.slice(0, 2).map((action, index) => (
                           <div
                             key={index}
-                            className="flex items-center gap-2 px-3 py-1 bg-gray-50 rounded-lg text-xs"
+                            className="flex items-center gap-1.5 px-2 sm:px-3 py-1 bg-gray-50 rounded-lg text-xs"
                           >
                             {getActionTypeIcon(action.type)}
-                            <span className="text-gray-700">
+                            <span className="text-gray-700 truncate">
                               {getActionTypeLabel(action.type)}
                             </span>
                           </div>
                         ))}
-                        {automation.actions.length > 3 && (
-                          <div className="flex items-center px-3 py-1 bg-gray-100 rounded-lg text-xs text-gray-500">
-                            +{automation.actions.length - 3} more
+                        {automation.actions.length > 2 && (
+                          <div className="flex items-center px-2 sm:px-3 py-1 bg-gray-100 rounded-lg text-xs text-gray-500">
+                            +{automation.actions.length - 2}
                           </div>
                         )}
                       </div>
                     </div>
 
-                    {/* Status and Actions */}
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                      <Badge
-                        variant={
-                          automation.status === "active"
-                            ? "default"
-                            : "secondary"
-                        }
-                        className={`rounded-full ${
-                          automation.status === "active"
-                            ? "bg-green-100 text-green-700 border-green-200"
-                            : "bg-gray-100 text-gray-600 border-gray-200"
-                        }`}
-                      >
-                        {automation.status === "active" ? "Active" : "Paused"}
-                      </Badge>
-                      <div className="flex items-center gap-2">
+                    {/* Mobile-Optimized Status and Actions */}
+                    <div className="space-y-3">
+                      {/* Status Badge */}
+                      <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                        <Badge
+                          variant={
+                            automation.status === "active"
+                              ? "default"
+                              : "secondary"
+                          }
+                          className={`rounded-full text-xs ${
+                            automation.status === "active"
+                              ? "bg-green-100 text-green-700 border-green-200"
+                              : "bg-gray-100 text-gray-600 border-gray-200"
+                          }`}
+                        >
+                          {automation.status === "active" ? "Active" : "Paused"}
+                        </Badge>
+                        <span className="text-xs text-gray-500">
+                          {new Date(automation.createdAt).toLocaleDateString(
+                            "en-US",
+                            {
+                              month: "short",
+                              day: "numeric",
+                            }
+                          )}
+                        </span>
+                      </div>
+
+                      {/* Mobile Action Buttons */}
+                      <div className="flex gap-2">
                         <Button
                           variant="outline"
                           size="sm"
@@ -525,7 +622,7 @@ export default function AutomationsDashboard() {
                               automation.status
                             )
                           }
-                          className={`rounded-lg ${
+                          className={`flex-1 rounded-lg text-xs sm:text-sm ${
                             automation.status === "active"
                               ? "text-orange-600 border-orange-200 hover:bg-orange-50"
                               : "text-green-600 border-green-200 hover:bg-green-50"
@@ -533,13 +630,15 @@ export default function AutomationsDashboard() {
                         >
                           {automation.status === "active" ? (
                             <>
-                              <Pause className="h-4 w-4 mr-1" />
-                              Pause
+                              <Pause className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1" />
+                              <span className="hidden sm:inline">Pause</span>
+                              <span className="sm:hidden">Pause</span>
                             </>
                           ) : (
                             <>
-                              <Play className="h-4 w-4 mr-1" />
-                              Activate
+                              <Play className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1" />
+                              <span className="hidden sm:inline">Activate</span>
+                              <span className="sm:hidden">Start</span>
                             </>
                           )}
                         </Button>
@@ -547,26 +646,11 @@ export default function AutomationsDashboard() {
                           variant="outline"
                           size="sm"
                           onClick={() => handleDeleteAutomation(automation.id)}
-                          className="rounded-lg text-red-600 border-red-200 hover:bg-red-50"
+                          className="rounded-lg text-red-600 border-red-200 hover:bg-red-50 px-3"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                         </Button>
                       </div>
-                    </div>
-
-                    {/* Footer Info */}
-                    <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
-                      <span>
-                        Created At{" "}
-                        {new Date(automation.createdAt).toLocaleDateString(
-                          "en-US",
-                          {
-                            month: "short",
-                            day: "numeric",
-                          }
-                        )}
-                      </span>
-                      <span></span>
                     </div>
                   </div>
                 );
@@ -576,16 +660,16 @@ export default function AutomationsDashboard() {
         </div>
       </div>
 
-      {/* Custom Confirmation Dialog */}
+      {/* Mobile-Responsive Confirmation Dialog */}
       <Dialog
         open={confirmDialog.isOpen}
         onOpenChange={handleCancelStatusChange}
       >
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md mx-3 sm:mx-auto w-[calc(100vw-24px)] sm:w-full">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-3">
+            <DialogTitle className="flex items-center gap-3 text-left">
               <div
-                className={`p-2 rounded-lg ${
+                className={`p-2 rounded-lg flex-shrink-0 ${
                   confirmDialog.action === "delete"
                     ? "bg-red-100"
                     : confirmDialog.action === "pause"
@@ -594,31 +678,33 @@ export default function AutomationsDashboard() {
                 }`}
               >
                 {confirmDialog.action === "delete" ? (
-                  <Trash2 className="h-5 w-5 text-red-600" />
+                  <Trash2 className="h-4 w-4 sm:h-5 sm:w-5 text-red-600" />
                 ) : confirmDialog.action === "pause" ? (
-                  <AlertTriangle className="h-5 w-5 text-orange-600" />
+                  <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-orange-600" />
                 ) : (
-                  <Play className="h-5 w-5 text-green-600" />
+                  <Play className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
                 )}
               </div>
-              {confirmDialog.action === "delete"
-                ? "Delete Automation"
-                : confirmDialog.action === "pause"
-                ? "Pause Automation"
-                : "Activate Automation"}
+              <span className="text-lg sm:text-xl font-semibold">
+                {confirmDialog.action === "delete"
+                  ? "Delete Automation"
+                  : confirmDialog.action === "pause"
+                  ? "Pause Automation"
+                  : "Activate Automation"}
+              </span>
             </DialogTitle>
           </DialogHeader>
 
           <div className="py-4">
-            <p className="text-gray-600 mb-4">
+            <p className="text-sm sm:text-base text-gray-600 mb-4">
               Are you sure you want to <strong>{confirmDialog.action}</strong>{" "}
               the automation:
             </p>
-            <div className="bg-gray-50 rounded-lg p-4 mb-6">
-              <p className="font-medium text-gray-900">
+            <div className="bg-gray-50 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
+              <p className="font-medium text-gray-900 text-sm sm:text-base truncate">
                 {confirmDialog.automationName}
               </p>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-xs sm:text-sm text-gray-500 mt-1">
                 {confirmDialog.action === "delete"
                   ? "This action cannot be undone. The automation and all its configurations will be permanently removed."
                   : confirmDialog.action === "pause"
@@ -628,17 +714,18 @@ export default function AutomationsDashboard() {
             </div>
           </div>
 
-          <div className="flex justify-end gap-3">
+          {/* Mobile-First Button Layout */}
+          <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
             <Button
               variant="outline"
               onClick={handleCancelStatusChange}
-              className="rounded-lg"
+              className="rounded-lg order-2 sm:order-1 w-full sm:w-auto"
             >
               Cancel
             </Button>
             <Button
               onClick={handleConfirmAction}
-              className={`rounded-lg ${
+              className={`rounded-lg order-1 sm:order-2 w-full sm:w-auto ${
                 confirmDialog.action === "delete"
                   ? "bg-red-600 hover:bg-red-700"
                   : confirmDialog.action === "pause"
@@ -649,17 +736,20 @@ export default function AutomationsDashboard() {
               {confirmDialog.action === "delete" ? (
                 <>
                   <Trash2 className="h-4 w-4 mr-2" />
-                  Delete Automation
+                  <span className="hidden sm:inline">Delete Automation</span>
+                  <span className="sm:hidden">Delete</span>
                 </>
               ) : confirmDialog.action === "pause" ? (
                 <>
                   <Pause className="h-4 w-4 mr-2" />
-                  Pause Automation
+                  <span className="hidden sm:inline">Pause Automation</span>
+                  <span className="sm:hidden">Pause</span>
                 </>
               ) : (
                 <>
                   <Play className="h-4 w-4 mr-2" />
-                  Activate Automation
+                  <span className="hidden sm:inline">Activate Automation</span>
+                  <span className="sm:hidden">Activate</span>
                 </>
               )}
             </Button>

@@ -12,16 +12,10 @@ import { PostingScheduleBudgetStep } from "@/components/dashboard/jobs/common/po
 import { ResumeAnalysisStep } from "@/components/dashboard/jobs/common/resume-analysis-step";
 import { ReviewPublishStep } from "@/components/dashboard/jobs/common/review-publish-step";
 import { StepControls } from "@/components/main/signup/stepNavigation";
-import { EnhancedProgressStepper, type Step } from "@/components/ui/enhanced-progress-stepper";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { type Step } from "@/components/ui/enhanced-progress-stepper";
 import { ROUTES } from "@/constants";
 import { stepFields } from "@/constants/form-constants";
 import {
@@ -37,28 +31,25 @@ import {
 } from "@/lib/validations/forms/job-form-schema";
 import type { JobTemplate } from "@/types/job-template";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { 
-  Database, 
-  FileText, 
-  Layers, 
-  RotateCcw, 
-  Sparkles, 
-  Briefcase, 
-  Users, 
-  Brain, 
-  Calendar, 
-  Zap, 
-  Clock, 
-  CheckCircle 
+import {
+  Brain,
+  Briefcase,
+  Calendar,
+  CheckCircle,
+  Clock,
+  Database,
+  FileText,
+  Layers,
+  RotateCcw,
+  Sparkles,
+  Users,
+  Zap,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { SaveAsTemplateDialog } from "./SaveAsTemplateDialog";
-
-
-
 
 // Load Draft Button Component
 function LoadDraftButton({
@@ -83,28 +74,27 @@ function LoadDraftButton({
   };
 
   return (
-    <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-lg p-4 mb-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
-            <FileText className="w-5 h-5 text-amber-600" />
+    <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-4 sm:p-5 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-amber-500 rounded-xl flex items-center justify-center shadow-sm">
+            <FileText className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-gray-900">
+            <h3 className="text-base font-semibold text-gray-900">
               Draft Available
             </h3>
-            <p className="text-xs text-gray-600">
+            <p className="text-sm text-gray-600">
               Step {draftInfo.step} • {formatDraftAge(draftInfo.timestamp)}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <Button
             type="button"
             variant="outline"
-            size="sm"
             onClick={onLoadDraft}
-            className="bg-white border-amber-300 text-amber-700 hover:bg-amber-50 hover:border-amber-400 rounded-xl h-10 px-4 font-medium shadow-none transition-all duration-200"
+            className="bg-white border-amber-300 text-amber-700 hover:bg-amber-50 hover:border-amber-400 rounded-xl h-11 px-6 font-medium shadow-none transition-all duration-200 flex-1 sm:flex-initial"
           >
             <RotateCcw className="w-4 h-4 mr-2" />
             Load Draft
@@ -112,9 +102,8 @@ function LoadDraftButton({
           <Button
             type="button"
             variant="ghost"
-            size="sm"
             onClick={onClearDraft}
-            className="text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-xl h-10 px-4 font-medium shadow-none transition-all duration-200"
+            className="text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-xl h-11 px-6 font-medium shadow-none transition-all duration-200 flex-1 sm:flex-initial"
           >
             Clear Draft
           </Button>
@@ -151,26 +140,95 @@ export default function CreateJob() {
   // Define steps for the progress stepper
   const getSteps = (): Step[] => {
     const baseSteps: Step[] = [
-      { id: "job-ad", title: "Job Details", description: "Basic job information", icon: FileText },
-      { id: "position", title: "Position & Company", description: "Role details and company info", icon: Briefcase },
-      { id: "qualifications", title: "Requirements", description: "Skills and qualifications", icon: Users },
+      {
+        id: "job-ad",
+        title: "Job Details",
+        description: "Basic job information",
+        icon: FileText,
+      },
+      {
+        id: "position",
+        title: "Position & Company",
+        description: "Role details and company info",
+        icon: Briefcase,
+      },
+      {
+        id: "qualifications",
+        title: "Requirements",
+        description: "Skills and qualifications",
+        icon: Users,
+      },
     ];
 
     if (hasProfessionalFeatures) {
       baseSteps.push(
-        { id: "resume-analysis", title: "Resume Analysis", description: "AI-powered resume screening", optional: true, icon: Brain },
-        { id: "posting", title: "Schedule & Budget", description: "Posting timeline and budget", icon: Calendar },
-        { id: "ai-overview", title: "AI Overview", description: "AI ranking and scoring", optional: true, icon: Sparkles },
-        { id: "automation", title: "Automation", description: "Automated workflows", optional: true, icon: Zap },
-        { id: "booking", title: "Interview Booking", description: "Schedule interviews", icon: Clock },
-        { id: "review", title: "Review & Publish", description: "Final review and publish", icon: CheckCircle }
+        {
+          id: "resume-analysis",
+          title: "Resume Analysis",
+          description: "AI-powered resume screening",
+          optional: true,
+          icon: Brain,
+        },
+        {
+          id: "posting",
+          title: "Schedule & Budget",
+          description: "Posting timeline and budget",
+          icon: Calendar,
+        },
+        {
+          id: "ai-overview",
+          title: "AI Overview",
+          description: "AI ranking and scoring",
+          optional: true,
+          icon: Sparkles,
+        },
+        {
+          id: "automation",
+          title: "Automation",
+          description: "Automated workflows",
+          optional: true,
+          icon: Zap,
+        },
+        {
+          id: "booking",
+          title: "Interview Booking",
+          description: "Schedule interviews",
+          icon: Clock,
+        },
+        {
+          id: "review",
+          title: "Review & Publish",
+          description: "Final review and publish",
+          icon: CheckCircle,
+        }
       );
     } else {
       baseSteps.push(
-        { id: "posting", title: "Schedule & Budget", description: "Posting timeline and budget", icon: Calendar },
-        { id: "booking", title: "Interview Booking", description: "Schedule interviews", icon: Clock },
-        { id: "automation", title: "Automation", description: "Automated workflows", optional: true, icon: Zap },
-        { id: "review", title: "Review & Publish", description: "Final review and publish", icon: CheckCircle }
+        {
+          id: "posting",
+          title: "Schedule & Budget",
+          description: "Posting timeline and budget",
+          icon: Calendar,
+        },
+        {
+          id: "booking",
+          title: "Interview Booking",
+          description: "Schedule interviews",
+          icon: Clock,
+        },
+        {
+          id: "automation",
+          title: "Automation",
+          description: "Automated workflows",
+          optional: true,
+          icon: Zap,
+        },
+        {
+          id: "review",
+          title: "Review & Publish",
+          description: "Final review and publish",
+          icon: CheckCircle,
+        }
       );
     }
 
@@ -193,7 +251,9 @@ export default function CreateJob() {
   const autoSaveDraft = async (formData: JobFormSchema) => {
     try {
       const draftData = {
-        title: formData.jobTitle || `Untitled Job - ${new Date().toLocaleDateString()}`,
+        title:
+          formData.jobTitle ||
+          `Untitled Job - ${new Date().toLocaleDateString()}`,
         formData,
         completedSections: getCompletedSections(formData),
       };
@@ -206,30 +266,37 @@ export default function CreateJob() {
         const response = await API.jobDraft.createJobDraft(draftData);
         setDraftId(response.data.draft.id);
       }
-      
+
       setLastSaved(new Date());
     } catch (error) {
-      console.error('Auto-save failed:', error);
+      console.error("Auto-save failed:", error);
       // Don't show error toast for auto-save failures
     }
   };
 
   const getCompletedSections = (formData: JobFormSchema) => {
     const sections = [];
-    if (formData.jobTitle && formData.jobBoardTitle && formData.jobDescription) {
-      sections.push('job-ad');
+    if (
+      formData.jobTitle &&
+      formData.jobBoardTitle &&
+      formData.jobDescription
+    ) {
+      sections.push("job-ad");
     }
     if (formData.department && formData.payRate && formData.positionsToHire) {
-      sections.push('position');
+      sections.push("position");
     }
-    if (formData.requiredQualifications && formData.requiredQualifications.length > 0) {
-      sections.push('qualifications');
+    if (
+      formData.requiredQualifications &&
+      formData.requiredQualifications.length > 0
+    ) {
+      sections.push("qualifications");
     }
     if (formData.startDate && formData.endDate) {
-      sections.push('schedule');
+      sections.push("schedule");
     }
     if (formData.startDate) {
-      sections.push('posting');
+      sections.push("posting");
     }
     return sections;
   };
@@ -239,11 +306,12 @@ export default function CreateJob() {
     // Save when user navigates between steps
     if (currentStep > 1) {
       const formData = watch();
-      if (formData.jobTitle || formData.jobBoardTitle) { // Only if meaningful data
+      if (formData.jobTitle || formData.jobBoardTitle) {
+        // Only if meaningful data
         autoSaveDraft({
-          ...formData, 
+          ...formData,
           schedule: formData.schedule || [],
-          benefits: formData.benefits || []
+          benefits: formData.benefits || [],
         });
       }
     }
@@ -255,40 +323,43 @@ export default function CreateJob() {
       const formData = watch();
       if (formData.jobTitle || formData.jobBoardTitle) {
         // Use localStorage for immediate save on page unload
-        localStorage.setItem('temp_job_draft', JSON.stringify({
-          title: formData.jobTitle || `Untitled Job - ${new Date().toLocaleDateString()}`,
-          formData,
-          completedSections: getCompletedSections(formData),
-          timestamp: Date.now(),
-        }));
+        localStorage.setItem(
+          "temp_job_draft",
+          JSON.stringify({
+            title:
+              formData.jobTitle ||
+              `Untitled Job - ${new Date().toLocaleDateString()}`,
+            formData,
+            completedSections: getCompletedSections(formData),
+            timestamp: Date.now(),
+          })
+        );
       }
     };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, []);
 
   // Process temp draft on component mount
   useEffect(() => {
-    const tempDraft = localStorage.getItem('temp_job_draft');
+    const tempDraft = localStorage.getItem("temp_job_draft");
     if (tempDraft) {
       try {
         const draftData = JSON.parse(tempDraft);
         // Save to backend API
         autoSaveDraft({
-          ...draftData.formData, 
+          ...draftData.formData,
           schedule: draftData.formData.schedule || [],
-          benefits: draftData.formData.benefits || []
+          benefits: draftData.formData.benefits || [],
         });
-        localStorage.removeItem('temp_job_draft');
+        localStorage.removeItem("temp_job_draft");
       } catch (error) {
-        console.error('Failed to process temp draft:', error);
-        localStorage.removeItem('temp_job_draft');
+        console.error("Failed to process temp draft:", error);
+        localStorage.removeItem("temp_job_draft");
       }
     }
   }, []);
-
-
 
   const handleSelectTemplate = (template: JobTemplate) => {
     setSelectedTemplate(template);
@@ -609,19 +680,19 @@ export default function CreateJob() {
         ...rest,
         automation: automationData,
         schedule: rest.schedule || [],
-      };
+      } as any;
 
       await API.job.createJob(newData);
-      
+
       // Delete the draft since job was successfully created
       if (draftId) {
         try {
           await API.jobDraft.deleteJobDraft(draftId);
         } catch (error) {
-          console.error('Failed to delete draft:', error);
+          console.error("Failed to delete draft:", error);
         }
       }
-      
+
       toast.success("Job created successfully!");
       navigate(ROUTES.DASHBOARD.MAIN);
     } catch (err) {
@@ -636,30 +707,7 @@ export default function CreateJob() {
   const renderCurrentStep = () => {
     switch (currentStep) {
       case 1:
-        return (
-          <div className="relative">
-            <JobAdStep />
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={loadTestData}
-                    className="absolute top-4 right-4 bg-primary/10 border-primary/20 text-primary hover:bg-primary/20"
-                  >
-                    <Database className="w-4 h-4 mr-2" />
-                    Load Data
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Load sample data to test the form</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-        );
+        return <JobAdStep />;
       case 2:
         return (
           <div>
@@ -750,77 +798,86 @@ export default function CreateJob() {
   };
 
   return (
-    <main className="pb-16">
-      {/* Enhanced Header - Mobile Optimized */}
-      <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 sm:py-6 relative overflow-hidden">
+    <main className="pb-16 min-h-full">
+      {/* Enhanced Header - Professional Mobile Design */}
+      <div className="bg-white border-b border-gray-100 px-4 sm:px-6 pt-4 sm:pt-6 relative overflow-hidden">
         <div className="relative z-10">
-          {/* Mobile Header */}
-          <div className="block sm:hidden mb-4">
-            <div className="flex items-center justify-between mb-3">
+          {/* Mobile Header - Professional Design */}
+          <div className="block sm:hidden mb-6">
+            <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-gray-100 rounded-lg">
-                  <FileText className="h-5 w-5 text-gray-600" />
+                <div className="p-3 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl border border-primary/10">
+                  <FileText className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <h1 className="text-lg font-bold text-gray-900">
+                  <h1 className="text-lg font-bold text-gray-900 leading-tight">
                     Create Job
                   </h1>
-                  <p className="text-xs text-gray-600">
+                  <p className="text-sm text-gray-600">
                     Step {currentStep} of {totalSteps}
                   </p>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-lg font-bold text-gray-900">
+                <div className="text-xl font-bold text-gray-900">
                   {Math.round(((currentStep - 1) / (totalSteps - 1)) * 100)}%
                 </div>
-                <p className="text-xs text-gray-600">Done</p>
+                <p className="text-sm text-gray-600 font-medium">Complete</p>
               </div>
             </div>
-            
-            {/* Mobile Action Buttons */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2">
+
+            {/* Mobile Action Buttons - Professional Touch Targets */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-1 px-1">
               <Button
                 variant="outline"
-                size="sm"
                 onClick={() => setShowSaveTemplateDialog(true)}
-                className="bg-white hover:bg-gray-50 border-gray-200 text-gray-600 hover:text-gray-700 rounded-lg h-8 px-3 text-xs font-medium whitespace-nowrap flex-shrink-0"
+                className="bg-white hover:bg-gray-50 border-gray-200 text-gray-700 hover:text-gray-900 rounded-xl h-11 px-3 text-sm font-medium whitespace-nowrap flex-shrink-0 shadow-none"
               >
-                <FileText className="h-3 w-3 mr-1" />
-                Save Template
+                <FileText className="h-4 w-4 mr-1.5" />
+                <span className="hidden sm:inline">Save Template</span>
+                <span className="sm:hidden">Save</span>
               </Button>
               <Button
                 variant="outline"
-                size="sm"
                 onClick={() =>
                   navigate(ROUTES.DASHBOARD.JOB_TEMPLATES, {
                     state: { fromJobCreation: true },
                   })
                 }
-                className="bg-white hover:bg-gray-50 border-gray-200 text-gray-600 hover:text-gray-700 rounded-lg h-8 px-3 text-xs font-medium whitespace-nowrap flex-shrink-0"
+                className="bg-white hover:bg-gray-50 border-gray-200 text-gray-700 hover:text-gray-900 rounded-xl h-11 px-3 text-sm font-medium whitespace-nowrap flex-shrink-0 shadow-none"
               >
-                <Layers className="h-3 w-3 mr-1" />
+                <Layers className="h-4 w-4 mr-1.5" />
                 Templates
+              </Button>
+              <Button
+                variant="outline"
+                onClick={loadTestData}
+                className="bg-white hover:bg-gray-50 border-gray-200 text-gray-700 hover:text-gray-900 rounded-xl h-11 px-3 text-sm font-medium whitespace-nowrap flex-shrink-0 shadow-none"
+              >
+                <Database className="h-4 w-4 mr-1.5" />
+                <span className="hidden sm:inline">Load Data</span>
+                <span className="sm:hidden">Load</span>
               </Button>
             </div>
           </div>
 
-          {/* Desktop Header */}
-          <div className="hidden sm:flex items-center justify-between mb-6">
+          {/* Desktop Header - Enhanced Professional Design */}
+          <div className="hidden sm:flex items-center justify-between mb-8">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-gray-100 rounded-xl">
-                <FileText className="h-6 w-6 text-gray-600" />
+              <div className="p-3 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl border border-primary/10">
+                <FileText className="h-6 w-6 text-primary" />
               </div>
               <div className="flex flex-col">
-                <h1 className="text-2xl font-bold text-gray-900">
+                <h1 className="text-2xl font-bold text-gray-900 leading-tight">
                   Create New Job
                 </h1>
-                <div className="text-gray-600 flex items-center gap-2">
-                  Set up your job posting with detailed requirements and
-                  preferences
+                <div className="text-gray-600 flex items-center gap-3 mt-1">
+                  <span>
+                    Set up your job posting with detailed requirements
+                  </span>
                   <Badge
                     variant="secondary"
-                    className="bg-gray-100 text-gray-700 text-xs"
+                    className="bg-primary/10 text-primary font-medium text-xs px-2 py-0.5 rounded-full border border-primary/20"
                   >
                     Step {currentStep} of {totalSteps}
                   </Badge>
@@ -832,25 +889,31 @@ export default function CreateJob() {
               <div className="flex items-center gap-3">
                 <Button
                   variant="outline"
-                  size="sm"
                   onClick={() => setShowSaveTemplateDialog(true)}
-                  className="bg-white hover:bg-gray-50 border-gray-200 text-gray-600 hover:text-gray-700 rounded-xl h-9 px-4 font-medium transition-all duration-200 shadow-sm"
+                  className="bg-white hover:bg-gray-50 border-gray-200 text-gray-700 hover:text-gray-900 rounded-xl h-10 px-6 font-medium transition-all duration-200 shadow-none"
                 >
                   <FileText className="h-4 w-4 mr-2" />
                   Save as Template
                 </Button>
                 <Button
                   variant="outline"
-                  size="sm"
                   onClick={() =>
                     navigate(ROUTES.DASHBOARD.JOB_TEMPLATES, {
                       state: { fromJobCreation: true },
                     })
                   }
-                  className="bg-white hover:bg-gray-50 border-gray-200 text-gray-600 hover:text-gray-700 rounded-xl h-9 px-4 font-medium transition-all duration-200 shadow-sm"
+                  className="bg-white hover:bg-gray-50 border-gray-200 text-gray-700 hover:text-gray-900 rounded-xl h-10 px-6 font-medium transition-all duration-200 shadow-none"
                 >
                   <Layers className="h-4 w-4 mr-2" />
                   {selectedTemplate ? "Change Template" : "Browse Templates"}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={loadTestData}
+                  className="bg-primary/10 hover:bg-primary/20 border-primary/20 text-primary hover:text-primary rounded-xl h-10 px-6 font-medium transition-all duration-200 shadow-none"
+                >
+                  <Database className="h-4 w-4 mr-2" />
+                  Load Test Data
                 </Button>
               </div>
 
@@ -865,30 +928,15 @@ export default function CreateJob() {
               </div>
             </div>
           </div>
-          
-          {/* Progress Stepper */}
-          <div className="w-full">
-            <EnhancedProgressStepper
-              steps={steps}
-              currentStep={currentStep}
-              completedSteps={Array.from({ length: currentStep - 1 }, (_, i) => i + 1)}
-              variant="horizontal"
-              size="md"
-              showProgress={true}
-              animated={true}
-              clickable={false}
-              className="max-w-6xl mx-auto"
-            />
-          </div>
         </div>
       </div>
 
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 mt-4 sm:mt-6">
-        {/* Template Status & Actions - Mobile Optimized */}
-        <div className="mb-4 sm:mb-6">
+      <div className="max-w-[1400px] mx-auto md:px-6 mt-6 sm:mt-8">
+        {/* Template Status & Actions - Professional Mobile Design */}
+        <div className="mb-6 sm:mb-8">
           {selectedTemplate && (
-            <div className="flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-lg px-3 py-2 mb-3">
-              <Sparkles className="h-4 w-4 text-primary flex-shrink-0" />
+            <div className="flex items-center gap-3 bg-primary/10 border border-primary/20 rounded-xl px-4 py-3 mb-4">
+              <Sparkles className="h-5 w-5 text-primary flex-shrink-0" />
               <span className="text-sm font-medium text-primary truncate">
                 Using template: {selectedTemplate.name}
               </span>
@@ -896,24 +944,24 @@ export default function CreateJob() {
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate(ROUTES.DASHBOARD.JOB_TEMPLATES)}
-                className="h-6 w-6 p-0 text-primary hover:text-primary/80 hover:bg-primary/10 flex-shrink-0"
+                className="h-8 w-8 p-0 text-primary hover:text-primary/80 hover:bg-primary/10 flex-shrink-0 rounded-lg"
               >
-                <RotateCcw className="h-3 w-3" />
+                <RotateCcw className="h-4 w-4" />
               </Button>
             </div>
           )}
 
           {/* Auto-save status indicator */}
           {lastSaved && (
-            <div className="text-xs text-gray-500 flex items-center gap-1 justify-center sm:justify-start">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              Auto-saved {lastSaved.toLocaleTimeString()}
+            <div className="text-sm text-gray-500 flex items-center gap-2 justify-center sm:justify-start bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span>Auto-saved {lastSaved.toLocaleTimeString()}</span>
             </div>
           )}
         </div>
 
-        <Card className="shadow-none border-0 bg-white p-2 sm:p-3">
-          <CardContent className="px-4 sm:px-8 pt-4 pb-4">
+        <Card className="shadow-none border-none md:border border-gray-100bg-white rounded-xl">
+          <CardContent className="px-4 md:px-8 py-6 sm:py-8">
             <FormProvider {...form}>
               <form
                 onSubmit={(e) => {

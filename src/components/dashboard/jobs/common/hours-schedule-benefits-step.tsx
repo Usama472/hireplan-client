@@ -6,17 +6,9 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import {
-  SCHEDULE_OPTIONS,
-  BENEFIT_OPTIONS,
-} from "@/constants";
+import { SCHEDULE_OPTIONS, BENEFIT_OPTIONS } from "@/constants";
 import { INPUT_TYPES } from "@/interfaces";
-import {
-  Clock,
-  Globe,
-  Heart,
-  Search,
-} from "lucide-react";
+import { Clock, Globe, Heart, Search } from "lucide-react";
 import { useFormContext } from "react-hook-form";
 import { useState } from "react";
 
@@ -24,12 +16,13 @@ export function HoursScheduleBenefitsStep() {
   const { watch, setValue } = useFormContext();
   const [scheduleSearch, setScheduleSearch] = useState("");
   const [benefitsSearch, setBenefitsSearch] = useState("");
-  
+
   const hoursPerWeekType = watch("hoursPerWeek.type") || "fixed-hours";
   const schedule = watch("schedule") || [];
   const benefits = watch("benefits") || [];
   const jobLocationWorkType = watch("jobLocationWorkType");
-  const remoteLocationRequired = watch("remoteLocationRequirement.required") || false;
+  const remoteLocationRequired =
+    watch("remoteLocationRequirement.required") || false;
 
   const toggleScheduleOption = (option: string) => {
     const current = schedule || [];
@@ -48,42 +41,42 @@ export function HoursScheduleBenefitsStep() {
   };
 
   // Filter functions
-  const filteredScheduleOptions = SCHEDULE_OPTIONS.filter(option =>
+  const filteredScheduleOptions = SCHEDULE_OPTIONS.filter((option) =>
     option.toLowerCase().includes(scheduleSearch.toLowerCase())
   );
 
-  const filteredBenefitOptions = BENEFIT_OPTIONS.filter(benefit =>
+  const filteredBenefitOptions = BENEFIT_OPTIONS.filter((benefit) =>
     benefit.toLowerCase().includes(benefitsSearch.toLowerCase())
   );
 
-
-
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold text-gray-900">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="px-1">
+        <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
           Hours, Schedule & Benefits
         </h2>
-        <p className="text-sm text-gray-600 mt-1">
+        <p className="text-xs sm:text-sm text-gray-600 mt-1">
           Define work schedule, hours, benefits, and location details
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* 3rd Card - Hours, Schedule & Benefits */}
-        <Card className="border border-gray-200">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-2 text-lg font-medium text-purple-600">
-              <Clock className="w-5 h-5" />
+        <Card className="border border-gray-200 shadow-none rounded-xl">
+          <CardHeader className="pb-3 sm:pb-4">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg font-medium text-purple-600">
+              <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
               Work Schedule & Benefits
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-4 sm:space-y-6 pt-0">
             {/* Expected Hours Per Week */}
-            <div className="space-y-3">
-              <Label className="text-sm font-medium">Expected Hours Per Week</Label>
-              
-              <div className="space-y-2">
+            <div className="space-y-2 sm:space-y-3">
+              <Label className="text-xs sm:text-sm font-medium">
+                Expected Hours Per Week
+              </Label>
+
+              <div className="space-y-1.5 sm:space-y-2">
                 <InputField
                   name="hoursPerWeek.type"
                   type={INPUT_TYPES.SELECT}
@@ -98,58 +91,64 @@ export function HoursScheduleBenefitsStep() {
               </div>
 
               {/* Hours Input Fields */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                 {hoursPerWeekType === "fixed-hours" && (
-                  <div className="col-span-2 space-y-1">
-                    <Label className="text-xs text-gray-600">Hours Per Week</Label>
-                                    <InputField
-                  name="hoursPerWeek.amount"
-                  type={INPUT_TYPES.NUMBER}
-                  placeholder="40"
-                />
+                  <div className="col-span-1 sm:col-span-2 space-y-1">
+                    <Label className="text-xs text-gray-600">
+                      Hours Per Week
+                    </Label>
+                    <InputField
+                      name="hoursPerWeek.amount"
+                      type={INPUT_TYPES.NUMBER}
+                      placeholder="40"
+                    />
                   </div>
                 )}
-                
+
                 {hoursPerWeekType === "range" && (
                   <>
                     <div className="space-y-1">
                       <Label className="text-xs text-gray-600">Minimum</Label>
-                                        <InputField
-                    name="hoursPerWeek.min"
-                    type={INPUT_TYPES.NUMBER}
-                    placeholder="20"
-                  />
+                      <InputField
+                        name="hoursPerWeek.min"
+                        type={INPUT_TYPES.NUMBER}
+                        placeholder="20"
+                      />
                     </div>
                     <div className="space-y-1">
                       <Label className="text-xs text-gray-600">Maximum</Label>
-                                        <InputField
-                    name="hoursPerWeek.max"
-                    type={INPUT_TYPES.NUMBER}
-                    placeholder="40"
-                  />
+                      <InputField
+                        name="hoursPerWeek.max"
+                        type={INPUT_TYPES.NUMBER}
+                        placeholder="40"
+                      />
                     </div>
                   </>
                 )}
-                
+
                 {hoursPerWeekType === "minimum" && (
-                  <div className="col-span-2 space-y-1">
-                    <Label className="text-xs text-gray-600">Minimum Hours</Label>
-                                    <InputField
-                  name="hoursPerWeek.min"
-                  type={INPUT_TYPES.NUMBER}
-                  placeholder="12"
-                />
+                  <div className="col-span-1 sm:col-span-2 space-y-1">
+                    <Label className="text-xs text-gray-600">
+                      Minimum Hours
+                    </Label>
+                    <InputField
+                      name="hoursPerWeek.min"
+                      type={INPUT_TYPES.NUMBER}
+                      placeholder="12"
+                    />
                   </div>
                 )}
-                
+
                 {hoursPerWeekType === "maximum" && (
-                  <div className="col-span-2 space-y-1">
-                    <Label className="text-xs text-gray-600">Maximum Hours</Label>
-                                    <InputField
-                  name="hoursPerWeek.max"
-                  type={INPUT_TYPES.NUMBER}
-                  placeholder="50"
-                />
+                  <div className="col-span-1 sm:col-span-2 space-y-1">
+                    <Label className="text-xs text-gray-600">
+                      Maximum Hours
+                    </Label>
+                    <InputField
+                      name="hoursPerWeek.max"
+                      type={INPUT_TYPES.NUMBER}
+                      placeholder="50"
+                    />
                   </div>
                 )}
               </div>
@@ -163,12 +162,12 @@ export function HoursScheduleBenefitsStep() {
             </div>
 
             {/* Schedule Multi-select */}
-            <div className="space-y-3">
-              <Label className="text-sm font-medium flex items-center gap-2">
+            <div className="space-y-2 sm:space-y-3">
+              <Label className="text-xs sm:text-sm font-medium flex items-center gap-2">
                 <Clock className="w-4 h-4" />
                 Schedule
               </Label>
-              
+
               {/* Search Input */}
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -180,7 +179,7 @@ export function HoursScheduleBenefitsStep() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto border rounded-md p-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto border rounded-md p-2 sm:p-3">
                 {filteredScheduleOptions.map((option) => (
                   <div key={option} className="flex items-center space-x-2">
                     <Checkbox
@@ -188,7 +187,7 @@ export function HoursScheduleBenefitsStep() {
                       checked={schedule.includes(option)}
                       onCheckedChange={() => toggleScheduleOption(option)}
                     />
-                    <Label 
+                    <Label
                       htmlFor={`schedule-${option}`}
                       className="text-xs font-normal cursor-pointer"
                     >
@@ -197,13 +196,13 @@ export function HoursScheduleBenefitsStep() {
                   </div>
                 ))}
               </div>
-              
+
               {filteredScheduleOptions.length === 0 && scheduleSearch && (
                 <p className="text-xs text-gray-500 text-center py-4">
                   No schedule options found for "{scheduleSearch}"
                 </p>
               )}
-              
+
               {schedule.length > 0 && (
                 <div className="flex flex-wrap gap-1">
                   {schedule.map((item: string) => (
@@ -216,12 +215,12 @@ export function HoursScheduleBenefitsStep() {
             </div>
 
             {/* Benefits Multi-select */}
-            <div className="space-y-3">
-              <Label className="text-sm font-medium flex items-center gap-2">
+            <div className="space-y-2 sm:space-y-3">
+              <Label className="text-xs sm:text-sm font-medium flex items-center gap-2">
                 <Heart className="w-4 h-4" />
                 Benefits
               </Label>
-              
+
               {/* Search Input */}
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -233,7 +232,7 @@ export function HoursScheduleBenefitsStep() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 gap-2 max-h-40 overflow-y-auto border rounded-md p-3">
+              <div className="grid grid-cols-1 gap-2 max-h-40 overflow-y-auto border rounded-md p-2 sm:p-3">
                 {filteredBenefitOptions.map((benefit) => (
                   <div key={benefit} className="flex items-center space-x-2">
                     <Checkbox
@@ -241,7 +240,7 @@ export function HoursScheduleBenefitsStep() {
                       checked={benefits.includes(benefit)}
                       onCheckedChange={() => toggleBenefit(benefit)}
                     />
-                    <Label 
+                    <Label
                       htmlFor={`benefit-${benefit}`}
                       className="text-xs font-normal cursor-pointer"
                     >
@@ -250,13 +249,13 @@ export function HoursScheduleBenefitsStep() {
                   </div>
                 ))}
               </div>
-              
+
               {filteredBenefitOptions.length === 0 && benefitsSearch && (
                 <p className="text-xs text-gray-500 text-center py-4">
                   No benefits found for "{benefitsSearch}"
                 </p>
               )}
-              
+
               {benefits.length > 0 && (
                 <div className="flex flex-wrap gap-1">
                   {benefits.slice(0, 5).map((item: string) => (
@@ -276,17 +275,19 @@ export function HoursScheduleBenefitsStep() {
         </Card>
 
         {/* 4th Card - Location & Language */}
-        <Card className="border border-gray-200">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-2 text-lg font-medium text-blue-600">
-              <Globe className="w-5 h-5" />
+        <Card className="border border-gray-200 shadow-none rounded-xl">
+          <CardHeader className="pb-3 sm:pb-4">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg font-medium text-blue-600">
+              <Globe className="w-4 h-4 sm:w-5 sm:h-5" />
               Location & Language
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3 sm:space-y-4 pt-0">
             {/* Country */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Country Where Job Post Is Shown</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label className="text-xs sm:text-sm font-medium">
+                Country Where Job Post Is Shown
+              </Label>
               <InputField
                 name="country"
                 type={INPUT_TYPES.SELECT}
@@ -312,8 +313,10 @@ export function HoursScheduleBenefitsStep() {
             </div>
 
             {/* Language */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Language of Job Post</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label className="text-xs sm:text-sm font-medium">
+                Language of Job Post
+              </Label>
               <InputField
                 name="language"
                 type={INPUT_TYPES.SELECT}
@@ -337,8 +340,10 @@ export function HoursScheduleBenefitsStep() {
             </div>
 
             {/* Job Location Type */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Job Location Type</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label className="text-xs sm:text-sm font-medium">
+                Job Location Type
+              </Label>
               <InputField
                 name="jobLocationWorkType"
                 type={INPUT_TYPES.SELECT}
@@ -356,21 +361,17 @@ export function HoursScheduleBenefitsStep() {
             {jobLocationWorkType === "in-person" && (
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Job Location</Label>
-                <p className="text-xs text-gray-500 mb-2">Must enter at least ZIP code</p>
+                <p className="text-xs text-gray-500 mb-2">
+                  Must enter at least ZIP code
+                </p>
                 <div className="space-y-2">
                   <InputField
                     name="jobLocation.address"
                     placeholder="Street address"
                   />
                   <div className="grid grid-cols-2 gap-2">
-                    <InputField
-                      name="jobLocation.city"
-                      placeholder="City"
-                    />
-                    <InputField
-                      name="jobLocation.state"
-                      placeholder="State"
-                    />
+                    <InputField name="jobLocation.city" placeholder="City" />
+                    <InputField name="jobLocation.state" placeholder="State" />
                   </div>
                   <InputField
                     name="jobLocation.zipCode"
@@ -382,12 +383,14 @@ export function HoursScheduleBenefitsStep() {
 
             {jobLocationWorkType === "fully-remote" && (
               <div className="space-y-3">
-                <Label className="text-sm font-medium">Remote Work Requirements</Label>
+                <Label className="text-sm font-medium">
+                  Remote Work Requirements
+                </Label>
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="remote-location-required"
                     checked={remoteLocationRequired}
-                    onCheckedChange={(checked) => 
+                    onCheckedChange={(checked) =>
                       setValue("remoteLocationRequirement.required", checked)
                     }
                   />
@@ -407,21 +410,17 @@ export function HoursScheduleBenefitsStep() {
             {jobLocationWorkType === "hybrid" && (
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Office Address</Label>
-                <p className="text-xs text-gray-500 mb-2">Must enter at least ZIP code</p>
+                <p className="text-xs text-gray-500 mb-2">
+                  Must enter at least ZIP code
+                </p>
                 <div className="space-y-2">
                   <InputField
                     name="jobLocation.address"
                     placeholder="Street address"
                   />
                   <div className="grid grid-cols-2 gap-2">
-                    <InputField
-                      name="jobLocation.city"
-                      placeholder="City"
-                    />
-                    <InputField
-                      name="jobLocation.state"
-                      placeholder="State"
-                    />
+                    <InputField name="jobLocation.city" placeholder="City" />
+                    <InputField name="jobLocation.state" placeholder="State" />
                   </div>
                   <InputField
                     name="jobLocation.zipCode"
@@ -438,18 +437,23 @@ export function HoursScheduleBenefitsStep() {
                   <Checkbox
                     id="consistent-starting-location"
                     checked={watch("hasConsistentStartingLocation")}
-                    onCheckedChange={(checked) => 
+                    onCheckedChange={(checked) =>
                       setValue("hasConsistentStartingLocation", checked)
                     }
                   />
-                  <Label htmlFor="consistent-starting-location" className="text-sm">
+                  <Label
+                    htmlFor="consistent-starting-location"
+                    className="text-sm"
+                  >
                     This job has a consistent starting location
                   </Label>
                 </div>
-                
+
                 {watch("hasConsistentStartingLocation") ? (
                   <div className="space-y-2">
-                    <p className="text-xs text-gray-500">Must enter at least ZIP code</p>
+                    <p className="text-xs text-gray-500">
+                      Must enter at least ZIP code
+                    </p>
                     <div className="space-y-2">
                       <InputField
                         name="jobLocation.address"

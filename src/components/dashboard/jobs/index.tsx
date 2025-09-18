@@ -120,39 +120,41 @@ export default function JobsPage() {
   }));
 
   return (
-    <div className="min-h-full">
-      <div className="space-y-4 sm:space-y-6">
-        {/* Enhanced Header - Mobile Optimized */}
-        <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 sm:py-5 relative overflow-hidden">
+    <div className="min-h-full bg-gray-50/30">
+      <div className="space-y-6 sm:space-y-8">
+        {/* Enhanced Header - Professional Mobile UI */}
+        <div className="bg-white border-b border-gray-100 px-4 sm:px-6 py-4 sm:py-6 relative overflow-hidden">
           <div className="relative z-10">
-            <div className="flex flex-col gap-4">
-              {/* Title and Description */}
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="p-2 sm:p-3 bg-gray-100 rounded-xl flex-shrink-0">
-                  <Briefcase className="h-5 sm:h-6 w-5 sm:w-6 text-gray-600" />
+            <div className="flex flex-col gap-4 sm:gap-6">
+              {/* Title Section - Improved Visual Hierarchy */}
+              <div className="flex items-center gap-4 min-w-0">
+                <div className="p-3 sm:p-3 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl flex-shrink-0 border border-primary/10">
+                  <Briefcase className="h-5 sm:h-5 lg:h-6 w-5 sm:w-5 lg:w-6 text-primary" />
                 </div>
-                <div className="flex flex-col min-w-0 flex-1">
-                  <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">
+                <div className="flex flex-col min-w-0 flex-1 justify-center">
+                  <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 leading-tight mb-1">
                     Job Postings
                   </h1>
-                  <div className="text-gray-600 flex items-center gap-2 flex-wrap">
-                    <span className="text-xs sm:text-sm">Manage and track your job postings</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm sm:text-sm text-gray-600">
+                      Manage and track your postings
+                    </span>
                     <Badge
                       variant="secondary"
-                      className="bg-gray-100 text-gray-700 text-xs"
+                      className="bg-primary/10 text-primary font-medium text-xs px-2 py-0.5 rounded-full border border-primary/20"
                     >
                       {jobs.length} active
                     </Badge>
                   </div>
                 </div>
               </div>
-              
-              {/* Action Buttons */}
-              <div className="flex items-center gap-2 w-full">
+
+              {/* Action Buttons - Professional Touch Targets */}
+              <div className="flex items-center gap-3 w-full">
                 <Button
                   onClick={() => navigate(`/company/${company?.slug}`)}
                   variant="outline"
-                  className="bg-white hover:bg-gray-50 text-gray-600 border border-gray-200 hover:border-gray-300 gap-2 px-3 sm:px-4 font-medium transition-all duration-200 text-sm shadow-sm flex-1 sm:flex-initial"
+                  className="bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 hover:border-gray-300 gap-2 px-4 sm:px-6 font-medium transition-all duration-200 text-sm flex-1 sm:flex-initial h-11 sm:h-10 rounded-md shadow-none"
                 >
                   <span className="hidden sm:inline">Website View</span>
                   <span className="sm:hidden">View Site</span>
@@ -160,9 +162,10 @@ export default function JobsPage() {
                 {canCreateJob && (
                   <Button
                     onClick={() => navigate(ROUTES.DASHBOARD.CREATE_JOB)}
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground border-0 shadow-lg hover:shadow-xl hover:shadow-primary/25 transition-all duration-300 gap-2 px-3 sm:px-4 flex-1 sm:flex-initial"
+                    variant="secondary"
+                    className="text-white border-0 transition-all duration-200 gap-2 px-4 sm:px-6 font-medium flex-1 sm:flex-initial h-11 sm:h-10 rounded-md shadow-none"
                   >
-                    <Plus className="w-4 h-4" />
+                    <Plus className="w-4 sm:w-4 h-4 sm:h-4" />
                     <span className="hidden sm:inline">Create Job</span>
                     <span className="sm:hidden">Create</span>
                   </Button>
@@ -172,45 +175,49 @@ export default function JobsPage() {
           </div>
         </div>
 
-        {/* Stats Cards Section - Mobile Optimized */}
+        {/* Stats Cards Section - Professional Mobile Design */}
         <div className="px-4 sm:px-6">
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-6 mb-6 sm:mb-8">
             {/* Active Jobs Card */}
-            <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 hover:border-primary/20 transition-all duration-300">
-              <div className="flex items-center justify-between">
-                <div className="min-w-0">
-                  <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1">
+            <div className="bg-white border border-gray-200 rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6 hover:border-primary/20 transition-all duration-300">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600 mb-0.5 sm:mb-1">
                     Active Jobs
                   </p>
-                  <p className="text-2xl sm:text-3xl font-bold text-gray-900">
+                  <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
                     {jobs.length}
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">Currently posted</p>
+                  <p className="text-xs text-gray-500 mt-0.5 sm:mt-1 hidden sm:block">
+                    Currently posted
+                  </p>
                 </div>
-                <div className="w-10 sm:w-12 h-10 sm:h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <Briefcase className="h-5 sm:h-6 w-5 sm:w-6 text-green-600" />
+                <div className="w-8 sm:w-10 lg:w-12 h-8 sm:h-10 lg:h-12 bg-green-100 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 self-end sm:self-auto">
+                  <Briefcase className="h-4 sm:h-5 lg:h-6 w-4 sm:w-5 lg:w-6 text-green-600" />
                 </div>
               </div>
             </div>
 
             {/* Total Applications Card */}
-            <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 hover:border-primary/20 transition-all duration-300">
-              <div className="flex items-center justify-between">
-                <div className="min-w-0">
-                  <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1">
-                    Total Applications
+            <div className="bg-white border border-gray-200 rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6 hover:border-primary/20 transition-all duration-300">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600 mb-0.5 sm:mb-1">
+                    Applications
                   </p>
-                  <p className="text-2xl sm:text-3xl font-bold text-gray-900">
+                  <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
                     {jobs.reduce(
                       (total, job) => total + (job.applicantsCount || 0),
                       0
                     )}
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">Across all jobs</p>
+                  <p className="text-xs text-gray-500 mt-0.5 sm:mt-1 hidden sm:block">
+                    Across all jobs
+                  </p>
                 </div>
-                <div className="w-10 sm:w-12 h-10 sm:h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <div className="w-8 sm:w-10 lg:w-12 h-8 sm:h-10 lg:h-12 bg-blue-100 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 self-end sm:self-auto">
                   <svg
-                    className="h-5 sm:h-6 w-5 sm:w-6 text-blue-600"
+                    className="h-4 sm:h-5 lg:h-6 w-4 sm:w-5 lg:w-6 text-blue-600"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -227,20 +234,22 @@ export default function JobsPage() {
             </div>
 
             {/* Recent Views Card */}
-            <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 hover:border-primary/20 transition-all duration-300">
-              <div className="flex items-center justify-between">
-                <div className="min-w-0">
-                  <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1">
-                    Recent Views
+            <div className="bg-white border border-gray-200 rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6 hover:border-primary/20 transition-all duration-300">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600 mb-0.5 sm:mb-1">
+                    Views
                   </p>
-                  <p className="text-2xl sm:text-3xl font-bold text-gray-900">
+                  <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
                     {jobs.reduce((total, job) => total + (job.views || 0), 0)}
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">Last 30 days</p>
+                  <p className="text-xs text-gray-500 mt-0.5 sm:mt-1 hidden sm:block">
+                    Last 30 days
+                  </p>
                 </div>
-                <div className="w-10 sm:w-12 h-10 sm:h-12 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <div className="w-8 sm:w-10 lg:w-12 h-8 sm:h-10 lg:h-12 bg-purple-100 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 self-end sm:self-auto">
                   <svg
-                    className="h-6 w-6 text-purple-600"
+                    className="h-4 sm:h-5 lg:h-6 w-4 sm:w-5 lg:w-6 text-purple-600"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -263,13 +272,13 @@ export default function JobsPage() {
             </div>
 
             {/* Average Applications Card */}
-            <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 hover:border-primary/20 transition-all duration-300">
-              <div className="flex items-center justify-between">
-                <div className="min-w-0">
-                  <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1">
-                    Avg Applications
+            <div className="bg-white border border-gray-200 rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6 hover:border-primary/20 transition-all duration-300">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600 mb-0.5 sm:mb-1">
+                    Avg Apps
                   </p>
-                  <p className="text-2xl sm:text-3xl font-bold text-gray-900">
+                  <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
                     {jobs.length > 0
                       ? Math.round(
                           jobs.reduce(
@@ -279,11 +288,13 @@ export default function JobsPage() {
                         )
                       : 0}
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">Per job posting</p>
+                  <p className="text-xs text-gray-500 mt-0.5 sm:mt-1 hidden sm:block">
+                    Per job posting
+                  </p>
                 </div>
-                <div className="w-10 sm:w-12 h-10 sm:h-12 bg-orange-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <div className="w-8 sm:w-10 lg:w-12 h-8 sm:h-10 lg:h-12 bg-orange-100 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 self-end sm:self-auto">
                   <svg
-                    className="h-5 sm:h-6 w-5 sm:w-6 text-orange-600"
+                    className="h-4 sm:h-5 lg:h-6 w-4 sm:w-5 lg:w-6 text-orange-600"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -302,54 +313,58 @@ export default function JobsPage() {
         </div>
 
         <div className="px-4 sm:px-6">
-          {/* Search and Controls Section - Mobile Optimized */}
+          {/* Search and Controls Section - Professional Mobile UX */}
           <div className="mb-6 sm:mb-8">
             <Tabs
               value={viewMode}
               onValueChange={(value) => setViewMode(value as "grid" | "list")}
             >
               {/* Enhanced Search and View Controls */}
-              <div className="mb-4 sm:mb-6">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+              <div className="mb-6">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   {/* Search Bar */}
                   <div className="flex-1 max-w-full sm:max-w-lg">
-                    <SearchBar
-                      placeholder="Search jobs..."
-                      onSearch={handleSearch}
-                      onClear={handleClearSearch}
-                      searchQuery={searchQuery as string}
-                    />
+                    <div className="relative">
+                      <SearchBar
+                        placeholder="Search jobs by title, location..."
+                        onSearch={handleSearch}
+                        onClear={handleClearSearch}
+                        searchQuery={searchQuery as string}
+                      />
+                    </div>
                   </div>
 
-                  {/* View Mode Tabs */}
+                  {/* View Mode Tabs - Professional Design */}
                   <div className="flex items-center justify-center sm:justify-end">
-                    <div className="flex bg-white border border-gray-200 rounded-lg p-1 gap-1">
+                    <div className="inline-flex bg-gray-50 border border-gray-200 rounded-xl p-1 gap-1 shadow-sm">
                       <button
                         onClick={() => setViewMode("grid")}
-                        className={`p-2 rounded-md transition-all duration-300 ease-in-out ${
+                        className={`inline-flex items-center justify-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 min-w-[44px] h-10 ${
                           viewMode === "grid"
-                            ? "bg-primary text-primary-foreground"
-                            : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                            ? "bg-white text-gray-900 shadow-sm border border-gray-200"
+                            : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
                         }`}
                       >
                         <Grid3X3 className="w-4 h-4" />
+                        <span className="hidden sm:inline ml-2">Grid</span>
                       </button>
                       <button
                         onClick={() => setViewMode("list")}
-                        className={`p-2 rounded-md transition-all duration-300 ease-in-out ${
+                        className={`inline-flex items-center justify-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 min-w-[44px] h-10 ${
                           viewMode === "list"
-                            ? "bg-primary text-primary-foreground shadow-sm"
-                            : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                            ? "bg-white text-gray-900 shadow-sm border border-gray-200"
+                            : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
                         }`}
                       >
                         <List className="w-4 h-4" />
+                        <span className="hidden sm:inline ml-2">List</span>
                       </button>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <TabsContent value="grid" className="space-y-6">
+              <TabsContent value="grid" className="space-y-4 sm:space-y-6">
                 {loading ? (
                   <JobsGridSkeleton />
                 ) : hasJobs ? (
@@ -366,7 +381,7 @@ export default function JobsPage() {
                 )}
               </TabsContent>
 
-              <TabsContent value="list" className="space-y-4">
+              <TabsContent value="list" className="space-y-2 sm:space-y-4">
                 {loading ? (
                   <JobsListSkeleton />
                 ) : hasJobs ? (
@@ -386,7 +401,11 @@ export default function JobsPage() {
           </div>
 
           {/* Pagination - Only show when not loading and has jobs */}
-          {!loading && hasJobs && <PaginationButton {...pageParams} />}
+          {!loading && hasJobs && (
+            <div className="mt-8 sm:mt-10 flex justify-center">
+              <PaginationButton {...pageParams} />
+            </div>
+          )}
         </div>
       </div>
 

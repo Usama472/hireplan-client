@@ -6,60 +6,64 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { HIRING_TIMELINE } from "@/constants";
 import { INPUT_TYPES } from "@/interfaces";
-import {
-  Building,
-  DollarSign,
-} from "lucide-react";
+import { Building, DollarSign } from "lucide-react";
 import { useFormContext } from "react-hook-form";
 
 export function CompanyPositionDetailsStep() {
   const { watch } = useFormContext();
-  
+
   const payRateType = watch("payRate.type") || "range";
   const hiringTimeline = watch("hiringTimeline");
   const positionsToHire = watch("positionsToHire") || 1;
 
   const getTimelinePriority = (timeline: string) => {
-    const item = HIRING_TIMELINE.find(t => t.value === timeline);
+    const item = HIRING_TIMELINE.find((t) => t.value === timeline);
     return item?.priority || "medium";
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case "urgent": return "bg-red-100 text-red-800 border-red-200";
-      case "high": return "bg-orange-100 text-orange-800 border-orange-200";
-      case "medium": return "bg-blue-100 text-blue-800 border-blue-200";
-      case "low": return "bg-gray-100 text-gray-800 border-gray-200";
-      default: return "bg-gray-100 text-gray-800 border-gray-200";
+      case "urgent":
+        return "bg-red-100 text-red-800 border-red-200";
+      case "high":
+        return "bg-orange-100 text-orange-800 border-orange-200";
+      case "medium":
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      case "low":
+        return "bg-gray-100 text-gray-800 border-gray-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
   const priority = getTimelinePriority(hiringTimeline);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold text-gray-900">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="px-1">
+        <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
           Company & Position Details
         </h2>
-        <p className="text-sm text-gray-600 mt-1">
+        <p className="text-xs sm:text-sm text-gray-600 mt-1">
           Define company, openings, compensation, and hiring timeline
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* 1st Card - Company & Position Info */}
-        <Card className="border border-gray-200">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-2 text-lg font-medium text-blue-600">
-              <Building className="w-5 h-5" />
+        <Card className="border border-gray-200 shadow-none rounded-xl">
+          <CardHeader className="pb-3 sm:pb-4">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg font-medium text-blue-600">
+              <Building className="w-4 h-4 sm:w-5 sm:h-5" />
               Company & Position
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3 sm:space-y-4 pt-0">
             {/* Company Selection */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Company for This Position</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label className="text-xs sm:text-sm font-medium">
+                Company for This Position
+              </Label>
               <InputField
                 name="company"
                 type={INPUT_TYPES.SELECT}
@@ -74,8 +78,10 @@ export function CompanyPositionDetailsStep() {
             </div>
 
             {/* Number of Openings */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Number of Openings</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label className="text-xs sm:text-sm font-medium">
+                Number of Openings
+              </Label>
               <div className="relative">
                 <InputField
                   name="positionsToHire"
@@ -87,25 +93,32 @@ export function CompanyPositionDetailsStep() {
                 </div>
               </div>
               {positionsToHire > 10 && (
-                <p className="text-xs text-red-600">Maximum 10 openings allowed</p>
+                <p className="text-xs text-red-600">
+                  Maximum 10 openings allowed
+                </p>
               )}
             </div>
 
             {/* Work Setting */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Work Setting</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label className="text-xs sm:text-sm font-medium">
+                Work Setting
+              </Label>
               <InputField
                 name="workSetting"
                 placeholder="e.g., Office, Remote, Hospital, Hybrid"
               />
               <p className="text-xs text-gray-500">
-                Describe the work environment (Office, Remote, Hospital, Hybrid, etc.)
+                Describe the work environment (Office, Remote, Hospital, Hybrid,
+                etc.)
               </p>
             </div>
 
             {/* Hiring Timeline */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Hiring Timeline</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label className="text-xs sm:text-sm font-medium">
+                Hiring Timeline
+              </Label>
               <InputField
                 name="hiringTimeline"
                 type={INPUT_TYPES.SELECT}
@@ -121,9 +134,10 @@ export function CompanyPositionDetailsStep() {
               {hiringTimeline && (
                 <div className="flex items-center gap-2">
                   <Badge className={`text-xs ${getPriorityColor(priority)}`}>
-                    Internal Priority: {priority.charAt(0).toUpperCase() + priority.slice(1)}
+                    Internal Priority:{" "}
+                    {priority.charAt(0).toUpperCase() + priority.slice(1)}
                   </Badge>
-                  {(priority === "urgent") && (
+                  {priority === "urgent" && (
                     <Badge className="bg-red-50 text-red-700 border-red-200 text-xs">
                       Will show urgent label on career page
                     </Badge>
@@ -135,36 +149,36 @@ export function CompanyPositionDetailsStep() {
         </Card>
 
         {/* 2nd Card - Pay & Job Type */}
-        <Card className="border border-gray-200">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-2 text-lg font-medium text-green-600">
-              <DollarSign className="w-5 h-5" />
+        <Card className="border border-gray-200 shadow-none rounded-xl">
+          <CardHeader className="pb-3 sm:pb-4">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg font-medium text-green-600">
+              <DollarSign className="w-4 h-4 sm:w-5 sm:h-5" />
               Compensation & Type
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3 sm:space-y-4 pt-0">
             {/* Pay Structure */}
-            <div className="space-y-3">
-              <Label className="text-sm font-medium">Pay</Label>
-              
+            <div className="space-y-2 sm:space-y-3">
+              <Label className="text-xs sm:text-sm font-medium">Pay</Label>
+
               {/* Pay Rate Type Selection */}
-              <div className="space-y-2">
+              <div className="space-y-1.5 sm:space-y-2">
                 <Label className="text-xs text-gray-600">Pay Structure</Label>
                 <InputField
                   name="payRate.type"
                   type={INPUT_TYPES.SELECT}
                   placeholder="Select pay type"
-                selectOptions={[
-                  { value: "range", label: "Range" },
-                  { value: "starting-amount", label: "Starting Amount" },
-                  { value: "maximum-amount", label: "Maximum Amount" },
-                  { value: "exact-amount", label: "Exact Amount" },
-                ]}
+                  selectOptions={[
+                    { value: "range", label: "Range" },
+                    { value: "starting-amount", label: "Starting Amount" },
+                    { value: "maximum-amount", label: "Maximum Amount" },
+                    { value: "exact-amount", label: "Exact Amount" },
+                  ]}
                 />
               </div>
 
               {/* Pay Amount Inputs */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                 {payRateType === "range" && (
                   <>
                     <div className="space-y-1">
@@ -185,12 +199,17 @@ export function CompanyPositionDetailsStep() {
                     </div>
                   </>
                 )}
-                
-                {(payRateType === "starting-amount" || payRateType === "maximum-amount" || payRateType === "exact-amount") && (
-                  <div className="col-span-2 space-y-1">
+
+                {(payRateType === "starting-amount" ||
+                  payRateType === "maximum-amount" ||
+                  payRateType === "exact-amount") && (
+                  <div className="col-span-1 sm:col-span-2 space-y-1">
                     <Label className="text-xs text-gray-600">
-                      {payRateType === "starting-amount" ? "Starting Amount" :
-                       payRateType === "maximum-amount" ? "Maximum Amount" : "Amount"}
+                      {payRateType === "starting-amount"
+                        ? "Starting Amount"
+                        : payRateType === "maximum-amount"
+                        ? "Maximum Amount"
+                        : "Amount"}
                     </Label>
                     <InputField
                       name="payRate.amount"
@@ -202,7 +221,7 @@ export function CompanyPositionDetailsStep() {
               </div>
 
               {/* Pay Period */}
-              <div className="space-y-2">
+              <div className="space-y-1.5 sm:space-y-2">
                 <Label className="text-xs text-gray-600">Pay Period</Label>
                 <InputField
                   name="payRate.period"
@@ -227,8 +246,8 @@ export function CompanyPositionDetailsStep() {
             </div>
 
             {/* Job Type */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Job Type</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label className="text-xs sm:text-sm font-medium">Job Type</Label>
               <InputField
                 name="employmentType"
                 type={INPUT_TYPES.SELECT}

@@ -5,23 +5,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  EXEMPT_STATUSES,
-} from "@/constants";
+import { EXEMPT_STATUSES } from "@/constants";
 import { INPUT_TYPES } from "@/interfaces";
-import {
-  Shield,
-  Building,
-  Plus,
-  Info,
-} from "lucide-react";
+import { Shield, Building, Plus, Info } from "lucide-react";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 export function ComplianceDepartmentStep() {
   const { watch, setValue } = useFormContext();
   const [newDepartment, setNewDepartment] = useState("");
-  
+
   const department = watch("department");
   const customDepartment = watch("customDepartment");
 
@@ -46,65 +39,86 @@ export function ComplianceDepartmentStep() {
     }
   };
 
-
-
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold text-gray-900">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="px-1">
+        <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
           Compliance & Department
         </h2>
-        <p className="text-sm text-gray-600 mt-1">
+        <p className="text-xs sm:text-sm text-gray-600 mt-1">
           Define exempt status, EEO category, and department information
         </p>
       </div>
 
       {/* Single Card - Compliance & Department */}
-      <Card className="border border-gray-200">
-        <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-2 text-lg font-medium text-indigo-600">
-            <Shield className="w-5 h-5" />
+      <Card className="border border-gray-200 shadow-none rounded-xl">
+        <CardHeader className="pb-3 sm:pb-4">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg font-medium text-indigo-600">
+            <Shield className="w-4 h-4 sm:w-5 sm:h-5" />
             Compliance & Department Information
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4 sm:space-y-6 pt-0">
           {/* Exempt Status */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Exempt Status</Label>
+          <div className="space-y-1.5 sm:space-y-2">
+            <Label className="text-xs sm:text-sm font-medium">
+              Exempt Status
+            </Label>
             <InputField
               name="exemptStatus"
               type={INPUT_TYPES.SELECT}
               placeholder="Select exempt status"
-              selectOptions={EXEMPT_STATUSES.map(status => ({
+              selectOptions={EXEMPT_STATUSES.map((status) => ({
                 value: status.value,
-                label: status.label
+                label: status.label,
               }))}
             />
             <div className="text-xs text-gray-500 space-y-1">
               <div className="flex items-start gap-2">
                 <Info className="w-3 h-3 mt-0.5 text-gray-400" />
                 <div>
-                  <p><strong>Exempt:</strong> Not eligible for overtime pay</p>
-                  <p><strong>Non-Exempt:</strong> Eligible for overtime pay</p>
-                  <p><strong>Not Applicable:</strong> For contractors or special cases</p>
+                  <p>
+                    <strong>Exempt:</strong> Not eligible for overtime pay
+                  </p>
+                  <p>
+                    <strong>Non-Exempt:</strong> Eligible for overtime pay
+                  </p>
+                  <p>
+                    <strong>Not Applicable:</strong> For contractors or special
+                    cases
+                  </p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* EEO Category */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">EEO Job Category</Label>
+          <div className="space-y-1.5 sm:space-y-2">
+            <Label className="text-xs sm:text-sm font-medium">
+              EEO Job Category
+            </Label>
             <InputField
               name="eeoJobCategory"
               type={INPUT_TYPES.SELECT}
               placeholder="Select EEO category"
               selectOptions={[
-                { value: "administrative-support-workers", label: "Administrative Support Workers" },
+                {
+                  value: "administrative-support-workers",
+                  label: "Administrative Support Workers",
+                },
                 { value: "craft-workers", label: "Craft Workers" },
-                { value: "executive-senior-level-officials-and-managers", label: "Executive/Senior Level Officials" },
-                { value: "first-mid-level-officials-and-managers", label: "First/Mid Level Officials" },
-                { value: "laborers-and-helpers", label: "Laborers And Helpers" },
+                {
+                  value: "executive-senior-level-officials-and-managers",
+                  label: "Executive/Senior Level Officials",
+                },
+                {
+                  value: "first-mid-level-officials-and-managers",
+                  label: "First/Mid Level Officials",
+                },
+                {
+                  value: "laborers-and-helpers",
+                  label: "Laborers And Helpers",
+                },
                 { value: "operatives", label: "Operatives" },
                 { value: "professionals", label: "Professionals" },
                 { value: "sales-workers", label: "Sales Workers" },
@@ -118,14 +132,14 @@ export function ComplianceDepartmentStep() {
           </div>
 
           {/* Department */}
-          <div className="space-y-3">
-            <Label className="text-sm font-medium">
-              Department 
-              <span className="text-gray-500 font-normal ml-1">
+          <div className="space-y-2 sm:space-y-3">
+            <Label className="text-xs sm:text-sm font-medium">
+              Department
+              <span className="text-gray-500 font-normal ml-1 text-xs">
                 (Internal use - does not appear on job boards)
               </span>
             </Label>
-            
+
             <InputField
               name="department"
               type={INPUT_TYPES.SELECT}
@@ -135,8 +149,10 @@ export function ComplianceDepartmentStep() {
 
             {/* Custom Department Input */}
             {(department === "custom" || customDepartment) && (
-              <div className="space-y-2">
-                <Label className="text-xs text-gray-600">Custom Department</Label>
+              <div className="space-y-1.5 sm:space-y-2">
+                <Label className="text-xs text-gray-600">
+                  Custom Department
+                </Label>
                 <div className="flex gap-2">
                   <Input
                     placeholder="Enter custom department name"
@@ -182,18 +198,24 @@ export function ComplianceDepartmentStep() {
           </div>
 
           {/* Information Box */}
-          <div className="p-4 bg-gray-50 border border-gray-200 rounded-md">
-            <div className="flex items-start gap-3">
-              <Info className="w-5 h-5 text-gray-400 mt-0.5" />
-              <div className="space-y-2">
-                <h4 className="text-sm font-medium text-gray-900">
+          <div className="p-3 sm:p-4 bg-gray-50 border border-gray-200 rounded-md">
+            <div className="flex items-start gap-2 sm:gap-3">
+              <Info className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 mt-0.5" />
+              <div className="space-y-1.5 sm:space-y-2">
+                <h4 className="text-xs sm:text-sm font-medium text-gray-900">
                   Important Information
                 </h4>
                 <ul className="text-xs text-gray-600 space-y-1">
-                  <li>• Department information is for internal organization only</li>
-                  <li>• EEO category is required for federal reporting compliance</li>
+                  <li>
+                    • Department information is for internal organization only
+                  </li>
+                  <li>
+                    • EEO category is required for federal reporting compliance
+                  </li>
                   <li>• Exempt status affects overtime pay eligibility</li>
-                  <li>• Custom departments will be saved for future job postings</li>
+                  <li>
+                    • Custom departments will be saved for future job postings
+                  </li>
                 </ul>
               </div>
             </div>

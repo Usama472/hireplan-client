@@ -291,11 +291,33 @@ export default function StaffManagement() {
   };
 
   return (
-    <div className="min-h-full px-4 sm:px-6 py-0">
-      <div className="space-y-4 sm:space-y-6">
-        <div className="bg-white border-b border-gray-200 -mx-4 sm:-mx-6 px-4 sm:px-6 py-4 relative overflow-hidden mt-0">
+    <div className="min-h-screen bg-gray-50">
+      <div className="w-full max-w-none">
+        {/* Mobile Header */}
+        <div className="block lg:hidden bg-white border-b border-gray-200 px-4 py-3">
+          <div className="flex flex-col space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-blue-50 rounded-lg">
+                  <Users className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <h1 className="text-lg font-semibold text-gray-900">
+                    Staff Management
+                  </h1>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Manage staff & roles
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop Header */}
+        <div className="hidden lg:block bg-white border-b border-gray-200 px-6 py-4">
           <div className="flex flex-col">
-            <h1 className="text-lg sm:text-xl font-semibold text-gray-900 mb-1">
+            <h1 className="text-xl font-semibold text-gray-900 mb-1">
               Staff Management
             </h1>
             <p className="text-gray-600 text-sm">
@@ -304,41 +326,125 @@ export default function StaffManagement() {
           </div>
         </div>
 
-        <div className="px-1 max-w-7xl mx-auto">
-          {/* Tabs */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 sm:mb-6">
-            <div className="flex items-center gap-4">
-              <div className="border-b border-gray-200 flex space-x-4 sm:space-x-8">
+        {/* Mobile Navigation */}
+        <div className="block lg:hidden px-4 py-3 bg-white border-b border-gray-100">
+          {/* Tab Pills */}
+          <div className="flex items-center gap-2 mb-3 overflow-x-auto scrollbar-hide">
+            <button
+              className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                activeTab === "staff"
+                  ? "bg-blue-100 text-blue-700 border border-blue-200"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+              onClick={() => setActiveTab("staff")}
+            >
+              <span className="flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Staff
+              </span>
+            </button>
+            <button
+              className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                activeTab === "roles"
+                  ? "bg-blue-100 text-blue-700 border border-blue-200"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+              onClick={() => setActiveTab("roles")}
+            >
+              <span className="flex items-center gap-2">
+                <Shield className="h-4 w-4" />
+                Roles
+              </span>
+            </button>
+          </div>
+
+          {/* Mobile Actions */}
+          <div className="flex flex-col space-y-3">
+            {/* Search Bar */}
+            <div className="w-full">
+              <SearchBar
+                searchQuery={searchQuery}
+                onSearch={handleSearch}
+                placeholder={`Search ${activeTab}...`}
+                onClear={clearSearch}
+              />
+            </div>
+
+            {/* View Mode & Add Button */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setViewMode("grid")}
+                  className={`${
+                    viewMode === "grid"
+                      ? "bg-blue-50 border-blue-200 text-blue-700"
+                      : ""
+                  }`}
+                >
+                  <Grid3X3 className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setViewMode("list")}
+                  className={`${
+                    viewMode === "list"
+                      ? "bg-blue-50 border-blue-200 text-blue-700"
+                      : ""
+                  }`}
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <Button
+                onClick={handleCreateNew}
+                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl px-4 py-2 font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add {activeTab === "staff" ? "Staff" : "Role"}
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop Navigation */}
+        <div className="hidden lg:block px-6 py-4 bg-gray-50">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-8">
+              <div className="border-b border-gray-200 flex space-x-8">
                 <button
-                  className={`pb-2 transition-colors ${
+                  className={`pb-3 transition-colors ${
                     activeTab === "staff"
-                      ? "border-b-2 border-primary text-primary font-medium"
+                      ? "border-b-2 border-blue-600 text-blue-600 font-medium"
                       : "text-gray-500 hover:text-gray-700"
                   }`}
                   onClick={() => setActiveTab("staff")}
                 >
-                  <span className="flex items-center gap-1 sm:gap-2">
-                    <Users className="h-3 sm:h-4 w-3 sm:w-4" />
-                    <span className="text-sm sm:text-base">Staff</span>
+                  <span className="flex items-center gap-2">
+                    <Users className="h-4 w-4" />
+                    <span className="text-base">Staff</span>
                   </span>
                 </button>
                 <button
-                  className={`pb-2 transition-colors ${
+                  className={`pb-3 transition-colors ${
                     activeTab === "roles"
-                      ? "border-b-2 border-primary text-primary font-medium"
+                      ? "border-b-2 border-blue-600 text-blue-600 font-medium"
                       : "text-gray-500 hover:text-gray-700"
                   }`}
                   onClick={() => setActiveTab("roles")}
                 >
-                  <span className="flex items-center gap-1 sm:gap-2">
-                    <Shield className="h-3 sm:h-4 w-3 sm:w-4" />
-                    <span className="text-sm sm:text-base">Roles</span>
+                  <span className="flex items-center gap-2">
+                    <Shield className="h-4 w-4" />
+                    <span className="text-base">Roles</span>
                   </span>
                 </button>
               </div>
             </div>
 
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3">
               <Button
                 variant="outline"
                 size="sm"
@@ -363,16 +469,18 @@ export default function StaffManagement() {
               />
               <Button
                 onClick={handleCreateNew}
-                className="bg-blue-600 hover:bg-blue-700 text-white gap-1 shadow-lg hover:shadow-xl hover:shadow-blue-600/25 transition-all duration-300"
+                className="bg-blue-600 hover:bg-blue-700 text-white gap-2 shadow-lg hover:shadow-xl hover:shadow-blue-600/25 transition-all duration-300"
               >
                 <Plus className="h-4 w-4" />
                 <span>Add {activeTab === "staff" ? "Staff" : "Role"}</span>
               </Button>
             </div>
           </div>
+        </div>
 
+        <div className="px-4 lg:px-6 py-4 lg:py-6">
           {/* Content Section */}
-          <div className="mt-8">
+          <div className="space-y-4">
             {activeTab === "staff" ? (
               <div className="space-y-6">
                 {viewMode === "grid" ? (
@@ -389,68 +497,121 @@ export default function StaffManagement() {
                   />
                 )}
 
-                {/* Pagination */}
+                {/* Mobile Pagination */}
                 {staffState.totalPages > 1 && (
-                  <div className="flex justify-center mt-6">
-                    <div className="flex items-center space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          handleStaffPageChange(
-                            Math.max(1, staffState.page - 1)
-                          )
-                        }
-                        disabled={staffState.page === 1 || staffState.isLoading}
-                        className="flex items-center gap-1"
-                      >
-                        <ChevronLeft className="h-4 w-4" />
-                        Previous
-                      </Button>
+                  <div className="mt-6">
+                    {/* Mobile: Full width pagination */}
+                    <div className="block sm:hidden">
+                      <div className="flex items-center justify-between mb-3">
+                        <Button
+                          variant="outline"
+                          onClick={() =>
+                            handleStaffPageChange(
+                              Math.max(1, staffState.page - 1)
+                            )
+                          }
+                          disabled={
+                            staffState.page === 1 || staffState.isLoading
+                          }
+                          className="flex-1 mr-2 bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                        >
+                          <ChevronLeft className="h-4 w-4 mr-1" />
+                          Previous
+                        </Button>
 
-                      <div className="flex items-center space-x-1">
-                        {Array.from(
-                          { length: staffState.totalPages },
-                          (_, i) => i + 1
-                        ).map((pageNum) => (
-                          <Button
-                            key={pageNum}
-                            variant={
-                              pageNum === staffState.page
-                                ? "default"
-                                : "outline"
-                            }
-                            size="sm"
-                            onClick={() => handleStaffPageChange(pageNum)}
-                            disabled={staffState.isLoading}
-                            className={
-                              pageNum === staffState.page
-                                ? "bg-primary text-white"
-                                : ""
-                            }
-                          >
-                            {pageNum}
-                          </Button>
-                        ))}
+                        <div className="px-3 py-2 bg-gray-100 rounded-lg text-sm font-medium text-gray-700">
+                          {staffState.page} of {staffState.totalPages}
+                        </div>
+
+                        <Button
+                          variant="outline"
+                          onClick={() =>
+                            handleStaffPageChange(
+                              Math.min(
+                                staffState.totalPages,
+                                staffState.page + 1
+                              )
+                            )
+                          }
+                          disabled={
+                            staffState.page === staffState.totalPages ||
+                            staffState.isLoading
+                          }
+                          className="flex-1 ml-2 bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                        >
+                          Next
+                          <ChevronRight className="h-4 w-4 ml-1" />
+                        </Button>
                       </div>
+                    </div>
 
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          handleStaffPageChange(
-                            Math.min(staffState.totalPages, staffState.page + 1)
-                          )
-                        }
-                        disabled={
-                          staffState.page === staffState.totalPages ||
-                          staffState.isLoading
-                        }
-                        className="flex items-center gap-1"
-                      >
-                        Next
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
+                    {/* Desktop: Traditional pagination */}
+                    <div className="hidden sm:flex justify-center">
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            handleStaffPageChange(
+                              Math.max(1, staffState.page - 1)
+                            )
+                          }
+                          disabled={
+                            staffState.page === 1 || staffState.isLoading
+                          }
+                          className="flex items-center gap-1"
+                        >
+                          <ChevronLeft className="h-4 w-4" />
+                          Previous
+                        </Button>
+
+                        <div className="flex items-center space-x-1">
+                          {Array.from(
+                            { length: staffState.totalPages },
+                            (_, i) => i + 1
+                          ).map((pageNum) => (
+                            <Button
+                              key={pageNum}
+                              variant={
+                                pageNum === staffState.page
+                                  ? "default"
+                                  : "outline"
+                              }
+                              size="sm"
+                              onClick={() => handleStaffPageChange(pageNum)}
+                              disabled={staffState.isLoading}
+                              className={
+                                pageNum === staffState.page
+                                  ? "bg-primary text-white"
+                                  : ""
+                              }
+                            >
+                              {pageNum}
+                            </Button>
+                          ))}
+                        </div>
+
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            handleStaffPageChange(
+                              Math.min(
+                                staffState.totalPages,
+                                staffState.page + 1
+                              )
+                            )
+                          }
+                          disabled={
+                            staffState.page === staffState.totalPages ||
+                            staffState.isLoading
+                          }
+                          className="flex items-center gap-1"
+                        >
+                          Next
+                          <ChevronRight className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -475,64 +636,107 @@ export default function StaffManagement() {
                   />
                 )}
 
-                {/* Pagination */}
+                {/* Mobile Pagination */}
                 {roleState.totalPages > 1 && (
-                  <div className="flex justify-center mt-6">
-                    <div className="flex items-center space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          handlePageChange(Math.max(1, roleState.page - 1))
-                        }
-                        disabled={roleState.page === 1 || roleState.isLoading}
-                        className="flex items-center gap-1"
-                      >
-                        <ChevronLeft className="h-4 w-4" />
-                        Previous
-                      </Button>
+                  <div className="mt-6">
+                    {/* Mobile: Full width pagination */}
+                    <div className="block sm:hidden">
+                      <div className="flex items-center justify-between mb-3">
+                        <Button
+                          variant="outline"
+                          onClick={() =>
+                            handlePageChange(Math.max(1, roleState.page - 1))
+                          }
+                          disabled={roleState.page === 1 || roleState.isLoading}
+                          className="flex-1 mr-2 bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                        >
+                          <ChevronLeft className="h-4 w-4 mr-1" />
+                          Previous
+                        </Button>
 
-                      <div className="flex items-center space-x-1">
-                        {Array.from(
-                          { length: roleState.totalPages },
-                          (_, i) => i + 1
-                        ).map((pageNum) => (
-                          <Button
-                            key={pageNum}
-                            variant={
-                              pageNum === roleState.page ? "default" : "outline"
-                            }
-                            size="sm"
-                            onClick={() => handlePageChange(pageNum)}
-                            disabled={roleState.isLoading}
-                            className={
-                              pageNum === roleState.page
-                                ? "bg-primary text-white"
-                                : ""
-                            }
-                          >
-                            {pageNum}
-                          </Button>
-                        ))}
+                        <div className="px-3 py-2 bg-gray-100 rounded-lg text-sm font-medium text-gray-700">
+                          {roleState.page} of {roleState.totalPages}
+                        </div>
+
+                        <Button
+                          variant="outline"
+                          onClick={() =>
+                            handlePageChange(
+                              Math.min(roleState.totalPages, roleState.page + 1)
+                            )
+                          }
+                          disabled={
+                            roleState.page === roleState.totalPages ||
+                            roleState.isLoading
+                          }
+                          className="flex-1 ml-2 bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                        >
+                          Next
+                          <ChevronRight className="h-4 w-4 ml-1" />
+                        </Button>
                       </div>
+                    </div>
 
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          handlePageChange(
-                            Math.min(roleState.totalPages, roleState.page + 1)
-                          )
-                        }
-                        disabled={
-                          roleState.page === roleState.totalPages ||
-                          roleState.isLoading
-                        }
-                        className="flex items-center gap-1"
-                      >
-                        Next
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
+                    {/* Desktop: Traditional pagination */}
+                    <div className="hidden sm:flex justify-center">
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            handlePageChange(Math.max(1, roleState.page - 1))
+                          }
+                          disabled={roleState.page === 1 || roleState.isLoading}
+                          className="flex items-center gap-1"
+                        >
+                          <ChevronLeft className="h-4 w-4" />
+                          Previous
+                        </Button>
+
+                        <div className="flex items-center space-x-1">
+                          {Array.from(
+                            { length: roleState.totalPages },
+                            (_, i) => i + 1
+                          ).map((pageNum) => (
+                            <Button
+                              key={pageNum}
+                              variant={
+                                pageNum === roleState.page
+                                  ? "default"
+                                  : "outline"
+                              }
+                              size="sm"
+                              onClick={() => handlePageChange(pageNum)}
+                              disabled={roleState.isLoading}
+                              className={
+                                pageNum === roleState.page
+                                  ? "bg-primary text-white"
+                                  : ""
+                              }
+                            >
+                              {pageNum}
+                            </Button>
+                          ))}
+                        </div>
+
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            handlePageChange(
+                              Math.min(roleState.totalPages, roleState.page + 1)
+                            )
+                          }
+                          disabled={
+                            roleState.page === roleState.totalPages ||
+                            roleState.isLoading
+                          }
+                          className="flex items-center gap-1"
+                        >
+                          Next
+                          <ChevronRight className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 )}

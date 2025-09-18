@@ -37,10 +37,91 @@ export function SaveChangesBar({
       )}
     >
       <div className="bg-white border-t shadow-2xl shadow-gray-900/10">
-        <div className="container mx-auto px-4 py-4 max-w-5xl">
-          <div className="flex items-center justify-between">
+        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 max-w-5xl">
+          {/* Mobile Layout */}
+          <div className="block sm:hidden">
+            <div className="space-y-3">
+              {/* Status Indicator - Mobile */}
+              <div className="flex items-center gap-2">
+                {isSaved ? (
+                  <>
+                    <div className="flex items-center justify-center w-6 h-6 bg-green-100 rounded-full flex-shrink-0">
+                      <CheckCircle2 className="h-3 w-3 text-green-600" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-green-700 truncate">
+                        Changes saved successfully!
+                      </p>
+                    </div>
+                  </>
+                ) : isDirty ? (
+                  <>
+                    <div className="flex items-center justify-center w-6 h-6 bg-amber-100 rounded-full flex-shrink-0">
+                      <AlertTriangle className="h-3 w-3 text-amber-600" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {changedFieldsCount > 0 ? (
+                          <>
+                            {changedFieldsCount}{" "}
+                            {changedFieldsCount === 1 ? "change" : "changes"} to
+                            save
+                          </>
+                        ) : (
+                          "You have unsaved changes"
+                        )}
+                      </p>
+                    </div>
+                  </>
+                ) : null}
+              </div>
+
+              {/* Action Buttons - Mobile */}
+              {isDirty && (
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 text-gray-600 hover:text-gray-800 gap-2 py-2.5"
+                    onClick={onDiscard}
+                  >
+                    <Undo2 className="h-3.5 w-3.5" />
+                    <span className="truncate">Discard</span>
+                  </Button>
+
+                  <Button
+                    type="button"
+                    onClick={onSubmit}
+                    disabled={isLoading}
+                    className={cn(
+                      "flex-1 font-medium shadow-lg transition-all duration-200 py-2.5",
+                      isLoading
+                        ? "bg-blue-500"
+                        : "bg-blue-600 hover:bg-blue-700 hover:shadow-xl"
+                    )}
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        <span className="truncate">Saving...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Save className="h-4 w-4 mr-2" />
+                        <span className="truncate">Save Changes</span>
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Desktop Layout */}
+          <div className="hidden sm:flex items-center justify-between">
             <div className="flex items-center gap-4">
-              {/* Status Indicator */}
+              {/* Status Indicator - Desktop */}
               <div className="flex items-center gap-2">
                 {isSaved ? (
                   <>
@@ -82,7 +163,7 @@ export function SaveChangesBar({
               </div>
             </div>
 
-            {/* Action Buttons */}
+            {/* Action Buttons - Desktop */}
             <div className="flex items-center gap-3">
               {isDirty && (
                 <>
@@ -100,7 +181,6 @@ export function SaveChangesBar({
                   <Button
                     type="button"
                     onClick={onSubmit}
-                    // Always enable the button when there are changes
                     disabled={isLoading}
                     className={cn(
                       "min-w-[140px] font-medium shadow-lg transition-all duration-200",
