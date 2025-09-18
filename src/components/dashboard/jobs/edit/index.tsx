@@ -580,7 +580,14 @@ export default function EditJob() {
               variant="horizontal"
               size="md"
               showProgress={true}
-              clickable={false}
+              clickable={true}
+              onStepClick={(stepIndex) => {
+                // Only allow navigation to completed steps or current step
+                const targetStep = stepIndex + 1;
+                if (targetStep <= currentStep) {
+                  setCurrentStep(targetStep);
+                }
+              }}
               className="max-w-6xl mx-auto"
             />
           </div>

@@ -32,6 +32,7 @@ export function JobQualificationsStep() {
   // AI Weighting Controls
   const [shouldVsNiceRatio, setShouldVsNiceRatio] = useState([70]); // 70% should, 30% nice
   const [passThreshold, setPassThreshold] = useState([50]); // Must hit 50% to pass
+  const [showAdvancedAI, setShowAdvancedAI] = useState(false); // Hide complex AI config by default
 
   // Unified qualifications list
   const allQualifications = watch("qualifications") || [];
@@ -297,15 +298,46 @@ export function JobQualificationsStep() {
       {hasAIFeatures && allQualifications.length > 0 && (
         <Card className="border border-blue-200 bg-blue-50/30 shadow-none rounded-xl">
           <CardHeader className="pb-3 sm:pb-4">
-            <CardTitle className="flex items-center gap-2 text-base sm:text-lg font-medium text-blue-600">
-              🤖 AI Scoring Configuration
-            </CardTitle>
-            <p className="text-xs sm:text-sm text-gray-600">
-              Configure how AI evaluates candidates against these qualifications
-            </p>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg font-medium text-blue-600">
+                  🤖 AI Scoring Configuration
+                </CardTitle>
+                <p className="text-xs sm:text-sm text-gray-600">
+                  {showAdvancedAI ? "Configure detailed AI evaluation settings" : "AI will automatically score candidates using smart defaults"}
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowAdvancedAI(!showAdvancedAI)}
+                className="text-xs whitespace-nowrap"
+              >
+                {showAdvancedAI ? "🎯 Simple Mode" : "🔧 Advanced"}
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4 sm:space-y-6 pt-0">
-            {/* Category Summary */}
+            {/* Simple Mode - Just show that AI is enabled */}
+            {!showAdvancedAI && (
+              <div className="text-center py-6">
+                <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold text-blue-900 mb-2">
+                  ✅ AI Qualification Scoring Enabled
+                </h3>
+                <p className="text-sm text-blue-700 max-w-md mx-auto">
+                  AI will automatically evaluate candidates against your qualifications using intelligent defaults. No manual configuration needed!
+                </p>
+              </div>
+            )}
+
+            {/* Advanced Mode - Show detailed configuration */}
+            {showAdvancedAI && (
+              <>
+                {/* Category Summary */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
               <div className="text-center p-3 sm:p-4 bg-gradient-to-br from-red-50 to-pink-50 border border-red-200/50 rounded-xl shadow-sm">
                 <div className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
@@ -503,6 +535,8 @@ export function JobQualificationsStep() {
                 </span>
               </div>
             </div>
+              </>
+            )}
           </CardContent>
         </Card>
       )}

@@ -164,6 +164,7 @@ export function CustomQuestionsBuilder({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [globalScoringMode, setGlobalScoringMode] = useState<'simple' | 'advanced'>('simple');
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [questionForm, setQuestionForm] = useState<CustomQuestion>({
     type: "text",
     question: "",

@@ -1,4 +1,7 @@
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { allTriggers } from "@/constants/automations-constants";
 import API from "@/http";
 import {
@@ -8,9 +11,11 @@ import {
   CheckCircle2,
   FileCheck,
   Mail,
+  Search,
   Target,
   TrendingUp,
   UserCheck,
+  X,
   Zap,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
@@ -23,6 +28,7 @@ interface Automation {
   conditions: any[];
   actions: any[];
   triggerType: string;
+  labels: string[];
   companyId: string;
   createdBy: string;
   createdAt: string;
@@ -56,10 +62,14 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
   isSelectable = false,
 }) => {
   const [automations, setAutomations] = useState<Automation[]>([]);
+  const [filteredAutomations, setFilteredAutomations] = useState<Automation[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState<string[]>(
     selectedAutomationIds
   );
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedLabel, setSelectedLabel] = useState<string>("");
+  const [availableLabels, setAvailableLabels] = useState<string[]>([]);
 
   const fetchAutomations = async () => {
     try {
@@ -67,7 +77,14 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
       const response: AutomationsResponse =
         await API.automation.getAutomations();
       if (response.success) {
-        setAutomations(response.results.filter((a) => a.status === "active"));
+        const activeAutomations = response.results.filter((a) => a.status === "active");
+        setAutomations(activeAutomations);
+        setFilteredAutomations(activeAutomations);
+        
+        // Extract unique labels
+        const allLabels = activeAutomations.flatMap(a => a.labels || []);
+        const uniqueLabels = [...new Set(allLabels)].sort();
+        setAvailableLabels(uniqueLabels);
       }
     } catch (error) {
       console.error("Error fetching automations:", error);
@@ -84,6 +101,29 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
   useEffect(() => {
     setSelectedIds(selectedAutomationIds);
   }, [selectedAutomationIds]);
+
+  // Filter automations based on search and label
+  useEffect(() => {
+    let filtered = automations;
+
+    // Filter by search term
+    if (searchTerm.trim()) {
+      const searchLower = searchTerm.toLowerCase();
+      filtered = filtered.filter(automation => 
+        automation.name.toLowerCase().includes(searchLower) ||
+        automation.labels.some(label => label.toLowerCase().includes(searchLower))
+      );
+    }
+
+    // Filter by selected label
+    if (selectedLabel) {
+      filtered = filtered.filter(automation => 
+        automation.labels.includes(selectedLabel)
+      );
+    }
+
+    setFilteredAutomations(filtered);
+  }, [automations, searchTerm, selectedLabel]);
 
   const handleSelectionChange = (automationId: string, isSelected: boolean) => {
     const newSelectedIds = isSelected
@@ -176,6 +216,98 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
         </div>
       </div>
 
+      {/* Search and Filter Controls */}
+      {!loading && automations.length > 0 && (
+        <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-4">
+          <div className="flex flex-col sm:flex-row gap-4">
+            {/* Search Input */}
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search automations by name or labels..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 pr-10"
+                />
+                {searchTerm && (
+                  <button
+                    onClick={() => setSearchTerm("")}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Label Filter */}
+            {availableLabels.length > 0 && (
+              <div className="sm:w-64">
+                <Select value={selectedLabel} onValueChange={setSelectedLabel}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Filter by label" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">All labels</SelectItem>
+                    {availableLabels.map((label) => (
+                      <SelectItem key={label} value={label}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </div>
+
+          {/* Active Filters Display */}
+          {(searchTerm || selectedLabel) && (
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-sm text-gray-500">Active filters:</span>
+              {searchTerm && (
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  Search: "{searchTerm}"
+                  <button
+                    onClick={() => setSearchTerm("")}
+                    className="ml-1 hover:text-gray-700"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              )}
+              {selectedLabel && (
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  Label: {selectedLabel}
+                  <button
+                    onClick={() => setSelectedLabel("")}
+                    className="ml-1 hover:text-gray-700"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setSearchTerm("");
+                  setSelectedLabel("");
+                }}
+                className="text-xs"
+              >
+                Clear all
+              </Button>
+            </div>
+          )}
+
+          {/* Results count */}
+          <div className="text-sm text-gray-500">
+            Showing {filteredAutomations.length} of {automations.length} automations
+          </div>
+        </div>
+      )}
+
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {[1, 2, 3].map((i) => (
@@ -188,6 +320,27 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
               <div className="h-3 bg-gray-200 rounded w-2/3"></div>
             </div>
           ))}
+        </div>
+      ) : filteredAutomations.length === 0 && automations.length > 0 ? (
+        <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-8 sm:p-12 text-center">
+          <div className="text-gray-400 mb-4">
+            <Search className="mx-auto h-12 w-12" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            No matching automations
+          </h3>
+          <p className="text-gray-500 mb-6">
+            Try adjusting your search terms or filters to find automations
+          </p>
+          <Button
+            variant="outline"
+            onClick={() => {
+              setSearchTerm("");
+              setSelectedLabel("");
+            }}
+          >
+            Clear filters
+          </Button>
         </div>
       ) : automations.length === 0 ? (
         <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-8 sm:p-12 text-center">
@@ -236,7 +389,7 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {automations.map((automation) => {
+            {filteredAutomations.map((automation) => {
               const triggerInfo = getTriggerInfo(automation.triggerType);
 
               return (
@@ -320,6 +473,26 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
                       </div>
                     </div>
                   </div>
+
+                  {/* Labels */}
+                  {automation.labels && automation.labels.length > 0 && (
+                    <div className="mb-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs font-medium text-gray-500">Labels:</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {automation.labels.map((label, index) => (
+                          <Badge
+                            key={index}
+                            variant="outline"
+                            className="text-xs bg-blue-50 text-blue-700 border-blue-200"
+                          >
+                            {label}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Actions Preview */}
                   <div className="mb-4 flex-1">

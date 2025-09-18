@@ -2,6 +2,7 @@ export interface AutomationType {
   id: string;
   name: string;
   description: string;
+  labels: string[];
   trigger: {
     type:
       | "application_created"

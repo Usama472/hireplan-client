@@ -211,17 +211,17 @@ export function ResumeAnalysisStep() {
                   <Brain className="w-4 h-4 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-medium text-gray-900">Simple Analysis</h3>
+                  <h3 className="font-medium text-gray-900">🎯 Smart & Simple</h3>
                   <p className="text-xs text-gray-600">
-                    AI decides automatically
+                    AI handles everything automatically
                   </p>
                 </div>
               </div>
               <ul className="text-xs text-gray-600 space-y-1">
-                <li>• AI analyzes based on job title and description</li>
-                <li>• Automatically identifies relevant skills</li>
-                <li>• Contextual matching of experience</li>
-                <li>• No manual configuration needed</li>
+                <li>• ✨ Zero setup required</li>
+                <li>• 🧠 AI reads your job description</li>
+                <li>• 🎯 Finds the best matching candidates</li>
+                <li>• ⚡ Ready to use immediately</li>
               </ul>
             </div>
 
@@ -248,18 +248,18 @@ export function ResumeAnalysisStep() {
                 </div>
                 <div>
                   <h3 className="font-medium text-gray-900">
-                    Detailed Analysis
+                    🔧 Advanced Control
                   </h3>
                   <p className="text-xs text-gray-600">
-                    Define specific criteria
+                    Customize every detail
                   </p>
                 </div>
               </div>
               <ul className="text-xs text-gray-600 space-y-1">
-                <li>• Manually define skills and experience</li>
-                <li>• Set custom scoring weights</li>
-                <li>• Precise control over evaluation</li>
-                <li>• Advanced AI configuration</li>
+                <li>• 📝 Define specific skills to look for</li>
+                <li>• ⚖️ Set custom scoring weights</li>
+                <li>• 🎛️ Fine-tune AI evaluation</li>
+                <li>• 🔬 Advanced configuration options</li>
               </ul>
             </div>
           </div>
@@ -268,73 +268,20 @@ export function ResumeAnalysisStep() {
 
       {/* Simple Mode Content */}
       {resumeAnalysisMode === "simple" && (
-        <Card className="border border-blue-200 bg-blue-50/30">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-2 text-lg font-medium text-blue-600">
-              🤖 AI Contextual Analysis
-            </CardTitle>
-            <p className="text-sm text-gray-600">
-              AI will automatically analyze resumes based on your job
-              description and requirements.
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="p-4 bg-white border border-blue-200 rounded-lg">
-              <h4 className="font-medium text-blue-900 mb-2">
-                What AI Will Look For:
-              </h4>
-              <ul className="text-sm text-blue-800 space-y-1">
-                <li>
-                  • <strong>Relevant Skills:</strong> Technical and soft skills
-                  matching the job requirements
-                </li>
-                <li>
-                  • <strong>Experience Level:</strong> Years of experience in
-                  similar roles or industries
-                </li>
-                <li>
-                  • <strong>Education Background:</strong> Degrees and
-                  certifications relevant to the position
-                </li>
-                <li>
-                  • <strong>Career Progression:</strong> Growth and advancement
-                  in previous roles
-                </li>
-                <li>
-                  • <strong>Industry Experience:</strong> Work history in
-                  related fields or companies
-                </li>
-              </ul>
+        <Card className="border border-green-200 bg-green-50/30">
+          <CardContent className="p-6 text-center">
+            <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Brain className="w-8 h-8 text-white" />
             </div>
-
-            {/* Simple Mode Scoring */}
-            <div className="p-4 bg-blue-100 border border-blue-300 rounded-lg">
-              <div className="flex items-center gap-2 mb-3">
-                <Brain className="w-5 h-5 text-blue-600" />
-                <Label className="text-sm font-medium text-blue-900">
-                  AI Scoring Weight
-                </Label>
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-blue-800">Resume Analysis Impact</span>
-                  <span className="font-medium text-blue-900">
-                    {resumeWeight[0]}%
-                  </span>
-                </div>
-                <Slider
-                  value={resumeWeight}
-                  onValueChange={setResumeWeight}
-                  max={50}
-                  min={10}
-                  step={5}
-                  className="mb-2"
-                />
-                <div className="flex justify-between text-xs text-blue-600">
-                  <span>10% (Minimal Impact)</span>
-                  <span>50% (High Impact)</span>
-                </div>
-              </div>
+            <h3 className="text-xl font-semibold text-green-900 mb-2">
+              ✅ AI Resume Analysis Enabled
+            </h3>
+            <p className="text-sm text-green-700 mb-4 max-w-md mx-auto">
+              AI will automatically analyze candidate resumes and score them based on your job requirements. No additional setup needed!
+            </p>
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 rounded-full">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="text-sm font-medium text-green-800">Auto-configured</span>
             </div>
           </CardContent>
         </Card>
@@ -670,8 +617,8 @@ export function ResumeAnalysisStep() {
         </CardContent>
       </Card>
 
-      {/* Pre-Screening Questions Threshold Configuration - Only show if there are custom questions */}
-      {watch("customQuestions")?.length > 0 && (
+      {/* Pre-Screening Questions Threshold Configuration - Only show if there are custom questions AND in detailed mode */}
+      {watch("customQuestions")?.length > 0 && resumeAnalysisMode === "detailed" && (
         <Card className="border border-blue-200">
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-2 text-lg font-medium text-blue-600">

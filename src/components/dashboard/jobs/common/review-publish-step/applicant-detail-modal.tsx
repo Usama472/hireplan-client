@@ -8,7 +8,6 @@ import { EmailChatWidget } from "@/components/dashboard/applicants/email-chat/Em
 import {
   AlertCircle,
   Brain,
-  Briefcase,
   Calendar,
   CalendarCheck,
   Check,
@@ -19,17 +18,14 @@ import {
   Eye,
   FileText,
   Globe,
-  GraduationCap,
   Linkedin,
   Mail,
   MapPin,
   MessageSquare,
   Phone,
   Shield,
-  Star,
   ThumbsUp,
   User,
-  Users,
   Video,
   X,
 } from "lucide-react";
@@ -39,19 +35,35 @@ import { useToast } from "@/lib/hooks/use-toast";
 import useAuthSessionContext from "@/lib/context/AuthSessionContext";
 
 export interface AIEvaluation {
-  skillsMatchScore: number;
-  skillsMatchJustification: string;
-  experienceScore: number;
-  experienceJustification: string;
-  educationScore: number;
-  educationJustification: string;
-  culturalFitScore: number;
-  culturalFitJustification: string;
+  autoReject: boolean;
+  autoRejectReason?: string;
+  qualificationsScore: number;
+  qualificationsJustification: string;
+  resumeScore: number;
+  resumeJustification: string;
+  customQuestionsScore: number;
+  customQuestionsJustification: string;
   totalScore: number;
   overallAssessment: string;
   strengths: string[];
   weaknesses: string[];
   recommendationLevel: "Strong No" | "No" | "Maybe" | "Yes" | "Strong Yes";
+  qualificationBreakdown?: {
+    needQualificationsMet: string[];
+    needQualificationsMissing: string[];
+    shouldQualificationsScore: number;
+    niceQualificationsScore: number;
+  };
+  resumeBreakdown?: {
+    skillsFound: string[];
+    experienceMatch: string;
+    educationMatch: string;
+  };
+  customQuestionBreakdown?: {
+    correctAnswers: number;
+    totalAnswers: number;
+    autoRejectTriggered: boolean;
+  };
 }
 
 interface Applicant {
@@ -803,132 +815,184 @@ export function ApplicantDetailModal({
                           Evaluation Areas
                         </h3>
                         <div className="space-y-8">
-                          {/* Skills Match */}
+                          {/* Auto-Reject Warning */}
+                          {applicant.aiEvaluation.autoReject && (
+                            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                              <div className="flex items-center gap-2">
+                                <AlertCircle className="w-5 h-5 text-red-600" />
+                                <h4 className="font-semibold text-red-900">Auto-Rejected</h4>
+                              </div>
+                              <p className="text-sm text-red-700 mt-2">
+                                {applicant.aiEvaluation.autoRejectReason || 'Failed critical evaluation criteria'}
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Qualifications Score */}
                           <div className="relative">
                             <div className="flex items-center justify-between mb-2">
                               <div className="flex items-center gap-2">
                                 <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
-                                  <Star className="w-5 h-5" />
+                                  <CheckCircle className="w-5 h-5" />
                                 </div>
                                 <div>
                                   <h4 className="font-semibold">
-                                    Skills Match
+                                    Qualifications Match
                                   </h4>
                                   <p className="text-sm text-muted-foreground">
-                                    Job-specific skills alignment
+                                    Required and preferred qualifications
                                   </p>
                                 </div>
                               </div>
                               <div className="text-2xl font-bold text-blue-600">
-                                {applicant.aiEvaluation.skillsMatchScore}%
+                                {applicant.aiEvaluation.qualificationsScore}%
                               </div>
                             </div>
                             <div className="relative h-2 bg-gray-100 rounded-full overflow-hidden mt-2 mb-3">
                               <div
                                 className="absolute top-0 left-0 h-full bg-blue-500 rounded-full"
                                 style={{
-                                  width: `${applicant.aiEvaluation.skillsMatchScore}%`,
+                                  width: `${applicant.aiEvaluation.qualificationsScore}%`,
                                 }}
                               ></div>
                             </div>
                             <div className="text-sm text-gray-600 bg-blue-50 p-4 rounded-lg border border-blue-100 mt-3 max-h-24 overflow-auto">
-                              {applicant.aiEvaluation.skillsMatchJustification}
+                              {applicant.aiEvaluation.qualificationsJustification}
                             </div>
+                            
+                            {/* Qualifications Breakdown */}
+                            {applicant.aiEvaluation.qualificationBreakdown && (
+                              <div className="mt-4 space-y-2">
+                                {applicant.aiEvaluation.qualificationBreakdown.needQualificationsMissing?.length > 0 && (
+                                  <div className="bg-red-50 border border-red-200 rounded p-3">
+                                    <h5 className="font-medium text-red-900 text-sm">Missing Critical Qualifications:</h5>
+                                    <ul className="text-xs text-red-700 mt-1 list-disc list-inside">
+                                      {applicant.aiEvaluation.qualificationBreakdown.needQualificationsMissing.map((qual, i) => (
+                                        <li key={i}>{qual}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                                {applicant.aiEvaluation.qualificationBreakdown.needQualificationsMet?.length > 0 && (
+                                  <div className="bg-green-50 border border-green-200 rounded p-3">
+                                    <h5 className="font-medium text-green-900 text-sm">Met Critical Qualifications:</h5>
+                                    <ul className="text-xs text-green-700 mt-1 list-disc list-inside">
+                                      {applicant.aiEvaluation.qualificationBreakdown.needQualificationsMet.map((qual, i) => (
+                                        <li key={i}>{qual}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </div>
 
-                          {/* Experience */}
+                          {/* Resume Analysis */}
                           <div className="relative">
                             <div className="flex items-center justify-between mb-2">
                               <div className="flex items-center gap-2">
-                                <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
-                                  <Briefcase className="w-5 h-5" />
+                                <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-600">
+                                  <FileText className="w-5 h-5" />
                                 </div>
                                 <div>
-                                  <h4 className="font-semibold">Experience</h4>
+                                  <h4 className="font-semibold">Resume Analysis</h4>
                                   <p className="text-sm text-muted-foreground">
-                                    Work history relevance
+                                    Skills, experience, and education match
                                   </p>
                                 </div>
                               </div>
-                              <div className="text-2xl font-bold text-indigo-600">
-                                {applicant.aiEvaluation.experienceScore}%
+                              <div className="text-2xl font-bold text-purple-600">
+                                {applicant.aiEvaluation.resumeScore}%
                               </div>
                             </div>
                             <div className="relative h-2 bg-gray-100 rounded-full overflow-hidden mt-2 mb-3">
                               <div
-                                className="absolute top-0 left-0 h-full bg-indigo-500 rounded-full"
+                                className="absolute top-0 left-0 h-full bg-purple-500 rounded-full"
                                 style={{
-                                  width: `${applicant.aiEvaluation.experienceScore}%`,
+                                  width: `${applicant.aiEvaluation.resumeScore}%`,
                                 }}
                               ></div>
                             </div>
-                            <div className="text-sm text-gray-600 bg-indigo-50 p-4 rounded-lg border border-indigo-100 mt-3 max-h-24 overflow-auto">
-                              {applicant.aiEvaluation.experienceJustification}
+                            <div className="text-sm text-gray-600 bg-purple-50 p-4 rounded-lg border border-purple-100 mt-3 max-h-24 overflow-auto">
+                              {applicant.aiEvaluation.resumeJustification}
                             </div>
+                            
+                            {/* Resume Breakdown */}
+                            {applicant.aiEvaluation.resumeBreakdown && (
+                              <div className="mt-4 space-y-2">
+                                {applicant.aiEvaluation.resumeBreakdown.skillsFound?.length > 0 && (
+                                  <div className="bg-purple-50 border border-purple-200 rounded p-3">
+                                    <h5 className="font-medium text-purple-900 text-sm">Skills Found:</h5>
+                                    <div className="flex flex-wrap gap-1 mt-1">
+                                      {applicant.aiEvaluation.resumeBreakdown.skillsFound.map((skill, i) => (
+                                        <Badge key={i} variant="outline" className="text-xs bg-purple-100 text-purple-700">
+                                          {skill}
+                                        </Badge>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                                {applicant.aiEvaluation.resumeBreakdown.experienceMatch && (
+                                  <div className="bg-purple-50 border border-purple-200 rounded p-3">
+                                    <h5 className="font-medium text-purple-900 text-sm">Experience Match:</h5>
+                                    <p className="text-xs text-purple-700 mt-1">{applicant.aiEvaluation.resumeBreakdown.experienceMatch}</p>
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </div>
 
-                          {/* Education */}
+                          {/* Custom Questions */}
                           <div className="relative">
                             <div className="flex items-center justify-between mb-2">
                               <div className="flex items-center gap-2">
                                 <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-600">
-                                  <GraduationCap className="w-5 h-5" />
+                                  <MessageSquare className="w-5 h-5" />
                                 </div>
                                 <div>
-                                  <h4 className="font-semibold">Education</h4>
+                                  <h4 className="font-semibold">Custom Questions</h4>
                                   <p className="text-sm text-muted-foreground">
-                                    Academic qualifications
+                                    Pre-screening question responses
                                   </p>
                                 </div>
                               </div>
                               <div className="text-2xl font-bold text-green-600">
-                                {applicant.aiEvaluation.educationScore}%
+                                {applicant.aiEvaluation.customQuestionsScore}%
                               </div>
                             </div>
                             <div className="relative h-2 bg-gray-100 rounded-full overflow-hidden mt-2 mb-3">
                               <div
                                 className="absolute top-0 left-0 h-full bg-green-500 rounded-full"
                                 style={{
-                                  width: `${applicant.aiEvaluation.educationScore}%`,
+                                  width: `${applicant.aiEvaluation.customQuestionsScore}%`,
                                 }}
                               ></div>
                             </div>
                             <div className="text-sm text-gray-600 bg-green-50 p-4 rounded-lg border border-green-100 mt-3 max-h-24 overflow-auto">
-                              {applicant.aiEvaluation.educationJustification}
+                              {applicant.aiEvaluation.customQuestionsJustification}
                             </div>
-                          </div>
-
-                          {/* Cultural Fit */}
-                          <div className="relative">
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="flex items-center gap-2">
-                                <div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-600">
-                                  <Users className="w-5 h-5" />
-                                </div>
-                                <div>
-                                  <h4 className="font-semibold">
-                                    Cultural Fit
-                                  </h4>
-                                  <p className="text-sm text-muted-foreground">
-                                    Alignment with company values
-                                  </p>
+                            
+                            {/* Custom Questions Breakdown */}
+                            {applicant.aiEvaluation.customQuestionBreakdown && (
+                              <div className="mt-4 space-y-2">
+                                <div className="bg-green-50 border border-green-200 rounded p-3">
+                                  <h5 className="font-medium text-green-900 text-sm">Question Performance:</h5>
+                                  <div className="flex items-center gap-4 mt-1 text-xs">
+                                    <span className="text-green-700">
+                                      Correct: {applicant.aiEvaluation.customQuestionBreakdown.correctAnswers}
+                                    </span>
+                                    <span className="text-green-700">
+                                      Total: {applicant.aiEvaluation.customQuestionBreakdown.totalAnswers}
+                                    </span>
+                                    {applicant.aiEvaluation.customQuestionBreakdown.autoRejectTriggered && (
+                                      <Badge variant="outline" className="bg-red-100 text-red-700">
+                                        Auto-Reject Triggered
+                                      </Badge>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
-                              <div className="text-2xl font-bold text-amber-600">
-                                {applicant.aiEvaluation.culturalFitScore}%
-                              </div>
-                            </div>
-                            <div className="relative h-2 bg-gray-100 rounded-full overflow-hidden mt-2 mb-3">
-                              <div
-                                className="absolute top-0 left-0 h-full bg-amber-500 rounded-full"
-                                style={{
-                                  width: `${applicant.aiEvaluation.culturalFitScore}%`,
-                                }}
-                              ></div>
-                            </div>
-                            <div className="text-sm text-gray-600 bg-amber-50 p-4 rounded-lg border border-amber-100 mt-3 max-h-24 overflow-auto">
-                              {applicant.aiEvaluation.culturalFitJustification}
-                            </div>
+                            )}
                           </div>
                         </div>
                       </section>
