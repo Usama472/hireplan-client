@@ -580,7 +580,6 @@ export default function EditJob() {
               variant="horizontal"
               size="md"
               showProgress={true}
-              animated={true}
               clickable={false}
               className="max-w-6xl mx-auto"
             />

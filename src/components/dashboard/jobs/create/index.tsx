@@ -15,7 +15,7 @@ import { StepControls } from "@/components/main/signup/stepNavigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { type Step } from "@/components/ui/enhanced-progress-stepper";
+import { EnhancedProgressStepper, type Step } from "@/components/ui/enhanced-progress-stepper";
 import { ROUTES } from "@/constants";
 import { stepFields } from "@/constants/form-constants";
 import {
@@ -723,7 +723,7 @@ export default function CreateJob() {
       case 3:
         return (
           <div>
-            <JobQualificationsStep />;
+            <JobQualificationsStep />
           </div>
         );
       case 4:
@@ -928,6 +928,20 @@ export default function CreateJob() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Progress Stepper */}
+        <div className="w-full px-4 sm:px-6 mt-6 sm:mt-8">
+          <EnhancedProgressStepper
+            steps={steps}
+            currentStep={currentStep}
+            completedSteps={Array.from({ length: currentStep - 1 }, (_, i) => i + 1)}
+            variant="horizontal"
+            size="md"
+            showProgress={true}
+            clickable={false}
+            className="max-w-6xl mx-auto"
+          />
         </div>
       </div>
 

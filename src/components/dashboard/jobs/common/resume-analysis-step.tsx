@@ -24,7 +24,9 @@ import {
   Target,
   Award,
   Briefcase,
+  MessageSquare,
 } from "lucide-react";
+import { CustomQuestionsBuilder } from "./custom-questions-builder";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import useAuthSessionContext from "@/lib/context/AuthSessionContext";
@@ -620,34 +622,74 @@ export function ResumeAnalysisStep() {
         </>
       )}
 
+      {/* Custom Pre-Screening Questions */}
+      <Card className="border border-green-200">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg font-medium text-green-600">
+            <MessageSquare className="w-5 h-5" />
+            Custom Pre-Screening Questions
+          </CardTitle>
+          <p className="text-sm text-gray-500">
+            Add up to 5 custom questions for pre-screening applicants alongside resume analysis. These questions help gather specific information not found in resumes.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <CustomQuestionsBuilder
+            name="customQuestions"
+            label="Custom Screening Questions (Max 5)"
+            description="Add up to 5 custom questions to screen applicants and gather specific information during the application process. Import from templates to avoid recreating common questions."
+          />
+
+          <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+            <div className="flex items-start gap-3">
+              <Info className="w-4 h-4 text-green-600 mt-0.5" />
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-green-900">
+                  Custom Questions Tips
+                </p>
+                <ul className="text-xs text-green-800 space-y-1">
+                  <li>
+                    • <strong>Complement Resume:</strong> Ask what resumes don't show (availability, certifications, preferences)
+                  </li>
+                  <li>
+                    • <strong>Keep Focused:</strong> Limit to 5 questions to maintain good candidate experience
+                  </li>
+                  <li>
+                    • <strong>Use Scoring:</strong> Questions with scoring help AI rank candidates alongside resume analysis
+                  </li>
+                  <li>
+                    • <strong>Examples:</strong> "Do you have a driver's license?", "Available weekends?", "Years of experience with X?"
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Information Box */}
       <div className="p-4 bg-purple-50 border border-purple-200 rounded-md">
         <div className="flex items-start gap-3">
           <Info className="w-5 h-5 text-purple-500 mt-0.5" />
           <div className="space-y-2">
             <h4 className="text-sm font-medium text-purple-900">
-              How Resume Analysis Works
+              How Resume Analysis & Pre-Screening Works
             </h4>
             <ul className="text-xs text-purple-700 space-y-1">
               <li>
-                • <strong>Simple Mode:</strong> AI automatically determines what
-                to look for based on job context
+                • <strong>Resume Analysis:</strong> AI analyzes resumes for skills, experience, and qualifications
               </li>
               <li>
-                • <strong>Detailed Mode:</strong> You define specific criteria
-                and weights for precise control
+                • <strong>Pre-Screening Questions:</strong> Gather specific information not found in resumes
               </li>
               <li>
-                • <strong>Contextual Matching:</strong> AI understands synonyms
-                and related terms
+                • <strong>Combined Scoring:</strong> Both resume and question answers contribute to overall candidate score
               </li>
               <li>
-                • <strong>Experience Analysis:</strong> Evaluates relevant work
-                history and project experience
+                • <strong>Contextual Matching:</strong> AI understands synonyms and related terms in both resumes and answers
               </li>
               <li>
-                • <strong>Combined Scoring:</strong> Resume analysis combines
-                with qualifications and pre-screening
+                • <strong>Qualification Integration:</strong> Results combine with job qualifications for final ranking
               </li>
             </ul>
           </div>

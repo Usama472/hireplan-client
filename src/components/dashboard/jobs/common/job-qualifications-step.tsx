@@ -14,8 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 
-import { CustomQuestionsBuilder } from "./custom-questions-builder";
-import { Plus, X, CheckCircle, Star, Info, MessageSquare } from "lucide-react";
+import { Plus, X, CheckCircle, Star, Info } from "lucide-react";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import useAuthSessionContext from "@/lib/context/AuthSessionContext";
@@ -224,7 +223,6 @@ export function JobQualificationsStep() {
                             updateRequiredToggle(index, checked)
                           }
                           disabled={qual.aiCategory === "need"}
-                          size="sm"
                         />
                       </div>
 
@@ -355,22 +353,52 @@ export function JobQualificationsStep() {
                 <Label className="text-xs sm:text-sm font-medium block">
                   AI Scoring Configuration
                 </Label>
-                <p className="text-xs text-gray-600">
-                  Click and drag on the bar to adjust Should vs Nice ratio and
-                  approval threshold
-                </p>
+                <div className="text-xs text-gray-600 space-y-2">
+                  <p>
+                    <span className="font-medium text-gray-700">Approval Threshold:</span> When qualifications reach <span className="font-semibold text-blue-600">{passThreshold[0]}%</span>, candidates advance to the next screening round.
+                  </p>
+                  <p>
+                    <span className="font-medium text-gray-700">Weight Distribution:</span> Should have <span className="font-semibold text-blue-600">{shouldVsNiceRatio[0]}%</span> vs Nice to have <span className="font-semibold text-purple-600">{100 - shouldVsNiceRatio[0]}%</span>.
+                  </p>
+                  <p>
+                    <span className="font-medium text-red-600">Auto-Reject:</span> Candidates missing any "Need To Have" qualifications are automatically rejected.
+                  </p>
+                </div>
               </div>
 
               {/* Interactive Combined Visual Bar */}
               <div
                 className="relative h-12 bg-gradient-to-r from-gray-100 to-gray-200 rounded-full shadow-inner cursor-pointer mb-8"
-                onClick={(e) => {
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  const x = e.clientX - rect.left;
-                  const percentage = Math.round((x / rect.width) * 100);
-                  setShouldVsNiceRatio([
-                    Math.max(0, Math.min(100, percentage)),
-                  ]);
+                onMouseDown={(e) => {
+                  // Don't handle if it's on the approval threshold slider
+                  if ((e.target as HTMLElement).closest('.approval-threshold-slider')) {
+                    return;
+                  }
+                  
+                  e.preventDefault();
+                  const bar = e.currentTarget;
+                  
+                  const handleMouseMove = (moveEvent: MouseEvent) => {
+                    const rect = bar.getBoundingClientRect();
+                    const x = moveEvent.clientX - rect.left;
+                    const percentage = Math.round((x / rect.width) * 100);
+                    setShouldVsNiceRatio([
+                      Math.max(0, Math.min(100, percentage)),
+                    ]);
+                  };
+                  
+                  const handleMouseUp = () => {
+                    document.removeEventListener("mousemove", handleMouseMove);
+                    document.removeEventListener("mouseup", handleMouseUp);
+                    document.body.style.userSelect = "";
+                  };
+                  
+                  // Initial position set
+                  handleMouseMove(e.nativeEvent);
+                  
+                  document.body.style.userSelect = "none";
+                  document.addEventListener("mousemove", handleMouseMove);
+                  document.addEventListener("mouseup", handleMouseUp);
                 }}
               >
                 {/* Should Have Section - Blue */}
@@ -392,7 +420,7 @@ export function JobQualificationsStep() {
 
                 {/* Approval Threshold Slider */}
                 <div
-                  className="absolute -top-1 h-14 w-4 z-50 cursor-grab active:cursor-grabbing"
+                  className="approval-threshold-slider absolute -top-1 h-14 w-4 z-50 cursor-grab active:cursor-grabbing"
                   style={{ left: `calc(${passThreshold[0]}% - 8px)` }}
                   title={`Drag to adjust approval threshold: ${passThreshold[0]}%`}
                   onMouseDown={(e) => {
@@ -402,7 +430,13 @@ export function JobQualificationsStep() {
                     const bar = e.currentTarget.parentElement;
                     if (!bar) return;
 
+                    let isDragging = false;
+
                     const handleMouseMove = (moveEvent: MouseEvent) => {
+                      isDragging = true;
+                      moveEvent.preventDefault();
+                      moveEvent.stopPropagation();
+                      
                       const rect = bar.getBoundingClientRect();
                       const x = moveEvent.clientX - rect.left;
                       const percentage = Math.round((x / rect.width) * 100);
@@ -411,18 +445,31 @@ export function JobQualificationsStep() {
                       ]);
                     };
 
-                    const handleMouseUp = () => {
-                      document.removeEventListener(
-                        "mousemove",
-                        handleMouseMove
-                      );
+                    const handleMouseUp = (upEvent: MouseEvent) => {
+                      upEvent.preventDefault();
+                      upEvent.stopPropagation();
+                      
+                      document.removeEventListener("mousemove", handleMouseMove);
                       document.removeEventListener("mouseup", handleMouseUp);
                       document.body.style.userSelect = "";
+                      document.body.style.pointerEvents = "";
+                      
+                      // Prevent the parent click handler from firing
+                      if (isDragging) {
+                        setTimeout(() => {
+                          isDragging = false;
+                        }, 10);
+                      }
                     };
 
                     document.body.style.userSelect = "none";
+                    document.body.style.pointerEvents = "none";
                     document.addEventListener("mousemove", handleMouseMove);
                     document.addEventListener("mouseup", handleMouseUp);
+                  }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                   }}
                 >
                   {/* Visible Line Through Bar */}
@@ -438,7 +485,7 @@ export function JobQualificationsStep() {
 
                   {/* Threshold Value Display */}
                   <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-xs px-2 py-1 rounded-md shadow-lg font-medium whitespace-nowrap">
-                    {passThreshold[0]}%
+                    Approval Rate: {passThreshold[0]}%
                   </div>
                 </div>
               </div>
@@ -460,55 +507,6 @@ export function JobQualificationsStep() {
         </Card>
       )}
 
-      {/* Custom Pre-Screening Questions */}
-      <Card className="border border-gray-200">
-        <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-2 text-lg font-medium text-purple-600">
-            <MessageSquare className="w-5 h-5" />
-            Custom Pre-Screening Questions
-          </CardTitle>
-          <p className="text-sm text-gray-500">
-            Add up to 5 custom questions for pre-screening applicants. Scoring
-            will be configured in the AI Ranking step.
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <CustomQuestionsBuilder
-            name="customQuestions"
-            label="Custom Screening Questions (Max 5)"
-            description="Add up to 5 custom questions to screen applicants and gather specific information during the application process. Import from templates to avoid recreating common questions."
-          />
-
-          <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-            <div className="flex items-start gap-3">
-              <Info className="w-4 h-4 text-yellow-600 mt-0.5" />
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-yellow-900">
-                  Custom Questions Tips
-                </p>
-                <ul className="text-xs text-yellow-800 space-y-1">
-                  <li>
-                    • <strong>Limit to 5 questions:</strong> Keep applications
-                    short and focused
-                  </li>
-                  <li>
-                    • <strong>Use templates:</strong> Import common questions
-                    from your settings
-                  </li>
-                  <li>
-                    • <strong>AI Analysis:</strong> Answers will be analyzed in
-                    the AI Ranking step
-                  </li>
-                  <li>
-                    • <strong>Examples:</strong> "Driver's License?", "Work with
-                    children?", "Available weekends?"
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Information Box */}
       <div className="p-4 bg-blue-50 border border-blue-200 rounded-md">
@@ -537,7 +535,7 @@ export function JobQualificationsStep() {
               </li>
               <li>
                 • <strong>Example:</strong> "Bachelor's Degree" - toggle to
-                Required + set AI category to "Need" for auto-reject
+                Required and set AI category to "Need" for auto-rejection
               </li>
             </ul>
           </div>

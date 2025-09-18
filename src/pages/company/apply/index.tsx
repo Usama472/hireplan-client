@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import {
   Select,
@@ -80,7 +81,7 @@ interface CustomField {
 interface CustomQuestion {
   id: string
   question: string
-  type: 'boolean' | 'select' | 'string'
+  type: 'boolean' | 'select' | 'string' | 'text' | 'textarea' | 'number' | 'email' | 'phone' | 'date'
   required: boolean
   options: string[]
   placeholder?: string
@@ -911,7 +912,7 @@ const JobApplicationPage: React.FC = () => {
                           </Label>
 
                           {/* Different input types based on question type */}
-                          {question.type === 'string' && (
+                          {(question.type === 'string' || question.type === 'text') && (
                             <Input
                               id={question.id}
                               value={
@@ -926,6 +927,109 @@ const JobApplicationPage: React.FC = () => {
                                 )
                               }
                               placeholder={question.placeholder}
+                              className='h-10 text-sm rounded-md focus:ring-purple-500 focus:border-purple-500 transition-all bg-white'
+                              required={question.required}
+                            />
+                          )}
+
+                          {question.type === 'textarea' && (
+                            <Textarea
+                              id={question.id}
+                              value={
+                                (formData.customQuestionAnswers.find(
+                                  (a) => a.questionId === question.id
+                                )?.answer as string) || ''
+                              }
+                              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                                handleCustomQuestionChange(
+                                  question.id,
+                                  e.target.value
+                                )
+                              }
+                              placeholder={question.placeholder || 'Enter your detailed response...'}
+                              className='min-h-[100px] text-sm rounded-md focus:ring-purple-500 focus:border-purple-500 transition-all bg-white resize-y'
+                              required={question.required}
+                            />
+                          )}
+
+                          {question.type === 'number' && (
+                            <Input
+                              type="number"
+                              id={question.id}
+                              value={
+                                (formData.customQuestionAnswers.find(
+                                  (a) => a.questionId === question.id
+                                )?.answer as string) || ''
+                              }
+                              onChange={(e) =>
+                                handleCustomQuestionChange(
+                                  question.id,
+                                  e.target.value
+                                )
+                              }
+                              placeholder={question.placeholder || 'Enter a number...'}
+                              className='h-10 text-sm rounded-md focus:ring-purple-500 focus:border-purple-500 transition-all bg-white'
+                              required={question.required}
+                            />
+                          )}
+
+                          {question.type === 'email' && (
+                            <Input
+                              type="email"
+                              id={question.id}
+                              value={
+                                (formData.customQuestionAnswers.find(
+                                  (a) => a.questionId === question.id
+                                )?.answer as string) || ''
+                              }
+                              onChange={(e) =>
+                                handleCustomQuestionChange(
+                                  question.id,
+                                  e.target.value
+                                )
+                              }
+                              placeholder={question.placeholder || 'Enter email address...'}
+                              className='h-10 text-sm rounded-md focus:ring-purple-500 focus:border-purple-500 transition-all bg-white'
+                              required={question.required}
+                            />
+                          )}
+
+                          {question.type === 'phone' && (
+                            <Input
+                              type="tel"
+                              id={question.id}
+                              value={
+                                (formData.customQuestionAnswers.find(
+                                  (a) => a.questionId === question.id
+                                )?.answer as string) || ''
+                              }
+                              onChange={(e) =>
+                                handleCustomQuestionChange(
+                                  question.id,
+                                  e.target.value
+                                )
+                              }
+                              placeholder={question.placeholder || 'Enter phone number...'}
+                              className='h-10 text-sm rounded-md focus:ring-purple-500 focus:border-purple-500 transition-all bg-white'
+                              required={question.required}
+                            />
+                          )}
+
+                          {question.type === 'date' && (
+                            <Input
+                              type="date"
+                              id={question.id}
+                              value={
+                                (formData.customQuestionAnswers.find(
+                                  (a) => a.questionId === question.id
+                                )?.answer as string) || ''
+                              }
+                              onChange={(e) =>
+                                handleCustomQuestionChange(
+                                  question.id,
+                                  e.target.value
+                                )
+                              }
                               className='h-10 text-sm rounded-md focus:ring-purple-500 focus:border-purple-500 transition-all bg-white'
                               required={question.required}
                             />
