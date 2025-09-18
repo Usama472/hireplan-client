@@ -47,6 +47,9 @@ export function ResumeAnalysisStep() {
 
   // AI Weighting Controls
   const [resumeWeight, setResumeWeight] = useState([30]); // 30% weight for resume analysis
+  
+  // Pre-screening threshold controls
+  const [preScreeningThreshold, setPreScreeningThreshold] = useState([50]); // Approval threshold for pre-screening
 
   const addCriterion = () => {
     if (newCriterion.trim()) {
@@ -666,6 +669,160 @@ export function ResumeAnalysisStep() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Pre-Screening Questions Threshold Configuration - Only show if there are custom questions */}
+      {watch("customQuestions")?.length > 0 && (
+        <Card className="border border-blue-200">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2 text-lg font-medium text-blue-600">
+              <Target className="w-5 h-5" />
+              Pre-Screening Questions Scoring Thresholds
+            </CardTitle>
+            <p className="text-sm text-gray-500">
+              Configure how AI handles candidates based on their pre-screening question scores.
+            </p>
+          </CardHeader>
+        <CardContent className="space-y-3 sm:space-y-4 pt-0">
+          {/* Interactive Threshold Configuration */}
+          <div className="bg-white border rounded-lg p-3 sm:p-4 space-y-3 sm:space-y-4">
+            <div className="space-y-2 sm:space-y-3">
+              <Label className="text-xs sm:text-sm font-medium block">
+                Pre-Screening Questions Threshold Configuration
+              </Label>
+              <div className="text-xs text-gray-600 space-y-2">
+                <p>
+                  <span className="font-medium text-gray-700">Approval Threshold:</span> When pre-screening questions reach <span className="font-semibold text-blue-600">{preScreeningThreshold[0]}%</span>, candidates advance to the next screening round.
+                </p>
+                <p>
+                  <span className="font-medium text-red-600">Auto-Reject:</span> Candidates with poor pre-screening question responses are automatically rejected.
+                </p>
+              </div>
+            </div>
+
+            {/* Interactive Combined Visual Bar */}
+            <div
+              className="relative h-12 bg-gradient-to-r from-gray-100 to-gray-200 rounded-full shadow-inner cursor-pointer mb-8"
+              onClick={(e) => {
+                // Don't handle click if it's on the approval threshold slider
+                if ((e.target as HTMLElement).closest('.approval-threshold-slider')) {
+                  return;
+                }
+                
+                const rect = e.currentTarget.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const percentage = Math.round((x / rect.width) * 100);
+                setPreScreeningThreshold([
+                  Math.max(0, Math.min(100, percentage)),
+                ]);
+                setValue("automation.sectionThresholds.preScreeningQuestions.manualReview", percentage);
+              }}
+            >
+
+              {/* Approval Threshold Slider */}
+              <div
+                className="approval-threshold-slider absolute -top-1 h-14 w-4 z-50 cursor-grab active:cursor-grabbing"
+                style={{ left: `calc(${preScreeningThreshold[0]}% - 8px)` }}
+                title={`Drag to adjust approval threshold: ${preScreeningThreshold[0]}%`}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+
+                  const bar = e.currentTarget.parentElement;
+                  if (!bar) return;
+
+                  let isDragging = false;
+
+                  const handleMouseMove = (moveEvent: MouseEvent) => {
+                    isDragging = true;
+                    moveEvent.preventDefault();
+                    moveEvent.stopPropagation();
+                    
+                    const rect = bar.getBoundingClientRect();
+                    const x = moveEvent.clientX - rect.left;
+                    const percentage = Math.round((x / rect.width) * 100);
+                    setPreScreeningThreshold([
+                      Math.max(0, Math.min(100, percentage)),
+                    ]);
+                    setValue("automation.sectionThresholds.preScreeningQuestions.manualReview", percentage);
+                  };
+
+                  const handleMouseUp = (upEvent: MouseEvent) => {
+                    upEvent.preventDefault();
+                    upEvent.stopPropagation();
+                    
+                    document.removeEventListener("mousemove", handleMouseMove);
+                    document.removeEventListener("mouseup", handleMouseUp);
+                    document.body.style.userSelect = "";
+                    document.body.style.pointerEvents = "";
+                    
+                    if (isDragging) {
+                      setTimeout(() => {
+                        isDragging = false;
+                      }, 10);
+                    }
+                  };
+
+                  document.body.style.userSelect = "none";
+                  document.body.style.pointerEvents = "none";
+                  document.addEventListener("mousemove", handleMouseMove);
+                  document.addEventListener("mouseup", handleMouseUp);
+                }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+              >
+                {/* Visible Line Through Bar */}
+                <div className="absolute top-1 left-1/2 w-0.5 h-12 bg-white shadow-lg transform -translate-x-1/2"></div>
+
+                {/* Draggable Handle */}
+                <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-6 h-6 bg-blue-500 rounded-full shadow-xl flex items-center justify-center hover:bg-blue-600 transition-all duration-200 border-2 border-white">
+                  <div className="flex gap-0.5">
+                    <div className="w-0.5 h-2 bg-white rounded-full"></div>
+                    <div className="w-0.5 h-2 bg-white rounded-full"></div>
+                  </div>
+                </div>
+
+                {/* Threshold Value Display */}
+                <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-xs px-2 py-1 rounded-md shadow-lg font-medium whitespace-nowrap">
+                  Approval Rate: {preScreeningThreshold[0]}%
+                </div>
+              </div>
+            </div>
+
+            {/* Legend */}
+            <div className="flex justify-center text-xs font-medium">
+              <span className="text-gray-700">
+                📏 Pre-Screening Approval: {preScreeningThreshold[0]}%
+              </span>
+            </div>
+          </div>
+
+          {/* Explanation */}
+          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-start gap-3">
+              <Info className="w-4 h-4 text-blue-600 mt-0.5" />
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-blue-900">
+                  How Pre-Screening Thresholds Work
+                </p>
+                <ul className="text-xs text-blue-700 space-y-1">
+                  <li>
+                    • <strong>Approval Threshold:</strong> Candidates scoring above {preScreeningThreshold[0]}% advance to the next round
+                  </li>
+                  <li>
+                    • <strong>Manual Review:</strong> Candidates below the threshold require human review
+                  </li>
+                  <li>
+                    • <strong>Combined Scoring:</strong> This threshold works with resume analysis and qualifications for final decisions
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      )}
 
       {/* Information Box */}
       <div className="p-4 bg-purple-50 border border-purple-200 rounded-md">
