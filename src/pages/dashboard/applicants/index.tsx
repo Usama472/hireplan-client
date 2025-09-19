@@ -71,10 +71,11 @@ interface Applicant {
   resume?: string;
   createdAt: string;
   aiEvaluation?: AIEvaluation;
-  status: "pending" | "reviewed" | "shortlisted" | "rejected";
+  status: "pending" | "reviewed" | "shortlisted" | "rejected" | "draft";
   job?: Job;
   interviewScheduled?: boolean;
   invitationSent?: boolean;
+  isPartial?: boolean;
 }
 
 interface ApplicantsResponse {
@@ -214,7 +215,12 @@ export default function ApplicantsPage() {
     );
   };
 
-  const getAIScoreBadge = (score?: number) => {
+  const getAIScoreBadge = (score?: number, applicant?: Applicant) => {
+    // Don't show AI score badge for draft/partial applications
+    if (applicant && (applicant.status === 'draft' || applicant.isPartial)) {
+      return null;
+    }
+    
     if (!score) return (
       <div className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs text-gray-400 bg-gray-50 border border-gray-200 md:px-4 md:py-2">
         <span className="w-2 h-2 rounded-full bg-gray-300 md:w-3 md:h-3"></span>
@@ -612,7 +618,7 @@ export default function ApplicantsPage() {
                               {applicant.firstName} {applicant.lastName}
                             </h3>
                             {getStatusBadge(applicant.status)}
-                            {getAIScoreBadge(applicant.aiEvaluation?.totalScore)}
+                            {getAIScoreBadge(applicant.aiEvaluation?.totalScore, applicant)}
                             {applicant.aiEvaluation?.autoReject && (
                               <Badge variant="outline" className="bg-red-100 text-red-700 border-red-200">
                                 Auto-Rejected

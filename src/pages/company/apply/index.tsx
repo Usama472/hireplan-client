@@ -103,6 +103,10 @@ const JobApplicationPage: React.FC = () => {
     customFields: [],
   })
 
+  // Track if user has made significant progress to determine if we should save draft
+  const [hasSignificantProgress, setHasSignificantProgress] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
   // Application steps
   const steps = [
     { id: 1, title: 'Basic Information', description: 'Tell us about yourself' },
@@ -206,10 +210,17 @@ const JobApplicationPage: React.FC = () => {
 
   // Handle step navigation
   const goToNextStep = async () => {
-    // Only save when we have minimum required info and when actually progressing
+    // Don't save partial applications during step navigation
+    // Only save to localStorage for session persistence
     if (formData.firstName.trim() && formData.lastName.trim() && formData.email.trim()) {
-      await savePartialApplication()
+      // Save progress to localStorage instead of database
+      localStorage.setItem(`application_progress_${jobId}`, JSON.stringify({
+        ...formData,
+        currentStep: currentStep + 1,
+        lastUpdated: new Date().toISOString()
+      }));
     }
+    
     if (currentStep < steps.length) {
       setCurrentStep(currentStep + 1)
     }
@@ -292,9 +303,40 @@ const JobApplicationPage: React.FC = () => {
         // Check for existing partial application for this job
         await checkForExistingPartialApplications(jobId)
         
-        // Check if token is provided in URL params (from continue button)
+        // Check if there's progress saved in localStorage (session-based)
+        const savedProgress = localStorage.getItem(`application_progress_${jobId}`)
         const urlParams = new URLSearchParams(window.location.search)
         const tokenParam = urlParams.get('token')
+        
+        if (savedProgress && !tokenParam) {
+          try {
+            const progressData = JSON.parse(savedProgress)
+            const lastUpdated = new Date(progressData.lastUpdated)
+            const hoursSinceUpdate = (new Date().getTime() - lastUpdated.getTime()) / (1000 * 60 * 60)
+            
+            // Only restore if it's recent (within 24 hours) and has meaningful data
+            if (hoursSinceUpdate < 24 && progressData.firstName && progressData.lastName && progressData.email) {
+              console.log('📱 Restoring progress from localStorage')
+              setFormData({
+                firstName: progressData.firstName || '',
+                lastName: progressData.lastName || '',
+                email: progressData.email || '',
+                phone: progressData.phone || '',
+                city: progressData.city || '',
+                state: progressData.state || '',
+                resume: null, // Can't restore file from localStorage
+                customQuestionAnswers: progressData.customQuestionAnswers || [],
+                customFields: progressData.customFields || [],
+              })
+              setCurrentStep(progressData.currentStep || 1)
+              setHasSignificantProgress(true)
+            }
+          } catch (error) {
+            console.log('Failed to restore localStorage progress:', error)
+          }
+        }
+        
+        // Check if token is provided in URL params (from continue button)
         if (tokenParam) {
           console.log('🔑 Token from URL parameter:', tokenParam)
           try {
@@ -407,10 +449,12 @@ const JobApplicationPage: React.FC = () => {
     return () => clearTimeout(timeoutId)
   }, [formData.email, jobId, applicationId])
 
-  // Save on page unload (when user leaves the page)
+  // Save draft only when user leaves page without completing application
   useEffect(() => {
     const handleBeforeUnload = () => {
-      if (formData.firstName.trim() && formData.lastName.trim() && formData.email.trim()) {
+      // Only save draft if user has made significant progress and isn't submitting
+      if (hasSignificantProgress && !isSubmitting && formData.firstName.trim() && formData.lastName.trim() && formData.email.trim()) {
+        console.log('💾 Auto-saving draft on page unload')
         // Use navigator.sendBeacon for reliable saving when page unloads
         const partialData = {
           ...formData,
@@ -420,16 +464,26 @@ const JobApplicationPage: React.FC = () => {
           status: 'draft',
           completionPercentage: getCompletionPercentage(),
           currentStep,
+          isPartial: true,
         }
         
         const blob = new Blob([JSON.stringify(partialData)], { type: 'application/json' })
-        navigator.sendBeacon(`/api/applicants/partial${applicationId ? `/${applicationId}` : ''}`, blob)
+        const apiUrl = import.meta.env.VITE_API_URL || 'https://hireplan.co/api/v1'
+        navigator.sendBeacon(`${apiUrl}/applicants/partial${applicationId ? `/${applicationId}` : ''}`, blob)
       }
     }
 
     window.addEventListener('beforeunload', handleBeforeUnload)
     return () => window.removeEventListener('beforeunload', handleBeforeUnload)
-  }, [formData, currentStep, applicationId, jobId, companyName, job?.jobTitle])
+  }, [formData, currentStep, applicationId, jobId, companyName, job?.jobTitle, hasSignificantProgress, isSubmitting])
+
+  // Track when user has made significant progress
+  useEffect(() => {
+    const progress = getCompletionPercentage()
+    if (progress >= 25 || currentStep >= 2) { // Consider 25% completion or step 2+ as significant
+      setHasSignificantProgress(true)
+    }
+  }, [formData, currentStep])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -442,6 +496,7 @@ const JobApplicationPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setSubmitting(true)
+    setIsSubmitting(true) // Prevent draft saving during submission
     setError(null)
 
     try {
@@ -461,6 +516,11 @@ const JobApplicationPage: React.FC = () => {
 
       await API.applicant.applyJob(applicationData)
 
+      // Clear localStorage and draft data on successful submission
+      localStorage.removeItem(`application_progress_${jobId}`)
+      localStorage.removeItem(`partial_application_token_${jobId}`)
+      console.log('✅ Application submitted successfully, cleared draft data')
+
       setSuccessMessage('Application submitted successfully!')
       setTimeout(() => {
         navigate('/')
@@ -471,6 +531,7 @@ const JobApplicationPage: React.FC = () => {
         err?.response?.data?.message ||
           'Failed to submit application. Please try again.'
       )
+      setIsSubmitting(false) // Allow draft saving again if submission failed
     } finally {
       setSubmitting(false)
     }

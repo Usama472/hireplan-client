@@ -7,7 +7,6 @@ import {
   Clock, 
   CheckCircle,
   AlertCircle,
-  Mail,
   FileText,
   LogOut,
   Bell,
@@ -20,7 +19,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import API from "@/http";
@@ -34,7 +32,10 @@ interface Application {
   company?: {
     name: string;
     logo?: string;
+    slug?: string;
+    companyName?: string;
   };
+  companyName?: string;
   location?: {
     city: string;
     state: string;
@@ -55,10 +56,11 @@ interface Application {
     totalScore: number;
     recommendationLevel: string;
   };
-  jobId: string;
+  jobId: string | { _id?: string; toString(): string };
   isPartial?: boolean;
   completionPercentage?: number;
   lastUpdated?: Date;
+  partialApplicationToken?: string;
 }
 
 interface ApplicantUser {
@@ -108,14 +110,14 @@ export default function ApplicantDashboard() {
       const apps = applicationsResponse.data.applications || []
       
       // Debug company data for different application types
-      console.log('🔍 Finished apps company data:', apps.filter(app => !app.isPartial && app.status !== 'draft').map(app => ({
+      console.log('🔍 Finished apps company data:', apps.filter((app: Application) => !app.isPartial && app.status !== 'draft').map((app: Application) => ({
         jobTitle: app.jobTitle,
         company: app.company,
         isPartial: app.isPartial,
         status: app.status
       })))
       
-      console.log('🔍 Unfinished apps company data:', apps.filter(app => app.isPartial || app.status === 'draft').map(app => ({
+      console.log('🔍 Unfinished apps company data:', apps.filter((app: Application) => app.isPartial || app.status === 'draft').map((app: Application) => ({
         jobTitle: app.jobTitle,
         company: app.company,
         isPartial: app.isPartial,
@@ -561,20 +563,24 @@ export default function ApplicantDashboard() {
                                 // Navigate to continue application
                                 const companySlug = application.company?.slug || application.company?.name?.toLowerCase().replace(/\s+/g, '-') || 'company';
                                 
-                                let jobId = application.jobId;
-                                if (typeof jobId === 'object' && jobId._id) {
-                                  jobId = jobId._id.toString();
-                                } else if (typeof jobId === 'object') {
-                                  jobId = jobId.toString();
-                                } else if (typeof jobId === 'string') {
-                                  const match = jobId.match(/ObjectId\('([^']+)'\)/);
+                                let jobId: string;
+                                if (typeof application.jobId === 'object' && application.jobId._id) {
+                                  jobId = application.jobId._id.toString();
+                                } else if (typeof application.jobId === 'object') {
+                                  jobId = application.jobId.toString();
+                                } else if (typeof application.jobId === 'string') {
+                                  const match = application.jobId.match(/ObjectId\('([^']+)'\)/);
                                   if (match) {
                                     jobId = match[1];
+                                  } else {
+                                    jobId = application.jobId;
                                   }
+                                } else {
+                                  jobId = String(application.jobId);
                                 }
                                 
-                                if (jobId && jobId.length === 24) {
-                                  const continueUrl = `/company/${companySlug}/job/${jobId}/apply?token=${application.partialApplicationToken || ''}`;
+                                if (jobId && jobId.length === 24 && application.partialApplicationToken) {
+                                  const continueUrl = `/company/${companySlug}/job/${jobId}/apply?token=${application.partialApplicationToken}`;
                                   window.location.href = continueUrl;
                                 }
                               }}

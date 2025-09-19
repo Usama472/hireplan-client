@@ -79,7 +79,8 @@ interface Applicant {
   createdAt: string;
   aiScore?: number;
   aiEvaluation?: AIEvaluation | null;
-  status?: "pending" | "reviewed" | "shortlisted" | "rejected";
+  status?: "pending" | "reviewed" | "shortlisted" | "rejected" | "draft";
+  isPartial?: boolean;
   interviewScheduled?: boolean;
   invitationSent?: boolean;
   invitationSentAt?: string;
@@ -351,7 +352,7 @@ export function ApplicantDetailModal({
                 <Mail className="w-4 h-4 mr-2" />
                 Email Chat
               </TabsTrigger>
-              {hasProfessionalFeatures && (
+              {hasProfessionalFeatures && !(applicant.status === 'draft' || applicant.isPartial) && (
                 <TabsTrigger
                   value="ai-score"
                   className="data-[state=active]:bg-purple-50 data-[state=active]:text-purple-700 transition-all duration-300"
@@ -702,8 +703,8 @@ export function ApplicantDetailModal({
                   </div>
                 </TabsContent>
 
-                {/* AI Score Tab - Professional+ Only */}
-                {hasProfessionalFeatures && (
+                {/* AI Score Tab - Professional+ Only, but not for draft/partial applications */}
+                {hasProfessionalFeatures && !(applicant.status === 'draft' || applicant.isPartial) && (
                   <TabsContent
                     value="ai-score"
                     className="mt-0 space-y-8 animate-in slide-in-from-right duration-500"
