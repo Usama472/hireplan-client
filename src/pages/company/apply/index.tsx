@@ -1,33 +1,19 @@
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import API from '@/http'
-import type { ICity, IState } from 'country-state-city'
-import { City, State } from 'country-state-city'
 import {
   Briefcase,
-  Building,
-  Calendar,
   CheckCircle,
   ChevronLeft,
   DollarSign,
-  FileText,
   MapPin,
-  Upload,
   User,
 } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-// Temporary interface until it's properly exported from @/interfaces
+
 interface Job {
   jobId: string
   jobTitle: string
@@ -46,13 +32,7 @@ interface Job {
     min?: number
     max?: number
   }
-  payType?:
-    | 'hourly'
-    | 'salary'
-    | 'base-commission'
-    | 'base-tips'
-    | 'base-bonus'
-    | 'commission-only'
+  payType?: string
   jobRequirements?: string[]
   qualifications?: Array<{
     text: string
@@ -60,36 +40,26 @@ interface Job {
     isRequired?: boolean
     aiCategory?: 'need' | 'should' | 'nice'
   }>
-  resumeAnalysisMode?: 'simple' | 'detailed'
-  resumeCriteria?: Array<{
-    text: string
-    type: 'skill' | 'experience' | 'education' | 'certification'
-    aiCategory: 'need' | 'should' | 'nice'
-  }>
-  externalApplicationSetup?: {
-    customFields?: string[]
-  }
   customQuestions?: CustomQuestion[]
+}
+
+interface CustomQuestion {
+  id: string
+  question: string
+  type: 'string' | 'textarea' | 'select' | 'boolean'
+  required: boolean
+  options?: string[]
+}
+
+interface CustomQuestionAnswer {
+  questionId: string
+  answer: string | boolean | number
 }
 
 interface CustomField {
   field: string
   value: string
   required: boolean
-}
-
-interface CustomQuestion {
-  id: string
-  question: string
-  type: 'boolean' | 'select' | 'string' | 'text' | 'textarea' | 'number' | 'email' | 'phone' | 'date'
-  required: boolean
-  options: string[]
-  placeholder?: string
-}
-
-interface CustomQuestionAnswer {
-  questionId: string
-  answer: string | boolean
 }
 
 interface JobApplicationFormData {
@@ -100,8 +70,8 @@ interface JobApplicationFormData {
   resume: File | null
   email: string
   phone: string
-  customFields: CustomField[]
   customQuestionAnswers: CustomQuestionAnswer[]
+  customFields: CustomField[]
 }
 
 const JobApplicationPage: React.FC = () => {
@@ -114,13 +84,12 @@ const JobApplicationPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true)
   const [submitting, setSubmitting] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
-  const [resumeName, setResumeName] = useState<string>('')
   const [successMessage, setSuccessMessage] = useState<string>('')
-  const [usStates, setUSStates] = useState<IState[]>([])
-  const [selectedState, setSelectedState] = useState<string>('')
-  const [isDescriptionExpanded, setIsDescriptionExpanded] =
-    useState<boolean>(false)
   const [customQuestions, setCustomQuestions] = useState<CustomQuestion[]>([])
+  
+  // Multi-step application state
+  const [currentStep, setCurrentStep] = useState<number>(1)
+  const [applicationId, setApplicationId] = useState<string | null>(null)
 
   const [formData, setFormData] = useState<JobApplicationFormData>({
     firstName: '',
@@ -130,9 +99,179 @@ const JobApplicationPage: React.FC = () => {
     resume: null,
     email: '',
     phone: '',
-    customFields: [],
     customQuestionAnswers: [],
+    customFields: [],
   })
+
+  // Application steps
+  const steps = [
+    { id: 1, title: 'Basic Information', description: 'Tell us about yourself' },
+    { id: 2, title: 'Location & Contact', description: 'Where are you located?' },
+    { id: 3, title: 'Resume & Experience', description: 'Share your experience' },
+    { id: 4, title: 'Additional Questions', description: 'Complete your application' },
+    { id: 5, title: 'Review & Submit', description: 'Review and submit' }
+  ]
+
+  // Calculate completion percentage
+  const getCompletionPercentage = () => {
+    let completedFields = 0
+    let totalFields = 0
+
+    // Basic info (step 1) - now includes email
+    totalFields += 3
+    if (formData.firstName.trim()) completedFields++
+    if (formData.lastName.trim()) completedFields++
+    if (formData.email.trim()) completedFields++
+
+    // Contact info (step 2)
+    totalFields += 3
+    if (formData.phone.trim()) completedFields++
+    if (formData.city.trim()) completedFields++
+    if (formData.state.trim()) completedFields++
+
+    // Resume (step 3)
+    totalFields += 1
+    if (formData.resume) completedFields++
+
+    // Custom questions (step 4)
+    if (customQuestions.length > 0) {
+      totalFields += customQuestions.length
+      completedFields += formData.customQuestionAnswers.filter(answer => 
+        typeof answer.answer === 'string' ? answer.answer.trim() : !!answer.answer
+      ).length
+    }
+
+    return Math.round((completedFields / totalFields) * 100)
+  }
+
+  // Save partial application
+  const savePartialApplication = async () => {
+    if (!formData.firstName.trim() || !formData.lastName.trim() || !formData.email.trim()) {
+      console.log('❌ Cannot save - missing basic info')
+      return // Need at least basic info to save
+    }
+
+    try {
+      const partialData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        city: formData.city,
+        state: formData.state,
+        resume: formData.resume,
+        jobId,
+        companyName,
+        jobTitle: job?.jobTitle || '',
+        status: 'draft',
+        completionPercentage: getCompletionPercentage(),
+        currentStep,
+        isPartial: true,
+        // Only include non-empty arrays
+        customQuestionAnswers: formData.customQuestionAnswers.filter(answer => 
+          answer.questionId && (
+            (typeof answer.answer === 'string' && answer.answer !== '') || 
+            (typeof answer.answer === 'boolean') ||
+            (typeof answer.answer === 'number')
+          )
+        ),
+        customFields: formData.customFields.filter(field => 
+          field.field && field.value && field.value.trim()
+        ),
+      }
+
+      console.log('💾 Saving partial application:', partialData)
+      console.log('🔍 JobId being sent:', jobId, 'Type:', typeof jobId)
+
+      if (applicationId) {
+        // Update existing partial application
+        const response = await API.applicant.updatePartialApplication(applicationId, partialData)
+        console.log('✅ Updated partial application:', response)
+      } else {
+        // Create new partial application
+        const response = await API.applicant.createPartialApplication(partialData)
+        console.log('✅ Created partial application:', response)
+        setApplicationId(response.applicationId || response.data?.applicationId || response.id)
+        
+        // Store token for secure access
+        if (response.token) {
+          localStorage.setItem(`partial_application_token_${jobId}`, response.token)
+          console.log('🔑 Stored partial application token')
+        }
+      }
+    } catch (error) {
+      console.error('❌ Failed to save partial application:', error)
+    }
+  }
+
+  // Handle step navigation
+  const goToNextStep = async () => {
+    // Only save when we have minimum required info and when actually progressing
+    if (formData.firstName.trim() && formData.lastName.trim() && formData.email.trim()) {
+      await savePartialApplication()
+    }
+    if (currentStep < steps.length) {
+      setCurrentStep(currentStep + 1)
+    }
+  }
+
+  const goToPreviousStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1)
+    }
+  }
+
+  // Check for existing partial applications
+  const checkForExistingPartialApplications = async (jobId: string) => {
+    try {
+      // Check if there's a stored token in localStorage for this job
+      const storedToken = localStorage.getItem(`partial_application_token_${jobId}`)
+      if (storedToken) {
+        console.log('🔍 Found stored token for this job')
+        const response = await API.applicant.getPartialApplicationByToken(storedToken)
+        if (response.application) {
+          console.log('📋 Loading existing partial application:', response.application)
+          const existingApp = response.application
+          setApplicationId(existingApp.id || existingApp._id)
+          setCurrentStep(existingApp.currentStep || 1)
+          
+          // Update form data with existing values
+          setFormData({
+            firstName: existingApp.firstName || '',
+            lastName: existingApp.lastName || '',
+            email: existingApp.email || '',
+            phone: existingApp.phone || '',
+            city: existingApp.city || '',
+            state: existingApp.state || '',
+            resume: null, // Can't restore file from backend
+            customQuestionAnswers: existingApp.customQuestionAnswers || [],
+            customFields: existingApp.customFields || [],
+          })
+        }
+      }
+    } catch (error) {
+      console.log('🔍 No existing partial application found:', error)
+    }
+  }
+
+  // Validate current step
+  const isCurrentStepValid = () => {
+    switch (currentStep) {
+      case 1: // Basic Information
+        return formData.firstName.trim() && formData.lastName.trim() && formData.email.trim()
+      case 2: // Location & Contact
+        return formData.phone.trim() && formData.city.trim() && formData.state.trim()
+      case 3: // Resume
+        return formData.resume !== null
+      case 4: // Additional Questions
+        if (customQuestions.length === 0) return true
+        return formData.customQuestionAnswers.length >= customQuestions.filter(q => q.required).length
+      case 5: // Review
+        return true
+      default:
+        return false
+    }
+  }
 
   useEffect(() => {
     const fetchJobData = async () => {
@@ -143,44 +282,56 @@ const JobApplicationPage: React.FC = () => {
           return
         }
 
-        const company = await API.company.getPublicCompany(slug)
-        if (!company) {
-          setError('Company not found')
-          return
-        }
+        const response = await API.job.getPublicJobDetails(jobId)
+        const jobData = response.job
 
-        setCompanyName(company.companyName || '')
-        setCompanyLogo(company.logoUrl || null)
+        setJob(jobData)
+        setCompanyName(jobData?.company?.name || jobData?.companyName || 'Company')
+        setCompanyLogo(jobData?.company?.logo || jobData?.companyLogo || null)
 
-        const { job } = await API.job.getPublicJobDetails(jobId)
-
-        if (!job) {
-          setError('Job not found')
-          return
-        }
-
-        setJob(job)
-
-        // Initialize custom fields from job data as optional
-        if (job.externalApplicationSetup?.customFields?.length > 0) {
-          const initialCustomFields =
-            job.externalApplicationSetup.customFields.map((field: string) => ({
-              field,
-              value: '',
-              required: false,
-            }))
-          setFormData((prev) => ({
-            ...prev,
-            customFields: initialCustomFields,
-          }))
+        // Check for existing partial application for this job
+        await checkForExistingPartialApplications(jobId)
+        
+        // Check if token is provided in URL params (from continue button)
+        const urlParams = new URLSearchParams(window.location.search)
+        const tokenParam = urlParams.get('token')
+        if (tokenParam) {
+          console.log('🔑 Token from URL parameter:', tokenParam)
+          try {
+            const response = await API.applicant.getPartialApplicationByToken(tokenParam)
+            if (response.application) {
+              console.log('📋 Loading partial application from token:', response.application)
+              const existingApp = response.application
+              setApplicationId(existingApp.id || existingApp._id)
+              setCurrentStep(existingApp.currentStep || 1)
+              
+              // Update form data with existing values
+              setFormData({
+                firstName: existingApp.firstName || '',
+                lastName: existingApp.lastName || '',
+                email: existingApp.email || '',
+                phone: existingApp.phone || '',
+                city: existingApp.city || '',
+                state: existingApp.state || '',
+                resume: null, // Can't restore file from backend
+                customQuestionAnswers: existingApp.customQuestionAnswers || [],
+                customFields: existingApp.customFields || [],
+              })
+              
+              // Store token for future detection
+              localStorage.setItem(`partial_application_token_${jobId}`, tokenParam)
+            }
+          } catch (error) {
+            console.log('🔍 No partial application found for token:', error)
+          }
         }
 
         // Handle custom questions if present
-        if (job.customQuestions?.length > 0) {
-          setCustomQuestions(job.customQuestions)
+        if (jobData?.customQuestions?.length > 0) {
+          setCustomQuestions(jobData.customQuestions)
 
           // Initialize answers for custom questions
-          const initialAnswers = job.customQuestions.map(
+          const initialAnswers = jobData.customQuestions.map(
             (question: CustomQuestion) => ({
               questionId: question.id,
               answer: question.type === 'boolean' ? false : '',
@@ -192,6 +343,22 @@ const JobApplicationPage: React.FC = () => {
             customQuestionAnswers: initialAnswers,
           }))
         }
+
+        // Handle custom fields if present
+        if (jobData?.externalApplicationSetup?.customFields?.length > 0) {
+          const initialCustomFields = jobData.externalApplicationSetup.customFields.map(
+            (field: string) => ({
+              field,
+              value: '',
+              required: false,
+            })
+          )
+
+          setFormData((prev) => ({
+            ...prev,
+            customFields: initialCustomFields,
+          }))
+        }
       } catch (err) {
         console.error('Error fetching job data:', err)
         setError('Failed to load job details')
@@ -201,23 +368,68 @@ const JobApplicationPage: React.FC = () => {
     }
 
     fetchJobData()
-
-    const states = State.getStatesOfCountry('US')
-    setUSStates(states)
   }, [slug, jobId])
 
-  const handleStateChange = (value: string) => {
-    setSelectedState(value)
-
-    const stateName = usStates.find((state) => state.isoCode === value)?.name
-    if (stateName) {
-      setFormData((prev) => ({
-        ...prev,
-        state: stateName,
-        city: '',
-      }))
+  // Check for existing partial application when form data changes
+  useEffect(() => {
+    const checkExistingApplication = async () => {
+      if (formData.email.trim() && jobId && !applicationId) {
+        try {
+          console.log('🔍 Checking for existing partial application...')
+          const response = await API.applicant.getPartialApplication(formData.email, jobId)
+          if (response.application) {
+            console.log('📋 Found existing partial application:', response.application)
+            // Load existing data
+            const existingApp = response.application
+            setApplicationId(existingApp.id || existingApp._id)
+            setCurrentStep(existingApp.currentStep || 1)
+            
+            // Update form data with existing values
+            setFormData(prev => ({
+              ...prev,
+              firstName: existingApp.firstName || prev.firstName,
+              lastName: existingApp.lastName || prev.lastName,
+              email: existingApp.email || prev.email,
+              phone: existingApp.phone || prev.phone,
+              city: existingApp.city || prev.city,
+              state: existingApp.state || prev.state,
+              customQuestionAnswers: existingApp.customQuestionAnswers || prev.customQuestionAnswers,
+              customFields: existingApp.customFields || prev.customFields,
+            }))
+          }
+        } catch (error) {
+          console.log('🔍 No existing partial application found or error:', error)
+        }
+      }
     }
-  }
+
+    const timeoutId = setTimeout(checkExistingApplication, 1000) // Debounce
+    return () => clearTimeout(timeoutId)
+  }, [formData.email, jobId, applicationId])
+
+  // Save on page unload (when user leaves the page)
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (formData.firstName.trim() && formData.lastName.trim() && formData.email.trim()) {
+        // Use navigator.sendBeacon for reliable saving when page unloads
+        const partialData = {
+          ...formData,
+          jobId,
+          companyName,
+          jobTitle: job?.jobTitle || '',
+          status: 'draft',
+          completionPercentage: getCompletionPercentage(),
+          currentStep,
+        }
+        
+        const blob = new Blob([JSON.stringify(partialData)], { type: 'application/json' })
+        navigator.sendBeacon(`/api/applicants/partial${applicationId ? `/${applicationId}` : ''}`, blob)
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [formData, currentStep, applicationId, jobId, companyName, job?.jobTitle])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -227,167 +439,38 @@ const JobApplicationPage: React.FC = () => {
     }))
   }
 
-  const handleCustomFieldChange = (index: number, value: string) => {
-    setFormData((prev) => {
-      const updatedFields = [...prev.customFields]
-      updatedFields[index] = {
-        ...updatedFields[index],
-        value,
-      }
-      return {
-        ...prev,
-        customFields: updatedFields,
-      }
-    })
-  }
-
-  const handleCustomQuestionChange = (
-    questionId: string,
-    answer: string | boolean
-  ) => {
-    setFormData((prev) => {
-      const updatedAnswers = prev.customQuestionAnswers.map((item) =>
-        item.questionId === questionId ? { ...item, answer } : item
-      )
-      return {
-        ...prev,
-        customQuestionAnswers: updatedAnswers,
-      }
-    })
-  }
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setFormData((prev) => ({
-        ...prev,
-        resume: file,
-      }))
-      setResumeName(file.name)
-    }
-  }
-
-  const formatJobDescription = (text: string) => {
-    return (
-      text
-        // Replace line breaks with HTML breaks
-        .replace(/\n/g, '<br>')
-        // Format section headers
-        .replace(
-          /(Key Responsibilities:|Requirements:|Benefits:|What We Offer:|Qualifications:)/gi,
-          '<br><strong>$1</strong><br>'
-        )
-        // Format bullet points
-        .replace(/•\s*/g, '<br>• ')
-        // Remove multiple consecutive breaks
-        .replace(/(<br>\s*){3,}/g, '<br><br>')
-        // Clean up leading breaks
-        .replace(/^(<br>\s*)+/, '')
-        // Add proper spacing after periods that end sentences
-        .replace(/\.\s+([A-Z])/g, '.<br><br>$1')
-        // Clean up any remaining issues
-        .trim()
-    )
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
-    if (!job) {
-      setError('Job information is missing')
-      return
-    }
-
-    const requiredFields = [
-      'firstName',
-      'lastName',
-      'email',
-      'phone',
-      'state',
-      'city',
-    ]
-
-    const missingFields = requiredFields.filter(
-      (field) => !formData[field as keyof JobApplicationFormData]
-    )
-
-    if (missingFields.length > 0) {
-      setError(
-        `Please fill in all required fields: ${missingFields.join(', ')}`
-      )
-      return
-    }
-
-    if (!formData.resume) {
-      setError('Please upload your resume')
-      return
-    }
-
-    // Validate required custom questions
-    const missingRequiredQuestions = customQuestions
-      .filter((q) => q.required)
-      .filter((q) => {
-        const answer = formData.customQuestionAnswers.find(
-          (a) => a.questionId === q.id
-        )?.answer
-        // Check if answer is empty string or undefined
-        if (typeof answer === 'string') {
-          return answer.trim() === ''
-        }
-        return answer === undefined
-      })
-      .map((q) => q.question)
-
-    if (missingRequiredQuestions.length > 0) {
-      setError(
-        `Please answer all required questions: ${missingRequiredQuestions.join(
-          ', '
-        )}`
-      )
-      return
-    }
-
     setSubmitting(true)
     setError(null)
 
     try {
-      const filteredCustomFields = formData.customFields.filter(
-        (field) => field.value.trim() !== ''
-      )
+      let resumeUrl = ''
 
-      const resumeUrl = await API.attachment.uploadAttachment(formData.resume)
-
-      // Filter out any empty custom question answers (for non-required fields)
-      const filteredCustomQuestionAnswers =
-        formData.customQuestionAnswers.filter((answer) => {
-          if (typeof answer.answer === 'string') {
-            return answer.answer.trim() !== ''
-          }
-          return answer.answer !== undefined
-        })
-
-      const applicantPayload = {
-        ...formData,
-        customFields: filteredCustomFields,
-        customQuestionAnswers: filteredCustomQuestionAnswers,
-        jobId,
-        companyName,
-        jobTitle: job.jobTitle,
-        resume: resumeUrl,
+      if (formData.resume) {
+        resumeUrl = await API.attachment.uploadAttachment(formData.resume)
       }
 
-      await API.applicant.applyJob(applicantPayload)
+      const applicationData = {
+        ...formData,
+        resume: resumeUrl,
+        jobId,
+        companyName,
+        jobTitle: job?.jobTitle || '',
+      }
 
-      setSuccessMessage(
-        `Your application for ${job.jobBoardTitle} has been successfully submitted.`
-      )
+      await API.applicant.applyJob(applicationData)
 
+      setSuccessMessage('Application submitted successfully!')
       setTimeout(() => {
-        navigate(`/company/${slug}`)
+        navigate('/')
       }, 3000)
-    } catch (err) {
-      console.error('Error submitting application:', err)
-      setError('Failed to submit application. Please try again.')
+    } catch (err: any) {
+      console.error('Application submission error:', err)
+      setError(
+        err?.response?.data?.message ||
+          'Failed to submit application. Please try again.'
+      )
     } finally {
       setSubmitting(false)
     }
@@ -395,26 +478,20 @@ const JobApplicationPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className='flex flex-col items-center justify-center min-h-screen bg-gray-50'>
-        <div className='animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500'></div>
-        <p className='mt-4 text-gray-600 text-sm'>Loading job details...</p>
+      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
+        <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600'></div>
       </div>
     )
   }
 
-  if (error) {
+  if (error && !job) {
     return (
-      <div className='flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4'>
-        <div className='bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-md max-w-md w-full text-center shadow-sm'>
-          <p className='text-base font-semibold mb-2'>Error</p>
-          <p className='text-sm'>{error}</p>
-          <Button
-            className='mt-4 bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded'
-            onClick={() => navigate(-1)}
-            size='sm'
-          >
-            <ChevronLeft className='w-4 h-4 mr-1' />
-            Go Back
+      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
+        <div className='text-center p-8'>
+          <h1 className='text-2xl font-bold text-red-600 mb-4'>Error</h1>
+          <p className='text-gray-600 mb-4'>{error}</p>
+          <Button onClick={() => navigate('/')} variant='outline'>
+            Go Back Home
           </Button>
         </div>
       </div>
@@ -423,827 +500,619 @@ const JobApplicationPage: React.FC = () => {
 
   if (successMessage) {
     return (
-      <div className='flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4'>
-        <div className='bg-green-50 border border-green-200 text-green-700 px-6 py-8 rounded-md max-w-md w-full text-center shadow-sm'>
-          <div className='flex justify-center mb-4'>
-            <div className='h-12 w-12 rounded-full bg-green-100 flex items-center justify-center'>
-              <svg
-                xmlns='http://www.w3.org/2000/svg'
-                className='h-6 w-6 text-green-600'
-                fill='none'
-                viewBox='0 0 24 24'
-                stroke='currentColor'
-              >
-                <path
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  strokeWidth={2}
-                  d='M5 13l4 4L19 7'
-                />
-              </svg>
-            </div>
-          </div>
-          <p className='text-xl font-semibold mb-3'>Application Submitted!</p>
-          <p className='mb-5 text-sm'>{successMessage}</p>
-          <p className='text-xs text-gray-500 mb-4'>
-            You will be redirected back to the company page shortly.
+      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
+        <div className='text-center p-8 bg-white rounded-lg shadow-md max-w-md w-full mx-4'>
+          <CheckCircle className='h-16 w-16 text-green-500 mx-auto mb-4' />
+          <h1 className='text-2xl font-bold text-gray-900 mb-4'>
+            Application Submitted!
+          </h1>
+          <p className='text-gray-600 mb-6'>{successMessage}</p>
+          <p className='text-sm text-gray-500'>
+            Redirecting you to the homepage in a few seconds...
           </p>
-          <Button
-            className='bg-green-600 hover:bg-green-700 text-white text-sm'
-            onClick={() => navigate(`/company/${slug}`)}
-            size='sm'
-          >
-            Return to Company Page
-          </Button>
         </div>
       </div>
     )
   }
 
-  if (!job) {
-    return null
-  }
-
-  const location = job.jobLocation
-    ? `${job.jobLocation.city}, ${job.jobLocation.state}`
-    : 'Location not specified'
-
-  const formattedDate = job.endDate
-    ? new Date(job.endDate).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      })
-    : null
-
   return (
-    <div className='min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-7'>
-      {/* Back button and breadcrumbs */}
-      <div className='container mx-auto px-4 max-w-7xl'>
-        <div className='mb-6'>
-          <Button
-            variant='ghost'
-            className='text-gray-600 hover:text-gray-800 text-sm flex items-center mb-2.5 transition-all hover:bg-gray-100'
-            onClick={() => navigate(`/company/${slug}`)}
-            size='sm'
-          >
-            <ChevronLeft className='h-4 w-4 mr-1' />
-            Back to jobs
-          </Button>
-          <div className='flex text-xs text-gray-500 bg-white px-3 py-2 rounded shadow-sm'>
-            <span>Companies</span>
-            <span className='mx-2'>/</span>
-            <span>{companyName}</span>
-            <span className='mx-2'>/</span>
-            <span className='text-blue-600 font-medium'>
-              {job.jobBoardTitle}
-            </span>
-          </div>
-        </div>
-
-        {/* Two-column layout */}
-        <div className='grid grid-cols-1 lg:grid-cols-12 gap-6'>
-          {/* Job Details Sidebar - Left Column */}
-          <div className='lg:col-span-3 space-y-4'>
-            {/* Header with company info */}
-            <div className='bg-white p-4 rounded-lg shadow-sm border border-gray-100 lg:sticky lg:top-6'>
-              <div className='flex items-start'>
-                <div className='flex-shrink-0 mr-3'>
-                  {companyLogo ? (
-                    <img
-                      src={companyLogo}
-                      alt={`${companyName} logo`}
-                      className='h-12 w-12 object-contain rounded border border-gray-200 p-1 bg-white'
-                      onError={(e) => {
-                        ;(e.target as HTMLImageElement).src =
-                          "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23888'%3E%3Cpath d='M21 13v10h-6v-6h-6v6h-6v-10h-3l12-12 12 12h-3z'/%3E%3C/svg%3E"
-                      }}
-                    />
-                  ) : (
-                    <div className='h-12 w-12 flex items-center justify-center bg-blue-50 rounded border border-blue-100'>
-                      <Building className='h-6 w-6 text-blue-400' />
-                    </div>
-                  )}
-                </div>
-                <div className='flex-1'>
-                  <p className='text-xs font-medium text-blue-600 mb-0.5'>
-                    {companyName}
-                  </p>
-                  <h1 className='text-base font-semibold text-gray-900 mb-2 leading-tight'>
-                    {job.jobBoardTitle}
-                  </h1>
-                  <div className='flex flex-wrap gap-1.5 mt-1'>
-                    <span className='inline-flex items-center px-2 py-0.5 bg-blue-50 text-blue-800 text-xs font-medium rounded-full border border-blue-100'>
-                      {job.employmentType.replace('-', ' ')}
-                    </span>
-                    <span className='inline-flex items-center px-2 py-0.5 bg-green-50 text-green-800 text-xs font-medium rounded-full border border-green-100'>
-                      {job.workplaceType}
-                    </span>
-                    {location && (
-                      <span className='inline-flex items-center px-2 py-0.5 bg-gray-50 text-gray-800 text-xs font-medium rounded-full border border-gray-200'>
-                        <MapPin className='h-3 w-3 mr-1' />
-                        {location}
-                      </span>
-                    )}
-                    {formattedDate && (
-                      <span className='inline-flex items-center px-2 py-0.5 bg-amber-50 text-amber-800 text-xs font-medium rounded-full border border-amber-100'>
-                        <Calendar className='h-3 w-3 mr-1' />
-                        Apply by {formattedDate}
-                      </span>
-                    )}
-                  </div>
-                </div>
+    <div className='min-h-screen bg-gray-50'>
+      {/* Header */}
+      <div className='bg-white shadow-sm border-b'>
+        <div className='max-w-6xl mx-auto px-6 py-4'>
+          <div className='flex items-center justify-between'>
+            <div className='flex items-center gap-4'>
+              {companyLogo && (
+                <img
+                  src={companyLogo}
+                  alt={`${companyName} logo`}
+                  className='h-12 w-12 rounded-lg object-cover'
+                />
+              )}
+              <div>
+                <h1 className='text-xl font-bold text-gray-900'>
+                  {job?.jobTitle}
+                </h1>
+                <p className='text-gray-600'>{companyName}</p>
               </div>
             </div>
+            <Button
+              variant='outline'
+              onClick={() => navigate(-1)}
+              className='flex items-center gap-2'
+            >
+              <ChevronLeft className='h-4 w-4' />
+              Back
+            </Button>
+          </div>
+        </div>
+      </div>
 
-            {/* Job Description */}
-            <Card className='p-3 shadow-md border border-gray-100 rounded-lg lg:sticky lg:top-28 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto'>
-              <div className='border-b pb-1.5 mb-3'>
-                <h3 className='text-xs font-medium text-gray-900 flex items-center gap-1.5'>
-                  <Briefcase className='h-3 w-3 text-blue-600' />
-                  Job Details
-                </h3>
-              </div>
-
-              {/* Salary Information */}
-              {job.payRate && (
-                <div className='mb-3 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200'>
-                  <h4 className='text-xs font-semibold text-gray-900 mb-2 flex items-center gap-1.5'>
-                    <DollarSign className='h-3 w-3 text-blue-600' />
-                    Compensation
-                  </h4>
-                  <div className='flex flex-col gap-0.5'>
-                    <span className='text-lg font-bold text-blue-800'>
-                      {job.payRate.type === 'fixed' && job.payRate.amount
-                        ? `$${job.payRate.amount.toLocaleString()}`
-                        : job.payRate.type === 'range' &&
-                          job.payRate.min &&
-                          job.payRate.max
-                        ? `$${job.payRate.min.toLocaleString()} - $${job.payRate.max.toLocaleString()}`
-                        : 'Competitive'}
-                    </span>
-                    <span className='text-xs font-medium text-blue-700'>
-                      {job.payType === 'hourly'
-                        ? 'per hour'
-                        : job.payType === 'salary'
-                        ? 'per year'
-                        : job.payType === 'base-commission'
-                        ? 'base + commission'
-                        : job.payType === 'base-tips'
-                        ? 'base + tips'
-                        : job.payType === 'base-bonus'
-                        ? 'base + bonus'
-                        : job.payType === 'commission-only'
-                        ? 'commission only'
-                        : ''}
-                    </span>
-                  </div>
+      <div className='max-w-6xl mx-auto px-6 py-8'>
+        <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
+          {/* Job Details - Left Column */}
+          <div className='lg:col-span-1'>
+            <div className='bg-white rounded-lg shadow-lg border p-6 space-y-4'>
+              <h2 className='text-xl font-bold text-gray-900 border-b pb-2'>Job Details</h2>
+              
+              <div className='space-y-4'>
+                <div>
+                  <h3 className='font-semibold text-gray-700'>Position</h3>
+                  <p className='text-gray-900'>{job?.jobTitle || 'Software Engineer'}</p>
                 </div>
-              )}
-
-              {/* Qualifications - Updated to use new structure */}
-              {((job.qualifications && job.qualifications.length > 0) || 
-                (job.jobRequirements && job.jobRequirements.length > 0)) && (
-                <div className='mb-3 p-3 bg-gradient-to-r from-slate-50 to-gray-50 rounded-lg border border-slate-200'>
-                  <h4 className='text-xs font-semibold text-gray-900 mb-2 flex items-center gap-1.5'>
-                    <CheckCircle className='h-3 w-3 text-slate-600' />
-                    Job Requirements
-                  </h4>
-                  <div className='space-y-2'>
-                    {/* New Structured Qualifications */}
-                    {job.qualifications && job.qualifications.length > 0 && (
-                      <>
-                        {/* Required Qualifications */}
-                        {job.qualifications.filter(q => q.isRequired).length > 0 && (
-                          <div>
-                            <h5 className='text-xs font-medium text-red-700 mb-1'>Required:</h5>
-                            <ul className='space-y-1'>
-                              {job.qualifications
-                                .filter(q => q.isRequired)
-                                .map((qual, index) => (
-                                  <li key={index} className='flex items-start gap-2 text-xs text-gray-700'>
-                                    <span className='w-1 h-1 bg-red-500 rounded-full mt-1.5 flex-shrink-0'></span>
-                                    <span>{qual.text}</span>
-                                  </li>
-                                ))}
-                            </ul>
-                          </div>
-                        )}
-                        
-                        {/* Preferred Qualifications */}
-                        {job.qualifications.filter(q => !q.isRequired).length > 0 && (
-                          <div>
-                            <h5 className='text-xs font-medium text-green-700 mb-1'>Preferred:</h5>
-                            <ul className='space-y-1'>
-                              {job.qualifications
-                                .filter(q => !q.isRequired)
-                                .map((qual, index) => (
-                                  <li key={index} className='flex items-start gap-2 text-xs text-gray-700'>
-                                    <span className='w-1 h-1 bg-green-500 rounded-full mt-1.5 flex-shrink-0'></span>
-                                    <span>{qual.text}</span>
-                                  </li>
-                                ))}
-                            </ul>
-                          </div>
-                        )}
-                      </>
-                    )}
-                    
-                    {/* Fallback to old jobRequirements */}
-                    {(!job.qualifications || job.qualifications.length === 0) && job.jobRequirements && job.jobRequirements.length > 0 && (
-                      <ul className='space-y-1'>
-                        {job.jobRequirements
-                          .slice(0, 5)
-                          .map((req: string, index: number) => (
-                            <li
-                              key={index}
-                              className='flex items-start gap-2 text-xs text-gray-700'
-                            >
-                              <span className='w-1 h-1 bg-slate-500 rounded-full mt-1.5 flex-shrink-0'></span>
-                              <span>{req}</span>
-                            </li>
-                          ))}
-                        {job.jobRequirements.length > 5 && (
-                          <li className='text-xs text-gray-500 italic'>
-                            +{job.jobRequirements.length - 5} more requirements
-                          </li>
-                        )}
-                      </ul>
-                    )}
-                  </div>
+                
+                <div>
+                  <h3 className='font-semibold text-gray-700'>Company</h3>
+                  <p className='text-gray-900'>{companyName || 'Tech Company'}</p>
                 </div>
-              )}
-
-              {/* Job Description - Compact */}
-              <div className='mb-2'>
-                <h4 className='text-xs font-semibold text-gray-900 mb-2 flex items-center gap-1.5'>
-                  <FileText className='h-3 w-3 text-gray-600' />
-                  About This Role
-                </h4>
-                <div
-                  className='prose prose-xs max-w-none text-gray-600 space-y-2 [&>strong]:font-semibold [&>strong]:text-gray-800 [&>strong]:block [&>strong]:mt-3 [&>strong]:mb-1'
-                  style={{
-                    fontSize: '11px',
-                    lineHeight: '1.5',
-                  }}
-                  dangerouslySetInnerHTML={{
-                    __html:
-                      !isDescriptionExpanded && job.jobDescription.length > 400
-                        ? formatJobDescription(
-                            job.jobDescription.substring(0, 400)
-                          ) + '...'
-                        : formatJobDescription(job.jobDescription),
-                  }}
-                />
-                {job.jobDescription.length > 400 && (
-                  <button
-                    onClick={() =>
-                      setIsDescriptionExpanded(!isDescriptionExpanded)
+                
+                <div>
+                  <h3 className='font-semibold text-gray-700'>Type</h3>
+                  <p className='text-gray-900'>{job?.employmentType || 'Full-time'}</p>
+                </div>
+                
+                <div>
+                  <h3 className='font-semibold text-gray-700'>Location</h3>
+                  <p className='text-gray-900'>
+                    {job?.jobLocation?.city && job?.jobLocation?.state 
+                      ? `${job.jobLocation.city}, ${job.jobLocation.state}`
+                      : 'Remote'
                     }
-                    className='text-xs text-blue-600 hover:text-blue-800 mt-2 font-medium transition-colors'
-                  >
-                    {isDescriptionExpanded ? 'Show less' : 'Read more'}
-                  </button>
+                  </p>
+                </div>
+                
+                <div>
+                  <h3 className='font-semibold text-gray-700'>Salary</h3>
+                  <p className='text-gray-900 font-semibold'>
+                    {job?.payRate?.min && job?.payRate?.max
+                      ? `$${job.payRate.min.toLocaleString()} - $${job.payRate.max.toLocaleString()}`
+                      : '$120,000 - $160,000'
+                    }
+                  </p>
+                  <p className='text-sm text-gray-600'>per year</p>
+                </div>
+
+                {/* Job Description */}
+                {job?.jobDescription && (
+                  <div>
+                    <h3 className='font-semibold text-gray-700 mb-2'>About This Role</h3>
+                    <div 
+                      className='text-sm text-gray-700 leading-relaxed max-h-32 overflow-y-auto'
+                      dangerouslySetInnerHTML={{ __html: job.jobDescription.substring(0, 300) + (job.jobDescription.length > 300 ? '...' : '') }}
+                    />
+                  </div>
+                )}
+
+                {/* Job Requirements */}
+                {((job?.qualifications && job.qualifications.length > 0) || (job?.jobRequirements && job.jobRequirements.length > 0)) && (
+                  <div>
+                    <h3 className='font-semibold text-gray-700 mb-2'>Requirements</h3>
+                    <div className='space-y-2'>
+                      {/* New structured qualifications */}
+                      {job?.qualifications && job.qualifications.length > 0 ? (
+                        <>
+                          {job.qualifications.slice(0, 6).map((qual, index) => (
+                            <div key={index} className='flex items-start gap-2'>
+                              <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${qual.isRequired ? 'bg-red-500' : 'bg-green-500'}`}></div>
+                              <span className='text-sm text-gray-700'>{qual.text}</span>
+                            </div>
+                          ))}
+                          {job.qualifications.length > 6 && (
+                            <p className='text-xs text-gray-500 italic'>+{job.qualifications.length - 6} more requirements</p>
+                          )}
+                        </>
+                      ) : (
+                        /* Fallback to legacy jobRequirements */
+                        job?.jobRequirements && job.jobRequirements.slice(0, 6).map((req, index) => (
+                          <div key={index} className='flex items-start gap-2'>
+                            <div className='w-2 h-2 rounded-full mt-1.5 bg-blue-500 flex-shrink-0'></div>
+                            <span className='text-sm text-gray-700'>{req}</span>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
                 )}
               </div>
-            </Card>
+            </div>
           </div>
 
           {/* Application Form - Right Column */}
-          <div className='lg:col-span-9'>
+          <div className='lg:col-span-2'>
             <Card className='shadow-md border-0 rounded-lg mb-7 overflow-hidden'>
-              <div className='bg-blue-600 text-white px-5 py-3'>
+              <div className='bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white px-5 py-3'>
                 <h2 className='text-lg font-medium'>Application Form</h2>
-                <p className='text-sm text-blue-100'>
+                <p className='text-sm text-white/90'>
                   Complete the form below to apply for this position
                 </p>
               </div>
 
-              <form onSubmit={handleSubmit} className='p-5 space-y-5'>
-                {/* Personal Information */}
-                <div className='bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200 shadow-sm'>
-                  <h3 className='text-base font-semibold text-gray-900 pb-2 mb-3 border-b border-blue-200 flex items-center'>
-                    <span className='bg-blue-100 text-blue-800 w-7 h-7 rounded-full inline-flex items-center justify-center text-sm mr-3 shadow-sm'>
-                      <User className='h-4 w-4' />
-                    </span>
-                    Personal Information
-                  </h3>
-                  <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-                    <div>
-                      <Label
-                        htmlFor='firstName'
-                        className='text-sm font-medium text-gray-700 mb-1 flex items-center'
-                      >
-                        First Name{' '}
-                        <span className='text-red-500 ml-0.5'>*</span>
-                      </Label>
-                      <Input
-                        id='firstName'
-                        name='firstName'
-                        value={formData.firstName}
-                        onChange={handleChange}
-                        className='h-10 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 transition-all bg-white'
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label
-                        htmlFor='lastName'
-                        className='text-sm font-medium text-gray-700 mb-1 flex items-center'
-                      >
-                        Last Name <span className='text-red-500 ml-0.5'>*</span>
-                      </Label>
-                      <Input
-                        id='lastName'
-                        name='lastName'
-                        value={formData.lastName}
-                        onChange={handleChange}
-                        className='h-10 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 transition-all bg-white'
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label
-                        htmlFor='email'
-                        className='text-sm font-medium text-gray-700 mb-1 flex items-center'
-                      >
-                        Email Address{' '}
-                        <span className='text-red-500 ml-0.5'>*</span>
-                      </Label>
-                      <Input
-                        id='email'
-                        name='email'
-                        type='email'
-                        value={formData.email}
-                        onChange={handleChange}
-                        className='h-10 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 transition-all bg-white'
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label
-                        htmlFor='phone'
-                        className='text-sm font-medium text-gray-700 mb-1 flex items-center'
-                      >
-                        Phone Number{' '}
-                        <span className='text-red-500 ml-0.5'>*</span>
-                      </Label>
-                      <Input
-                        id='phone'
-                        name='phone'
-                        type='tel'
-                        value={formData.phone}
-                        onChange={handleChange}
-                        className='h-10 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 transition-all bg-white'
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label
-                        htmlFor='state'
-                        className='text-sm font-medium text-gray-700 mb-1 flex items-center'
-                      >
-                        State <span className='text-red-500 ml-0.5'>*</span>
-                      </Label>
-                      <Select
-                        value={selectedState}
-                        onValueChange={handleStateChange}
-                      >
-                        <SelectTrigger
-                          id='state'
-                          className='h-10 text-sm bg-white focus:ring-blue-500 focus:border-blue-500 transition-all'
-                        >
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className='max-h-[220px]'>
-                          {usStates.map((state) => (
-                            <SelectItem
-                              key={state.isoCode}
-                              value={state.isoCode}
-                            >
-                              {state.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label
-                        htmlFor='city'
-                        className='text-sm font-medium text-gray-700 mb-1 flex items-center'
-                      >
-                        City <span className='text-red-500 ml-0.5'>*</span>
-                      </Label>
-                      <Input
-                        id='city'
-                        name='city'
-                        value={formData.city}
-                        onChange={handleChange}
-                        placeholder='Enter your city'
-                        className='h-10 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 transition-all bg-white'
-                        required
-                      />
-                    </div>
-                  </div>
+              {/* Progress Bar */}
+              <div className="px-5 py-4 bg-gray-50 border-b">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-gray-600">
+                    Step {currentStep} of {steps.length}
+                  </span>
+                  <span className="text-sm text-gray-500">
+                    {getCompletionPercentage()}% Complete
+                  </span>
                 </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 h-2 rounded-full transition-all duration-500"
+                    style={{ width: `${(currentStep / steps.length) * 100}%` }}
+                  ></div>
+                </div>
+                <div className="flex justify-between mt-2">
+                  {steps.map((step) => (
+                    <div key={step.id} className="flex flex-col items-center">
+                      <div className={`w-3 h-3 rounded-full ${currentStep >= step.id ? 'bg-blue-500' : 'bg-gray-300'}`}></div>
+                      <span className="text-xs mt-1 text-gray-600 hidden sm:block">{step.title}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
 
-
-
-                {/* Custom Fields */}
-                {formData.customFields.length > 0 && (
-                  <div className='bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg p-4 border border-indigo-200 shadow-sm'>
-                    <h3 className='text-base font-semibold text-gray-900 pb-2 mb-3 border-b border-indigo-200 flex items-center'>
-                      <span className='bg-indigo-100 text-indigo-800 w-7 h-7 rounded-full inline-flex items-center justify-center text-sm mr-3 shadow-sm'>
-                        <FileText className='h-4 w-4' />
-                      </span>
-                      Additional Information{' '}
-                      <span className='text-xs text-gray-500 ml-2 font-normal'>
-                        (Optional)
-                      </span>
-                    </h3>
-                    <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                      {formData.customFields.map((customField, index) => (
-                        <div key={index}>
-                          <Label
-                            htmlFor={`custom-${index}`}
-                            className='text-sm font-medium text-gray-700 mb-1 flex items-center'
-                          >
-                            {customField.field}
+              <form onSubmit={handleSubmit} className='p-5 space-y-5'>
+                {/* Step 1: Basic Information */}
+                {currentStep === 1 && (
+                  <div className='space-y-6'>
+                    <div className="text-center mb-6">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">Let's start with the basics</h3>
+                      <p className="text-gray-600">Tell us your name and email so we can save your progress</p>
+                    </div>
+                    
+                    <div className='bg-gradient-to-r from-blue-50/50 to-purple-50/50 rounded-lg p-6 border border-purple-200 shadow-sm backdrop-blur-sm'>
+                      <h3 className='text-lg font-semibold text-gray-900 mb-4 flex items-center'>
+                        <span className='bg-gradient-to-r from-blue-500 to-purple-600 text-white w-8 h-8 rounded-full inline-flex items-center justify-center text-sm mr-3 shadow-sm'>
+                          <User className='h-4 w-4' />
+                        </span>
+                        Basic Information
+                      </h3>
+                      <div className='space-y-4'>
+                        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                          <div>
+                            <Label htmlFor='firstName' className='text-sm font-medium text-gray-700 mb-1 flex items-center'>
+                              First Name <span className='text-red-500 ml-0.5'>*</span>
+                            </Label>
+                            <Input
+                              id='firstName'
+                              name='firstName'
+                              value={formData.firstName}
+                              onChange={handleChange}
+                              className='h-10 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 transition-all bg-white'
+                              required
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor='lastName' className='text-sm font-medium text-gray-700 mb-1 flex items-center'>
+                              Last Name <span className='text-red-500 ml-0.5'>*</span>
+                            </Label>
+                            <Input
+                              id='lastName'
+                              name='lastName'
+                              value={formData.lastName}
+                              onChange={handleChange}
+                              className='h-10 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 transition-all bg-white'
+                              required
+                            />
+                          </div>
+                        </div>
+                        
+                        {/* Email field */}
+                        <div>
+                          <Label htmlFor='email' className='text-sm font-medium text-gray-700 mb-1 flex items-center'>
+                            Email Address <span className='text-red-500 ml-0.5'>*</span>
                           </Label>
                           <Input
-                            id={`custom-${index}`}
-                            value={customField.value}
-                            onChange={(e) =>
-                              handleCustomFieldChange(index, e.target.value)
-                            }
-                            className='h-10 text-sm rounded-md focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-white'
+                            id='email'
+                            name='email'
+                            type='email'
+                            value={formData.email}
+                            onChange={handleChange}
+                            placeholder='your.email@example.com'
+                            className='h-10 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 transition-all bg-white'
+                            required
+                          />
+                          <p className='text-xs text-gray-500 mt-1'>
+                            We'll use this to save your progress and contact you about your application
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 2: Location & Contact */}
+                {currentStep === 2 && (
+                  <div className='space-y-6'>
+                    <div className="text-center mb-6">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">Where are you located?</h3>
+                      <p className="text-gray-600">Help us understand your location and contact preferences</p>
+                    </div>
+                    
+                    <div className='bg-gradient-to-r from-purple-50/50 to-pink-50/50 rounded-lg p-6 border border-purple-200 shadow-sm backdrop-blur-sm'>
+                      <h3 className='text-lg font-semibold text-gray-900 mb-4 flex items-center'>
+                        <span className='bg-gradient-to-r from-purple-500 to-pink-500 text-white w-8 h-8 rounded-full inline-flex items-center justify-center text-sm mr-3 shadow-sm'>
+                          <MapPin className='h-4 w-4' />
+                        </span>
+                        Location & Contact
+                      </h3>
+                      <div className='space-y-4'>
+                        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                          <div>
+                            <Label htmlFor='city' className='text-sm font-medium text-gray-700 mb-1 flex items-center'>
+                              City <span className='text-red-500 ml-0.5'>*</span>
+                            </Label>
+                            <Input
+                              id='city'
+                              name='city'
+                              value={formData.city}
+                              onChange={handleChange}
+                              placeholder='San Francisco'
+                              className='h-10 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 transition-all bg-white'
+                              required
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor='state' className='text-sm font-medium text-gray-700 mb-1 flex items-center'>
+                              State <span className='text-red-500 ml-0.5'>*</span>
+                            </Label>
+                            <Input
+                              id='state'
+                              name='state'
+                              value={formData.state}
+                              onChange={handleChange}
+                              placeholder='California'
+                              className='h-10 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 transition-all bg-white'
+                              required
+                            />
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <Label htmlFor='phone' className='text-sm font-medium text-gray-700 mb-1 flex items-center'>
+                            Phone Number <span className='text-red-500 ml-0.5'>*</span>
+                          </Label>
+                          <Input
+                            id='phone'
+                            name='phone'
+                            type='tel'
+                            value={formData.phone}
+                            onChange={handleChange}
+                            placeholder='(555) 123-4567'
+                            className='h-10 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 transition-all bg-white'
+                            required
                           />
                         </div>
-                      ))}
+                      </div>
                     </div>
                   </div>
                 )}
 
-                {/* Custom Questions */}
-                {customQuestions.length > 0 && (
-                  <div className='bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-4 border border-purple-200 shadow-sm'>
-                    <h3 className='text-base font-semibold text-gray-900 pb-2 mb-3 border-b border-purple-200 flex items-center'>
-                      <span className='bg-purple-100 text-purple-800 w-7 h-7 rounded-full inline-flex items-center justify-center text-sm mr-3 shadow-sm'>
-                        <FileText className='h-4 w-4' />
-                      </span>
-                      Additional Questions
-                    </h3>
-                    <div className='grid grid-cols-1 gap-5'>
-                      {customQuestions.map((question) => (
-                        <div
-                          key={question.id}
-                          className='bg-white p-4 rounded-md border border-purple-100 shadow-sm'
-                        >
-                          <Label
-                            htmlFor={question.id}
-                            className='text-sm font-medium text-gray-700 mb-2 flex items-start'
-                          >
-                            <div className='flex-grow'>
-                              {question.question}
-                              {question.required && (
-                                <span className='text-red-500 ml-0.5'>*</span>
-                              )}
-                            </div>
+                {/* Step 3: Resume */}
+                {currentStep === 3 && (
+                  <div className='space-y-6'>
+                    <div className="text-center mb-6">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">Share your experience</h3>
+                      <p className="text-gray-600">Upload your resume to showcase your background</p>
+                    </div>
+                    
+                    <div className='bg-gradient-to-r from-pink-50/50 to-purple-50/50 rounded-lg p-6 border border-pink-200 shadow-sm backdrop-blur-sm'>
+                      <h3 className='text-lg font-semibold text-gray-900 mb-4 flex items-center'>
+                        <span className='bg-gradient-to-r from-pink-500 to-purple-600 text-white w-8 h-8 rounded-full inline-flex items-center justify-center text-sm mr-3 shadow-sm'>
+                          📄
+                        </span>
+                        Resume Upload
+                      </h3>
+                      <div className='space-y-4'>
+                        <div>
+                          <Label htmlFor='resume' className='text-sm font-medium text-gray-700 mb-1 flex items-center'>
+                            Resume <span className='text-red-500 ml-0.5'>*</span>
                           </Label>
-
-                          {/* Different input types based on question type */}
-                          {(question.type === 'string' || question.type === 'text') && (
-                            <Input
-                              id={question.id}
-                              value={
-                                (formData.customQuestionAnswers.find(
-                                  (a) => a.questionId === question.id
-                                )?.answer as string) || ''
+                          <Input
+                            id='resume'
+                            name='resume'
+                            type='file'
+                            accept='.pdf,.doc,.docx'
+                            onChange={(e) => {
+                              const file = e.target.files?.[0]
+                              if (file) {
+                                setFormData(prev => ({ ...prev, resume: file }))
                               }
-                              onChange={(e) =>
-                                handleCustomQuestionChange(
-                                  question.id,
-                                  e.target.value
-                                )
-                              }
-                              placeholder={question.placeholder}
-                              className='h-10 text-sm rounded-md focus:ring-purple-500 focus:border-purple-500 transition-all bg-white'
-                              required={question.required}
-                            />
-                          )}
-
-                          {question.type === 'textarea' && (
-                            <Textarea
-                              id={question.id}
-                              value={
-                                (formData.customQuestionAnswers.find(
-                                  (a) => a.questionId === question.id
-                                )?.answer as string) || ''
-                              }
-                              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                                handleCustomQuestionChange(
-                                  question.id,
-                                  e.target.value
-                                )
-                              }
-                              placeholder={question.placeholder || 'Enter your detailed response...'}
-                              className='min-h-[100px] text-sm rounded-md focus:ring-purple-500 focus:border-purple-500 transition-all bg-white resize-y'
-                              required={question.required}
-                            />
-                          )}
-
-                          {question.type === 'number' && (
-                            <Input
-                              type="number"
-                              id={question.id}
-                              value={
-                                (formData.customQuestionAnswers.find(
-                                  (a) => a.questionId === question.id
-                                )?.answer as string) || ''
-                              }
-                              onChange={(e) =>
-                                handleCustomQuestionChange(
-                                  question.id,
-                                  e.target.value
-                                )
-                              }
-                              placeholder={question.placeholder || 'Enter a number...'}
-                              className='h-10 text-sm rounded-md focus:ring-purple-500 focus:border-purple-500 transition-all bg-white'
-                              required={question.required}
-                            />
-                          )}
-
-                          {question.type === 'email' && (
-                            <Input
-                              type="email"
-                              id={question.id}
-                              value={
-                                (formData.customQuestionAnswers.find(
-                                  (a) => a.questionId === question.id
-                                )?.answer as string) || ''
-                              }
-                              onChange={(e) =>
-                                handleCustomQuestionChange(
-                                  question.id,
-                                  e.target.value
-                                )
-                              }
-                              placeholder={question.placeholder || 'Enter email address...'}
-                              className='h-10 text-sm rounded-md focus:ring-purple-500 focus:border-purple-500 transition-all bg-white'
-                              required={question.required}
-                            />
-                          )}
-
-                          {question.type === 'phone' && (
-                            <Input
-                              type="tel"
-                              id={question.id}
-                              value={
-                                (formData.customQuestionAnswers.find(
-                                  (a) => a.questionId === question.id
-                                )?.answer as string) || ''
-                              }
-                              onChange={(e) =>
-                                handleCustomQuestionChange(
-                                  question.id,
-                                  e.target.value
-                                )
-                              }
-                              placeholder={question.placeholder || 'Enter phone number...'}
-                              className='h-10 text-sm rounded-md focus:ring-purple-500 focus:border-purple-500 transition-all bg-white'
-                              required={question.required}
-                            />
-                          )}
-
-                          {question.type === 'date' && (
-                            <Input
-                              type="date"
-                              id={question.id}
-                              value={
-                                (formData.customQuestionAnswers.find(
-                                  (a) => a.questionId === question.id
-                                )?.answer as string) || ''
-                              }
-                              onChange={(e) =>
-                                handleCustomQuestionChange(
-                                  question.id,
-                                  e.target.value
-                                )
-                              }
-                              className='h-10 text-sm rounded-md focus:ring-purple-500 focus:border-purple-500 transition-all bg-white'
-                              required={question.required}
-                            />
-                          )}
-
-                          {question.type === 'boolean' && (
-                            <div className='flex gap-4'>
-                              <label className='flex items-center gap-2 cursor-pointer'>
-                                <input
-                                  type='radio'
-                                  name={question.id}
-                                  checked={
-                                    formData.customQuestionAnswers.find(
-                                      (a) => a.questionId === question.id
-                                    )?.answer === true
-                                  }
-                                  onChange={() =>
-                                    handleCustomQuestionChange(
-                                      question.id,
-                                      true
-                                    )
-                                  }
-                                  className='h-4 w-4 text-purple-600'
-                                  required={question.required}
-                                />
-                                <span className='text-sm text-gray-700'>
-                                  Yes
-                                </span>
-                              </label>
-                              <label className='flex items-center gap-2 cursor-pointer'>
-                                <input
-                                  type='radio'
-                                  name={question.id}
-                                  checked={
-                                    formData.customQuestionAnswers.find(
-                                      (a) => a.questionId === question.id
-                                    )?.answer === false
-                                  }
-                                  onChange={() =>
-                                    handleCustomQuestionChange(
-                                      question.id,
-                                      false
-                                    )
-                                  }
-                                  className='h-4 w-4 text-purple-600'
-                                  required={question.required}
-                                />
-                                <span className='text-sm text-gray-700'>
-                                  No
-                                </span>
-                              </label>
-                            </div>
-                          )}
-
-                          {question.type === 'select' && (
-                            <Select
-                              value={
-                                (formData.customQuestionAnswers.find(
-                                  (a) => a.questionId === question.id
-                                )?.answer as string) || ''
-                              }
-                              onValueChange={(value) =>
-                                handleCustomQuestionChange(question.id, value)
-                              }
-                            >
-                              <SelectTrigger
-                                id={question.id}
-                                className='h-10 text-sm bg-white focus:ring-purple-500 focus:border-purple-500 transition-all'
-                              >
-                                <SelectValue placeholder='Select an option' />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {question.options.map((option) => (
-                                  <SelectItem key={option} value={option}>
-                                    {option}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          )}
+                            }}
+                            className='h-10 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 transition-all bg-white'
+                            required
+                          />
+                          <p className='text-xs text-gray-500 mt-1'>
+                            Accepted formats: PDF, DOC, DOCX (Max 5MB)
+                          </p>
                         </div>
-                      ))}
+                        {formData.resume && (
+                          <div className='p-3 bg-green-50 border border-green-200 rounded-lg'>
+                            <p className='text-sm text-green-700 font-medium'>
+                              ✓ File selected: {formData.resume.name}
+                            </p>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}
 
-                {/* Resume Upload */}
-                <div className='bg-gradient-to-r from-gray-50 to-slate-50 rounded-lg p-4 border border-gray-200 shadow-sm'>
-                  <h3 className='text-base font-semibold text-gray-900 pb-2 mb-3 border-b border-gray-200 flex items-center'>
-                    <span className='bg-gray-100 text-gray-800 w-7 h-7 rounded-full inline-flex items-center justify-center text-sm mr-3 shadow-sm'>
-                      <Upload className='h-4 w-4' />
-                    </span>
-                    Resume Upload
-                  </h3>
-                  <div className='border-2 border-dashed border-gray-300 rounded-lg p-6 bg-white/50 flex flex-col items-center justify-center hover:bg-white/70 transition-colors'>
-                    <div className='relative mb-3'>
-                      <Button
-                        type='button'
-                        variant='outline'
-                        className={`w-full md:w-auto flex items-center justify-center h-12 px-6 font-medium transition-all ${
-                          resumeName
-                            ? 'bg-green-50 border-green-300 text-green-700 hover:bg-green-100'
-                            : 'bg-white hover:bg-gray-50 hover:border-gray-400 border-gray-300 text-gray-700'
-                        }`}
-                      >
-                        {resumeName ? (
-                          <>
-                            <CheckCircle className='h-5 w-5 mr-2 text-green-500' />
-                            <span className='text-sm font-medium'>
-                              {resumeName}
-                            </span>
-                          </>
-                        ) : (
-                          <>
-                            <Upload className='h-5 w-5 mr-2 text-gray-600' />
-                            <span className='text-sm font-medium'>
-                              Choose Resume File
-                            </span>
-                          </>
-                        )}
-                      </Button>
-                      <input
-                        id='resume'
-                        type='file'
-                        accept='.pdf,.doc,.docx'
-                        onChange={handleFileChange}
-                        className='absolute inset-0 opacity-0 w-full h-full cursor-pointer'
-                        required
-                      />
+                {/* Step 4: Additional Questions */}
+                {currentStep === 4 && (
+                  <div className='space-y-6'>
+                    <div className="text-center mb-6">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">A few more questions</h3>
+                      <p className="text-gray-600">Help us understand your fit for this role</p>
                     </div>
-                    <div className='text-center max-w-md'>
-                      {resumeName ? (
-                        <p className='text-sm text-green-600 font-medium'>
-                          ✓ File selected: {resumeName}
-                        </p>
-                      ) : (
-                        <div className='space-y-1'>
-                          <p className='text-sm font-medium text-gray-700'>
-                            Accepted formats: PDF, DOC, DOCX
-                          </p>
-                          <p className='text-xs text-gray-500'>
-                            Maximum file size: 5MB
-                          </p>
+                    
+                    {customQuestions.length > 0 ? (
+                      <div className='space-y-4'>
+                        {customQuestions.map((question) => (
+                          <div key={question.id} className='bg-gradient-to-r from-orange-50/50 to-pink-50/50 rounded-lg p-6 border border-orange-200 shadow-sm backdrop-blur-sm'>
+                            <Label className='text-sm font-medium text-gray-700 mb-2 flex items-center'>
+                              {question.question}
+                              {question.required && <span className='text-red-500 ml-1'>*</span>}
+                            </Label>
+                            
+                            {/* Text Input */}
+                            {question.type === 'string' && (
+                              <Input
+                                value={formData.customQuestionAnswers.find(a => a.questionId === question.id)?.answer as string || ''}
+                                onChange={(e) => {
+                                  const newAnswers = [...formData.customQuestionAnswers]
+                                  const existingIndex = newAnswers.findIndex(a => a.questionId === question.id)
+                                  if (existingIndex >= 0) {
+                                    newAnswers[existingIndex].answer = e.target.value
+                                  } else {
+                                    newAnswers.push({ questionId: question.id, answer: e.target.value })
+                                  }
+                                  setFormData(prev => ({ ...prev, customQuestionAnswers: newAnswers }))
+                                }}
+                                placeholder='Your answer...'
+                                className='h-10 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 transition-all bg-white'
+                                required={question.required}
+                              />
+                            )}
+                            
+                            {/* Textarea */}
+                            {question.type === 'textarea' && (
+                              <textarea
+                                value={formData.customQuestionAnswers.find(a => a.questionId === question.id)?.answer as string || ''}
+                                onChange={(e) => {
+                                  const newAnswers = [...formData.customQuestionAnswers]
+                                  const existingIndex = newAnswers.findIndex(a => a.questionId === question.id)
+                                  if (existingIndex >= 0) {
+                                    newAnswers[existingIndex].answer = e.target.value
+                                  } else {
+                                    newAnswers.push({ questionId: question.id, answer: e.target.value })
+                                  }
+                                  setFormData(prev => ({ ...prev, customQuestionAnswers: newAnswers }))
+                                }}
+                                rows={4}
+                                placeholder='Your detailed answer...'
+                                className='w-full p-3 text-sm rounded-md border border-gray-300 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white'
+                                required={question.required}
+                              />
+                            )}
+                            
+                            {/* Boolean/Yes-No */}
+                            {question.type === 'boolean' && (
+                              <div className='space-y-2'>
+                                <div className='flex gap-4'>
+                                  <label className='flex items-center'>
+                                    <input
+                                      type='radio'
+                                      name={`question_${question.id}`}
+                                      checked={formData.customQuestionAnswers.find(a => a.questionId === question.id)?.answer === true}
+                                      onChange={() => {
+                                        const newAnswers = [...formData.customQuestionAnswers]
+                                        const existingIndex = newAnswers.findIndex(a => a.questionId === question.id)
+                                        if (existingIndex >= 0) {
+                                          newAnswers[existingIndex].answer = true
+                                        } else {
+                                          newAnswers.push({ questionId: question.id, answer: true })
+                                        }
+                                        setFormData(prev => ({ ...prev, customQuestionAnswers: newAnswers }))
+                                      }}
+                                      className='mr-2'
+                                    />
+                                    <span className='text-sm text-gray-700'>Yes</span>
+                                  </label>
+                                  <label className='flex items-center'>
+                                    <input
+                                      type='radio'
+                                      name={`question_${question.id}`}
+                                      checked={formData.customQuestionAnswers.find(a => a.questionId === question.id)?.answer === false}
+                                      onChange={() => {
+                                        const newAnswers = [...formData.customQuestionAnswers]
+                                        const existingIndex = newAnswers.findIndex(a => a.questionId === question.id)
+                                        if (existingIndex >= 0) {
+                                          newAnswers[existingIndex].answer = false
+                                        } else {
+                                          newAnswers.push({ questionId: question.id, answer: false })
+                                        }
+                                        setFormData(prev => ({ ...prev, customQuestionAnswers: newAnswers }))
+                                      }}
+                                      className='mr-2'
+                                    />
+                                    <span className='text-sm text-gray-700'>No</span>
+                                  </label>
+                                </div>
+                              </div>
+                            )}
+                            
+                            {/* Select Dropdown */}
+                            {question.type === 'select' && question.options && (
+                              <select
+                                value={formData.customQuestionAnswers.find(a => a.questionId === question.id)?.answer as string || ''}
+                                onChange={(e) => {
+                                  const newAnswers = [...formData.customQuestionAnswers]
+                                  const existingIndex = newAnswers.findIndex(a => a.questionId === question.id)
+                                  if (existingIndex >= 0) {
+                                    newAnswers[existingIndex].answer = e.target.value
+                                  } else {
+                                    newAnswers.push({ questionId: question.id, answer: e.target.value })
+                                  }
+                                  setFormData(prev => ({ ...prev, customQuestionAnswers: newAnswers }))
+                                }}
+                                className='w-full p-3 text-sm rounded-md border border-gray-300 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white'
+                                required={question.required}
+                              >
+                                <option value=''>Select an option...</option>
+                                {question.options.map((option, optIndex) => (
+                                  <option key={optIndex} value={option}>
+                                    {option}
+                                  </option>
+                                ))}
+                              </select>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className='text-center p-8'>
+                        <CheckCircle className='h-12 w-12 text-green-500 mx-auto mb-4' />
+                        <p className='text-gray-600'>No additional questions for this position</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Step 5: Review & Submit */}
+                {currentStep === 5 && (
+                  <div className='space-y-6'>
+                    <div className="text-center mb-6">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">Review your application</h3>
+                      <p className="text-gray-600">Please review your information before submitting</p>
+                    </div>
+                    
+                    <div className='bg-gradient-to-r from-green-50/50 to-blue-50/50 rounded-lg p-6 border border-green-200 shadow-sm backdrop-blur-sm'>
+                      <h3 className='text-lg font-semibold text-gray-900 mb-4 flex items-center'>
+                        <span className='bg-gradient-to-r from-green-500 to-blue-600 text-white w-8 h-8 rounded-full inline-flex items-center justify-center text-sm mr-3 shadow-sm'>
+                          <CheckCircle className='h-4 w-4' />
+                        </span>
+                        Application Summary
+                      </h3>
+                      
+                      <div className='space-y-4'>
+                        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                          <div>
+                            <h4 className='font-medium text-gray-700'>Name</h4>
+                            <p className='text-gray-900'>{formData.firstName} {formData.lastName}</p>
+                          </div>
+                          <div>
+                            <h4 className='font-medium text-gray-700'>Email</h4>
+                            <p className='text-gray-900'>{formData.email}</p>
+                          </div>
+                          <div>
+                            <h4 className='font-medium text-gray-700'>Phone</h4>
+                            <p className='text-gray-900'>{formData.phone}</p>
+                          </div>
+                          <div>
+                            <h4 className='font-medium text-gray-700'>Location</h4>
+                            <p className='text-gray-900'>{formData.city}, {formData.state}</p>
+                          </div>
                         </div>
-                      )}
+                        
+                        {formData.resume && (
+                          <div>
+                            <h4 className='font-medium text-gray-700'>Resume</h4>
+                            <p className='text-gray-900'>📄 {formData.resume.name}</p>
+                          </div>
+                        )}
+                        
+                        {formData.customQuestionAnswers.length > 0 && (
+                          <div>
+                            <h4 className='font-medium text-gray-700'>Additional Questions</h4>
+                            <div className='space-y-2'>
+                              {formData.customQuestionAnswers.map((answer, index) => {
+                                const question = customQuestions.find(q => q.id === answer.questionId)
+                                return (
+                                  <div key={index} className='text-sm'>
+                                    <p className='font-medium text-gray-600'>{question?.question}</p>
+                                    <p className='text-gray-900'>{answer.answer?.toString()}</p>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
 
-                {/* Submit Button */}
-                <div className='pt-4 border-t border-gray-200'>
-                  <div className='flex flex-col md:flex-row md:items-center justify-between'>
-                    <p className='text-sm text-gray-500 mb-3 md:mb-0'>
-                      <span className='text-red-500'>*</span> indicates required
-                      fields
+                {/* Step Navigation */}
+                <div className="flex justify-between pt-6 border-t border-gray-200">
+                  <Button 
+                    type="button"
+                    variant="outline" 
+                    onClick={goToPreviousStep}
+                    disabled={currentStep === 1}
+                    className="flex items-center gap-2"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    Previous
+                  </Button>
+                  
+                  <div className="text-center">
+                    <p className="text-sm text-gray-600 mb-1">
+                      {steps.find(s => s.id === currentStep)?.description}
                     </p>
-                    <Button
-                      type='submit'
-                      className={`${
-                        submitting
-                          ? 'bg-blue-400'
-                          : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700'
-                      } text-white px-8 py-3 h-auto rounded-lg transition-all shadow-lg hover:shadow-xl font-semibold`}
-                      disabled={submitting}
+                  </div>
+
+                  {currentStep < steps.length ? (
+                    <Button 
+                      type="button"
+                      onClick={goToNextStep}
+                      disabled={!isCurrentStepValid()}
+                      className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+                    >
+                      Next
+                      <ChevronLeft className="w-4 h-4 rotate-180" />
+                    </Button>
+                  ) : (
+                    <Button 
+                      type="submit"
+                      disabled={submitting || !isCurrentStepValid()}
+                      className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
                     >
                       {submitting ? (
-                        <div className='flex items-center justify-center'>
-                          <svg
-                            className='animate-spin -ml-1 mr-3 h-5 w-5 text-white'
-                            xmlns='http://www.w3.org/2000/svg'
-                            fill='none'
-                            viewBox='0 0 24 24'
-                          >
-                            <circle
-                              className='opacity-25'
-                              cx='12'
-                              cy='12'
-                              r='10'
-                              stroke='currentColor'
-                              strokeWidth='4'
-                            ></circle>
-                            <path
-                              className='opacity-75'
-                              fill='currentColor'
-                              d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
-                            ></path>
-                          </svg>
-                          <span className='text-sm font-medium'>
-                            Submitting Application...
-                          </span>
-                        </div>
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          Submitting...
+                        </>
                       ) : (
-                        <div className='flex items-center'>
-                          <span className='text-sm font-medium'>
-                            Submit Application
-                          </span>
-                          <svg
-                            className='ml-2 h-4 w-4'
-                            xmlns='http://www.w3.org/2000/svg'
-                            fill='none'
-                            viewBox='0 0 24 24'
-                            stroke='currentColor'
-                          >
-                            <path
-                              strokeLinecap='round'
-                              strokeLinejoin='round'
-                              strokeWidth={2}
-                              d='M14 5l7 7m0 0l-7 7m7-7H3'
-                            />
-                          </svg>
-                        </div>
+                        <>
+                          Submit Application
+                          <CheckCircle className="w-4 h-4" />
+                        </>
                       )}
                     </Button>
-                  </div>
+                  )}
                 </div>
               </form>
             </Card>
