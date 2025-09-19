@@ -9,6 +9,7 @@ import {
   PlusCircle,
   Send,
   Settings,
+  UserCheck,
   Users,
 } from "lucide-react";
 import type * as React from "react";
@@ -67,6 +68,11 @@ export const DashboardSidebar = ({
       name: "Jobs",
       url: ROUTES.DASHBOARD.MAIN,
       icon: Briefcase,
+    });
+    staticData.projects.push({
+      name: "Applicants",
+      url: ROUTES.DASHBOARD.APPLICANTS,
+      icon: UserCheck,
     });
   }
   if (userPermissions.includes(PERMISSIONS.JOB_CREATE)) {

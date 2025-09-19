@@ -52,6 +52,7 @@ import Signup from "@pages/auth/Signup";
 // Applicant Pages
 import ApplicantLogin from "@/pages/applicant/login";
 import ApplicantDashboard from "@/pages/applicant/dashboard";
+import ApplicantsPage from "@/pages/dashboard/applicants";
 
 export const appRoutes: AppRoutesType[] = [
   {
@@ -119,6 +120,12 @@ export const appRoutes: AppRoutesType[] = [
     id: DASHBOARD_TEXT,
     url: ROUTES.DASHBOARD.MAIN,
     element: <DashboardPage />,
+    isPrivate: true,
+  },
+  {
+    id: "applicants",
+    url: ROUTES.DASHBOARD.APPLICANTS,
+    element: <ApplicantsPage />,
     isPrivate: true,
   },
   {

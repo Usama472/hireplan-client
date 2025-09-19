@@ -196,6 +196,25 @@ export function JobAdStep() {
             </CardHeader>
             <CardContent className="pt-0">
               <div className="space-y-3">
+                {/* AI Enhancement Instructions */}
+                <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 sm:p-4">
+                  <div className="flex items-start gap-2">
+                    <div className="flex-shrink-0 w-5 h-5 bg-purple-100 rounded-full flex items-center justify-center mt-0.5">
+                      <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
+                    </div>
+                    <div className="text-xs sm:text-sm text-purple-700">
+                      <p className="font-medium mb-1">💡 AI Enhancement Tip</p>
+                      <p>
+                        Start writing your job description, then use the{" "}
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-100 rounded text-xs font-medium">
+                          ✨ Enhance with AI
+                        </span>{" "}
+                        button to improve clarity, structure, and appeal. The more details you provide initially, the better the AI can enhance your content.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
                 <TiptapEditor
                   name="jobDescription"
                   placeholder="Describe the role, responsibilities, work culture, benefits, growth opportunities, and hiring process expectations..."

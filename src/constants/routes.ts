@@ -8,6 +8,7 @@ export const DASHBOARD_ROUTES = {
   EDIT_JOB_ID: `${DASHBOARD_MAIN_ROUTE}/edit/:id`,
   VIEW_JOB: `${DASHBOARD_MAIN_ROUTE}/view`,
   VIEW_JOB_ID: `${DASHBOARD_MAIN_ROUTE}/view/:id`,
+  APPLICANTS: `/dashboard/applicants`,
   PROFILE: `/dashboard/profile`,
   SCHEDULER: `/dashboard/scheduler`,
   CHATS: `/dashboard/chats`,

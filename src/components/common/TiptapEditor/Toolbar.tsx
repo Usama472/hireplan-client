@@ -293,13 +293,16 @@ export function Toolbar({ editor, enableAI, aiContext, onAIEnhance }: ToolbarPro
             onClick={handleAIEnhance}
             disabled={isEnhancing}
             className={cn(
-              "p-2 rounded hover:bg-purple-100 transition-colors duration-200 text-purple-700",
+              "flex items-center gap-2 px-3 py-2 rounded-md hover:bg-purple-100 transition-colors duration-200 text-purple-700 text-sm font-medium",
               isEnhancing && "opacity-50 cursor-not-allowed"
             )}
             aria-label="Enhance with AI"
             title="Enhance with AI"
           >
             <Sparkles className={cn("w-4 h-4", isEnhancing && "animate-spin")} />
+            <span className="whitespace-nowrap">
+              {isEnhancing ? "Enhancing..." : "Enhance with AI"}
+            </span>
           </button>
         </>
       )}

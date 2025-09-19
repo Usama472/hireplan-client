@@ -110,9 +110,10 @@ const getStatusColor = (status?: string) => {
 };
 
 const getScoreColor = (score: number) => {
-  if (score >= 80) return "bg-green-100 text-green-800 border-green-300";
-  if (score >= 60) return "bg-yellow-100 text-yellow-800 border-yellow-300";
-  return "bg-red-100 text-red-800 border-red-300";
+  if (score >= 80) return "bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-green-500/25 ring-green-500/20";
+  if (score >= 60) return "bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white shadow-purple-500/25 ring-purple-500/20"; // HirePlan signature gradient
+  if (score >= 40) return "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-amber-500/25 ring-amber-500/20";
+  return "bg-gradient-to-r from-red-500 to-rose-600 text-white shadow-red-500/25 ring-red-500/20";
 };
 
 // Stats Card Component - Mobile Optimized
@@ -306,12 +307,17 @@ const ApplicantCard = ({
         <div className="flex flex-wrap gap-1.5 sm:gap-2">
           {applicant.aiScore && (
             <div
-              className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getScoreColor(
-                applicant.aiScore
-              )}`}
+              className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-all duration-200 backdrop-blur-sm
+                sm:gap-1.5 sm:px-2.5 sm:py-1
+                md:gap-1.5 md:px-3 md:py-1.5 md:text-sm md:font-semibold md:shadow-md md:ring-2 md:hover:shadow-lg
+                ${getScoreColor(applicant.aiScore)}`}
             >
-              <Star className="w-3 h-3" />
-              {applicant.aiScore}%
+              <div className="flex items-center justify-center w-2.5 h-2.5 bg-white/20 rounded-full sm:w-3 sm:h-3 md:w-3 md:h-3">
+                <div className="w-1 h-1 bg-white rounded-full sm:w-1.5 sm:h-1.5 md:w-1.5 md:h-1.5"></div>
+              </div>
+              <span className="font-bold">
+                {applicant.aiScore}%
+              </span>
             </div>
           )}
           <div
