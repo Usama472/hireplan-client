@@ -57,6 +57,10 @@ export const JOB_FORM_DEFAULT_VALUES: JobFormSchema = {
   jobRequirements: [], // Legacy field, keeping empty
   customQuestions: [],
 
+  // AI Analysis fields - Resume Analysis
+  resumeAnalysisMode: "simple",
+  resumeCriteria: [],
+
   // Step 6: Posting Schedule & Budget
   startDate: new Date(),
   endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // Default to 30 days from now
@@ -223,6 +227,35 @@ export const JOB_FORM_TEST_DATA: JobFormSchema = {
         "Part-time (20-30 hours/week)",
         "Contract/Freelance",
       ],
+    },
+  ],
+
+  // AI Analysis fields - Resume Analysis
+  resumeAnalysisMode: "detailed",
+  resumeCriteria: [
+    {
+      text: "React.js proficiency",
+      type: "skill",
+      aiCategory: "need",
+      weight: 5,
+    },
+    {
+      text: "Node.js experience",
+      type: "skill",
+      aiCategory: "need",
+      weight: 5,
+    },
+    {
+      text: "5+ years full-stack experience",
+      type: "experience",
+      aiCategory: "need",
+      weight: 4,
+    },
+    {
+      text: "TypeScript knowledge",
+      type: "skill",
+      aiCategory: "should",
+      weight: 3,
     },
   ],
 

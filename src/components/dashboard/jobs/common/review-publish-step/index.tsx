@@ -19,7 +19,7 @@ import {
 import { useFormContext } from "react-hook-form";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { AutomationReview } from "./AutomationReview";
+import { AIAnalysisReview } from "./AIAnalysisReview";
 import { AvailabilityReview } from "./AvailabilityReview";
 import { ComplianceReview } from "./ComplianceReview";
 import { HoursScheduleReview } from "./HoursScheduleReview";
@@ -61,7 +61,7 @@ export function ReviewPublishStep({
     { id: "compliance", label: "Compliance", icon: Building },
     { id: "qualifications", label: "Qualifications", icon: Users },
     { id: "posting", label: "Posting", icon: Calendar },
-    { id: "automation", label: "AI Overview", icon: Brain },
+    { id: "automation", label: "AI Analysis", icon: Brain },
     { id: "custom-automations", label: "Custom Automations", icon: Zap },
     { id: "availability", label: "Availability", icon: CalendarClock },
     ...(mode === "review"
@@ -291,7 +291,7 @@ export function ReviewPublishStep({
                   <PostingScheduleReview formData={formData} />
                 )}
                 {activeTab === "automation" && (
-                  <AutomationReview formData={formData} />
+                  <AIAnalysisReview formData={formData} />
                 )}
                 {activeTab === "custom-automations" && (
                   <SelectedAutomationsPreview

@@ -38,6 +38,14 @@ const qualificationSchema = z.object({
   score: z.number().min(0).max(100).optional().default(0),
 });
 
+// Resume criteria schema for AI analysis
+const resumeCriterionSchema = z.object({
+  text: z.string().min(1, "Criterion text is required"),
+  type: z.enum(["skill", "experience"]).default("skill"),
+  aiCategory: z.enum(["need", "should", "nice"]).optional(),
+  weight: z.number().min(1).max(10).default(1),
+});
+
 // These schemas are now part of the section-based automation system
 // Old AI ranking and custom rule schemas have been replaced
 
@@ -298,6 +306,10 @@ export const jobFormSchema = z
     preferredQualifications: z.array(qualificationSchema).default([]),
     jobRequirements: z.array(z.string()).default([]),
     customQuestions: z.array(customQuestionSchema).default([]),
+
+    // AI Analysis fields - Resume Analysis
+    resumeAnalysisMode: z.enum(["simple", "detailed"]).default("simple"),
+    resumeCriteria: z.array(resumeCriterionSchema).default([]),
 
     // Step 6: Posting Schedule & Budget
     startDate: z.preprocess(
