@@ -1,5 +1,6 @@
 "use client";
 
+import { AIAnalysisStep } from "@/components/dashboard/jobs/common/ai-analysis-step";
 import { BookingPageStep } from "@/components/dashboard/jobs/common/booking-page-step";
 import { CustomAutomationStep } from "@/components/dashboard/jobs/common/custom-automation-step";
 import { JobAdStep } from "@/components/dashboard/jobs/common/job-ad-step";
@@ -7,7 +8,10 @@ import { PositionDetailsStep } from "@/components/dashboard/jobs/common/position
 import { ReviewPublishStep } from "@/components/dashboard/jobs/common/review-publish-step";
 import { SettingsNotificationsStep } from "@/components/dashboard/jobs/common/settings-notifications-step";
 import { StepControls } from "@/components/main/signup/stepNavigation";
-import { EnhancedProgressStepper, type Step } from "@/components/ui/enhanced-progress-stepper";
+import {
+  EnhancedProgressStepper,
+  type Step,
+} from "@/components/ui/enhanced-progress-stepper";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,6 +22,7 @@ import { stepFields } from "@/constants/form-constants";
 import { JOB_FORM_DEFAULT_VALUES } from "@/constants/job-form-defaults";
 import API from "@/http";
 import type { JobFormData } from "@/interfaces";
+import useAuthSessionContext from "@/lib/context/AuthSessionContext";
 import { errorResolver } from "@/lib/utils";
 import {
   jobFormSchema,
@@ -120,6 +125,10 @@ const getJobDefaults = (
     automation: job.automation || defaults.automation,
     automations: job.automations || defaults.automations,
 
+    // Resume Analysis fields
+    resumeAnalysisMode: job.resumeAnalysisMode || defaults.resumeAnalysisMode,
+    resumeCriteria: job.resumeCriteria || defaults.resumeCriteria,
+
     // Step 7: Email Templates
     emailTemplates: job.emailTemplates || defaults.emailTemplates,
 
@@ -167,17 +176,90 @@ export default function EditJob() {
     isRetrying: false,
   });
   const navigate = useNavigate();
+  const { subscription } = useAuthSessionContext();
+
+  // Check if user has Professional/Enterprise features
+  const hasProfessionalFeatures =
+    subscription?.planId === "professional" ||
+    subscription?.planId === "enterprise";
 
   // Define steps for the progress stepper
-  const steps: Step[] = [
-    { id: "job-ad", title: "Job Details", description: "Basic job information" },
-    { id: "position", title: "Position Details", description: "Role details and company info" },
-    { id: "settings", title: "Settings", description: "Job settings and notifications" },
-    { id: "questions", title: "Questions", description: "Custom screening questions", optional: true },
-    { id: "automation", title: "Automation", description: "Automated workflows", optional: true },
-    { id: "booking", title: "Interview Booking", description: "Schedule interviews" },
-    { id: "review", title: "Review & Update", description: "Final review and update" },
-  ];
+  const getSteps = (): Step[] => {
+    const baseSteps: Step[] = [
+      {
+        id: "job-ad",
+        title: "Job Details",
+        description: "Basic job information",
+      },
+      {
+        id: "position",
+        title: "Position Details",
+        description: "Role details and company info",
+      },
+      {
+        id: "settings",
+        title: "Settings",
+        description: "Job settings and notifications",
+      },
+    ];
+
+    if (hasProfessionalFeatures) {
+      baseSteps.push(
+        {
+          id: "ai-analysis",
+          title: "AI Analysis",
+          description: "Resume screening & AI overview",
+          optional: true,
+        },
+        {
+          id: "automation",
+          title: "Automation",
+          description: "Automated workflows",
+          optional: true,
+        },
+        {
+          id: "booking",
+          title: "Interview Booking",
+          description: "Schedule interviews",
+        },
+        {
+          id: "review",
+          title: "Review & Update",
+          description: "Final review and update",
+        }
+      );
+    } else {
+      baseSteps.push(
+        {
+          id: "questions",
+          title: "Questions",
+          description: "Custom screening questions",
+          optional: true,
+        },
+        {
+          id: "automation",
+          title: "Automation",
+          description: "Automated workflows",
+          optional: true,
+        },
+        {
+          id: "booking",
+          title: "Interview Booking",
+          description: "Schedule interviews",
+        },
+        {
+          id: "review",
+          title: "Review & Update",
+          description: "Final review and update",
+        }
+      );
+    }
+
+    return baseSteps;
+  };
+
+  const steps = getSteps();
+  const totalSteps = steps.length;
 
   const form = useForm({
     resolver: zodResolver(jobFormSchema),
@@ -259,28 +341,42 @@ export default function EditJob() {
   const handleNext = async () => {
     clearErrors();
 
-    // Skip validation for CustomQuestionsBuilder step
-    if (currentStep === 4) {
-      setCurrentStep((prev) => Math.min(prev + 1, 7));
+    // Skip validation for AI Analysis step (step 4 for Professional users)
+    if (currentStep === 4 && hasProfessionalFeatures) {
+      setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
+      scrollToTop();
+      return;
+    }
+
+    // Skip validation for CustomQuestionsBuilder step (step 4 for non-Professional users)
+    if (currentStep === 4 && !hasProfessionalFeatures) {
+      setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
       scrollToTop();
       return;
     }
 
     // Skip validation for Custom Automation step
-    if (currentStep === 5) {
-      setCurrentStep((prev) => Math.min(prev + 1, 7));
+    if (
+      (currentStep === 5 && hasProfessionalFeatures) ||
+      (currentStep === 5 && !hasProfessionalFeatures)
+    ) {
+      setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
       scrollToTop();
       return;
     }
 
     // Special validation for Booking Page step
-    if (currentStep === 6) {
+    const isBookingPageStep =
+      (hasProfessionalFeatures && currentStep === 6) ||
+      (!hasProfessionalFeatures && currentStep === 6);
+
+    if (isBookingPageStep) {
       const isValid = await trigger("availabilityId", {
         shouldFocus: true,
       });
 
       if (isValid) {
-        setCurrentStep((prev) => Math.min(prev + 1, 7));
+        setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
         scrollToTop();
       }
       return;
@@ -292,7 +388,7 @@ export default function EditJob() {
     });
 
     if (isStepValid) {
-      setCurrentStep((prev) => Math.min(prev + 1, 6));
+      setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
       clearErrors();
       scrollToTop();
     }
@@ -305,7 +401,7 @@ export default function EditJob() {
   };
 
   const onSubmit = async (data: JobFormSchema) => {
-    if (currentStep !== 7 || !job?.id) return;
+    if (currentStep !== totalSteps || !job?.id) return;
 
     // Validate the required availabilityId field
     const isValid = await trigger("availabilityId");
@@ -363,15 +459,20 @@ export default function EditJob() {
         return <PositionDetailsStep />;
       case 3:
         return <SettingsNotificationsStep />;
-
       case 4:
-        return (
-          <CustomQuestionsBuilder
-            name="customQuestions"
-            label="Custom Screening Questions"
-            description="Add custom questions to screen applicants and gather specific information during the application process"
-          />
-        );
+        if (hasProfessionalFeatures) {
+          // AI Analysis step for Professional users
+          return <AIAnalysisStep />;
+        } else {
+          // Custom Questions step for non-Professional users
+          return (
+            <CustomQuestionsBuilder
+              name="customQuestions"
+              label="Custom Screening Questions"
+              description="Add custom questions to screen applicants and gather specific information during the application process"
+            />
+          );
+        }
       case 5:
         return (
           <CustomAutomationStep
@@ -536,9 +637,7 @@ export default function EditJob() {
           <div className="block sm:hidden mb-4">
             <div className="flex items-center justify-between mb-3">
               <div>
-                <h1 className="text-lg font-bold text-gray-900">
-                  Edit Job
-                </h1>
+                <h1 className="text-lg font-bold text-gray-900">Edit Job</h1>
                 <p className="text-xs text-gray-600 truncate max-w-[200px]">
                   {job.jobTitle}
                 </p>
@@ -570,13 +669,16 @@ export default function EditJob() {
               </p>
             </div>
           </div>
-          
+
           {/* Progress Stepper */}
           <div className="w-full">
             <EnhancedProgressStepper
               steps={steps}
               currentStep={currentStep}
-              completedSteps={Array.from({ length: currentStep - 1 }, (_, i) => i + 1)}
+              completedSteps={Array.from(
+                { length: currentStep - 1 },
+                (_, i) => i + 1
+              )}
               variant="horizontal"
               size="md"
               showProgress={true}
@@ -603,7 +705,7 @@ export default function EditJob() {
                     onNext={handleNext}
                     onPrevious={handlePrevious}
                     isFirstStep={currentStep === 1}
-                    isLastStep={currentStep === 7}
+                    isLastStep={currentStep === totalSteps}
                     isValid={true}
                     isSubmitting={isSubmitting}
                     finalStepText="Update Job"

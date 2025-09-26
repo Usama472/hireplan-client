@@ -8,6 +8,7 @@ import {
   MessageSquare,
   Brain,
   Star,
+  Settings,
 } from "lucide-react";
 import type { JobFormData } from "@/interfaces";
 
@@ -123,31 +124,93 @@ export function AIAnalysisReview({ formData }: AIAnalysisReviewProps) {
               Qualifications ({qualStats.total})
             </h4>
           </div>
-          <div className="space-y-2">
-            <div className="flex flex-wrap gap-1 sm:gap-2">
-              <div className="inline-flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs">
-                <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
-                {qualStats.need} Need
+
+          {qualifications.length > 0 ? (
+            <div className="space-y-3">
+              <div className="flex flex-wrap gap-1 sm:gap-2">
+                <div className="inline-flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs">
+                  <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                  {qualStats.need} Need
+                </div>
+                <div className="inline-flex items-center gap-1 px-2 py-1 bg-orange-100 text-orange-700 rounded-full text-xs">
+                  <span className="w-1.5 h-1.5 bg-orange-500 rounded-full"></span>
+                  {qualStats.should} Should
+                </div>
+                <div className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
+                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                  {qualStats.nice} Nice
+                </div>
+                <div className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs">
+                  <span className="w-1.5 h-1.5 bg-gray-500 rounded-full"></span>
+                  {qualStats.required} Required
+                </div>
               </div>
-              <div className="inline-flex items-center gap-1 px-2 py-1 bg-orange-100 text-orange-700 rounded-full text-xs">
-                <span className="w-1.5 h-1.5 bg-orange-500 rounded-full"></span>
-                {qualStats.should} Should
+
+              {/* Qualification Details */}
+              <div className="space-y-2 max-h-32 overflow-y-auto">
+                {qualifications.slice(0, 3).map((qual: any, index: number) => (
+                  <div
+                    key={index}
+                    className="bg-white/60 rounded-lg p-2 text-xs"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="text-blue-800 font-medium">
+                        {qual.text}
+                      </span>
+                      <div className="flex gap-1 flex-shrink-0">
+                        {qual.isRequired && (
+                          <span className="px-1 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">
+                            Required
+                          </span>
+                        )}
+                        <span
+                          className={`px-1 py-0.5 rounded text-xs ${
+                            qual.aiCategory === "need"
+                              ? "bg-red-100 text-red-600"
+                              : qual.aiCategory === "should"
+                              ? "bg-orange-100 text-orange-600"
+                              : "bg-green-100 text-green-600"
+                          }`}
+                        >
+                          {qual.aiCategory || "nice"}
+                        </span>
+                      </div>
+                    </div>
+                    {qual.score !== undefined && (
+                      <div className="text-blue-600 mt-1">
+                        Score weight: {qual.score}%
+                      </div>
+                    )}
+                  </div>
+                ))}
+                {qualifications.length > 3 && (
+                  <div className="text-center text-xs text-blue-600">
+                    +{qualifications.length - 3} more qualifications
+                  </div>
+                )}
               </div>
-              <div className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
-                <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
-                {qualStats.nice} Nice
+
+              <div className="w-full bg-blue-200 rounded-full h-1.5">
+                <div
+                  className="bg-blue-500 h-1.5 rounded-full"
+                  style={{ width: qualStats.total > 0 ? "100%" : "0%" }}
+                ></div>
               </div>
+              <p className="text-xs text-blue-700">
+                Auto-reject candidates missing "Need" qualifications • Score
+                remaining qualifications
+              </p>
             </div>
-            <div className="w-full bg-blue-200 rounded-full h-1.5">
-              <div
-                className="bg-blue-500 h-1.5 rounded-full"
-                style={{ width: qualStats.total > 0 ? "100%" : "0%" }}
-              ></div>
+          ) : (
+            <div className="text-center py-4">
+              <p className="text-sm text-blue-600">
+                No qualifications configured
+              </p>
+              <p className="text-xs text-blue-500 mt-1">
+                Add qualifications in the Requirements step to filter candidates
+              </p>
             </div>
-            <p className="text-xs text-blue-700">
-              Auto-reject if missing "Need" qualifications
-            </p>
-          </div>
+          )}
         </div>
 
         {/* Custom Questions Section */}
@@ -158,31 +221,92 @@ export function AIAnalysisReview({ formData }: AIAnalysisReviewProps) {
               Custom Questions ({questionStats.total})
             </h4>
           </div>
-          <div className="space-y-2">
-            <div className="flex flex-wrap gap-1 sm:gap-2">
-              <div className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">
-                <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
-                {questionStats.required} Required
+
+          {customQuestions.length > 0 ? (
+            <div className="space-y-3">
+              <div className="flex flex-wrap gap-1 sm:gap-2">
+                <div className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">
+                  <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
+                  {questionStats.required} Required
+                </div>
+                <div className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
+                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                  {questionStats.simpleMode} Simple
+                </div>
+                <div className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs">
+                  <span className="w-1.5 h-1.5 bg-purple-500 rounded-full"></span>
+                  {questionStats.advancedMode} Advanced
+                </div>
+                {questionStats.autoReject > 0 && (
+                  <div className="inline-flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs">
+                    <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                    {questionStats.autoReject} Auto-reject
+                  </div>
+                )}
               </div>
-              <div className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
-                <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
-                {questionStats.simpleMode} Simple
+
+              {/* Question Details */}
+              <div className="space-y-2 max-h-32 overflow-y-auto">
+                {customQuestions
+                  .slice(0, 3)
+                  .map((question: any, index: number) => (
+                    <div
+                      key={index}
+                      className="bg-white/60 rounded-lg p-2 text-xs"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <span className="text-green-800 font-medium truncate">
+                          {question.question}
+                        </span>
+                        <div className="flex gap-1 flex-shrink-0">
+                          {question.required && (
+                            <span className="px-1 py-0.5 bg-blue-100 text-blue-600 rounded text-xs">
+                              Required
+                            </span>
+                          )}
+                          {question.autoReject && (
+                            <span className="px-1 py-0.5 bg-red-100 text-red-600 rounded text-xs">
+                              Auto-reject
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-green-600 mt-1">
+                        Type: {question.type}{" "}
+                        {question.scoringMode &&
+                          `• ${question.scoringMode} scoring`}
+                      </div>
+                    </div>
+                  ))}
+                {customQuestions.length > 3 && (
+                  <div className="text-center text-xs text-green-600">
+                    +{customQuestions.length - 3} more questions
+                  </div>
+                )}
               </div>
-              <div className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs">
-                <span className="w-1.5 h-1.5 bg-purple-500 rounded-full"></span>
-                {questionStats.advancedMode} Advanced
+
+              <div className="w-full bg-green-200 rounded-full h-1.5">
+                <div
+                  className="bg-green-500 h-1.5 rounded-full"
+                  style={{ width: questionStats.total > 0 ? "100%" : "0%" }}
+                ></div>
               </div>
+              <p className="text-xs text-green-700">
+                Smart AI analysis based on question types and scoring
+                configuration
+              </p>
             </div>
-            <div className="w-full bg-green-200 rounded-full h-1.5">
-              <div
-                className="bg-green-500 h-1.5 rounded-full"
-                style={{ width: questionStats.total > 0 ? "100%" : "0%" }}
-              ></div>
+          ) : (
+            <div className="text-center py-4">
+              <p className="text-sm text-green-600">
+                No custom questions configured
+              </p>
+              <p className="text-xs text-green-500 mt-1">
+                Add custom questions in the AI Analysis step to screen
+                candidates
+              </p>
             </div>
-            <p className="text-xs text-green-700">
-              Smart AI analysis based on question types
-            </p>
-          </div>
+          )}
         </div>
 
         {/* Resume Analysis Section */}
@@ -191,58 +315,138 @@ export function AIAnalysisReview({ formData }: AIAnalysisReviewProps) {
             <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" />
             <h4 className="font-semibold text-purple-900">Resume Analysis</h4>
           </div>
-          <div className="space-y-2">
-            <div className="flex flex-wrap gap-1 sm:gap-2">
-              <div
-                className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs ${
-                  resumeStats.mode === "simple"
-                    ? "bg-blue-100 text-blue-700"
-                    : "bg-purple-100 text-purple-700"
-                }`}
-              >
-                <span
-                  className={`w-1.5 h-1.5 rounded-full ${
-                    resumeStats.mode === "simple"
-                      ? "bg-blue-500"
-                      : "bg-purple-500"
-                  }`}
-                ></span>
-                {resumeStats.mode === "simple" ? "Smart AI" : "Detailed"}
+
+          {resumeStats.mode === "detailed" && resumeCriteria.length > 0 ? (
+            <div className="space-y-3">
+              <div className="flex flex-wrap gap-1 sm:gap-2">
+                <div className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs">
+                  <span className="w-1.5 h-1.5 bg-purple-500 rounded-full"></span>
+                  Detailed Mode
+                </div>
+                <div className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">
+                  <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
+                  {resumeStats.skillsCriteria} Skills
+                </div>
+                <div className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
+                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                  {resumeStats.experienceCriteria} Experience
+                </div>
               </div>
-              {resumeStats.mode === "detailed" && (
-                <>
-                  <div className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">
-                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
-                    {resumeStats.skillsCriteria} Skills
+
+              {/* Resume Criteria Details */}
+              <div className="space-y-2 max-h-32 overflow-y-auto">
+                {resumeCriteria
+                  .slice(0, 4)
+                  .map((criterion: any, index: number) => (
+                    <div
+                      key={index}
+                      className="bg-white/60 rounded-lg p-2 text-xs"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <span className="text-purple-800 font-medium">
+                          {criterion.text}
+                        </span>
+                        <div className="flex gap-1 flex-shrink-0">
+                          <span
+                            className={`px-1 py-0.5 rounded text-xs ${
+                              criterion.aiCategory === "need"
+                                ? "bg-red-100 text-red-600"
+                                : criterion.aiCategory === "should"
+                                ? "bg-orange-100 text-orange-600"
+                                : "bg-green-100 text-green-600"
+                            }`}
+                          >
+                            {criterion.aiCategory || "nice"}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-purple-600 mt-1">
+                        {criterion.type} • Weight: {criterion.weight}/10
+                      </div>
+                    </div>
+                  ))}
+                {resumeCriteria.length > 4 && (
+                  <div className="text-center text-xs text-purple-600">
+                    +{resumeCriteria.length - 4} more criteria
                   </div>
-                  <div className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
-                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
-                    {resumeStats.experienceCriteria} Experience
-                  </div>
-                </>
-              )}
+                )}
+              </div>
+
+              <div className="w-full bg-purple-200 rounded-full h-1.5">
+                <div
+                  className="bg-purple-500 h-1.5 rounded-full"
+                  style={{
+                    width: `${Math.min(
+                      (resumeStats.criteriaCount / 10) * 100,
+                      100
+                    )}%`,
+                  }}
+                ></div>
+              </div>
+              <p className="text-xs text-purple-700">
+                {resumeStats.criteriaCount} custom criteria configured for
+                detailed resume analysis
+              </p>
             </div>
-            <div className="w-full bg-purple-200 rounded-full h-1.5">
-              <div
-                className="bg-purple-500 h-1.5 rounded-full"
-                style={{
-                  width:
-                    resumeStats.mode === "simple"
-                      ? "100%"
-                      : `${Math.min(
-                          (resumeStats.criteriaCount / 10) * 100,
-                          100
-                        )}%`,
-                }}
-              ></div>
+          ) : (
+            <div className="space-y-2">
+              <div className="flex flex-wrap gap-1 sm:gap-2">
+                <div className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">
+                  <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
+                  Smart AI Mode
+                </div>
+              </div>
+              <div className="w-full bg-purple-200 rounded-full h-1.5">
+                <div className="bg-purple-500 h-1.5 rounded-full w-full"></div>
+              </div>
+              <p className="text-xs text-purple-700">
+                {resumeStats.mode === "simple"
+                  ? "Contextual AI analysis of skills and experience using intelligent pattern matching"
+                  : "No custom criteria configured - using smart AI analysis"}
+              </p>
             </div>
-            <p className="text-xs text-purple-700">
-              {resumeStats.mode === "simple"
-                ? "Contextual AI analysis of skills and experience"
-                : `${resumeStats.criteriaCount} custom criteria configured`}
-            </p>
-          </div>
+          )}
         </div>
+
+        {/* AI Scoring Configuration */}
+        {formData.automation?.sectionWeights && (
+          <div className="bg-indigo-50 rounded-lg p-3 sm:p-4 border border-indigo-100">
+            <div className="flex items-center gap-2 mb-3">
+              <Settings className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />
+              <h4 className="font-semibold text-indigo-900">
+                AI Scoring Weights
+              </h4>
+            </div>
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-2">
+                {Object.entries(formData.automation.sectionWeights).map(
+                  ([section, weight]) => (
+                    <div key={section} className="bg-white/60 rounded-lg p-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-indigo-700 capitalize">
+                          {section.replace(/([A-Z])/g, " $1").trim()}
+                        </span>
+                        <span className="text-sm font-semibold text-indigo-900">
+                          {weight}%
+                        </span>
+                      </div>
+                      <div className="w-full bg-indigo-200 rounded-full h-1 mt-1">
+                        <div
+                          className="bg-indigo-500 h-1 rounded-full"
+                          style={{ width: `${weight}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  )
+                )}
+              </div>
+              <p className="text-xs text-indigo-700">
+                These weights determine how much each section contributes to the
+                overall AI score
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Evaluation Process - Completely Redesigned for Mobile */}

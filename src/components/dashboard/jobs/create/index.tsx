@@ -1,6 +1,6 @@
 "use client";
 
-import { AIOverviewStep } from "@/components/dashboard/jobs/common/ai-overview-step";
+import { AIAnalysisStep } from "@/components/dashboard/jobs/common/ai-analysis-step";
 import { BookingPageStep } from "@/components/dashboard/jobs/common/booking-page-step";
 import { CompanyPositionDetailsStep } from "@/components/dashboard/jobs/common/company-position-details-step";
 import { ComplianceDepartmentStep } from "@/components/dashboard/jobs/common/compliance-department-step";
@@ -9,13 +9,15 @@ import { HoursScheduleBenefitsStep } from "@/components/dashboard/jobs/common/ho
 import { JobAdStep } from "@/components/dashboard/jobs/common/job-ad-step";
 import { JobQualificationsStep } from "@/components/dashboard/jobs/common/job-qualifications-step";
 import { PostingScheduleBudgetStep } from "@/components/dashboard/jobs/common/posting-schedule-budget-step";
-import { ResumeAnalysisStep } from "@/components/dashboard/jobs/common/resume-analysis-step";
 import { ReviewPublishStep } from "@/components/dashboard/jobs/common/review-publish-step";
 import { StepControls } from "@/components/main/signup/stepNavigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { EnhancedProgressStepper, type Step } from "@/components/ui/enhanced-progress-stepper";
+import {
+  EnhancedProgressStepper,
+  type Step,
+} from "@/components/ui/enhanced-progress-stepper";
 import { ROUTES } from "@/constants";
 import { stepFields } from "@/constants/form-constants";
 import {
@@ -51,68 +53,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { SaveAsTemplateDialog } from "./SaveAsTemplateDialog";
 
-// Load Draft Button Component
-function LoadDraftButton({
-  onLoadDraft,
-  onClearDraft,
-  draftInfo,
-}: {
-  onLoadDraft: () => void;
-  onClearDraft: () => void;
-  draftInfo: { step: number; timestamp: number } | null;
-}) {
-  if (!draftInfo) return null;
-
-  const formatDraftAge = (timestamp: number) => {
-    const age = Date.now() - timestamp;
-    const hours = Math.floor(age / (1000 * 60 * 60));
-    const days = Math.floor(hours / 24);
-
-    if (days > 0) return `${days} day${days > 1 ? "s" : ""} ago`;
-    if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
-    return "Just now";
-  };
-
-  return (
-    <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-4 sm:p-5 mb-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-amber-500 rounded-xl flex items-center justify-center shadow-sm">
-            <FileText className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h3 className="text-base font-semibold text-gray-900">
-              Draft Available
-            </h3>
-            <p className="text-sm text-gray-600">
-              Step {draftInfo.step} • {formatDraftAge(draftInfo.timestamp)}
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onLoadDraft}
-            className="bg-white border-amber-300 text-amber-700 hover:bg-amber-50 hover:border-amber-400 rounded-xl h-11 px-6 font-medium shadow-none transition-all duration-200 flex-1 sm:flex-initial"
-          >
-            <RotateCcw className="w-4 h-4 mr-2" />
-            Load Draft
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={onClearDraft}
-            className="text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-xl h-11 px-6 font-medium shadow-none transition-all duration-200 flex-1 sm:flex-initial"
-          >
-            Clear Draft
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function CreateJob() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -133,7 +73,7 @@ export default function CreateJob() {
     subscription?.planId === "professional" ||
     subscription?.planId === "enterprise";
 
-  const totalSteps = hasProfessionalFeatures ? 9 : 8;
+  const totalSteps = hasProfessionalFeatures ? 8 : 7;
 
   console.log("Current step and total steps:", { currentStep, totalSteps });
 
@@ -163,9 +103,9 @@ export default function CreateJob() {
     if (hasProfessionalFeatures) {
       baseSteps.push(
         {
-          id: "resume-analysis",
-          title: "Resume Analysis",
-          description: "AI-powered resume screening",
+          id: "ai-analysis",
+          title: "AI Analysis",
+          description: "Resume screening & AI overview",
           optional: true,
           icon: Brain,
         },
@@ -174,13 +114,6 @@ export default function CreateJob() {
           title: "Schedule & Budget",
           description: "Posting timeline and budget",
           icon: Calendar,
-        },
-        {
-          id: "ai-overview",
-          title: "AI Overview",
-          description: "AI ranking and scoring",
-          optional: true,
-          icon: Sparkles,
         },
         {
           id: "automation",
@@ -243,7 +176,7 @@ export default function CreateJob() {
     mode: "onChange",
   });
 
-  const { trigger, clearErrors, setValue, watch, reset } = form;
+  const { trigger, clearErrors, setValue, watch } = form;
   const [draftId, setDraftId] = useState<string | null>(null);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
@@ -497,23 +430,23 @@ export default function CreateJob() {
   const handleNext = async () => {
     clearErrors();
 
-    // Skip validation for AI Ranking step (5), Automation step (7), and Review step (8/7)
-    // But require validation for Booking Page step (6/5)
-    if (currentStep === 5 && hasProfessionalFeatures) {
-      // AI Ranking step - skip validation for Professional+ users
+    // Skip validation for AI Analysis step (4), Automation step (6), and Review step (7/6)
+    // But require validation for Booking Page step (7/5)
+    if (currentStep === 4 && hasProfessionalFeatures) {
+      // AI Analysis step (merged Resume Analysis + AI Overview) - skip validation for Professional+ users
       setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
       scrollToTop();
       return;
     }
 
     if (currentStep === 4 && !hasProfessionalFeatures) {
-      // For non-Professional users, skip AI step (5) and go directly to Booking Page (6->5)
+      // For non-Professional users, skip AI step and go directly to Booking Page (step 5)
       setCurrentStep(5); // This will be the Booking Page for non-Professional users
       scrollToTop();
       return;
     }
 
-    if (currentStep === 7 && hasProfessionalFeatures) {
+    if (currentStep === 6 && hasProfessionalFeatures) {
       // Automation step - skip validation for Professional+ users
       setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
       scrollToTop();
@@ -521,8 +454,8 @@ export default function CreateJob() {
     }
 
     if (
-      (currentStep === 8 && hasProfessionalFeatures) ||
-      (currentStep === 7 && !hasProfessionalFeatures)
+      (currentStep === 7 && hasProfessionalFeatures) ||
+      (currentStep === 6 && !hasProfessionalFeatures)
     ) {
       // Review step - skip validation
       setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
@@ -530,9 +463,9 @@ export default function CreateJob() {
       return;
     }
 
-    // Special validation for Booking Page step (step 6 for Professional+, step 5 for Starter)
+    // Special validation for Booking Page step (step 7 for Professional+, step 5 for Starter)
     const isBookingPageStep =
-      (hasProfessionalFeatures && currentStep === 6) ||
+      (hasProfessionalFeatures && currentStep === 7) ||
       (!hasProfessionalFeatures && currentStep === 5);
     if (isBookingPageStep) {
       // Get current availabilityId value
@@ -606,7 +539,7 @@ export default function CreateJob() {
 
     // Handle skipping AI step for non-Professional users when going backwards
     if (currentStep === 5 && !hasProfessionalFeatures) {
-      // For non-Professional users, step 5 is Booking Page, so go back to step 4
+      // For non-Professional users, step 5 is Booking Page, so go back to step 4 (Schedule & Budget)
       setCurrentStep(4);
     } else if (currentStep === 6 && !hasProfessionalFeatures) {
       // For non-Professional users, step 6 is Automation, so go back to step 5 (Booking Page)
@@ -614,14 +547,17 @@ export default function CreateJob() {
     } else if (currentStep === 7 && !hasProfessionalFeatures) {
       // For non-Professional users, step 7 is Review, so go back to step 6 (Automation)
       setCurrentStep(6);
+    } else if (currentStep === 5 && hasProfessionalFeatures) {
+      // For Professional+ users, step 5 is Schedule & Budget, go back to step 4 (AI Analysis)
+      setCurrentStep(4);
     } else if (currentStep === 6 && hasProfessionalFeatures) {
-      // For Professional+ users, step 6 is Booking Page, go back to step 5 (AI)
+      // For Professional+ users, step 6 is Automation, go back to step 5 (Schedule & Budget)
       setCurrentStep(5);
     } else if (currentStep === 7 && hasProfessionalFeatures) {
-      // For Professional+ users, step 7 is Automation, go back to step 6 (Booking Page)
+      // For Professional+ users, step 7 is Booking Page, go back to step 6 (Automation)
       setCurrentStep(6);
     } else if (currentStep === 8 && hasProfessionalFeatures) {
-      // For Professional+ users, step 8 is Review, go back to step 7 (Automation)
+      // For Professional+ users, step 8 is Review, go back to step 7 (Booking Page)
       setCurrentStep(7);
     } else {
       setCurrentStep((prev) => Math.max(prev - 1, 1));
@@ -716,7 +652,7 @@ export default function CreateJob() {
               <HoursScheduleBenefitsStep />
             </div>
             <div className="mt-4">
-              <ComplianceDepartmentStep />;
+              <ComplianceDepartmentStep />
             </div>
           </div>
         );
@@ -728,11 +664,8 @@ export default function CreateJob() {
         );
       case 4:
         if (hasProfessionalFeatures) {
-          return (
-            <div>
-              <ResumeAnalysisStep />
-            </div>
-          );
+          // Merged AI Analysis step - includes both Resume Analysis and AI Overview
+          return <AIAnalysisStep />;
         } else {
           // For non-Professional users, step 4 is Posting/Schedule/Budget
           return <PostingScheduleBudgetStep />;
@@ -746,7 +679,15 @@ export default function CreateJob() {
         }
       case 6:
         if (hasProfessionalFeatures) {
-          return <AIOverviewStep />;
+          return (
+            <CustomAutomationStep
+              isSelectable={true}
+              automations={(watch("automations") as string[]) || []}
+              onSelectionChange={(selectedIds) => {
+                setValue("automations", selectedIds);
+              }}
+            />
+          );
         } else {
           // For non-Professional users, step 6 is the Automation step
           return (
@@ -761,15 +702,7 @@ export default function CreateJob() {
         }
       case 7:
         if (hasProfessionalFeatures) {
-          return (
-            <CustomAutomationStep
-              isSelectable={true}
-              automations={(watch("automations") as string[]) || []}
-              onSelectionChange={(selectedIds) => {
-                setValue("automations", selectedIds);
-              }}
-            />
-          );
+          return <BookingPageStep />;
         } else {
           // For non-Professional users, step 7 is the Review step
           return (
@@ -779,13 +712,6 @@ export default function CreateJob() {
           );
         }
       case 8:
-        if (hasProfessionalFeatures) {
-          return <BookingPageStep />;
-        } else {
-          // Non-Professional users don't have step 8
-          return <PostingScheduleBudgetStep />;
-        }
-      case 9:
         // Only for Professional+ users - Review step
         return (
           <>
@@ -935,7 +861,10 @@ export default function CreateJob() {
           <EnhancedProgressStepper
             steps={steps}
             currentStep={currentStep}
-            completedSteps={Array.from({ length: currentStep - 1 }, (_, i) => i + 1)}
+            completedSteps={Array.from(
+              { length: currentStep - 1 },
+              (_, i) => i + 1
+            )}
             variant="horizontal"
             size="md"
             showProgress={true}
