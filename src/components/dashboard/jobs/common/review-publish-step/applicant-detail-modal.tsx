@@ -70,6 +70,7 @@ export interface AIEvaluation {
 
 interface Applicant {
   id: string;
+  _id?: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -203,7 +204,9 @@ export function ApplicantDetailModal({
 
     setIsRequestingAI(true);
     try {
-      const response = await API.applicant.requestAIAssessment(applicant.id);
+      const applicantId = applicant._id || applicant.id;
+      console.log('🤖 Requesting AI assessment for applicant ID:', applicantId, 'from applicant object:', applicant);
+      const response = await API.applicant.requestAIAssessment(applicantId);
       if (response.status) {
         toast({
           title: "AI Assessment Completed",

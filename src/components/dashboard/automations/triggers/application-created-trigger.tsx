@@ -982,7 +982,7 @@ export default function ApplicationCreatedTrigger() {
                           </SelectTrigger>
                           <SelectContent>
                             {smsTemplates.length === 0 ? (
-                              <SelectItem value="" disabled>
+                              <SelectItem value="none" disabled>
                                 No SMS templates available
                               </SelectItem>
                             ) : (
@@ -1029,7 +1029,7 @@ export default function ApplicationCreatedTrigger() {
                               <SelectValue placeholder="Use default chat invitation or select template" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="">Default Chat Invitation</SelectItem>
+                              <SelectItem value="default">Default Chat Invitation</SelectItem>
                               {smsTemplates
                                 .filter(template => template.category === 'invite')
                                 .map((template) => (

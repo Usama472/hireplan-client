@@ -10,6 +10,7 @@ import {
   DollarSign,
   MapPin,
   User,
+  X,
 } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -534,10 +535,19 @@ const JobApplicationPage: React.FC = () => {
       }, 3000)
     } catch (err: any) {
       console.error('Application submission error:', err)
-      setError(
-        err?.response?.data?.message ||
-          'Failed to submit application. Please try again.'
-      )
+      
+      // Handle duplicate application error specifically
+      if (err?.response?.status === 409) { // CONFLICT status
+        setError(
+          err?.response?.data?.message || 
+          'You have already submitted an application for this job with this email address. Please check your email for confirmation or contact support if you need assistance.'
+        )
+      } else {
+        setError(
+          err?.response?.data?.message ||
+            'Failed to submit application. Please try again.'
+        )
+      }
       setIsSubmitting(false) // Allow draft saving again if submission failed
     } finally {
       setSubmitting(false)
@@ -742,6 +752,21 @@ const JobApplicationPage: React.FC = () => {
               </div>
 
               <form onSubmit={handleSubmit} className='p-5 space-y-5'>
+                {/* Error Display */}
+                {error && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0">
+                        <X className="h-3 w-3 text-white" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-red-800">Application Error</h4>
+                        <p className="text-sm text-red-700 mt-1">{error}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Step 1: Basic Information */}
                 {currentStep === 1 && (
                   <div className='space-y-6'>
