@@ -26,9 +26,11 @@ export interface AutomationType {
     value: string;
   }>;
   actions: Array<{
-    type: "send_email" | "webhook" | "slack" | "update_job_status" | "assign_recruiter" | "ai_follow_up" | "send_rejection" | "custom";
+    type: "send_email" | "send_sms" | "send_chat_invite" | "webhook" | "slack" | "update_job_status" | "assign_recruiter" | "ai_follow_up" | "send_rejection" | "custom";
     config: {
       templateId?: string;
+      smsTemplateId?: string;
+      customMessage?: string;
       delay?: {
         value: number;
         unit: "minutes" | "hours" | "days";

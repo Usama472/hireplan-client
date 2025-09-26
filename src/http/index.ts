@@ -17,6 +17,7 @@ import * as jobDraftApi from "./job-draft/api";
 import * as meetingApi from "./meeting/api";
 import * as microsoftApi from "./microsoft/api";
 import * as roleApi from "./role/api";
+import * as smsApi from "./sms/api";
 import * as staffApi from "./staff/api";
 import * as userApi from "./user/api";
 import * as zoomApi from "./zoom/api";
@@ -42,6 +43,7 @@ const API = {
   globalSetting: globalSettingApi,
   interview: interviewApi,
   role: roleApi,
+  sms: smsApi,
   staff: staffApi,
   automation: automationApi,
 };

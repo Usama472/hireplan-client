@@ -13,6 +13,10 @@ export const DASHBOARD_ROUTES = {
   SCHEDULER: `/dashboard/scheduler`,
   CHATS: `/dashboard/chats`,
   CHAT_CONVERSATION: `/dashboard/chats/:conversationId`,
+  SMS: `/dashboard/sms`,
+  CREATE_SMS_TEMPLATE: `/dashboard/sms/create`,
+  EDIT_SMS_TEMPLATE: `/dashboard/sms/edit`,
+  EDIT_SMS_TEMPLATE_ID: `/dashboard/sms/edit/:id`,
   EMAIL_TEMPLATES: `/dashboard/email-templates`,
   CREATE_EMAIL_TEMPLATE: `/dashboard/email-templates/create`,
   EDIT_EMAIL_TEMPLATE: `/dashboard/email-templates/edit`,
@@ -33,6 +37,11 @@ export const DASHBOARD_ROUTES = {
 export const APPLICANT_ROUTES = {
   LOGIN: `/applicant/login`,
   DASHBOARD: `/applicant/dashboard`,
+  PORTAL: `/applicant/portal/:token`,
+};
+
+export const SHORT_URL_ROUTES = {
+  REDIRECT: `/s/:shortCode`,
 };
 
 export const ROUTES = {
@@ -51,4 +60,5 @@ export const ROUTES = {
   APPLY_JOB: "/company/:slug/job/:jobId/apply",
   INTERVIEW_SCHEDULE: "/interview/schedule/:token",
   APPLICANT: APPLICANT_ROUTES,
+  SHORT_URL: SHORT_URL_ROUTES,
 };

@@ -320,7 +320,7 @@ export default function JobsPage() {
               onValueChange={(value) => setViewMode(value as "grid" | "list")}
             >
               {/* Enhanced Search and View Controls */}
-              <div className="mb-6">
+              <div className="mb-6 space-y-4">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   {/* Search Bar */}
                   <div className="flex-1 max-w-full sm:max-w-lg">
@@ -362,6 +362,53 @@ export default function JobsPage() {
                     </div>
                   </div>
                 </div>
+
+                {/* Additional Filters Row */}
+                <div className="flex flex-wrap gap-3 items-center justify-between">
+                  {/* Filter Options */}
+                  <div className="flex flex-wrap gap-3 items-center">
+                    <select className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                      <option value="">All Statuses</option>
+                      <option value="active">Active</option>
+                      <option value="draft">Draft</option>
+                      <option value="paused">Paused</option>
+                      <option value="closed">Closed</option>
+                    </select>
+                    
+                    <select className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                      <option value="">All Types</option>
+                      <option value="full-time">Full-time</option>
+                      <option value="part-time">Part-time</option>
+                      <option value="contract">Contract</option>
+                      <option value="internship">Internship</option>
+                    </select>
+
+                    <select className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                      <option value="">Sort by</option>
+                      <option value="newest">Newest First</option>
+                      <option value="oldest">Oldest First</option>
+                      <option value="most-applicants">Most Applicants</option>
+                      <option value="least-applicants">Least Applicants</option>
+                      <option value="highest-salary">Highest Salary</option>
+                      <option value="lowest-salary">Lowest Salary</option>
+                    </select>
+                  </div>
+
+                  {/* Results Summary */}
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <span>{hasSearchQuery && "Filtered:"}</span>
+                    <span className="font-medium text-gray-900">{jobs.length}</span>
+                    <span>job{jobs.length !== 1 ? 's' : ''}</span>
+                    {hasSearchQuery && (
+                      <button 
+                        onClick={handleClearSearch}
+                        className="text-primary hover:text-primary/80 font-medium ml-2"
+                      >
+                        Clear filters
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
 
               <TabsContent value="grid" className="space-y-4 sm:space-y-6">
@@ -400,10 +447,53 @@ export default function JobsPage() {
             </Tabs>
           </div>
 
-          {/* Pagination - Only show when not loading and has jobs */}
+          {/* Enhanced Pagination with Page Info */}
           {!loading && hasJobs && (
-            <div className="mt-8 sm:mt-10 flex justify-center">
-              <PaginationButton {...pageParams} />
+            <div className="mt-8 sm:mt-10 space-y-4">
+              {/* Pagination Info */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-3 bg-white rounded-lg border border-gray-100">
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <span className="flex items-center gap-1">
+                    <Briefcase className="w-4 h-4" />
+                    Showing
+                  </span>
+                  <span className="font-medium text-gray-900">
+                    {Math.min((pageParams.currentPage - 1) * pageParams.pageSize + 1, pageParams.totalRows || 0)}
+                  </span>
+                  to 
+                  <span className="font-medium text-gray-900">
+                    {Math.min(pageParams.currentPage * pageParams.pageSize, pageParams.totalRows || 0)}
+                  </span>
+                  of 
+                  <span className="font-medium text-gray-900">
+                    {pageParams.totalRows || 0}
+                  </span>
+                  jobs
+                </div>
+                
+                {/* Page size selector for larger screens */}
+                <div className="hidden sm:flex items-center gap-2 text-sm text-gray-600">
+                  <span>Jobs per page:</span>
+                  <select 
+                    value={pageParams.pageSize}
+                    onChange={(e) => {
+                      // This would need to be implemented in the pagination hook
+                      console.log('Page size changed to:', e.target.value);
+                    }}
+                    className="px-2 py-1 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  >
+                    <option value={6}>6</option>
+                    <option value={12}>12</option>
+                    <option value={24}>24</option>
+                    <option value={36}>36</option>
+                  </select>
+                </div>
+              </div>
+              
+              {/* Pagination Controls */}
+              <div className="flex justify-center">
+                <PaginationButton {...pageParams} className="bg-white rounded-lg border border-gray-100 px-4 py-3" />
+              </div>
             </div>
           )}
         </div>

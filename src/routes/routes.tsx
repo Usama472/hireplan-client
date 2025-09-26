@@ -36,6 +36,8 @@ import TriggersPage from "@/pages/dashboard/automations/triggers";
 import ChatsPage from "@/pages/dashboard/chats";
 import ConversationPage from "@/pages/dashboard/chats/conversation";
 import EmailTemplatesPage from "@/pages/dashboard/email-template";
+import SMSPage from "@/pages/dashboard/sms";
+import CreateSMSTemplatePage from "@/pages/dashboard/sms/create";
 import CreateEmailTemplatePage from "@/pages/dashboard/email-template/create";
 import EditEmailTemplatePage from "@/pages/dashboard/email-template/edit";
 import GlobalSettingPage from "@/pages/dashboard/global-setting";
@@ -52,6 +54,8 @@ import Signup from "@pages/auth/Signup";
 // Applicant Pages
 import ApplicantLogin from "@/pages/applicant/login";
 import ApplicantDashboard from "@/pages/applicant/dashboard";
+import ApplicantPortal from "@/pages/applicant/portal";
+import ShortUrlRedirect from "@/components/common/ShortUrlRedirect";
 import ApplicantsPage from "@/pages/dashboard/applicants";
 
 export const appRoutes: AppRoutesType[] = [
@@ -225,6 +229,18 @@ export const appRoutes: AppRoutesType[] = [
     isPrivate: true,
   },
   {
+    id: "sms",
+    url: ROUTES.DASHBOARD.SMS,
+    element: <SMSPage />,
+    isPrivate: true,
+  },
+  {
+    id: "create-sms-template",
+    url: ROUTES.DASHBOARD.CREATE_SMS_TEMPLATE,
+    element: <CreateSMSTemplatePage />,
+    isPrivate: true,
+  },
+  {
     id: "chat-conversation",
     url: ROUTES.DASHBOARD.CHAT_CONVERSATION,
     element: <ConversationPage />,
@@ -284,5 +300,17 @@ export const appRoutes: AppRoutesType[] = [
     url: ROUTES.APPLICANT.DASHBOARD,
     element: <ApplicantDashboard />,
     isPrivate: false, // We'll handle auth inside the component
+  },
+  {
+    id: "applicant-portal",
+    url: ROUTES.APPLICANT.PORTAL,
+    element: <ApplicantPortal />,
+    isPrivate: false,
+  },
+  {
+    id: "short-url-redirect",
+    url: ROUTES.SHORT_URL.REDIRECT,
+    element: <ShortUrlRedirect />,
+    isPrivate: false,
   },
 ];

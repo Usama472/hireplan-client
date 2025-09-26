@@ -93,7 +93,7 @@ const PaginationButton = ({
   return (
     <div className={cn("flex items-center justify-center pt-8", className)}>
       <Pagination>
-        <PaginationContent className="gap-1">
+        <PaginationContent className="gap-2">
           {/* Previous Button */}
           <PaginationItem>
             <Button
@@ -102,7 +102,7 @@ const PaginationButton = ({
               onClick={handlePrevious}
               disabled={currentPage === 1}
               className={cn(
-                "h-9 w-9 p-0 border-gray-300 hover:border-blue-300 hover:bg-blue-50",
+                "h-10 w-10 p-0 border-gray-200 hover:border-primary/30 hover:bg-primary/5 text-gray-600 hover:text-primary transition-all duration-200",
                 currentPage === 1 && "opacity-50 cursor-not-allowed"
               )}
               aria-label="Go to previous page"
@@ -119,13 +119,13 @@ const PaginationButton = ({
                   variant="outline"
                   size="sm"
                   onClick={() => handlePageClick(1)}
-                  className="h-9 w-9 p-0 border-gray-300 hover:border-blue-300 hover:bg-blue-50"
+                  className="h-10 w-10 p-0 border-gray-200 hover:border-primary/30 hover:bg-primary/5 text-gray-600 hover:text-primary transition-all duration-200"
                 >
                   1
                 </Button>
               </PaginationItem>
               <PaginationItem>
-                <div className="flex h-9 w-9 items-center justify-center">
+                <div className="flex h-10 w-10 items-center justify-center">
                   <MoreHorizontal className="w-4 h-4 text-gray-400" />
                 </div>
               </PaginationItem>
@@ -140,10 +140,10 @@ const PaginationButton = ({
                 size="sm"
                 onClick={() => handlePageClick(page)}
                 className={cn(
-                  "h-9 w-9 p-0",
+                  "h-10 w-10 p-0 transition-all duration-200",
                   page === currentPage
-                    ? "bg-blue-600 hover:bg-blue-700 border-blue-600 text-white shadow-sm"
-                    : "border-gray-300 hover:border-blue-300 hover:bg-blue-50 text-gray-700"
+                    ? "bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 border-primary text-white shadow-md"
+                    : "border-gray-200 hover:border-primary/30 hover:bg-primary/5 text-gray-600 hover:text-primary"
                 )}
                 aria-label={`Go to page ${page}`}
                 aria-current={page === currentPage ? "page" : undefined}
@@ -157,7 +157,7 @@ const PaginationButton = ({
           {showEndEllipsis && (
             <>
               <PaginationItem>
-                <div className="flex h-9 w-9 items-center justify-center">
+                <div className="flex h-10 w-10 items-center justify-center">
                   <MoreHorizontal className="w-4 h-4 text-gray-400" />
                 </div>
               </PaginationItem>
@@ -166,7 +166,7 @@ const PaginationButton = ({
                   variant="outline"
                   size="sm"
                   onClick={() => handlePageClick(totalPages)}
-                  className="h-9 w-9 p-0 border-gray-300 hover:border-blue-300 hover:bg-blue-50"
+                  className="h-10 w-10 p-0 border-gray-200 hover:border-primary/30 hover:bg-primary/5 text-gray-600 hover:text-primary transition-all duration-200"
                 >
                   {totalPages}
                 </Button>
@@ -182,7 +182,7 @@ const PaginationButton = ({
               onClick={handleNext}
               disabled={currentPage === totalPages}
               className={cn(
-                "h-9 w-9 p-0 border-gray-300 hover:border-blue-300 hover:bg-blue-50",
+                "h-10 w-10 p-0 border-gray-200 hover:border-primary/30 hover:bg-primary/5 text-gray-600 hover:text-primary transition-all duration-200",
                 currentPage === totalPages && "opacity-50 cursor-not-allowed"
               )}
               aria-label="Go to next page"

@@ -316,7 +316,7 @@ const ApplicantCard = ({
                 <div className="w-1 h-1 bg-white rounded-full sm:w-1.5 sm:h-1.5 md:w-1.5 md:h-1.5"></div>
               </div>
               <span className="font-bold">
-                {applicant.aiScore}%
+                AI Score {applicant.aiScore}%
               </span>
             </div>
           )}

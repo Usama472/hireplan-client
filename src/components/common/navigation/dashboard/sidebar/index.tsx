@@ -6,6 +6,7 @@ import {
   LifeBuoy,
   Mail,
   MessageCircle,
+  Phone,
   PlusCircle,
   Send,
   Settings,
@@ -92,6 +93,11 @@ export const DashboardSidebar = ({
       name: "Chats",
       url: ROUTES.DASHBOARD.CHATS,
       icon: MessageCircle,
+    });
+    staticData.projects.push({
+      name: "SMS",
+      url: ROUTES.DASHBOARD.SMS,
+      icon: Phone,
     });
   }
   if (userPermissions.includes(PERMISSIONS.STAFF_CREATE)) {

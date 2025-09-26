@@ -7,6 +7,8 @@ import {
   FileCheck,
   MessageSquare,
   UserCheck,
+  Phone,
+  Send,
   type LucideIcon,
 } from "lucide-react";
 
@@ -157,5 +159,62 @@ export const applicantConditions = [
   {
     id: "skillsMatchScore",
     label: "Skills Match Score",
+  },
+];
+
+export const allActions = [
+  {
+    type: "send_email",
+    label: "Send Email",
+    description: "Send an email using a template",
+    icon: <MessageSquare className="h-5 w-5" />,
+    category: "communication",
+    color: "bg-blue-500",
+    iconBg: "bg-blue-100",
+  },
+  {
+    type: "send_sms",
+    label: "Send SMS",
+    description: "Send an SMS message using a template",
+    icon: <Phone className="h-5 w-5" />,
+    category: "communication",
+    color: "bg-green-500",
+    iconBg: "bg-green-100",
+  },
+  {
+    type: "send_chat_invite",
+    label: "Send Chat Invitation",
+    description: "Invite applicant to start a chat conversation via SMS",
+    icon: <Send className="h-5 w-5" />,
+    category: "communication",
+    color: "bg-purple-500",
+    iconBg: "bg-purple-100",
+  },
+  {
+    type: "update_job_status",
+    label: "Update Status",
+    description: "Change the applicant's status",
+    icon: <CheckCircle2 className="h-5 w-5" />,
+    category: "status",
+    color: "bg-emerald-500",
+    iconBg: "bg-emerald-100",
+  },
+  {
+    type: "assign_recruiter",
+    label: "Assign Recruiter",
+    description: "Assign a recruiter to this applicant",
+    icon: <UserCheck className="h-5 w-5" />,
+    category: "assignment",
+    color: "bg-amber-500",
+    iconBg: "bg-amber-100",
+  },
+  {
+    type: "webhook",
+    label: "Webhook",
+    description: "Send data to an external URL",
+    icon: <AlertCircle className="h-5 w-5" />,
+    category: "integration",
+    color: "bg-gray-500",
+    iconBg: "bg-gray-100",
   },
 ];

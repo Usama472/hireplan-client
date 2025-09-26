@@ -28,11 +28,13 @@ import {
   User,
   Video,
   X,
+  Send,
 } from "lucide-react";
 import { useState } from "react";
 import API from "@/http";
 import { useToast } from "@/lib/hooks/use-toast";
 import useAuthSessionContext from "@/lib/context/AuthSessionContext";
+import ChatInviteDialog from "@/components/dashboard/sms/ChatInviteDialog";
 
 export interface AIEvaluation {
   autoReject: boolean;
@@ -178,6 +180,7 @@ export function ApplicantDetailModal({
   const [activeTab, setActiveTab] = useState("overview");
   const { subscription } = useAuthSessionContext();
   const [isRequestingAI, setIsRequestingAI] = useState(false);
+  const [showChatInviteModal, setShowChatInviteModal] = useState(false);
   const { toast } = useToast();
   
   // Check subscription for AI features
@@ -1048,6 +1051,15 @@ export function ApplicantDetailModal({
                   Reject Candidate
                 </Button>
                 <Button
+                  variant="outline"
+                  className="flex-1 border-purple-200 text-purple-700 hover:bg-purple-50 transform transition-all duration-200 hover:-translate-y-0.5"
+                  onClick={() => setShowChatInviteModal(true)}
+                  disabled={!applicant.phone}
+                >
+                  <Send className="w-4 h-4 mr-2" />
+                  {applicant.phone ? 'Send Chat Invite' : 'No Phone'}
+                </Button>
+                <Button
                   className="flex-1 bg-green-600 hover:bg-green-700 transform transition-all duration-200 hover:-translate-y-0.5"
                   onClick={() => handleStatusUpdate("shortlisted")}
                 >
@@ -1056,17 +1068,56 @@ export function ApplicantDetailModal({
                 </Button>
               </>
             ) : (
-              <Button
-                className="flex-1 bg-green-600 hover:bg-green-700 transform transition-all duration-200 hover:-translate-y-0.5"
-                onClick={() => handleStatusUpdate("shortlisted")}
-              >
-                <CheckCircle className="w-4 h-4 mr-2" />
-                Shortlist Candidate
-              </Button>
+              <>
+                <Button
+                  variant="outline"
+                  className="flex-1 border-purple-200 text-purple-700 hover:bg-purple-50 transform transition-all duration-200 hover:-translate-y-0.5"
+                  onClick={() => setShowChatInviteModal(true)}
+                  disabled={!applicant.phone}
+                >
+                  <Send className="w-4 h-4 mr-2" />
+                  {applicant.phone ? 'Send Chat Invite' : 'No Phone'}
+                </Button>
+                <Button
+                  className="flex-1 bg-green-600 hover:bg-green-700 transform transition-all duration-200 hover:-translate-y-0.5"
+                  onClick={() => handleStatusUpdate("shortlisted")}
+                >
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  Shortlist Candidate
+                </Button>
+              </>
             )}
           </div>
         </div>
       </SheetContent>
+      
+      {/* Chat Invite Dialog */}
+      {showChatInviteModal && applicant.phone && (
+        <ChatInviteDialog
+          open={showChatInviteModal}
+          onOpenChange={setShowChatInviteModal}
+          applicant={{
+            _id: applicant.id,
+            firstName: applicant.firstName,
+            lastName: applicant.lastName,
+            email: applicant.email,
+            phone: applicant.phone,
+            status: applicant.status || 'pending',
+          }}
+          job={{
+            _id: applicant.jobId || applicant.job?.id || '',
+            jobTitle: applicant.jobTitle || applicant.job?.jobTitle || '',
+            company: applicant.job?.company || { name: applicant.job?.companyName || '' },
+            companyName: applicant.job?.companyName,
+          }}
+          onInviteSent={() => {
+            toast({
+              title: "Chat Invitation Sent",
+              description: `SMS sent to ${applicant.firstName} ${applicant.lastName}`,
+            });
+          }}
+        />
+      )}
     </Sheet>
   );
 }

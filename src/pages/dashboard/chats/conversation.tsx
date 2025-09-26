@@ -92,6 +92,11 @@ interface ChatConversation {
   }>;
   status: 'active' | 'closed' | 'archived';
   lastMessageAt: Date;
+  metadata?: {
+    source?: 'email' | 'sms' | 'portal';
+    smsInviteSent?: boolean;
+    [key: string]: any;
+  };
   applicantId?: {
     _id: string;
     firstName: string;
@@ -546,7 +551,12 @@ const ConversationPage: React.FC = () => {
                           }`}
                         >
                           <div className="flex items-center justify-between w-full">
-                            <span className="font-medium text-sm truncate flex-1">{conv.subject}</span>
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <span className="font-medium text-sm truncate">{conv.subject}</span>
+                              {conv.metadata?.source === 'sms' && (
+                                <Phone className="h-3 w-3 text-purple-500 flex-shrink-0" title="Started via SMS" />
+                              )}
+                            </div>
                             <Badge variant="outline" className="ml-2 text-xs">
                               {conv.status}
                             </Badge>

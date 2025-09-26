@@ -16,6 +16,7 @@ import {
   MoreVertical,
   X,
   UserCheck,
+  Phone,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -42,6 +43,11 @@ interface ChatConversation {
   }>;
   status: "active" | "closed" | "archived";
   lastMessageAt: Date;
+  metadata?: {
+    source?: 'email' | 'sms' | 'portal';
+    smsInviteSent?: boolean;
+    [key: string]: any;
+  };
   applicantId?: {
     _id: string;
     firstName: string;
@@ -733,6 +739,14 @@ const ChatsPage: React.FC = () => {
                                   {group.latestConversation.subject}
                                 </span>
                               </div>
+                              {group.latestConversation.metadata?.source === 'sms' && (
+                                <div className="flex items-center gap-2 text-sm text-purple-700 bg-purple-50 rounded-lg px-3 py-2">
+                                  <Phone className="h-4 w-4" />
+                                  <span className="truncate font-medium">
+                                    Started via SMS invitation
+                                  </span>
+                                </div>
+                              )}
                             </div>
 
                             {/* Message Preview */}
@@ -892,6 +906,14 @@ const ChatsPage: React.FC = () => {
                                           {group.latestConversation.subject}
                                         </span>
                                       </div>
+                                      {group.latestConversation.metadata?.source === 'sms' && (
+                                        <div className="flex items-center gap-2">
+                                          <Phone className="h-4 w-4 text-purple-500" />
+                                          <span className="truncate font-medium text-purple-700">
+                                            Started via SMS invitation
+                                          </span>
+                                        </div>
+                                      )}
                                     </div>
 
                                     <div className="bg-gray-50 rounded-lg p-3 border">

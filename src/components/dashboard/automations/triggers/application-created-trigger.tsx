@@ -17,7 +17,9 @@ import {
   Clock,
   Mail,
   MessageSquare,
+  Phone,
   Plus,
+  Send,
   Trash2,
   UserCheck,
 } from "lucide-react";
@@ -25,6 +27,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useGlobalEmailTemplates } from "../../global-setting/hooks/useGlobalEmailTemplates";
+import { useGlobalSMSTemplates } from "../../sms/hooks/useSMSTemplates";
 
 interface Condition {
   id: string;
@@ -44,6 +47,7 @@ interface Action {
   type: string;
   config: {
     templateId?: string;
+    smsTemplateId?: string;
     status?: string;
     delay: {
       value: number;
@@ -60,6 +64,7 @@ interface Action {
 export default function ApplicationCreatedTrigger() {
   const [useConditions, setUseConditions] = useState<boolean>(false);
   const { availableTemplates } = useGlobalEmailTemplates();
+  const { templates: smsTemplates } = useGlobalSMSTemplates();
   const navigate = useNavigate();
   const [conditions, setConditions] = useState<Condition[]>([
     { id: "1", field: "totalScore", operator: "equals", value: "" },
@@ -128,6 +133,16 @@ export default function ApplicationCreatedTrigger() {
       value: "send_email_recruiter",
       label: "Send Email to Recruiter",
       icon: <Mail className="h-4 w-4 text-indigo-500" />,
+    },
+    {
+      value: "send_sms",
+      label: "Send SMS to Applicant",
+      icon: <Phone className="h-4 w-4 text-green-500" />,
+    },
+    {
+      value: "send_chat_invite",
+      label: "Send Chat Invitation via SMS",
+      icon: <Send className="h-4 w-4 text-purple-500" />,
     },
     {
       value: "update_job_status",
@@ -280,6 +295,16 @@ export default function ApplicationCreatedTrigger() {
             action.type === "send_email_applicant" ? "applicant" : "recruiter";
           setValidationMessage(
             `Please select an email template for the ${recipient} email action`
+          );
+          return false;
+        }
+      }
+      
+      if (action.type === "send_sms") {
+        if (!action.config.smsTemplateId || action.config.smsTemplateId === "") {
+          setIsValid(false);
+          setValidationMessage(
+            "Please select an SMS template for the SMS action"
           );
           return false;
         }
@@ -930,6 +955,105 @@ export default function ApplicationCreatedTrigger() {
                         <p className="text-xs text-gray-500 mt-1">
                           This email will be sent to the assigned recruiter
                         </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {action.type === "send_sms" && (
+                    <div className="bg-green-50/30 p-4 rounded-lg border border-green-100">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Phone className="h-4 w-4 text-green-500" />
+                        <h3 className="text-sm font-medium text-gray-700">
+                          SMS Configuration
+                        </h3>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 mb-1 block">
+                          SMS Template <span className="text-red-500">*</span>
+                        </label>
+                        <Select
+                          value={action.config.smsTemplateId || ""}
+                          onValueChange={(value) =>
+                            updateAction(action.id, "config.smsTemplateId", value)
+                          }
+                        >
+                          <SelectTrigger className="bg-white">
+                            <SelectValue placeholder="Select SMS template" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {smsTemplates.length === 0 ? (
+                              <SelectItem value="" disabled>
+                                No SMS templates available
+                              </SelectItem>
+                            ) : (
+                              smsTemplates.map((template) => (
+                                <SelectItem key={template._id} value={template._id}>
+                                  <div className="flex flex-col">
+                                    <span className="font-medium">{template.name}</span>
+                                    <span className="text-xs text-gray-500 truncate max-w-[200px]">
+                                      {template.message}
+                                    </span>
+                                  </div>
+                                </SelectItem>
+                              ))
+                            )}
+                          </SelectContent>
+                        </Select>
+                        <p className="text-xs text-gray-500 mt-1">
+                          SMS will be sent to the applicant's phone number
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {action.type === "send_chat_invite" && (
+                    <div className="bg-purple-50/30 p-4 rounded-lg border border-purple-100">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Send className="h-4 w-4 text-purple-500" />
+                        <h3 className="text-sm font-medium text-gray-700">
+                          Chat Invitation Configuration
+                        </h3>
+                      </div>
+                      <div className="space-y-3">
+                        <div>
+                          <label className="text-sm font-medium text-gray-700 mb-1 block">
+                            SMS Template (Optional)
+                          </label>
+                          <Select
+                            value={action.config.smsTemplateId || ""}
+                            onValueChange={(value) =>
+                              updateAction(action.id, "config.smsTemplateId", value)
+                            }
+                          >
+                            <SelectTrigger className="bg-white">
+                              <SelectValue placeholder="Use default chat invitation or select template" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="">Default Chat Invitation</SelectItem>
+                              {smsTemplates
+                                .filter(template => template.category === 'invite')
+                                .map((template) => (
+                                  <SelectItem key={template._id} value={template._id}>
+                                    <div className="flex flex-col">
+                                      <span className="font-medium">{template.name}</span>
+                                      <span className="text-xs text-gray-500 truncate max-w-[200px]">
+                                        {template.message}
+                                      </span>
+                                    </div>
+                                  </SelectItem>
+                                ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="p-3 bg-blue-50 rounded-lg">
+                          <div className="flex items-center gap-2 text-blue-700 text-sm font-medium mb-1">
+                            <MessageSquare className="h-4 w-4" />
+                            Chat Portal Integration
+                          </div>
+                          <p className="text-xs text-blue-600">
+                            Automatically creates secure chat links that direct applicants to the chat portal without requiring login.
+                          </p>
+                        </div>
                       </div>
                     </div>
                   )}

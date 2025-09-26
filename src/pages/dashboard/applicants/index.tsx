@@ -269,7 +269,7 @@ export default function ApplicantsPage() {
           <div className="w-1 h-1 bg-white rounded-full md:w-1.5 md:h-1.5"></div>
         </div>
         <span className="font-bold">
-          {score}%
+          AI Score {score}%
         </span>
       </div>
     );
