@@ -74,6 +74,7 @@ interface Applicant {
   lastName: string;
   email: string;
   phone?: string;
+  smsConsent?: boolean;
   city?: string;
   state?: string;
   resume?: string;
@@ -1054,10 +1055,10 @@ export function ApplicantDetailModal({
                   variant="outline"
                   className="flex-1 border-purple-200 text-purple-700 hover:bg-purple-50 transform transition-all duration-200 hover:-translate-y-0.5"
                   onClick={() => setShowChatInviteModal(true)}
-                  disabled={!applicant.phone}
+                  disabled={!applicant.phone || !applicant.smsConsent}
                 >
                   <Send className="w-4 h-4 mr-2" />
-                  {applicant.phone ? 'Send Chat Invite' : 'No Phone'}
+                  {!applicant.phone ? 'No Phone' : !applicant.smsConsent ? 'No SMS Consent' : 'Send Chat Invite'}
                 </Button>
                 <Button
                   className="flex-1 bg-green-600 hover:bg-green-700 transform transition-all duration-200 hover:-translate-y-0.5"
@@ -1073,10 +1074,10 @@ export function ApplicantDetailModal({
                   variant="outline"
                   className="flex-1 border-purple-200 text-purple-700 hover:bg-purple-50 transform transition-all duration-200 hover:-translate-y-0.5"
                   onClick={() => setShowChatInviteModal(true)}
-                  disabled={!applicant.phone}
+                  disabled={!applicant.phone || !applicant.smsConsent}
                 >
                   <Send className="w-4 h-4 mr-2" />
-                  {applicant.phone ? 'Send Chat Invite' : 'No Phone'}
+                  {!applicant.phone ? 'No Phone' : !applicant.smsConsent ? 'No SMS Consent' : 'Send Chat Invite'}
                 </Button>
                 <Button
                   className="flex-1 bg-green-600 hover:bg-green-700 transform transition-all duration-200 hover:-translate-y-0.5"
@@ -1102,6 +1103,7 @@ export function ApplicantDetailModal({
             lastName: applicant.lastName,
             email: applicant.email,
             phone: applicant.phone,
+            smsConsent: applicant.smsConsent,
             status: applicant.status || 'pending',
           }}
           job={{

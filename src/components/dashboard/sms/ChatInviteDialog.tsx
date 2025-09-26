@@ -61,6 +61,7 @@ interface Applicant {
   lastName: string;
   email: string;
   phone?: string;
+  smsConsent?: boolean;
   status: string;
 }
 
@@ -229,6 +230,37 @@ export default function ChatInviteDialog({
               <ExternalLink className="h-4 w-4 text-orange-600" />
               <span className="text-sm text-orange-800">
                 Consider using email chat or adding a phone number to their profile.
+              </span>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  if (!applicant.smsConsent) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5 text-red-500" />
+              No SMS Consent
+            </DialogTitle>
+            <DialogDescription>
+              This applicant has not consented to receive SMS messages.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="flex items-center gap-3 p-3 bg-red-50 rounded-lg">
+              <ExternalLink className="h-4 w-4 text-red-600" />
+              <span className="text-sm text-red-800">
+                For 10DLC compliance, SMS can only be sent to applicants who have explicitly consented. Consider using email chat instead.
               </span>
             </div>
           </div>

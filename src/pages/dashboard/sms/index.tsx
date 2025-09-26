@@ -160,6 +160,69 @@ export default function SMSPage() {
             <CardContent>
               <div className="space-y-6">
                 <div className="space-y-4">
+                  <h3 className="text-base font-semibold">10DLC Compliance Configuration</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Brand Registration</label>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline">
+                          Required
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Register your brand with The Campaign Registry (TCR)
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Campaign Registration</label>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline">
+                          Required
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Register hiring/recruiting use case campaign
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">SMS Consent Tracking</label>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="default">
+                          Enabled
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Applicants provide SMS consent during application
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">STOP/START Handling</label>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="default">
+                          Enabled
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Automatic opt-out/opt-in keyword processing
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="p-4 bg-amber-50 rounded-lg border border-amber-200">
+                    <h4 className="font-medium text-amber-900 mb-2">10DLC Setup Required</h4>
+                    <p className="text-sm text-amber-800 mb-3">
+                      To send SMS messages, you must complete 10DLC brand and campaign registration with Twilio/TCR.
+                    </p>
+                    <ul className="text-xs text-amber-700 space-y-1">
+                      <li>• Register your business brand (~$4 fee)</li>
+                      <li>• Register hiring/recruiting campaign (~$50 fee)</li>
+                      <li>• Configure Twilio phone number for 10DLC</li>
+                      <li>• Set up inbound webhook for STOP/START handling</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
                   <h3 className="text-base font-semibold">Twilio Configuration</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">

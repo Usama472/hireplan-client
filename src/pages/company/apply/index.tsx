@@ -70,6 +70,7 @@ interface JobApplicationFormData {
   resume: File | null
   email: string
   phone: string
+  smsConsent: boolean
   customQuestionAnswers: CustomQuestionAnswer[]
   customFields: CustomField[]
 }
@@ -99,6 +100,7 @@ const JobApplicationPage: React.FC = () => {
     resume: null,
     email: '',
     phone: '',
+    smsConsent: false,
     customQuestionAnswers: [],
     customFields: [],
   })
@@ -161,6 +163,7 @@ const JobApplicationPage: React.FC = () => {
         lastName: formData.lastName,
         email: formData.email,
         phone: formData.phone,
+        smsConsent: formData.smsConsent,
         city: formData.city,
         state: formData.state,
         resume: formData.resume,
@@ -252,6 +255,7 @@ const JobApplicationPage: React.FC = () => {
             lastName: existingApp.lastName || '',
             email: existingApp.email || '',
             phone: existingApp.phone || '',
+            smsConsent: existingApp.smsConsent || false,
             city: existingApp.city || '',
             state: existingApp.state || '',
             resume: null, // Can't restore file from backend
@@ -322,6 +326,7 @@ const JobApplicationPage: React.FC = () => {
                 lastName: progressData.lastName || '',
                 email: progressData.email || '',
                 phone: progressData.phone || '',
+                smsConsent: progressData.smsConsent || false,
                 city: progressData.city || '',
                 state: progressData.state || '',
                 resume: null, // Can't restore file from localStorage
@@ -353,6 +358,7 @@ const JobApplicationPage: React.FC = () => {
                 lastName: existingApp.lastName || '',
                 email: existingApp.email || '',
                 phone: existingApp.phone || '',
+                smsConsent: existingApp.smsConsent || false,
                 city: existingApp.city || '',
                 state: existingApp.state || '',
                 resume: null, // Can't restore file from backend
@@ -433,6 +439,7 @@ const JobApplicationPage: React.FC = () => {
               lastName: existingApp.lastName || prev.lastName,
               email: existingApp.email || prev.email,
               phone: existingApp.phone || prev.phone,
+              smsConsent: existingApp.smsConsent || prev.smsConsent,
               city: existingApp.city || prev.city,
               state: existingApp.state || prev.state,
               customQuestionAnswers: existingApp.customQuestionAnswers || prev.customQuestionAnswers,
@@ -851,20 +858,41 @@ const JobApplicationPage: React.FC = () => {
                           </div>
                         </div>
                         
-                        <div>
-                          <Label htmlFor='phone' className='text-sm font-medium text-gray-700 mb-1 flex items-center'>
-                            Phone Number <span className='text-red-500 ml-0.5'>*</span>
-                          </Label>
-                          <Input
-                            id='phone'
-                            name='phone'
-                            type='tel'
-                            value={formData.phone}
-                            onChange={handleChange}
-                            placeholder='(555) 123-4567'
-                            className='h-10 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 transition-all bg-white'
-                            required
-                          />
+                        <div className="space-y-3">
+                          <div>
+                            <Label htmlFor='phone' className='text-sm font-medium text-gray-700 mb-1 flex items-center'>
+                              Phone Number <span className='text-red-500 ml-0.5'>*</span>
+                            </Label>
+                            <Input
+                              id='phone'
+                              name='phone'
+                              type='tel'
+                              value={formData.phone}
+                              onChange={handleChange}
+                              placeholder='(555) 123-4567'
+                              className='h-10 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 transition-all bg-white'
+                              required
+                            />
+                          </div>
+                          
+                          {/* SMS Consent Checkbox - 10DLC Compliance */}
+                          <div className="flex items-start space-x-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                            <input
+                              type="checkbox"
+                              id="smsConsent"
+                              checked={formData.smsConsent}
+                              onChange={(e) => setFormData(prev => ({ ...prev, smsConsent: e.target.checked }))}
+                              className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                            />
+                            <div className="flex-1">
+                              <Label htmlFor="smsConsent" className="text-sm font-medium text-blue-900 cursor-pointer">
+                                SMS Communications (Optional)
+                              </Label>
+                              <p className="text-xs text-blue-800 mt-1 leading-relaxed">
+                                By providing your phone number and checking this box, you consent to receive SMS messages from {companyName || 'this company'} regarding your application and potential chat invitations. Message frequency may vary. Reply STOP to opt-out. Reply HELP for assistance. Message and data rates may apply.
+                              </p>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
