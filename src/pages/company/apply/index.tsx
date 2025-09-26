@@ -4,10 +4,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import API from '@/http'
 import {
-  Briefcase,
   CheckCircle,
   ChevronLeft,
-  DollarSign,
   MapPin,
   User,
   X,
@@ -151,66 +149,6 @@ const JobApplicationPage: React.FC = () => {
     return Math.round((completedFields / totalFields) * 100)
   }
 
-  // Save partial application
-  const savePartialApplication = async () => {
-    if (!formData.firstName.trim() || !formData.lastName.trim() || !formData.email.trim()) {
-      console.log('❌ Cannot save - missing basic info')
-      return // Need at least basic info to save
-    }
-
-    try {
-      const partialData = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        phone: formData.phone,
-        smsConsent: formData.smsConsent,
-        city: formData.city,
-        state: formData.state,
-        resume: formData.resume,
-        jobId,
-        companyName,
-        jobTitle: job?.jobTitle || '',
-        status: 'draft',
-        completionPercentage: getCompletionPercentage(),
-        currentStep,
-        isPartial: true,
-        // Only include non-empty arrays
-        customQuestionAnswers: formData.customQuestionAnswers.filter(answer => 
-          answer.questionId && (
-            (typeof answer.answer === 'string' && answer.answer !== '') || 
-            (typeof answer.answer === 'boolean') ||
-            (typeof answer.answer === 'number')
-          )
-        ),
-        customFields: formData.customFields.filter(field => 
-          field.field && field.value && field.value.trim()
-        ),
-      }
-
-      console.log('💾 Saving partial application:', partialData)
-      console.log('🔍 JobId being sent:', jobId, 'Type:', typeof jobId)
-
-      if (applicationId) {
-        // Update existing partial application
-        const response = await API.applicant.updatePartialApplication(applicationId, partialData)
-        console.log('✅ Updated partial application:', response)
-      } else {
-        // Create new partial application
-        const response = await API.applicant.createPartialApplication(partialData)
-        console.log('✅ Created partial application:', response)
-        setApplicationId(response.applicationId || response.data?.applicationId || response.id)
-        
-        // Store token for secure access
-        if (response.token) {
-          localStorage.setItem(`partial_application_token_${jobId}`, response.token)
-          console.log('🔑 Stored partial application token')
-        }
-      }
-    } catch (error) {
-      console.error('❌ Failed to save partial application:', error)
-    }
-  }
 
   // Handle step navigation
   const goToNextStep = async () => {
@@ -530,18 +468,28 @@ const JobApplicationPage: React.FC = () => {
       console.log('✅ Application submitted successfully, cleared draft data')
 
       setSuccessMessage('Application submitted successfully!')
-      setTimeout(() => {
-        navigate('/')
-      }, 3000)
     } catch (err: any) {
       console.error('Application submission error:', err)
       
       // Handle duplicate application error specifically
       if (err?.response?.status === 409) { // CONFLICT status
-        setError(
-          err?.response?.data?.message || 
-          'You have already submitted an application for this job with this email address. Please check your email for confirmation or contact support if you need assistance.'
-        )
+        const responseData = err?.response?.data;
+        
+        // Check if email was sent for duplicate application
+        if (responseData?.emailSent || responseData?.message?.includes('email')) {
+          setSuccessMessage(
+            responseData?.message || 
+            'You have already submitted an application for this job. We\'ve sent you an email with a link to check your application status.'
+          );
+          // Don't set error for email sent scenario
+          setError(null);
+        } else {
+          // Regular duplicate error (no email sent)
+          setError(
+            responseData?.message || 
+            'You have already submitted an application for this job with this email address. Please check your email for confirmation or contact support if you need assistance.'
+          );
+        }
       } else {
         setError(
           err?.response?.data?.message ||
@@ -585,9 +533,21 @@ const JobApplicationPage: React.FC = () => {
             Application Submitted!
           </h1>
           <p className='text-gray-600 mb-6'>{successMessage}</p>
-          <p className='text-sm text-gray-500'>
-            Redirecting you to the homepage in a few seconds...
-          </p>
+          <div className='space-y-3'>
+            <Button
+              onClick={() => navigate('/')}
+              className='w-full bg-blue-600 hover:bg-blue-700'
+            >
+              Return to Homepage
+            </Button>
+            <Button
+              variant='outline'
+              onClick={() => navigate(-1)}
+              className='w-full'
+            >
+              Go Back
+            </Button>
+          </div>
         </div>
       </div>
     )
