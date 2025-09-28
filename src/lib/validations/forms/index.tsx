@@ -38,9 +38,19 @@ export const planSelectionSchema = z.object({
   }),
 });
 
+export const privacyConsentSchema = z.object({
+  privacyPolicyAccepted: z.boolean().refine(val => val === true, {
+    message: "You must accept the privacy policy to continue",
+  }),
+  termsOfServiceAccepted: z.boolean().refine(val => val === true, {
+    message: "You must accept the terms of service to continue",
+  }),
+});
+
 export const fullFormSchema = personalInfoSchema
   .merge(companyInfoSchema)
-  .merge(planSelectionSchema);
+  .merge(planSelectionSchema)
+  .merge(privacyConsentSchema);
 
 export const profileFormSchema = z.object({
   // Personal Information

@@ -48,7 +48,12 @@ export interface PlanSelection {
   plan: "starter" | "professional" | "enterprise";
 }
 
-export interface FormData extends PersonalInfo, CompanyInfo, PlanSelection {}
+export interface PrivacyConsent {
+  privacyPolicyAccepted: boolean;
+  termsOfServiceAccepted: boolean;
+}
+
+export interface FormData extends PersonalInfo, CompanyInfo, PlanSelection, PrivacyConsent {}
 
 export interface StepProps {
   onNext: () => void;

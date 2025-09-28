@@ -144,7 +144,9 @@ export default function RecruiterOnboardingForm({
         city: formData.city,
         state: formData.state,
         zipCode: formData.zipCode,
-        // country: formData.
+        country: 'US',
+        privacyPolicyAccepted: formData.privacyPolicyAccepted,
+        termsOfServiceAccepted: formData.termsOfServiceAccepted,
       });
 
       const token = response.tokens.accessToken.token;

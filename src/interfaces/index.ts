@@ -286,6 +286,8 @@ export interface RecruiterRegistrationInput {
   state: string;
   zipCode: string;
   country?: string;
+  privacyPolicyAccepted: boolean;
+  termsOfServiceAccepted: boolean;
 }
 
 export interface ErrorResponse {
