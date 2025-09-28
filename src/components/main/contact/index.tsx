@@ -432,11 +432,10 @@ export default function ContactPage() {
                 <Users className="w-6 h-6 text-purple-600" />
               </div>
               <h3 className="font-medium text-gray-900 mb-3 text-lg">
-                What's included in the free trial?
+                What makes HirePlan different?
               </h3>
               <p className="text-gray-700 leading-relaxed text-base">
-                14-day access to all features, up to 50 candidate profiles, and
-                full AI matching capabilities.
+                Advanced AI-powered matching, automated workflows, and seamless candidate communication all in one platform.
               </p>
             </div>
 

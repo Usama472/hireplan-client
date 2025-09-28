@@ -109,7 +109,7 @@ export function ReviewSubmitStep() {
               <Checkbox
                 id="privacyPolicyAccepted"
                 checked={privacyPolicyAccepted || false}
-                onCheckedChange={(checked) => setValue("privacyPolicyAccepted", checked)}
+                onCheckedChange={(checked) => setValue("privacyPolicyAccepted", !!checked)}
                 className="mt-1"
               />
               <div className="space-y-1">
@@ -150,7 +150,7 @@ export function ReviewSubmitStep() {
               <Checkbox
                 id="termsOfServiceAccepted"
                 checked={termsOfServiceAccepted || false}
-                onCheckedChange={(checked) => setValue("termsOfServiceAccepted", checked)}
+                onCheckedChange={(checked) => setValue("termsOfServiceAccepted", !!checked)}
                 className="mt-1"
               />
               <div className="space-y-1">

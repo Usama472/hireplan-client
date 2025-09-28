@@ -200,15 +200,6 @@ export const allActions = [
     iconBg: "bg-emerald-100",
   },
   {
-    type: "assign_recruiter",
-    label: "Assign Recruiter",
-    description: "Assign a recruiter to this applicant",
-    icon: <UserCheck className="h-5 w-5" />,
-    category: "assignment",
-    color: "bg-amber-500",
-    iconBg: "bg-amber-100",
-  },
-  {
     type: "webhook",
     label: "Webhook",
     description: "Send data to an external URL",

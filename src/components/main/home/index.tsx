@@ -4,8 +4,21 @@ import { CompactHowItWorks } from "./compact-how-it-works";
 import { PricingSection } from "./pricing-section";
 import { SMSOptIn } from "./sms-opt-in";
 import { MessageSquare } from "lucide-react";
+import { useEffect } from "react";
+import { useNavigate } from "react-router";
+import useAuthSessionContext from "@/lib/context/AuthSessionContext";
+import { ROUTES } from "@/constants";
 
 export default function Home() {
+  const navigate = useNavigate();
+  const { status } = useAuthSessionContext();
+
+  useEffect(() => {
+    // Redirect authenticated users to dashboard
+    if (status === 'authenticated') {
+      navigate(ROUTES.DASHBOARD.MAIN);
+    }
+  }, [status, navigate]);
   return (
     <main>
       <HeroSection />

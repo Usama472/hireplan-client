@@ -57,6 +57,8 @@ export default function RecruiterOnboardingForm({
       state: "",
       zipCode: "",
       plan: "starter" as const,
+      privacyPolicyAccepted: false,
+      termsOfServiceAccepted: false,
     },
     mode: "onChange",
     criteriaMode: "all",
@@ -82,7 +84,7 @@ export default function RecruiterOnboardingForm({
       "state",
       "zipCode",
     ],
-    3: [],
+    3: ["privacyPolicyAccepted", "termsOfServiceAccepted"],
   };
 
   const handleNext = async () => {
