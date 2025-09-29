@@ -37,6 +37,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 import API from '@/http';
+import * as emailChatAPI from '@/http/email-chat/api';
 import { useToast } from '@/lib/hooks/use-toast';
 import type { EmailChatConversation } from '@/interfaces';
 
@@ -78,7 +79,8 @@ export function EmailChatWidget({
   const loadConversations = async () => {
     try {
       setIsLoading(true);
-      const response = await API.emailChat.getConversations({
+      // Use emailChatAPI directly for better compatibility
+      const response = await emailChatAPI.getConversations({
         applicantId,
         page: 1,
         limit: 50,
@@ -513,6 +515,28 @@ export function EmailChatWidget({
                               <span className={`text-xs ${message.direction === 'outbound' ? 'text-blue-100' : 'text-gray-500'}`}>
                                 {format(new Date(message.timestamp), 'HH:mm')}
                               </span>
+                              
+                              {/* Channel Indicator */}
+                              <div className={`flex items-center gap-1 ${message.direction === 'outbound' ? 'text-blue-200' : 'text-gray-400'}`}>
+                                {message.metadata?.source === 'sms' && (
+                                  <>
+                                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                    <span className="text-xs">SMS</span>
+                                  </>
+                                )}
+                                {message.metadata?.source === 'portal' && (
+                                  <>
+                                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                                    <span className="text-xs">Portal</span>
+                                  </>
+                                )}
+                                {(!message.metadata?.source || message.metadata?.source === 'email') && (
+                                  <>
+                                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                    <span className="text-xs">Email</span>
+                                  </>
+                                )}
+                              </div>
                             </div>
                           </div>
                           <div 

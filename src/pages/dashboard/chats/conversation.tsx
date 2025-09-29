@@ -20,7 +20,6 @@ import {
   AlertCircle,
   MessageSquare,
   MoreVertical,
-  Info,
   Phone,
   MapPin,
   User,
@@ -39,8 +38,7 @@ import {
   Calendar,
   CheckCircle,
   UserCheck,
-  UserX,
-  HelpCircle
+  UserX
 } from 'lucide-react';
 import { SubscriptionGuard } from '@/components/common/SubscriptionGuard';
 import useAuthSessionContext from '@/lib/context/AuthSessionContext';
@@ -130,13 +128,12 @@ interface ChatConversation {
 const ConversationPage: React.FC = () => {
   const { conversationId } = useParams<{ conversationId: string }>();
   const navigate = useNavigate();
-  const { subscription } = useAuthSessionContext();
+  const { subscription, data: authData } = useAuthSessionContext();
   const [conversation, setConversation] = useState<ChatConversation | null>(null);
   const [applicantConversations, setApplicantConversations] = useState<ChatConversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [replyContent, setReplyContent] = useState('');
-  const [showApplicantInfo, setShowApplicantInfo] = useState(false);
   const [showApplicantModal, setShowApplicantModal] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -353,7 +350,7 @@ const ConversationPage: React.FC = () => {
     if (!conversation?.applicantId) return;
 
     try {
-      await API.applicant.updateApplicantStatus(conversation.applicantId._id, 'shortlisted');
+      await API.applicant.updateApplicantStatusDirect(conversation.applicantId._id, 'shortlisted');
       toast.success('Applicant shortlisted successfully!');
       // Reload conversation to update status
       await loadConversation();
@@ -367,7 +364,7 @@ const ConversationPage: React.FC = () => {
     if (!conversation?.applicantId) return;
 
     try {
-      await API.applicant.updateApplicantStatus(conversation.applicantId._id, 'rejected');
+      await API.applicant.updateApplicantStatusDirect(conversation.applicantId._id, 'rejected');
       toast.success('Applicant rejected');
       // Reload conversation to update status
       await loadConversation();
@@ -377,12 +374,6 @@ const ConversationPage: React.FC = () => {
     }
   };
 
-  const handleAskQuestion = () => {
-    // Set a predefined question template in the editor
-    const questionTemplate = "Hi! I'd like to ask you a quick question about your application. ";
-    setReplyContent(questionTemplate);
-    toast.info('Question template added - please complete your question');
-  };
 
 
 
@@ -407,6 +398,27 @@ const ConversationPage: React.FC = () => {
     const applicantParticipant = conversation.participants.find(p => p.role === 'applicant');
     const name = applicantParticipant?.name || applicantParticipant?.email || 'UA';
     return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  };
+
+  const getCurrentUserInitials = () => {
+    if (!authData?.user) return 'YU'; // "You User" fallback
+    
+    const { firstName, lastName, email } = authData.user;
+    
+    if (firstName && lastName) {
+      return `${firstName[0]}${lastName[0]}`.toUpperCase();
+    }
+    
+    if (firstName) {
+      return firstName.substring(0, 2).toUpperCase();
+    }
+    
+    if (email) {
+      const emailParts = email.split('@')[0];
+      return emailParts.substring(0, 2).toUpperCase();
+    }
+    
+    return 'YU';
   };
 
   const getMessageContent = (message: ChatMessage) => {
@@ -513,15 +525,6 @@ const ConversationPage: React.FC = () => {
             </div>
             
             <div className="flex items-center gap-2">
-                {/* Applicant Info Button */}
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => setShowApplicantInfo(!showApplicantInfo)}
-                  className={`p-2 hover:bg-gray-100 rounded-full ${showApplicantInfo ? 'bg-blue-100 text-blue-600' : ''}`}
-                >
-                  <Info className="h-5 w-5" />
-                </Button>
                 
                 {/* View Profile Button */}
                 <Button 
@@ -554,7 +557,9 @@ const ConversationPage: React.FC = () => {
                             <div className="flex items-center gap-2 flex-1 min-w-0">
                               <span className="font-medium text-sm truncate">{conv.subject}</span>
                               {conv.metadata?.source === 'sms' && (
-                                <Phone className="h-3 w-3 text-purple-500 flex-shrink-0" title="Started via SMS" />
+                                <div title="Started via SMS">
+                                  <Phone className="h-3 w-3 text-purple-500 flex-shrink-0" />
+                                </div>
                               )}
                             </div>
                             <Badge variant="outline" className="ml-2 text-xs">
@@ -596,8 +601,8 @@ const ConversationPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Applicant Info Panel */}
-          {showApplicantInfo && conversation.applicantId && (
+          {/* Applicant Info Panel - Always Visible */}
+          {conversation.applicantId && (
             <div className="bg-blue-50 border-b border-blue-200 px-4 py-3 animate-in slide-in-from-top duration-300">
                 <div className="flex items-start gap-4">
                 <Avatar className="h-12 w-12 border-2 border-white shadow-sm">
@@ -607,8 +612,6 @@ const ConversationPage: React.FC = () => {
                     </AvatarFallback>
                   </Avatar>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-gray-900 text-lg mb-1">{getApplicantName()}</h3>
-                  
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                     <div className="flex items-center gap-2">
                       <Mail className="h-4 w-4 text-blue-500 flex-shrink-0" />
@@ -652,14 +655,6 @@ const ConversationPage: React.FC = () => {
                   </div>
                 </div>
                 
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => setShowApplicantInfo(false)}
-                  className="p-1 hover:bg-blue-200 rounded-full flex-shrink-0"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
               </div>
             </div>
           )}
@@ -683,14 +678,17 @@ const ConversationPage: React.FC = () => {
                     
                     <div className={`flex ${message.direction === 'outbound' ? 'justify-end' : 'justify-start'}`}>
                       <div className={`flex gap-2 max-w-xs sm:max-w-md ${message.direction === 'outbound' ? 'flex-row-reverse' : 'flex-row'}`}>
-                        {message.direction === 'inbound' && (
-                          <Avatar className="h-7 w-7 flex-shrink-0">
-                            <AvatarImage src={undefined} />
-                            <AvatarFallback className="bg-gray-300 text-gray-600 text-xs">
-                              {getApplicantInitials()}
-                            </AvatarFallback>
-                          </Avatar>
-                        )}
+                        {/* Avatar for all messages - applicant initials for inbound, your initials for outbound */}
+                        <Avatar className="h-7 w-7 flex-shrink-0">
+                          <AvatarImage src={undefined} />
+                          <AvatarFallback className={`text-xs ${
+                            message.direction === 'inbound' 
+                              ? 'bg-gray-300 text-gray-600' 
+                              : 'bg-blue-500 text-white'
+                          }`}>
+                            {message.direction === 'inbound' ? getApplicantInitials() : getCurrentUserInitials()}
+                          </AvatarFallback>
+                        </Avatar>
                         
                         <div className={`flex flex-col ${message.direction === 'outbound' ? 'items-end' : 'items-start'}`}>
                           <div

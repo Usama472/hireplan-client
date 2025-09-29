@@ -1,10 +1,18 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Send, MessageSquare, Clock } from 'lucide-react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { Send, MessageSquare, Clock, Search, Filter, Building } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import API from '@/http';
 
 interface ChatMessage {
@@ -42,6 +50,9 @@ export default function ChatInterface({ jobId, onConversationCreated }: ChatInte
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [companyFilter, setCompanyFilter] = useState('all');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -61,6 +72,42 @@ export default function ChatInterface({ jobId, onConversationCreated }: ChatInte
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  // Filter conversations based on search and filters
+  const filteredConversations = useMemo(() => {
+    let filtered = conversations;
+
+    // Search filter
+    if (searchTerm.trim()) {
+      const search = searchTerm.toLowerCase();
+      filtered = filtered.filter(conv => 
+        conv.subject.toLowerCase().includes(search) ||
+        conv.jobTitle.toLowerCase().includes(search) ||
+        conv.companyName.toLowerCase().includes(search) ||
+        conv.messages.some(msg => 
+          msg.content.toLowerCase().includes(search)
+        )
+      );
+    }
+
+    // Status filter
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(conv => conv.status === statusFilter);
+    }
+
+    // Company filter (extract companies dynamically)
+    if (companyFilter !== 'all') {
+      filtered = filtered.filter(conv => conv.companyName === companyFilter);
+    }
+
+    return filtered;
+  }, [conversations, searchTerm, statusFilter, companyFilter]);
+
+  // Get unique companies for filter dropdown
+  const availableCompanies = useMemo(() => {
+    const companies = [...new Set(conversations.map(conv => conv.companyName))].filter(Boolean);
+    return companies.sort();
+  }, [conversations]);
 
   const fetchConversations = async () => {
     try {
@@ -175,17 +222,65 @@ export default function ChatInterface({ jobId, onConversationCreated }: ChatInte
       {/* Conversations List */}
       <div className="lg:col-span-1">
         <Card className="h-full">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 mb-4">
               <MessageSquare className="h-5 w-5" />
               Conversations
+              <Badge variant="secondary" className="ml-auto">
+                {filteredConversations.length}
+              </Badge>
             </CardTitle>
+            
+            {/* Search */}
+            <div className="relative mb-3">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search conversations..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            
+            {/* Filters */}
+            <div className="flex gap-2">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="closed">Closed</SelectItem>
+                  <SelectItem value="archived">Archived</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              {availableCompanies.length > 1 && (
+                <Select value={companyFilter} onValueChange={setCompanyFilter}>
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="Filter by company" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Companies</SelectItem>
+                    {availableCompanies.map(company => (
+                      <SelectItem key={company} value={company}>
+                        <div className="flex items-center gap-2">
+                          <Building className="h-3 w-3" />
+                          {company}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
           </CardHeader>
           <CardContent className="p-0">
-            <ScrollArea className="h-[500px]">
-              {conversations.length > 0 ? (
+            <ScrollArea className="h-[400px]">
+              {filteredConversations.length > 0 ? (
                 <div className="space-y-1">
-                  {conversations.map((conversation) => (
+                  {filteredConversations.map((conversation) => (
                     <div
                       key={conversation.id}
                       className={`p-4 cursor-pointer border-b hover:bg-gray-50 transition-colors ${
@@ -196,10 +291,10 @@ export default function ChatInterface({ jobId, onConversationCreated }: ChatInte
                       <div className="flex items-start justify-between">
                         <div className="flex-1 min-w-0">
                           <h4 className="text-sm font-medium text-gray-900 truncate">
-                            {conversation.jobTitle}
+                            {conversation.subject || conversation.jobTitle || 'Chat Conversation'}
                           </h4>
                           <p className="text-xs text-gray-500 truncate">
-                            {conversation.companyName}
+                            {conversation.jobTitle || 'Job Application'}
                           </p>
                           <div className="flex items-center gap-2 mt-1">
                             <Clock className="h-3 w-3 text-gray-400" />
@@ -264,8 +359,10 @@ export default function ChatInterface({ jobId, onConversationCreated }: ChatInte
                             }`}>
                               {formatMessageTime(message.timestamp)}
                             </span>
-                            {message.source === 'portal' && (
-                              <Badge variant="secondary" className="text-xs">
+                            
+                            {/* Only show portal badge for clarity */}
+                            {(message.source === 'portal' || message.metadata?.source === 'portal') && (
+                              <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200">
                                 Portal
                               </Badge>
                             )}

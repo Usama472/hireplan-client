@@ -22,7 +22,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import API from "@/http";
-import ChatInterface from "@/components/applicant/chat/ChatInterface";
+import UnifiedApplicantChat from "@/components/applicant/chat/UnifiedApplicantChat";
 import { ApplicantHeader } from "@/components/applicant/ApplicantHeader";
 import { COMPONENT_STYLES } from "@/constants";
 
@@ -624,7 +624,7 @@ export default function ApplicantDashboard() {
               )}
             </div>
             
-            <ChatInterface 
+            <UnifiedApplicantChat 
               jobId={selectedJobForChat || undefined}
               onConversationCreated={() => {
                 setSelectedJobForChat(null);

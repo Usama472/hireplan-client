@@ -90,8 +90,8 @@ export function CompanyInfoForm() {
         return;
       }
 
-      toast.info("Refreshing website data...", {
-        description: "This may take a few moments",
+      toast.info("Re-scraping website data...", {
+        description: "This will update your company page styling",
       });
 
       // Perform live scraping
@@ -100,9 +100,9 @@ export function CompanyInfoForm() {
       // Save to cache
       await saveScrapedDataToCache(companyId, response);
 
-      toast.success("Website data refreshed successfully!", {
+      toast.success("Website styling updated successfully!", {
         description:
-          "Your company page will now show the updated website design",
+          "Your company page now reflects your current website design",
       });
     } catch (error) {
       console.error("Error refreshing website data:", error);

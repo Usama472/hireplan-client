@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import API from '@/http'
 import {
+  AlertTriangle,
   CheckCircle,
   ChevronLeft,
   MapPin,
@@ -85,6 +86,7 @@ const JobApplicationPage: React.FC = () => {
   const [submitting, setSubmitting] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string>('')
+  const [isDuplicateApplication, setIsDuplicateApplication] = useState<boolean>(false)
   const [customQuestions, setCustomQuestions] = useState<CustomQuestion[]>([])
   
   // Multi-step application state
@@ -477,6 +479,7 @@ const JobApplicationPage: React.FC = () => {
         
         // Check if email was sent for duplicate application
         if (responseData?.emailSent || responseData?.message?.includes('email')) {
+          setIsDuplicateApplication(true);
           setSuccessMessage(
             responseData?.message || 
             'You have already submitted an application for this job. We\'ve sent you an email with a link to check your application status.'
@@ -528,10 +531,21 @@ const JobApplicationPage: React.FC = () => {
     return (
       <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
         <div className='text-center p-8 bg-white rounded-lg shadow-md max-w-md w-full mx-4'>
-          <CheckCircle className='h-16 w-16 text-green-500 mx-auto mb-4' />
-          <h1 className='text-2xl font-bold text-gray-900 mb-4'>
-            Application Submitted!
-          </h1>
+          {isDuplicateApplication ? (
+            <>
+              <AlertTriangle className='h-16 w-16 text-amber-500 mx-auto mb-4' />
+              <h1 className='text-2xl font-bold text-gray-900 mb-4'>
+                Application Already Submitted
+              </h1>
+            </>
+          ) : (
+            <>
+              <CheckCircle className='h-16 w-16 text-green-500 mx-auto mb-4' />
+              <h1 className='text-2xl font-bold text-gray-900 mb-4'>
+                Application Submitted!
+              </h1>
+            </>
+          )}
           <p className='text-gray-600 mb-6'>{successMessage}</p>
           <div className='space-y-3'>
             <Button

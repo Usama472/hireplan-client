@@ -2,7 +2,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import type { JobFormDataWithId } from '@/interfaces'
-import { Briefcase, Calendar, DollarSign, MapPin } from 'lucide-react'
+import { Briefcase, Calendar, DollarSign, MapPin, CheckCircle, Star, Clock } from 'lucide-react'
 import React from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
@@ -88,198 +88,309 @@ const CompanyJobCard: React.FC<CompanyJobCardProps> = ({ job, onApply }) => {
     <Card
       style={{
         overflow: 'hidden',
-        border: '1px solid #e5e7eb',
-        borderRadius: '0.75rem',
-        boxShadow:
-          '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-        transition: 'all 0.3s ease',
+        border: '1px solid #e2e8f0',
+        borderRadius: '1.25rem',
+        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         backgroundColor: '#ffffff',
-        marginTop: '2rem',
+        marginBottom: '1.5rem',
+        position: 'relative',
       }}
       onMouseOver={(e) => {
-        e.currentTarget.style.boxShadow =
-          '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
-        e.currentTarget.style.transform = 'translateY(-2px)'
+        e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+        e.currentTarget.style.transform = 'translateY(-6px)'
+        e.currentTarget.style.borderColor = '#cbd5e1'
       }}
       onMouseOut={(e) => {
-        e.currentTarget.style.boxShadow =
-          '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+        e.currentTarget.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
         e.currentTarget.style.transform = 'translateY(0)'
+        e.currentTarget.style.borderColor = '#e2e8f0'
       }}
     >
-      <div style={{ padding: '2.5rem' }}>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'flex-start',
-            marginBottom: '1.5rem',
-          }}
-        >
+      {/* Header Section */}
+      <div style={{ 
+        backgroundColor: '#f8fafc',
+        borderBottom: '1px solid #e2e8f0',
+        padding: '2rem',
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
           <h3
             style={{
-              fontSize: '2.125rem',
-              fontWeight: 'bold',
-              color: '#111827',
-              lineHeight: '1.2',
-              letterSpacing: '-0.025em',
+              fontSize: '1.75rem',
+              fontWeight: '700',
+              color: '#0f172a',
+              lineHeight: '1.3',
+              margin: '0',
+              flex: '1',
+              marginRight: '1rem',
             }}
           >
             {job.jobBoardTitle}
           </h3>
-          <Badge
+          <div
             style={{
-              background: priorityStyle.background,
-              color: priorityStyle.color,
-              textTransform: 'capitalize',
-              fontSize: '1.125rem',
-              padding: '0.625rem 1rem',
-              borderRadius: '9999px',
-              fontWeight: '600',
+              backgroundColor: '#10b981',
+              color: 'white',
+              padding: '0.75rem 1.25rem',
+              borderRadius: '0.75rem',
+              fontSize: '1rem',
+              fontWeight: '700',
+              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
             }}
           >
-            {job.jobStatus}
-          </Badge>
+            <DollarSign style={{ height: '1.125rem', width: '1.125rem' }} />
+            {formatSalary(job.payRate)} {formatPayType(job.payType)}
+          </div>
         </div>
-
-        {job.company && (
-          <div
-            style={{
-              marginBottom: '1.5rem',
-              color: '#374151',
-              fontWeight: '500',
-              fontSize: '1.5rem',
-            }}
-          >
-            {job.company}
-          </div>
-        )}
-
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: '1.5rem',
-            marginBottom: '1.75rem',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              color: '#4b5563',
-              fontSize: '1.375rem',
-            }}
-          >
-            <MapPin
-              style={{
-                height: '1.75rem',
-                width: '1.75rem',
-                marginRight: '0.875rem',
-                color: '#6b7280',
-              }}
-            />
-            <span>{location}</span>
-          </div>
-
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              color: '#4b5563',
-              fontSize: '1.375rem',
-            }}
-          >
-            <Briefcase
-              style={{
-                height: '1.75rem',
-                width: '1.75rem',
-                marginRight: '0.875rem',
-                color: '#6b7280',
-              }}
-            />
+        
+        {/* Quick Info Tags */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
+          <div style={{
+            backgroundColor: '#ffffff',
+            border: '1px solid #e2e8f0',
+            padding: '0.5rem 0.875rem',
+            borderRadius: '0.75rem',
+            fontSize: '0.875rem',
+            fontWeight: '600',
+            color: '#374151',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+          }}>
+            <Briefcase style={{ height: '1rem', width: '1rem', color: '#6b7280' }} />
             <span style={{ textTransform: 'capitalize' }}>
               {job.employmentType.replace('-', ' ')}
             </span>
           </div>
-
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              color: '#4b5563',
-              fontSize: '1.375rem',
-            }}
-          >
-            <span style={{ marginRight: '0.875rem', fontSize: '1.75rem' }}>
-              {getWorkplaceTypeIcon(job.workplaceType)}
-            </span>
-            <span style={{ textTransform: 'capitalize' }}>
-              {job.workplaceType}
-            </span>
+          
+          <div style={{
+            backgroundColor: '#ffffff',
+            border: '1px solid #e2e8f0',
+            padding: '0.5rem 0.875rem',
+            borderRadius: '0.75rem',
+            fontSize: '0.875rem',
+            fontWeight: '600',
+            color: '#374151',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+          }}>
+            <span style={{ fontSize: '1rem' }}>{getWorkplaceTypeIcon(job.workplaceType)}</span>
+            <span style={{ textTransform: 'capitalize' }}>{job.workplaceType}</span>
           </div>
-
-          <div
-            style={{
+          
+          {job.workplaceType !== 'remote' && (
+            <div style={{
+              backgroundColor: '#ffffff',
+              border: '1px solid #e2e8f0',
+              padding: '0.5rem 0.875rem',
+              borderRadius: '0.75rem',
+              fontSize: '0.875rem',
+              fontWeight: '600',
+              color: '#374151',
               display: 'flex',
               alignItems: 'center',
-              color: '#4b5563',
-              fontSize: '1.375rem',
+              gap: '0.5rem',
+              boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+            }}>
+              <MapPin style={{ height: '1rem', width: '1rem', color: '#6b7280' }} />
+              <span>{location}</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Content Section */}
+      <div style={{ padding: '2rem' }}>
+        {/* Job Description */}
+        <div style={{ marginBottom: '2rem' }}>
+          <h4 style={{ 
+            fontSize: '1.25rem', 
+            fontWeight: '700', 
+            color: '#0f172a', 
+            marginBottom: '1rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
+            <div style={{ 
+              width: '0.25rem', 
+              height: '1.5rem', 
+              backgroundColor: '#3b82f6', 
+              borderRadius: '0.125rem' 
+            }}></div>
+            About this role
+          </h4>
+          <div
+            style={{
+              backgroundColor: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              borderRadius: '0.75rem',
+              padding: '1.25rem',
+              maxHeight: '8rem',
+              overflowY: 'auto',
+              fontSize: '1rem',
+              lineHeight: '1.7',
+              color: '#374151',
             }}
           >
-            <DollarSign
+            <div
               style={{
-                height: '1.75rem',
-                width: '1.75rem',
-                marginRight: '0.875rem',
-                color: '#6b7280',
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+              }}
+              dangerouslySetInnerHTML={{
+                __html: job.jobDescription.replace(/<[^>]*>?/gm, '').replace(/\n/g, '<br>')
               }}
             />
-            <span>
-              {formatSalary(job.payRate)} {formatPayType(job.payType)}
-            </span>
           </div>
         </div>
 
-        <div style={{ marginBottom: '1.75rem' }}>
-          <p
-            style={{
-              color: '#4b5563',
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-              fontSize: '1.375rem',
-              lineHeight: '1.7',
-            }}
-          >
-            {job.jobDescription.replace(/<[^>]*>?/gm, '')}
-          </p>
-        </div>
+        {/* Required Qualifications */}
+        {job.requiredQualifications && job.requiredQualifications.length > 0 && (
+          <div style={{ marginBottom: '2rem' }}>
+            <h4 style={{ 
+              fontSize: '1.25rem', 
+              fontWeight: '700', 
+              color: '#0f172a', 
+              marginBottom: '1rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}>
+              <CheckCircle style={{ height: '1.25rem', width: '1.25rem', color: '#10b981' }} />
+              Required Qualifications
+            </h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
+              {job.requiredQualifications.slice(0, 4).map((qual, index) => (
+                <div key={index} style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '1rem',
+                  padding: '1rem',
+                  backgroundColor: '#f8fafc',
+                  borderRadius: '0.75rem',
+                  border: '1px solid #e2e8f0'
+                }}>
+                  <div style={{
+                    width: '0.5rem',
+                    height: '0.5rem',
+                    backgroundColor: '#10b981',
+                    borderRadius: '50%',
+                    marginTop: '0.625rem',
+                    flexShrink: 0
+                  }}></div>
+                  <span style={{
+                    fontSize: '1rem',
+                    color: '#374151',
+                    lineHeight: '1.6',
+                    fontWeight: '500'
+                  }}>
+                    {qual.text}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
+        {/* Preferred Qualifications */}
+        {job.preferredQualifications && job.preferredQualifications.length > 0 && (
+          <div style={{ marginBottom: '2rem' }}>
+            <h4 style={{ 
+              fontSize: '1.25rem', 
+              fontWeight: '700', 
+              color: '#0f172a', 
+              marginBottom: '1rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}>
+              <Star style={{ height: '1.25rem', width: '1.25rem', color: '#f59e0b' }} />
+              Preferred Qualifications
+            </h4>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
+              {job.preferredQualifications.slice(0, 6).map((qual, index) => (
+                <div key={index} style={{
+                  padding: '0.75rem 1rem',
+                  backgroundColor: '#fef3c7',
+                  color: '#92400e',
+                  fontSize: '0.95rem',
+                  fontWeight: '600',
+                  borderRadius: '0.75rem',
+                  border: '1px solid #fcd34d'
+                }}>
+                  {qual.text}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Job Requirements */}
+        {job.jobRequirements && job.jobRequirements.length > 0 && (
+          <div style={{ marginBottom: '2rem' }}>
+            <h4 style={{ 
+              fontSize: '1.25rem', 
+              fontWeight: '700', 
+              color: '#0f172a', 
+              marginBottom: '1rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}>
+              <Clock style={{ height: '1.25rem', width: '1.25rem', color: '#6366f1' }} />
+              Additional Requirements
+            </h4>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
+              {job.jobRequirements.slice(0, 4).map((req, index) => (
+                <div key={index} style={{
+                  padding: '0.75rem 1rem',
+                  backgroundColor: '#ede9fe',
+                  color: '#5b21b6',
+                  fontSize: '0.95rem',
+                  fontWeight: '600',
+                  borderRadius: '0.75rem',
+                  border: '1px solid #c4b5fd'
+                }}>
+                  {req}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Footer */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            marginTop: '1.75rem',
-            paddingTop: '1.5rem',
-            borderTop: '1px solid #f3f4f6',
+            paddingTop: '2rem',
+            borderTop: '1px solid #e2e8f0',
+            marginTop: '1rem',
           }}
         >
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
-              color: '#6b7280',
-              fontSize: '1.25rem',
+              color: '#64748b',
+              fontSize: '0.875rem',
+              fontWeight: '500',
             }}
           >
             <Calendar
               style={{
-                height: '1.5rem',
-                width: '1.5rem',
-                marginRight: '0.625rem',
+                height: '1rem',
+                width: '1rem',
+                marginRight: '0.5rem',
+                color: '#94a3b8',
               }}
             />
             <span>Apply by {formattedDate}</span>
@@ -288,30 +399,29 @@ const CompanyJobCard: React.FC<CompanyJobCardProps> = ({ job, onApply }) => {
           <Button
             onClick={handleApplyClick}
             style={{
-              backgroundColor: '#2563eb',
+              backgroundColor: '#1f2937',
               color: 'white',
               paddingLeft: '2rem',
               paddingRight: '2rem',
               paddingTop: '0.875rem',
               paddingBottom: '0.875rem',
-              borderRadius: '0.5rem',
-              fontSize: '1.375rem',
+              borderRadius: '0.75rem',
+              fontSize: '1rem',
               fontWeight: '600',
-              boxShadow:
-                '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-              transition: 'all 0.2s ease',
+              border: 'none',
+              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+              cursor: 'pointer',
             }}
             onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = '#1d4ed8'
+              e.currentTarget.style.backgroundColor = '#111827'
               e.currentTarget.style.transform = 'translateY(-1px)'
-              e.currentTarget.style.boxShadow =
-                '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+              e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
             }}
             onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = '#2563eb'
+              e.currentTarget.style.backgroundColor = '#1f2937'
               e.currentTarget.style.transform = 'translateY(0)'
-              e.currentTarget.style.boxShadow =
-                '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+              e.currentTarget.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
             }}
           >
             Apply Now

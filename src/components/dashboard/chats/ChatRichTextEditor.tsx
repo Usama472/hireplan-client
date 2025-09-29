@@ -19,7 +19,7 @@ import {
   X,
   File,
   Image as ImageIcon,
-
+  Search,
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -77,6 +77,7 @@ export function ChatRichTextEditor({
 }: ChatRichTextEditorProps) {
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
   const [loadingTemplates, setLoadingTemplates] = useState(false);
+  const [templateSearch, setTemplateSearch] = useState('');
   const [showLinkInput, setShowLinkInput] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
@@ -122,7 +123,7 @@ export function ChatRichTextEditor({
         // Handle Enter key for sending
         if (event.key === "Enter" && !event.shiftKey) {
           event.preventDefault();
-          if (!sending && !disabled && (value.trim() || attachedFiles.length > 0)) {
+          if (!sending && !disabled && ((value || '').trim() || attachedFiles.length > 0)) {
             handleSend();
           }
           return true;
@@ -298,7 +299,15 @@ export function ChatRichTextEditor({
 
   const isActive = (name: string) => editor?.isActive(name) || false;
 
-  const groupedTemplates = templates.reduce((acc, template) => {
+  // Filter templates based on search
+  const filteredTemplates = templates.filter(template => 
+    template.name.toLowerCase().includes(templateSearch.toLowerCase()) ||
+    template.subject.toLowerCase().includes(templateSearch.toLowerCase()) ||
+    template.body.toLowerCase().includes(templateSearch.toLowerCase()) ||
+    (template.description || '').toLowerCase().includes(templateSearch.toLowerCase())
+  );
+
+  const groupedTemplates = filteredTemplates.reduce((acc, template) => {
     const category = template.category || 'General';
     if (!acc[category]) acc[category] = [];
     acc[category].push(template);
@@ -324,10 +333,22 @@ export function ChatRichTextEditor({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-80 max-h-96">
-            <div className="p-2">
+            <div className="p-3">
               <div className="text-sm font-medium text-gray-900 mb-2">Email Templates</div>
-              <div className="text-xs text-gray-500 mb-3">
-                Select a template to insert into your message
+              
+              {/* Search Input */}
+              <div className="relative mb-3">
+                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-gray-400" />
+                <Input
+                  placeholder="Search templates..."
+                  value={templateSearch}
+                  onChange={(e) => setTemplateSearch(e.target.value)}
+                  className="pl-7 h-8 text-xs"
+                />
+              </div>
+              
+              <div className="text-xs text-gray-500 mb-2">
+                {filteredTemplates.length} template{filteredTemplates.length !== 1 ? 's' : ''} found
               </div>
             </div>
             
@@ -529,7 +550,7 @@ export function ChatRichTextEditor({
         <div className="absolute bottom-2 right-2">
           <Button
             onClick={handleSend}
-            disabled={sending || disabled || (!value.trim() && attachedFiles.length === 0)}
+            disabled={sending || disabled || (!(value || '').trim() && attachedFiles.length === 0)}
             size="sm"
             className="h-10 w-10 p-0 rounded-xl bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg transition-all duration-200"
           >

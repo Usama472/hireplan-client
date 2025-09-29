@@ -4,6 +4,7 @@ import * as attachmentApi from "./attachment/api";
 import * as authApi from "./auth/api";
 import * as automationApi from "./automation/api";
 import * as availabilityApi from "./availability/api";
+import * as chatApi from "./chat/api";
 import * as companyApi from "./company/api";
 import * as emailChatApi from "./email-chat/api";
 import * as emailTemplateApi from "./email-template/api";
@@ -38,7 +39,8 @@ const API = {
   zoom: zoomApi,
   meeting: meetingApi,
   holidays: holidaysApi,
-  emailChat: emailChatApi,
+  chat: chatApi, // New unified chat API
+  emailChat: emailChatApi, // Keep for backward compatibility
   emailTemplate: emailTemplateApi,
   globalSetting: globalSettingApi,
   interview: interviewApi,

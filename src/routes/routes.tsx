@@ -35,6 +35,7 @@ import EditAutomationPage from "@/pages/dashboard/automations/edit";
 import TriggersPage from "@/pages/dashboard/automations/triggers";
 import ChatsPage from "@/pages/dashboard/chats";
 import ConversationPage from "@/pages/dashboard/chats/conversation";
+import SimpleUnifiedChat from "@/pages/dashboard/chats/simple-unified-chat";
 import EmailTemplatesPage from "@/pages/dashboard/email-template";
 import SMSPage from "@/pages/dashboard/sms";
 import CreateSMSTemplatePage from "@/pages/dashboard/sms/create";
@@ -225,7 +226,7 @@ export const appRoutes: AppRoutesType[] = [
   {
     id: "chats",
     url: ROUTES.DASHBOARD.CHATS,
-    element: <ChatsPage />,
+    element: <SimpleUnifiedChat />,
     isPrivate: true,
   },
   {
@@ -243,7 +244,7 @@ export const appRoutes: AppRoutesType[] = [
   {
     id: "chat-conversation",
     url: ROUTES.DASHBOARD.CHAT_CONVERSATION,
-    element: <ConversationPage />,
+    element: <SimpleUnifiedChat />,
     isPrivate: true,
   },
   {
