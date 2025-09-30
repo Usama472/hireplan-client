@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useChatContext } from "@/lib/context/ChatContext";
 import {
   MessageCircle,
   Search,
@@ -102,14 +103,22 @@ const ChatsPage: React.FC = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const navigate = useNavigate();
+  const { refreshTrigger } = useChatContext();
 
   useEffect(() => {
     loadConversations();
   }, [page, statusFilter]);
 
+  // Silent refresh when conversations are updated
+  useEffect(() => {
+    if (refreshTrigger > 0) {
+      loadConversations();
+    }
+  }, [refreshTrigger]);
+
   const getUnreadCount = (conversation: ChatConversation) => {
     return conversation.messages.filter(
-      (msg) => msg.direction === "inbound" && !msg.readReceipt
+      (msg) => msg.direction === "inbound" && !msg.readReceipt && !msg.readAt
     ).length;
   };
 

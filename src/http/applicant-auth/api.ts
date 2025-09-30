@@ -65,3 +65,7 @@ export const sendMessage = (conversationId: string, data: { message: string }) =
 export const createConversation = (data: { jobId: string; message: string }) => {
   return applicantAxios.post(`${BASE_URL}/chat/conversations`, data);
 };
+
+export const markConversationAsRead = (conversationId: string) => {
+  return applicantAxios.patch(`${BASE_URL}/chat/conversations/${conversationId}/read`);
+};

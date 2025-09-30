@@ -81,6 +81,28 @@ export default function UnifiedApplicantChat({ jobId, onConversationCreated }: C
     try {
       const response = await API.applicantAuth.getConversationMessages(conversation.conversationId);
       setMessages(response.data.messages || []);
+      
+      // Mark any unread messages as read and update the conversation list
+      if (conversation.unreadCount > 0) {
+        // Update the local conversation's unread count immediately for UI responsiveness
+        setConversations(prevConversations => 
+          prevConversations.map(conv => 
+            conv.conversationId === conversation.conversationId 
+              ? { ...conv, unreadCount: 0 }
+              : conv
+          )
+        );
+        
+        // Explicitly mark conversation as read to ensure consistency
+        try {
+          await API.applicantAuth.markConversationAsRead(conversation.conversationId);
+          
+          // Notify other components to refresh conversation lists silently
+          localStorage.setItem('chat_conversation_updated', Date.now().toString());
+        } catch (error) {
+          console.error('Error marking conversation as read:', error);
+        }
+      }
     } catch (error) {
       console.error('Error fetching messages:', error);
     }
@@ -98,6 +120,16 @@ export default function UnifiedApplicantChat({ jobId, onConversationCreated }: C
       // Refresh messages
       const response = await API.applicantAuth.getConversationMessages(selectedConversation.conversationId);
       setMessages(response.data.messages || []);
+      
+      // Refresh conversation list to update unread counts
+      await fetchConversations();
+      
+      // Notify other components to refresh conversation lists silently
+      try {
+        localStorage.setItem('chat_conversation_updated', Date.now().toString());
+      } catch (error) {
+        console.log('Could not notify other components');
+      }
       
     } catch (error) {
       console.error('Error sending message:', error);

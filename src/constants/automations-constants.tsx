@@ -9,6 +9,7 @@ import {
   UserCheck,
   Phone,
   Send,
+  Video,
   type LucideIcon,
 } from "lucide-react";
 
@@ -189,6 +190,15 @@ export const allActions = [
     category: "communication",
     color: "bg-purple-500",
     iconBg: "bg-purple-100",
+  },
+  {
+    type: "send_interview_invite",
+    label: "Send Interview Invitation",
+    description: "Send interview scheduling link to applicant",
+    icon: <Video className="h-5 w-5" />,
+    category: "communication",
+    color: "bg-orange-500",
+    iconBg: "bg-orange-100",
   },
   {
     type: "update_job_status",

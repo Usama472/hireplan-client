@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
+import { ChatProvider, useChatContext } from "@/lib/context/ChatContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,6 +16,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { ChatRichTextEditor } from "@/components/dashboard/chats/ChatRichTextEditor";
+import { AIFollowupMessage } from "@/components/dashboard/chats/AIFollowupMessage";
 import {
   MessageCircle,
   Search,
@@ -57,10 +59,11 @@ interface Applicant {
   lastActivityAt: Date;
 }
 
-const SimpleUnifiedChat: React.FC = () => {
+const SimpleUnifiedChatInner: React.FC = () => {
   const navigate = useNavigate();
   const { conversationId } = useParams();
   const { data: authData } = useAuthSessionContext();
+  const { refreshTrigger, conversationUpdated } = useChatContext();
   
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [selectedApplicant, setSelectedApplicant] = useState<Applicant | null>(null);
@@ -102,7 +105,7 @@ const SimpleUnifiedChat: React.FC = () => {
       // Group ALL messages by applicant into unified conversations
       const applicantMap = new Map<string, Applicant>();
       
-      conversations.forEach(conv => {
+      conversations.forEach((conv: any) => {
         if (!conv.applicantId) return;
         
         const applicantId = conv.applicantId.id;
@@ -131,7 +134,7 @@ const SimpleUnifiedChat: React.FC = () => {
         // Add enhanced conversation with channel info on messages
         const enhancedConversation = {
           ...conv,
-          messages: (conv.messages || []).map(message => ({
+          messages: (conv.messages || []).map((message: any) => ({
             ...message,
             channel: conv.metadata?.source || 'email', // Detect channel from metadata
             conversationId: conv.conversationId,
@@ -141,7 +144,9 @@ const SimpleUnifiedChat: React.FC = () => {
         
         applicant.conversations.push(enhancedConversation);
         
-        applicant.totalUnread += conv.messages?.filter(m => !m.readAt && m.direction === 'inbound').length || 0;
+        applicant.totalUnread += conv.messages?.filter((m: any) => 
+          m.direction === 'inbound' && !m.readAt && !m.readReceipt
+        ).length || 0;
         
         // Update last activity if this conversation is more recent
         if (new Date(conv.lastMessageAt) > applicant.lastActivityAt) {
@@ -163,7 +168,7 @@ const SimpleUnifiedChat: React.FC = () => {
 
       // Auto-select if conversationId in URL
       if (conversationId && applicantsList.length > 0) {
-        const targetConversation = conversations.find(c => c.conversationId === conversationId);
+        const targetConversation = conversations.find((c: any) => c.conversationId === conversationId);
         if (targetConversation) {
           const applicant = applicantsList.find(a => a.id === targetConversation.applicantId?.id);
           if (applicant) {
@@ -195,9 +200,48 @@ const SimpleUnifiedChat: React.FC = () => {
   };
 
   // Select a conversation
-  const selectConversation = (conversation: any) => {
+  const selectConversation = async (conversation: any) => {
     setSelectedConversation(conversation);
     setMessages(conversation.messages || []);
+    
+    // Mark unread messages as read
+    const unreadMessages = conversation.messages?.filter((msg: any) => 
+      msg.direction === 'inbound' && !msg.readReceipt && !msg.readAt
+    ) || [];
+
+    if (unreadMessages.length > 0) {
+      // Immediately update local state to hide badge for responsive UI
+      setApplicants(prevApplicants => 
+        prevApplicants.map(applicant => {
+          if (applicant.conversations.some(conv => conv.conversationId === conversation.conversationId)) {
+            return {
+              ...applicant,
+              totalUnread: Math.max(0, applicant.totalUnread - unreadMessages.length)
+            };
+          }
+          return applicant;
+        })
+      );
+      
+      try {
+        // Mark each unread message as read
+        for (const message of unreadMessages) {
+          await emailChatAPI.markMessageAsRead(conversation.conversationId, message.messageId);
+        }
+        
+        // Use setTimeout to defer the refresh trigger after state updates settle
+        setTimeout(() => {
+          conversationUpdated(conversation.conversationId);
+        }, 50);
+        
+        console.log(`Marked ${unreadMessages.length} messages as read in conversation ${conversation.conversationId}`);
+      } catch (error) {
+        console.error('Error marking messages as read:', error);
+        // If API call fails, reload data to get correct state
+        loadData();
+      }
+    }
+    
     navigate(`/dashboard/chats/${conversation.conversationId}`);
   };
 
@@ -210,7 +254,7 @@ const SimpleUnifiedChat: React.FC = () => {
       
       await emailChatAPI.sendMessage(selectedConversation.conversationId, {
         htmlContent: newMessage,
-        textContent: newMessage,
+        textContent: newMessage.replace(/<[^>]*>/g, ''), // Strip HTML tags for text content
       });
       
       setNewMessage("");
@@ -220,6 +264,11 @@ const SimpleUnifiedChat: React.FC = () => {
       const updatedConv = await emailChatAPI.getConversation(selectedConversation.conversationId);
       if (updatedConv.status && updatedConv.data?.conversation) {
         setMessages(updatedConv.data.conversation.messages || []);
+      }
+      
+      // Notify other components to refresh conversation lists silently
+      if (selectedConversation) {
+        conversationUpdated(selectedConversation.conversationId);
       }
       
     } catch (error) {
@@ -272,9 +321,9 @@ const SimpleUnifiedChat: React.FC = () => {
         app.id === selectedApplicant.id ? { ...app, status } : app
       ));
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Error updating applicant status:', error);
-      toast.error(`Failed to update applicant status: ${error.message || 'Unknown error'}`);
+      toast.error(`Failed to update applicant status: ${error?.message || 'Unknown error'}`);
     }
   };
 
@@ -299,6 +348,14 @@ const SimpleUnifiedChat: React.FC = () => {
   useEffect(() => {
     loadData();
   }, []);
+
+  // Silent refresh when conversations are updated - only refresh if needed
+  useEffect(() => {
+    if (refreshTrigger > 0 && !loading) {
+      // Only refresh if we're not already loading to prevent loops
+      loadData();
+    }
+  }, [refreshTrigger]);
 
   useEffect(() => {
     scrollToBottom();
@@ -587,71 +644,105 @@ const SimpleUnifiedChat: React.FC = () => {
                 {/* Messages Container with Proper Scroll */}
                 <div className="flex-1 overflow-hidden flex flex-col">
                   <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{ scrollBehavior: 'smooth' }}>
-                    {messages.map((message, index) => (
-                      <div
-                        key={message._id || index}
-                        className={`flex ${message.direction === 'outbound' ? 'justify-end' : 'justify-start'}`}
-                      >
-                        <div className={`flex gap-3 max-w-lg ${message.direction === 'outbound' ? 'flex-row-reverse' : 'flex-row'}`}>
-                          {/* Avatar */}
-                          <Avatar className="h-8 w-8 flex-shrink-0">
-                            <AvatarImage src={undefined} />
-                            <AvatarFallback className={`text-xs ${
-                              message.direction === 'inbound' 
-                                ? 'bg-gray-300 text-gray-600' 
-                                : 'bg-blue-500 text-white'
-                            }`}>
-                              {message.direction === 'inbound' 
-                                ? `${selectedApplicant.firstName[0]}${selectedApplicant.lastName[0]}`.toUpperCase()
-                                : getUserInitials()
-                              }
-                            </AvatarFallback>
-                          </Avatar>
-                          
-                          <div className={`flex flex-col ${message.direction === 'outbound' ? 'items-end' : 'items-start'}`}>
-                            <div className={`px-4 py-3 rounded-2xl shadow-sm max-w-full ${
-                              message.direction === 'outbound'
-                                ? 'bg-blue-500 text-white rounded-br-md'
-                                : 'bg-gray-100 text-gray-900 border border-gray-200 rounded-bl-md'
-                            }`}>
-                              <div className="text-sm leading-relaxed whitespace-pre-wrap break-words">
-                                {message.textContent || message.htmlContent?.replace(/<[^>]*>/g, '') || 'No content'}
-                              </div>
-                            </div>
+                    {messages.map((message, index) => {
+                      // Check if this is an inbound AI follow-up response (not outbound questions)
+                      const isInboundAIFollowup = message.metadata?.type === 'ai_followup' && message.direction === 'inbound';
+
+                      if (isInboundAIFollowup) {
+                        return (
+                          <div
+                            key={message._id || index}
+                            className="flex justify-start"
+                          >
+                            <AIFollowupMessage
+                              message={message}
+                              isOutbound={false}
+                              conversationId={selectedConversation?.conversationId || ''}
+                            />
+                          </div>
+                        );
+                      }
+
+                      // Regular message display
+                      return (
+                        <div
+                          key={message._id || index}
+                          className={`flex ${message.direction === 'outbound' ? 'justify-end' : 'justify-start'}`}
+                        >
+                          <div className={`flex gap-3 max-w-lg ${message.direction === 'outbound' ? 'flex-row-reverse' : 'flex-row'}`}>
+                            {/* Avatar */}
+                            <Avatar className="h-8 w-8 flex-shrink-0">
+                              <AvatarImage src={undefined} />
+                              <AvatarFallback className={`text-xs ${
+                                message.direction === 'inbound'
+                                  ? 'bg-blue-500 text-white'
+                                  : 'bg-gray-300 text-gray-600'
+                              }`}>
+                                {message.direction === 'inbound'
+                                  ? `${selectedApplicant.firstName[0]}${selectedApplicant.lastName[0]}`.toUpperCase()
+                                  : getUserInitials()
+                                }
+                              </AvatarFallback>
+                            </Avatar>
                             
-                            <div className={`flex items-center gap-2 mt-1 text-xs text-gray-500 ${
-                              message.direction === 'outbound' ? 'flex-row-reverse' : 'flex-row'
-                            }`}>
-                              <span>{format(new Date(message.timestamp), 'MMM d, HH:mm')}</span>
-                              
-                              {/* Channel Indicator */}
-                              <div className="flex items-center gap-1">
-                                {message.channel === 'sms' && (
-                                  <>
-                                    <Phone className="h-3 w-3 text-green-500" />
-                                    <span className="text-green-600 font-medium">SMS</span>
-                                  </>
-                                )}
-                                {message.channel === 'portal' && (
-                                  <>
-                                    <Globe className="h-3 w-3 text-purple-500" />
-                                    <span className="text-purple-600 font-medium">Portal</span>
-                                  </>
-                                )}
-                                {(message.channel === 'email' || !message.channel) && (
-                                  <>
-                                    <Mail className="h-3 w-3 text-blue-500" />
-                                    <span className="text-blue-600 font-medium">Email</span>
-                                  </>
-                                )}
+                            <div className={`flex flex-col ${message.direction === 'outbound' ? 'items-end' : 'items-start'}`}>
+                              <div className={`px-4 py-3 rounded-2xl shadow-sm max-w-full ${
+                                message.direction === 'outbound'
+                                  ? 'bg-gray-100 text-gray-900 border border-gray-200 rounded-br-md'
+                                  : 'bg-blue-500 text-white rounded-bl-md'
+                              }`}>
+                                <div className="text-sm leading-relaxed whitespace-pre-wrap break-words">
+                                  {(() => {
+                                    const content = message.textContent || message.htmlContent || '';
+                                    // Clean HTML thoroughly for all messages
+                                    return content
+                                      .replace(/<[^>]*>/g, '') // Remove HTML tags
+                                      .replace(/&nbsp;/g, ' ') // Replace &nbsp; with spaces
+                                      .replace(/&amp;/g, '&') // Replace &amp; with &
+                                      .replace(/&lt;/g, '<') // Replace &lt; with <
+                                      .replace(/&gt;/g, '>') // Replace &gt; with >
+                                      .replace(/&quot;/g, '"') // Replace &quot; with "
+                                      .replace(/&#39;/g, "'") // Replace &#39; with '
+                                      .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+                                      .trim();
+                                  })()}
+                                </div>
                               </div>
                               
-                              {message.readAt && <span className="text-blue-500">✓✓</span>}
+                              <div className={`flex items-center gap-2 mt-1 text-xs text-gray-500 ${
+                                message.direction === 'outbound' ? 'flex-row-reverse' : 'flex-row'
+                              }`}>
+                                <span>{format(new Date(message.timestamp), 'MMM d, HH:mm')}</span>
+                                
+                                {/* Channel Indicator */}
+                                <div className="flex items-center gap-1">
+                                  {message.channel === 'sms' && (
+                                    <>
+                                      <Phone className="h-3 w-3 text-green-500" />
+                                      <span className="text-green-600 font-medium">SMS</span>
+                                    </>
+                                  )}
+                                  {message.channel === 'portal' && (
+                                    <>
+                                      <Globe className="h-3 w-3 text-purple-500" />
+                                      <span className="text-purple-600 font-medium">Portal</span>
+                                    </>
+                                  )}
+                                  {(message.channel === 'email' || !message.channel) && (
+                                    <>
+                                      <Mail className="h-3 w-3 text-blue-500" />
+                                      <span className="text-blue-600 font-medium">Email</span>
+                                    </>
+                                  )}
+                                </div>
+                                
+                                {message.readAt && <span className="text-blue-500">✓✓</span>}
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                     <div ref={messagesEndRef} />
                   </div>
                 </div>
@@ -704,6 +795,14 @@ const SimpleUnifiedChat: React.FC = () => {
         )}
       </div>
     </div>
+  );
+};
+
+const SimpleUnifiedChat: React.FC = () => {
+  return (
+    <ChatProvider>
+      <SimpleUnifiedChatInner />
+    </ChatProvider>
   );
 };
 

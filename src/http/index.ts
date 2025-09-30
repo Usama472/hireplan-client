@@ -3,6 +3,8 @@ import * as applicantAuthApi from "./applicant-auth/api";
 import * as attachmentApi from "./attachment/api";
 import * as authApi from "./auth/api";
 import * as automationApi from "./automation/api";
+import * as automationTemplatesApi from "./automation-templates/api";
+import * as aiFollowupApi from "./ai-followup/api";
 import * as availabilityApi from "./availability/api";
 import * as chatApi from "./chat/api";
 import * as companyApi from "./company/api";
@@ -48,6 +50,8 @@ const API = {
   sms: smsApi,
   staff: staffApi,
   automation: automationApi,
+  automationTemplates: automationTemplatesApi,
+  aiFollowup: aiFollowupApi,
 };
 
 export default API;

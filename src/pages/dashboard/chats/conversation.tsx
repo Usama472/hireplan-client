@@ -42,6 +42,7 @@ import {
 } from 'lucide-react';
 import { SubscriptionGuard } from '@/components/common/SubscriptionGuard';
 import useAuthSessionContext from '@/lib/context/AuthSessionContext';
+import { useChatContext } from '@/lib/context/ChatContext';
 // Layout is provided by PrivateRoute
 import API from '@/http';
 import { format } from 'date-fns';
@@ -129,6 +130,7 @@ const ConversationPage: React.FC = () => {
   const { conversationId } = useParams<{ conversationId: string }>();
   const navigate = useNavigate();
   const { subscription, data: authData } = useAuthSessionContext();
+  const { conversationUpdated } = useChatContext();
   const [conversation, setConversation] = useState<ChatConversation | null>(null);
   const [applicantConversations, setApplicantConversations] = useState<ChatConversation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -236,7 +238,7 @@ const ConversationPage: React.FC = () => {
 
   const markUnreadMessagesAsRead = async (conv: ChatConversation) => {
     const unreadMessages = conv.messages.filter(msg => 
-      msg.direction === 'inbound' && !msg.readReceipt
+      msg.direction === 'inbound' && !msg.readReceipt && !msg.readAt
     );
 
     for (const message of unreadMessages) {
@@ -245,6 +247,24 @@ const ConversationPage: React.FC = () => {
       } catch (error) {
         console.error('Error marking message as read:', error);
       }
+    }
+    
+    // Update local conversation to reflect read status immediately
+    if (unreadMessages.length > 0) {
+      setConversation(prevConv => {
+        if (!prevConv) return prevConv;
+        return {
+          ...prevConv,
+          messages: prevConv.messages.map(msg => 
+            unreadMessages.some(unread => unread.messageId === msg.messageId)
+              ? { ...msg, readReceipt: true, readAt: new Date() }
+              : msg
+          )
+        };
+      });
+      
+      // Notify other components to refresh conversation lists silently
+      conversationUpdated(conv.conversationId);
     }
   };
 
@@ -312,6 +332,11 @@ const ConversationPage: React.FC = () => {
       
       // Reload conversation to show new message
       await loadConversation();
+      
+      // Notify other components to refresh conversation lists silently
+      if (conversation) {
+        conversationUpdated(conversation.conversationId);
+      }
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error('Failed to send message');

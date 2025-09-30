@@ -6,7 +6,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { allTriggers } from "@/constants/automations-constants";
+import { AutomationTemplateLibrary } from "@/components/dashboard/automations/AutomationTemplateLibrary";
 import API from "@/http";
 import {
   AlertCircle,
@@ -15,6 +17,7 @@ import {
   Calendar,
   CheckCircle2,
   FileCheck,
+  Library,
   Mail,
   Pause,
   Play,
@@ -307,57 +310,46 @@ export default function AutomationsDashboard() {
       <div className="space-y-4 sm:space-y-6">
         {/* Mobile-First Responsive Header */}
         <div className="bg-white border-b px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
-          {/* Mobile Layout */}
-          <div className="block sm:hidden">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-blue-50 rounded-xl flex-shrink-0">
-                <Zap className="h-5 w-5 text-blue-600" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <h1 className="text-lg font-semibold text-gray-900 truncate">
-                  Automations
-                </h1>
-                <p className="text-sm text-gray-600 truncate">
-                  Streamline your recruitment workflow
-                </p>
+          <Tabs defaultValue="automations" className="w-full">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+              <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+                <div className="p-2 sm:p-3 bg-blue-50 rounded-xl flex-shrink-0">
+                  <Zap className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h1 className="text-xl sm:text-2xl font-bold text-gray-900 truncate">
+                    Automation Center
+                  </h1>
+                  <p className="text-sm sm:text-base text-gray-600 truncate">
+                    Streamline your recruitment workflow
+                  </p>
+                </div>
               </div>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-blue-600 font-medium">
-                {automations.length} automations
-              </span>
-              <Button onClick={handleCreateAutomation} variant="secondary">
-                <Plus className="h-4 w-4 mr-1" />
-                Create
-              </Button>
-            </div>
-          </div>
 
-          {/* Desktop Layout */}
-          <div className="hidden sm:flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-blue-50 rounded-xl">
-                <Zap className="h-6 w-6 text-blue-600" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-semibold text-gray-900">
-                  Automations
-                </h1>
-                <p className="text-gray-600 flex items-center gap-2">
-                  Streamline your recruitment workflow
+            <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsTrigger value="automations" className="flex items-center gap-2">
+                <Zap className="h-4 w-4" />
+                My Automations
+              </TabsTrigger>
+              <TabsTrigger value="templates" className="flex items-center gap-2">
+                <Library className="h-4 w-4" />
+                Template Library
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="automations">
+              <div className="space-y-4 sm:space-y-6">
+                <div className="flex items-center justify-between mb-6">
                   <span className="text-sm text-blue-600 font-medium">
                     {automations.length} automations
                   </span>
-                </p>
-              </div>
-            </div>
-
-            <Button onClick={handleCreateAutomation} variant="secondary">
-              <Plus className="h-4 w-4 mr-2" />
-              Create Automation
-            </Button>
-          </div>
-        </div>
+                  <Button onClick={handleCreateAutomation} variant="secondary">
+                    <Plus className="h-4 w-4 mr-2" />
+                    <span className="hidden sm:inline">Create Automation</span>
+                    <span className="sm:hidden">Create</span>
+                  </Button>
+                </div>
 
         {/* Mobile-First Filters Section */}
         <div className="px-3 sm:px-6 lg:px-8">
@@ -756,6 +748,14 @@ export default function AutomationsDashboard() {
           </div>
         </DialogContent>
       </Dialog>
+            </TabsContent>
+
+            <TabsContent value="templates">
+              <AutomationTemplateLibrary onTemplateActivated={fetchAutomations} />
+            </TabsContent>
+          </Tabs>
+        </div>
+      </div>
     </div>
   );
 }
