@@ -13,18 +13,17 @@ import {
   Search,
   Filter,
   X,
-  TrendingUp,
   Mail,
   Sparkles,
-  BarChart3,
   Grid3x3,
   List,
   ChevronLeft,
   ChevronRight,
   ChevronDown,
   ChevronUp,
-  Building2,
-  MapPin
+  MapPin,
+  ExternalLink,
+  Video
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,9 +32,16 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import API from "@/http";
 import UnifiedApplicantChat from "@/components/applicant/chat/UnifiedApplicantChat";
 import { ApplicantHeader } from "@/components/applicant/ApplicantHeader";
+import { useApplicantNotifications } from "@/lib/hooks/use-applicant-notifications";
 
 interface Application {
   id: string;
@@ -63,6 +69,16 @@ interface Application {
   };
   interviewScheduled: boolean;
   invitationSent: boolean;
+  interview?: {
+    id: string;
+    scheduledDate: Date;
+    startTime: string;
+    endTime: string;
+    meetingLink?: string;
+    timezone?: string;
+    meetingSource?: 'google' | 'zoom' | 'teams';
+    status?: 'scheduled' | 'rescheduled' | 'cancelled' | 'completed';
+  } | null;
   aiEvaluation?: {
     totalScore: number;
     recommendationLevel: string;
@@ -92,6 +108,9 @@ export default function ApplicantDashboard() {
   const [selectedJobForChat, setSelectedJobForChat] = useState<string | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
   
+  // Notifications hook
+  const { unreadCount, refetch: refetchNotifications } = useApplicantNotifications();
+  
   // Search and filter state
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -114,6 +133,13 @@ export default function ApplicantDashboard() {
     
     fetchUserData();
   }, []);
+
+  // Refresh notifications when switching away from chat tab (messages may have been read)
+  useEffect(() => {
+    if (activeTab !== 'chat') {
+      refetchNotifications();
+    }
+  }, [activeTab, refetchNotifications]);
 
   const fetchUserData = async () => {
     try {
@@ -209,6 +235,26 @@ export default function ApplicantDashboard() {
     setCurrentPage(1);
   }, [searchTerm, statusFilter, activeTab]);
 
+  // Get applications with scheduled interviews
+  const getScheduledInterviews = () => {
+    return applications.filter(app => app.interviewScheduled && app.interview);
+  };
+
+  // Separate upcoming and past interviews
+  const getUpcomingInterviews = () => {
+    const now = new Date();
+    return getScheduledInterviews()
+      .filter(app => new Date(app.interview!.scheduledDate) >= now)
+      .sort((a, b) => new Date(a.interview!.scheduledDate).getTime() - new Date(b.interview!.scheduledDate).getTime());
+  };
+
+  const getPastInterviews = () => {
+    const now = new Date();
+    return getScheduledInterviews()
+      .filter(app => new Date(app.interview!.scheduledDate) < now)
+      .sort((a, b) => new Date(b.interview!.scheduledDate).getTime() - new Date(a.interview!.scheduledDate).getTime());
+  };
+
   const getStatusBadge = (status: string, isPartial?: boolean, completionPercentage?: number) => {
     const simplifiedStatus = getSimplifiedStatus(status, isPartial);
     
@@ -227,6 +273,25 @@ export default function ApplicantDashboard() {
         {config.label}
       </Badge>
     );
+  };
+
+  const formatInterviewDateTime = (date: Date, startTime: string, timezone?: string) => {
+    const interviewDate = new Date(date);
+    const dateStr = interviewDate.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+    
+    // Parse startTime to get formatted time
+    const time = new Date(startTime).toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+    
+    return { dateStr, time, timezone: timezone || 'UTC' };
   };
 
   if (loading) {
@@ -286,14 +351,63 @@ export default function ApplicantDashboard() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="border-gray-200 hover:bg-gray-50 transition-all duration-200"
-              >
-                <Bell className="h-4 w-4 mr-2" />
-                Notifications
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="border-gray-200 hover:bg-gray-50 transition-all duration-200 relative"
+                  >
+                    <Bell className="h-4 w-4 mr-2" />
+                    Notifications
+                    {unreadCount > 0 && (
+                      <Badge className="ml-2 bg-red-500 text-white text-xs px-1.5 min-w-[20px] h-5">
+                        {unreadCount}
+                      </Badge>
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-80">
+                  <div className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-semibold text-gray-900">Notifications</h3>
+                      {unreadCount > 0 && (
+                        <Badge variant="secondary" className="text-xs">
+                          {unreadCount} unread
+                        </Badge>
+                      )}
+                    </div>
+                    {unreadCount > 0 ? (
+                      <div className="space-y-2">
+                        <DropdownMenuItem 
+                          className="flex flex-col items-start p-3 cursor-pointer"
+                          onClick={() => {
+                            setActiveTab("chat");
+                            refetchNotifications();
+                          }}
+                        >
+                          <div className="flex items-start gap-2 w-full">
+                            <MessageSquare className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-gray-900">
+                                New Messages
+                              </p>
+                              <p className="text-xs text-gray-600 mt-0.5">
+                                You have {unreadCount} unread message{unreadCount !== 1 ? 's' : ''} from recruiters
+                              </p>
+                            </div>
+                          </div>
+                        </DropdownMenuItem>
+                      </div>
+                    ) : (
+                      <div className="py-8 text-center">
+                        <Bell className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                        <p className="text-sm text-gray-500">No new notifications</p>
+                      </div>
+                    )}
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Button 
                 variant="outline" 
                 size="sm"
@@ -339,12 +453,12 @@ export default function ApplicantDashboard() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gray-50 border-gray-200 hover:shadow-md transition-all duration-200 group">
+            <Card className="bg-gray-50 border-gray-200 hover:shadow-md transition-all duration-200 group cursor-pointer" onClick={() => setActiveTab("chat")}>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-gray-600 text-xs font-medium mb-1">Messages</p>
-                    <p className="text-3xl font-bold text-gray-900">-</p>
+                    <p className="text-gray-600 text-xs font-medium mb-1">Unread Messages</p>
+                    <p className="text-3xl font-bold text-gray-900">{unreadCount}</p>
                   </div>
                   <div className="h-12 w-12 bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
                     <MessageSquare className="h-6 w-6 text-white" />
@@ -353,12 +467,12 @@ export default function ApplicantDashboard() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gray-50 border-gray-200 hover:shadow-md transition-all duration-200 group">
+            <Card className="bg-gray-50 border-gray-200 hover:shadow-md transition-all duration-200 group cursor-pointer" onClick={() => setActiveTab("interviews")}>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-gray-600 text-xs font-medium mb-1">Interviews</p>
-                    <p className="text-3xl font-bold text-gray-900">-</p>
+                    <p className="text-3xl font-bold text-gray-900">{getScheduledInterviews().length}</p>
                   </div>
                   <div className="h-12 w-12 bg-gradient-to-br from-pink-400 to-pink-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
                     <Calendar className="h-6 w-6 text-white" />
@@ -404,6 +518,11 @@ export default function ApplicantDashboard() {
               >
               <MessageSquare className="h-4 w-4" />
               Messages
+                {unreadCount > 0 && (
+                  <Badge className="ml-1 bg-red-500 text-white text-xs px-1.5 py-0">
+                    {unreadCount}
+                  </Badge>
+                )}
             </TabsTrigger>
               <TabsTrigger 
                 value="interviews" 
@@ -953,17 +1072,229 @@ export default function ApplicantDashboard() {
           <TabsContent value="interviews" className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-bold text-gray-900">Interviews</h2>
+              {getScheduledInterviews().length > 0 && (
+                <div className="flex gap-2">
+                  {getUpcomingInterviews().length > 0 && (
+                    <Badge className="bg-green-500 text-white">
+                      {getUpcomingInterviews().length} Upcoming
+                    </Badge>
+                  )}
+                  {getPastInterviews().length > 0 && (
+                    <Badge className="bg-gray-400 text-white">
+                      {getPastInterviews().length} Past
+                    </Badge>
+                  )}
+                </div>
+              )}
             </div>
             
-            <Card>
-              <CardContent className="p-12 text-center">
-                <Calendar className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No Interviews Scheduled</h3>
-                <p className="text-gray-500">
-                  Interview invitations and scheduling will appear here.
-                </p>
-              </CardContent>
-            </Card>
+            {getScheduledInterviews().length > 0 ? (
+              <div className="space-y-6">
+                {/* Upcoming Interviews */}
+                {getUpcomingInterviews().length > 0 && (
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                      <Clock className="h-5 w-5 text-green-600" />
+                      Upcoming Interviews
+                    </h3>
+                    {getUpcomingInterviews().map((application) => {
+                      const { dateStr, time, timezone } = formatInterviewDateTime(
+                        application.interview!.scheduledDate,
+                        application.interview!.startTime,
+                        application.interview!.timezone
+                      );
+                      
+                      return (
+                        <Card key={application.id} className="hover:shadow-lg transition-all duration-200 border-green-200">
+                          <CardContent className="p-6">
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex-1 space-y-4">
+                                {/* Header */}
+                                <div className="flex items-start gap-4">
+                                  {application.company?.logo && (
+                                    <img
+                                      src={application.company.logo}
+                                      alt={application.company.name || application.companyName || 'Company'}
+                                      className="w-12 h-12 rounded-lg object-cover border border-gray-200"
+                                    />
+                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    <h3 className="text-lg font-bold text-gray-900 mb-1">
+                                      {application.jobTitle}
+                                    </h3>
+                                    <p className="text-gray-600 text-sm">
+                                      {application.company?.name || application.company?.companyName || application.companyName || 'Company'}
+                                    </p>
+                                  </div>
+                                  <Badge className="bg-green-100 text-green-700 border-green-200">
+                                    Upcoming
+                                  </Badge>
+                                </div>
+
+                                {/* Interview Details */}
+                                <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4 border border-green-200">
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="flex items-start gap-3">
+                                      <Calendar className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                                      <div>
+                                        <p className="text-sm font-medium text-gray-700">Date</p>
+                                        <p className="text-gray-900 font-semibold">{dateStr}</p>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-start gap-3">
+                                      <Clock className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                                      <div>
+                                        <p className="text-sm font-medium text-gray-700">Time</p>
+                                        <p className="text-gray-900 font-semibold">
+                                          {time} {timezone}
+                                        </p>
+                                      </div>
+                                    </div>
+                                    {application.interview?.meetingSource && (
+                                      <div className="flex items-start gap-3">
+                                        <Video className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                                        <div>
+                                          <p className="text-sm font-medium text-gray-700">Platform</p>
+                                          <p className="text-gray-900 font-semibold capitalize">
+                                            {application.interview.meetingSource}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Meeting Link */}
+                                {application.interview?.meetingLink && (
+                                  <div className="flex gap-2">
+                                    <Button
+                                      onClick={() => window.open(application.interview!.meetingLink, '_blank')}
+                                      className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white"
+                                    >
+                                      <Video className="h-4 w-4 mr-2" />
+                                      Join Meeting
+                                      <ExternalLink className="h-3 w-3 ml-2" />
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      onClick={() => {
+                                        navigator.clipboard.writeText(application.interview!.meetingLink!);
+                                      }}
+                                      className="border-gray-200 hover:bg-gray-50"
+                                    >
+                                      Copy Link
+                                    </Button>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Past Interviews */}
+                {getPastInterviews().length > 0 && (
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5 text-gray-600" />
+                      Past Interviews
+                    </h3>
+                    {getPastInterviews().map((application) => {
+                      const { dateStr, time, timezone } = formatInterviewDateTime(
+                        application.interview!.scheduledDate,
+                        application.interview!.startTime,
+                        application.interview!.timezone
+                      );
+                      
+                      return (
+                        <Card key={application.id} className="opacity-75 hover:opacity-100 transition-all duration-200 border-gray-300 bg-gray-50">
+                          <CardContent className="p-6">
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex-1 space-y-4">
+                                {/* Header */}
+                                <div className="flex items-start gap-4">
+                                  {application.company?.logo && (
+                                    <img
+                                      src={application.company.logo}
+                                      alt={application.company.name || application.companyName || 'Company'}
+                                      className="w-12 h-12 rounded-lg object-cover border border-gray-200 grayscale"
+                                    />
+                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    <h3 className="text-lg font-bold text-gray-700 mb-1">
+                                      {application.jobTitle}
+                                    </h3>
+                                    <p className="text-gray-500 text-sm">
+                                      {application.company?.name || application.company?.companyName || application.companyName || 'Company'}
+                                    </p>
+                                  </div>
+                                  <Badge className="bg-gray-200 text-gray-700 border-gray-300">
+                                    Completed
+                                  </Badge>
+                                </div>
+
+                                {/* Interview Details */}
+                                <div className="bg-gray-100 rounded-lg p-4 border border-gray-200">
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="flex items-start gap-3">
+                                      <Calendar className="h-5 w-5 text-gray-500 mt-0.5 flex-shrink-0" />
+                                      <div>
+                                        <p className="text-sm font-medium text-gray-600">Date</p>
+                                        <p className="text-gray-700 font-semibold">{dateStr}</p>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-start gap-3">
+                                      <Clock className="h-5 w-5 text-gray-500 mt-0.5 flex-shrink-0" />
+                                      <div>
+                                        <p className="text-sm font-medium text-gray-600">Time</p>
+                                        <p className="text-gray-700 font-semibold">
+                                          {time} {timezone}
+                                        </p>
+                                      </div>
+                                    </div>
+                                    {application.interview?.meetingSource && (
+                                      <div className="flex items-start gap-3">
+                                        <Video className="h-5 w-5 text-gray-500 mt-0.5 flex-shrink-0" />
+                                        <div>
+                                          <p className="text-sm font-medium text-gray-600">Platform</p>
+                                          <p className="text-gray-700 font-semibold capitalize">
+                                            {application.interview.meetingSource}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Past Interview Note */}
+                                <div className="flex items-center gap-2 text-sm text-gray-600">
+                                  <CheckCircle className="h-4 w-4" />
+                                  <span>This interview has already taken place</span>
+                                </div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                )}
+              
+              </div>
+            ) : (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <Calendar className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Interviews Scheduled</h3>
+                  <p className="text-gray-500">
+                    Interview invitations and scheduling will appear here.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="profile" className="space-y-6">

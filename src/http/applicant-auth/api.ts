@@ -49,6 +49,11 @@ export const getApplications = () => {
   return applicantAxios.get(`${BASE_URL}/applications`);
 };
 
+// Notifications
+export const getUnreadCount = () => {
+  return applicantAxios.get(`${BASE_URL}/notifications/unread-count`);
+};
+
 // Chat endpoints
 export const getChatConversations = () => {
   return applicantAxios.get(`${BASE_URL}/chat/conversations`);
