@@ -29,7 +29,7 @@ const PublicRoute: FC<PublicRouteProps> = ({ children }) => {
   }
 
   // Hide layout for specific routes and all company routes
-  const shouldHideLayout = hideLayoutFor.includes(path) || path.startsWith("/company/") || path.startsWith("/applicant/");
+  const shouldHideLayout = hideLayoutFor.includes(path) || path.startsWith("/company/") || path.startsWith("/applicant/") || path.startsWith("/owner/");
 
   return shouldHideLayout ? (
     <>

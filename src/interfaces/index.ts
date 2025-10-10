@@ -7,6 +7,7 @@ export type AppRoutesType = {
   url: string;
   element: ReactNode;
   isPrivate: boolean;
+  isOwner?: boolean; // Flag for owner portal routes
 };
 
 export type DefaultLayoutProps = {

@@ -9,9 +9,10 @@ export const axiosApi = axios.create({
 
 axiosApi.interceptors.request.use(
   (config) => {
-    config.headers.Authorization = `Bearer ${localStorage.getItem(
-      clientAccessToken
-    )}`
+    const token = localStorage.getItem(clientAccessToken)
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
     return config
   },
   (error) => {
@@ -31,11 +32,17 @@ axiosApi.interceptors.response.use(
       const isLoginPage = currentPath === '/login'
       const isSignupPage = currentPath === '/signup'
       const isForgotPasswordPage = currentPath === '/forgot-password'
-      
+      const isOwnerLoginPage = currentPath === '/owner/login'
+      const isOwnerPage = currentPath.startsWith('/owner/')
+
       // Don't redirect if user is already on auth pages
-      if (!isLoginPage && !isSignupPage && !isForgotPasswordPage) {
+      if (!isLoginPage && !isSignupPage && !isForgotPasswordPage && !isOwnerLoginPage) {
         localStorage.removeItem(clientAccessToken)
-        window.location.href = '/login'
+        // Redirect to appropriate login page based on current route
+        window.location.href = isOwnerPage ? '/owner/login' : '/login'
+      } else {
+        // For auth pages, just reject the error without redirect
+        console.log('🚫 Auth request failed on auth page, not redirecting');
       }
     }
     return Promise.reject(error)

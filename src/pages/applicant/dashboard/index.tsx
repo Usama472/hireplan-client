@@ -262,34 +262,25 @@ export default function ApplicantDashboard() {
       {/* HirePlan Header */}
       <ApplicantHeader />
       
-      {/* Hero Welcome Section with Gradient */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">
-        {/* Animated background elements */}
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-10 left-10 w-72 h-72 bg-white rounded-full mix-blend-overlay filter blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-10 right-10 w-96 h-96 bg-white rounded-full mix-blend-overlay filter blur-3xl animate-pulse delay-700"></div>
-        </div>
-
-        <div className="relative max-w-7xl mx-auto px-6 py-8">
+      {/* Hero Welcome Section */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-5">
-              <div className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-pink-600 to-purple-600 rounded-full blur opacity-75 group-hover:opacity-100 transition duration-200"></div>
-                <Avatar className="relative h-16 w-16 border-4 border-white shadow-xl">
+              <Avatar className="h-16 w-16 border-2 border-gray-200 shadow-sm">
                 <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${user?.firstName} ${user?.lastName}`} />
-                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-lg font-bold">
+                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-lg font-bold">
                   {user?.firstName?.[0]}{user?.lastName?.[0]}
                 </AvatarFallback>
               </Avatar>
-              </div>
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <h1 className="text-3xl font-bold text-white drop-shadow-sm">
-                  Welcome back, {user?.firstName}!
-                </h1>
-                  <Sparkles className="h-6 w-6 text-yellow-300 animate-pulse" />
+                  <h1 className="text-3xl font-bold text-gray-900">
+                    Welcome back, {user?.firstName}!
+                  </h1>
+                  <Sparkles className="h-6 w-6 text-blue-600" />
                 </div>
-                <p className="text-blue-100 text-sm font-medium">
+                <p className="text-gray-600 text-sm font-medium">
                   Track your applications and connect with recruiters
                 </p>
               </div>
@@ -298,7 +289,7 @@ export default function ApplicantDashboard() {
               <Button 
                 variant="outline" 
                 size="sm"
-                className="bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 transition-all duration-200"
+                className="border-gray-200 hover:bg-gray-50 transition-all duration-200"
               >
                 <Bell className="h-4 w-4 mr-2" />
                 Notifications
@@ -310,7 +301,7 @@ export default function ApplicantDashboard() {
                   localStorage.removeItem('applicant_token');
                   window.location.href = '/applicant/login';
                 }}
-                className="bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 transition-all duration-200"
+                className="border-gray-200 hover:bg-gray-50 transition-all duration-200"
               >
                 <LogOut className="h-4 w-4 mr-2" />
                 Sign Out
@@ -320,12 +311,12 @@ export default function ApplicantDashboard() {
 
           {/* Dashboard Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-8">
-            <Card className="bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all duration-200 group">
+            <Card className="bg-gray-50 border-gray-200 hover:shadow-md transition-all duration-200 group">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-blue-100 text-xs font-medium mb-1">Active Applications</p>
-                    <p className="text-3xl font-bold text-white">{getFilteredApplications(applications, 'active').length}</p>
+                    <p className="text-gray-600 text-xs font-medium mb-1">Active Applications</p>
+                    <p className="text-3xl font-bold text-gray-900">{getFilteredApplications(applications, 'active').length}</p>
                   </div>
                   <div className="h-12 w-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
                     <Briefcase className="h-6 w-6 text-white" />
@@ -334,12 +325,12 @@ export default function ApplicantDashboard() {
               </CardContent>
             </Card>
 
-            <Card className="bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all duration-200 group">
+            <Card className="bg-gray-50 border-gray-200 hover:shadow-md transition-all duration-200 group">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-blue-100 text-xs font-medium mb-1">Unfinished</p>
-                    <p className="text-3xl font-bold text-white">{getFilteredApplications(applications, 'partial').length}</p>
+                    <p className="text-gray-600 text-xs font-medium mb-1">Unfinished</p>
+                    <p className="text-3xl font-bold text-gray-900">{getFilteredApplications(applications, 'partial').length}</p>
                   </div>
                   <div className="h-12 w-12 bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
                     <FileText className="h-6 w-6 text-white" />
@@ -348,12 +339,12 @@ export default function ApplicantDashboard() {
               </CardContent>
             </Card>
 
-            <Card className="bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all duration-200 group">
+            <Card className="bg-gray-50 border-gray-200 hover:shadow-md transition-all duration-200 group">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-blue-100 text-xs font-medium mb-1">Messages</p>
-                    <p className="text-3xl font-bold text-white">-</p>
+                    <p className="text-gray-600 text-xs font-medium mb-1">Messages</p>
+                    <p className="text-3xl font-bold text-gray-900">-</p>
                   </div>
                   <div className="h-12 w-12 bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
                     <MessageSquare className="h-6 w-6 text-white" />
@@ -362,12 +353,12 @@ export default function ApplicantDashboard() {
               </CardContent>
             </Card>
 
-            <Card className="bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all duration-200 group">
+            <Card className="bg-gray-50 border-gray-200 hover:shadow-md transition-all duration-200 group">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-blue-100 text-xs font-medium mb-1">Interviews</p>
-                    <p className="text-3xl font-bold text-white">-</p>
+                    <p className="text-gray-600 text-xs font-medium mb-1">Interviews</p>
+                    <p className="text-3xl font-bold text-gray-900">-</p>
                   </div>
                   <div className="h-12 w-12 bg-gradient-to-br from-pink-400 to-pink-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
                     <Calendar className="h-6 w-6 text-white" />

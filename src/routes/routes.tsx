@@ -59,6 +59,15 @@ import ApplicantPortal from "@/pages/applicant/portal";
 import ShortUrlRedirect from "@/components/common/ShortUrlRedirect";
 import ApplicantsPage from "@/pages/dashboard/applicants";
 
+// Owner Pages
+import OwnerLogin from "@/pages/owner/login";
+import OwnerDashboard from "@/pages/owner/dashboard/index"; 
+import OwnerCompanies from "@/pages/owner/companies/index";
+import OwnerUsers from "@/pages/owner/users/index";
+import OwnerSubscriptions from "@/pages/owner/subscriptions/index";
+import OwnerSupport from "@/pages/owner/support/index";
+import OwnerAnalytics from "@/pages/owner/analytics/index";
+
 export const appRoutes: AppRoutesType[] = [
   {
     id: HOME_TEXT,
@@ -313,5 +322,54 @@ export const appRoutes: AppRoutesType[] = [
     url: ROUTES.SHORT_URL.REDIRECT,
     element: <ShortUrlRedirect />,
     isPrivate: false,
+  },
+  // Owner routes - Note: These will use OwnerRoute wrapper in index.tsx
+  {
+    id: "owner-login",
+    url: "/owner/login",
+    element: <OwnerLogin />,
+    isPrivate: false,
+  },
+  {
+    id: "owner-dashboard",
+    url: "/owner/dashboard",
+    element: <OwnerDashboard />,
+    isPrivate: false,
+    isOwner: true, // Special flag for owner routes
+  },
+  {
+    id: "owner-companies",
+    url: "/owner/companies",
+    element: <OwnerCompanies />,
+    isPrivate: false,
+    isOwner: true,
+  },
+  {
+    id: "owner-users",
+    url: "/owner/users",
+    element: <OwnerUsers />,
+    isPrivate: false,
+    isOwner: true,
+  },
+  {
+    id: "owner-subscriptions",
+    url: "/owner/subscriptions",
+    element: <OwnerSubscriptions />,
+    isPrivate: false,
+    isOwner: true,
+  },
+  {
+    id: "owner-support",
+    url: "/owner/support",
+    element: <OwnerSupport />,
+    isPrivate: false,
+    isOwner: true,
+  },
+  {
+    id: "owner-analytics",
+    url: "/owner/analytics",
+    element: <OwnerAnalytics />,
+    isPrivate: false,
+    isOwner: true,
   },
 ];

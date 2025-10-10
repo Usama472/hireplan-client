@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ownerAuthService } from '@/http/owner/auth';
-import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, Shield } from 'lucide-react';
 
 const OwnerLogin: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -22,9 +22,21 @@ const OwnerLogin: React.FC = () => {
     setIsLoading(true);
 
     try {
-      await ownerAuthService.login({ email, password });
-      navigate('/owner/dashboard');
-    } catch (err) {
+      console.log('🔐 Owner login attempt:', { email, password: '***' });
+      const loginResult = await ownerAuthService.login({ email, password });
+      console.log('✅ Owner login successful:', loginResult);
+      console.log('🔑 Tokens stored, redirecting to dashboard');
+      
+      // Wait for state to update before navigating
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      console.log('Access token:', ownerAuthService.getAccessToken());
+      console.log('Is authenticated:', ownerAuthService.isAuthenticated());
+      console.log('localStorage token:', localStorage.getItem('owner_access_token'));
+      
+      navigate('/owner/dashboard', { replace: true });
+    } catch (err: any) {
+      console.error('❌ Owner login failed:', err.message);
       setError('Invalid email or password. Please try again.');
     } finally {
       setIsLoading(false);
@@ -36,7 +48,7 @@ const OwnerLogin: React.FC = () => {
       <Card className="w-full max-w-md shadow-xl border-0">
         <CardHeader className="text-center space-y-2">
           <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center mb-4">
-            <Lock className="w-8 h-8 text-white" />
+            <Shield className="w-8 h-8 text-white" />
           </div>
           <CardTitle className="text-2xl font-bold text-gray-900">
             Owner Access
