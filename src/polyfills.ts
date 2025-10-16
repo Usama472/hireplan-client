@@ -94,15 +94,16 @@ window.addEventListener('resize', () => {
   body.style.display = '';
 });
 
-// Fix for iOS Safari scroll bounce
-document.addEventListener('touchmove', (e) => {
-  const target = e.target as HTMLElement;
-  const scrollable = target.closest('.overflow-auto, .overflow-y-auto, .overflow-x-auto');
-  
-  if (!scrollable) {
-    e.preventDefault();
-  }
-}, { passive: false });
+// Fix for iOS Safari scroll bounce - DISABLED TO ALLOW SCROLLING
+// This was preventing all scrolling on mobile
+// document.addEventListener('touchmove', (e) => {
+//   const target = e.target as HTMLElement;
+//   const scrollable = target.closest('.overflow-auto, .overflow-y-auto, .overflow-x-auto');
+//   
+//   if (!scrollable) {
+//     e.preventDefault();
+//   }
+// }, { passive: false });
 
 // Fix for iOS Safari form input zoom
 const preventZoom = (e: Event) => {
