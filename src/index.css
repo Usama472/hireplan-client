@@ -192,16 +192,21 @@ button:not([class*="size-"]) {
 
 /* Fix iOS Safari viewport issues */
 html {
-  height: 100%;
   -webkit-text-size-adjust: 100%;
   -ms-text-size-adjust: 100%;
+  overflow-x: hidden;
 }
 
 body {
-  min-height: 100%;
-  position: relative;
+  min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
 /* Fix iOS Safari input zoom */
@@ -235,6 +240,12 @@ input[type="button"] {
 /* Fix Safari viewport and resize issues */
 @supports (-webkit-touch-callout: none) {
   /* Safari-specific styles */
+  html, body {
+    overflow-x: hidden;
+    overflow-y: auto !important;
+    height: auto !important;
+  }
+
   .min-h-screen {
     min-height: 100vh;
     min-height: calc(var(--vh, 1vh) * 100);
@@ -449,6 +460,33 @@ body {
   }
 }
 
+/* Accordion animations */
+@keyframes accordion-down {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+
+.animate-accordion-down {
+  animation: accordion-down 0.2s ease-out;
+}
+
+.animate-accordion-up {
+  animation: accordion-up 0.2s ease-out;
+}
+
 @keyframes pulse {
   0% {
     box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4);
@@ -558,4 +596,41 @@ select {
 
 .automation-icon-float {
   animation: floatingIcon 3s ease-in-out infinite;
+}
+
+/* Hide scrollbar for category pills */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Critical mobile scrolling fix */
+@media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    height: auto !important;
+    position: relative !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  #root {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    height: auto !important;
+    min-height: 100vh !important;
+    position: relative !important;
+  }
+
+  /* Ensure all page containers can scroll */
+  main, 
+  div[class*="min-h-screen"],
+  section {
+    overflow-x: hidden;
+    position: relative;
+  }
 }

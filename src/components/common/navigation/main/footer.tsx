@@ -91,6 +91,37 @@ export function Footer() {
             before.
           </motion.p>
 
+          {/* Links */}
+          <motion.div
+            variants={itemVariants}
+            className="flex flex-wrap justify-center gap-6 mb-8"
+          >
+            <button
+              onClick={() => handleNavigation("/contact")}
+              className="text-gray-400 hover:text-white text-sm transition-colors"
+            >
+              Contact
+            </button>
+            <button
+              onClick={() => handleNavigation("/faq")}
+              className="text-gray-400 hover:text-white text-sm transition-colors"
+            >
+              FAQ
+            </button>
+            <button
+              onClick={() => handleNavigation("/privacy")}
+              className="text-gray-400 hover:text-white text-sm transition-colors"
+            >
+              Privacy
+            </button>
+            <button
+              onClick={() => handleNavigation("/terms")}
+              className="text-gray-400 hover:text-white text-sm transition-colors"
+            >
+              Terms
+            </button>
+          </motion.div>
+
           {/* Copyright */}
           <motion.div
             variants={itemVariants}

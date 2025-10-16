@@ -14,7 +14,6 @@ import {
   Filter,
   X,
   Mail,
-  Sparkles,
   Grid3x3,
   List,
   ChevronLeft,
@@ -323,34 +322,31 @@ export default function ApplicantDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30">
+    <div className="min-h-screen bg-gray-50">
       {/* HirePlan Header */}
       <ApplicantHeader />
       
-      {/* Hero Welcome Section */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-5">
-              <Avatar className="h-16 w-16 border-2 border-gray-200 shadow-sm">
+      {/* Welcome Section */}
+      <div className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <Avatar className="h-12 w-12 border-2 border-gray-200">
                 <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${user?.firstName} ${user?.lastName}`} />
-                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-lg font-bold">
+                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-sm font-bold">
                   {user?.firstName?.[0]}{user?.lastName?.[0]}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <h1 className="text-3xl font-bold text-gray-900">
-                    Welcome back, {user?.firstName}!
-                  </h1>
-                  <Sparkles className="h-6 w-6 text-blue-600" />
-                </div>
-                <p className="text-gray-600 text-sm font-medium">
+                <h1 className="text-xl font-bold text-gray-900">
+                  Welcome back, {user?.firstName}!
+                </h1>
+                <p className="text-gray-600 text-sm">
                   Track your applications and connect with recruiters
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button 
@@ -424,58 +420,58 @@ export default function ApplicantDashboard() {
           </div>
 
           {/* Dashboard Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-8">
-            <Card className="bg-gray-50 border-gray-200 hover:shadow-md transition-all duration-200 group">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-gray-600 text-xs font-medium mb-1">Active Applications</p>
-                    <p className="text-3xl font-bold text-gray-900">{getFilteredApplications(applications, 'active').length}</p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
+            <Card className="bg-white border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all duration-200 cursor-pointer" onClick={() => setActiveTab("applications")}>
+              <CardContent className="p-3">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Briefcase className="h-5 w-5 text-white" />
                   </div>
-                  <div className="h-12 w-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                    <Briefcase className="h-6 w-6 text-white" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gray-50 border-gray-200 hover:shadow-md transition-all duration-200 group">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-gray-600 text-xs font-medium mb-1">Unfinished</p>
-                    <p className="text-3xl font-bold text-gray-900">{getFilteredApplications(applications, 'partial').length}</p>
-                  </div>
-                  <div className="h-12 w-12 bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                    <FileText className="h-6 w-6 text-white" />
+                  <div className="min-w-0">
+                    <p className="text-2xl font-bold text-gray-900">{getFilteredApplications(applications, 'active').length}</p>
+                    <p className="text-gray-600 text-xs font-medium truncate">Active Apps</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-gray-50 border-gray-200 hover:shadow-md transition-all duration-200 group cursor-pointer" onClick={() => setActiveTab("chat")}>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-gray-600 text-xs font-medium mb-1">Unread Messages</p>
-                    <p className="text-3xl font-bold text-gray-900">{unreadCount}</p>
+            <Card className="bg-white border-gray-200 hover:border-orange-300 hover:shadow-sm transition-all duration-200 cursor-pointer" onClick={() => setActiveTab("continue")}>
+              <CardContent className="p-3">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 bg-gradient-to-br from-orange-400 to-orange-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <FileText className="h-5 w-5 text-white" />
                   </div>
-                  <div className="h-12 w-12 bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                    <MessageSquare className="h-6 w-6 text-white" />
+                  <div className="min-w-0">
+                    <p className="text-2xl font-bold text-gray-900">{getFilteredApplications(applications, 'partial').length}</p>
+                    <p className="text-gray-600 text-xs font-medium truncate">Unfinished</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-gray-50 border-gray-200 hover:shadow-md transition-all duration-200 group cursor-pointer" onClick={() => setActiveTab("interviews")}>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-gray-600 text-xs font-medium mb-1">Interviews</p>
-                    <p className="text-3xl font-bold text-gray-900">{getScheduledInterviews().length}</p>
+            <Card className="bg-white border-gray-200 hover:border-purple-300 hover:shadow-sm transition-all duration-200 cursor-pointer" onClick={() => setActiveTab("chat")}>
+              <CardContent className="p-3">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 bg-gradient-to-br from-purple-400 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <MessageSquare className="h-5 w-5 text-white" />
                   </div>
-                  <div className="h-12 w-12 bg-gradient-to-br from-pink-400 to-pink-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                    <Calendar className="h-6 w-6 text-white" />
+                  <div className="min-w-0">
+                    <p className="text-2xl font-bold text-gray-900">{unreadCount}</p>
+                    <p className="text-gray-600 text-xs font-medium truncate">Messages</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white border-gray-200 hover:border-pink-300 hover:shadow-sm transition-all duration-200 cursor-pointer" onClick={() => setActiveTab("interviews")}>
+              <CardContent className="p-3">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 bg-gradient-to-br from-pink-400 to-pink-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Calendar className="h-5 w-5 text-white" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-2xl font-bold text-gray-900">{getScheduledInterviews().length}</p>
+                    <p className="text-gray-600 text-xs font-medium truncate">Interviews</p>
                   </div>
                 </div>
               </CardContent>
@@ -484,10 +480,10 @@ export default function ApplicantDashboard() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg">
-            <TabsList className="grid w-full grid-cols-5 p-1 bg-gradient-to-r from-gray-100 to-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+          <Card className="bg-white border border-gray-200 shadow-sm">
+            <TabsList className="grid w-full grid-cols-5 p-1 bg-gray-50">
               <TabsTrigger 
                 value="applications" 
                 className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white transition-all duration-200"
@@ -541,12 +537,12 @@ export default function ApplicantDashboard() {
           </TabsList>
           </Card>
 
-          <TabsContent value="applications" className="space-y-6">
+          <TabsContent value="applications" className="space-y-4">
             {/* Applications Header */}
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Your Applications</h2>
-                <p className="text-sm text-gray-600 mt-1">Track and manage all your job applications in one place</p>
+                <h2 className="text-xl font-bold text-gray-900">Your Applications</h2>
+                <p className="text-xs text-gray-600 mt-0.5">Track and manage all your job applications</p>
               </div>
               <div className="flex items-center gap-2">
                 <Button
@@ -566,8 +562,8 @@ export default function ApplicantDashboard() {
 
             {/* Search and Filters */}
             {showFilters && (
-              <Card className="p-5 bg-gradient-to-r from-blue-50 to-purple-50 border-0 shadow-md">
-                <div className="flex items-center gap-4">
+              <Card className="p-3 bg-gray-50 border border-gray-200">
+                <div className="flex items-center gap-3">
                   <div className="flex-1">
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -575,12 +571,12 @@ export default function ApplicantDashboard() {
                         placeholder="Search by job title or company..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10 bg-white border-0 shadow-sm"
+                        className="pl-10 h-9 bg-white border border-gray-200"
                       />
                     </div>
                   </div>
                   <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-40 bg-white border-0 shadow-sm">
+                    <SelectTrigger className="w-40 h-9 bg-white border border-gray-200">
                       <SelectValue placeholder="Filter by status" />
                     </SelectTrigger>
                     <SelectContent>
@@ -613,9 +609,9 @@ export default function ApplicantDashboard() {
                 {/* Active Applications Section */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <h3 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Active Applications</h3>
-                      <Badge className="bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-sm px-3 py-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-base font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Active Applications</h3>
+                      <Badge className="bg-gradient-to-r from-blue-500 to-purple-600 text-white text-xs px-2 py-0.5">
                       {getFilteredApplications(applications, 'active').length}
                     </Badge>
                     </div>
@@ -641,72 +637,68 @@ export default function ApplicantDashboard() {
                   
                   {getFilteredApplications(applications, 'active').length > 0 ? (
                     <>
-                      <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-4' : 'space-y-3'}>
+                      <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-3' : 'space-y-2'}>
                         {getPaginatedApplications(getFilteredApplications(applications, 'active')).map((application) => (
-                          <Card key={application.id} className="group relative overflow-hidden bg-white hover:shadow-xl transition-all duration-300 border-0">
+                          <Card key={application.id} className="group relative overflow-hidden bg-white hover:shadow-lg transition-all duration-300 border-0">
                             {/* Gradient border effect */}
-                            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ padding: '2px' }}>
+                            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ padding: '1px' }}>
                               <div className="h-full w-full bg-white"></div>
                             </div>
                             
-                            <CardContent className="relative p-6">
-                              <div className="flex items-start justify-between mb-4">
+                            <CardContent className="relative p-4">
+                              <div className="flex items-start gap-3 mb-2">
+                                <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-md flex-shrink-0">
+                                  {(application.company?.name || application.company?.companyName || application.companyName || 'C')[0].toUpperCase()}
+                                </div>
                                 <div className="flex-1 min-w-0">
-                                  <div className="flex items-start gap-3 mb-3">
-                                    <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl shadow-lg flex-shrink-0">
-                                      {(application.company?.name || application.company?.companyName || application.companyName || 'C')[0].toUpperCase()}
-                                    </div>
-                              <div className="flex-1 min-w-0">
-                                      <h4 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
+                                  <h4 className="text-sm font-bold text-gray-900 mb-0.5 group-hover:text-blue-600 transition-colors truncate">
                                     {application.jobTitle}
                                   </h4>
-                                      <p className="text-base font-semibold text-gray-700 mb-1">
+                                  <p className="text-xs font-medium text-gray-600 truncate">
                                     {application.company?.name || 
                                      application.company?.companyName || 
                                      application.companyName ||
-                                         'Company Name'}
-                                      </p>
-                                    </div>
-                                  </div>
-                                  
-                                  <div className="flex items-center gap-3 text-xs text-gray-500 mb-3">
-                                    <div className="flex items-center gap-1">
-                                      <Clock className="h-3 w-3" />
+                                     'Company Name'}
+                                  </p>
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
+                                <div className="flex items-center gap-1">
+                                  <Clock className="h-3 w-3" />
                                   <span>{new Date(application.applicationDate).toLocaleDateString()}</span>
+                                </div>
+                                {application.location && (
+                                  <>
+                                    <span>•</span>
+                                    <div className="flex items-center gap-1 truncate">
+                                      <MapPin className="h-3 w-3 flex-shrink-0" />
+                                      <span className="truncate">{application.location.city}, {application.location.state}</span>
                                     </div>
-                                    {application.location && (
-                                      <>
-                                        <span>•</span>
-                                        <div className="flex items-center gap-1">
-                                          <MapPin className="h-3 w-3" />
-                                          <span>{application.location.city}, {application.location.state}</span>
-                                        </div>
-                                      </>
-                                    )}
-                                </div>
+                                  </>
+                                )}
+                              </div>
 
-                                  <div className="flex items-center gap-2 flex-wrap mb-4">
-                                    {getStatusBadge(application.status, application.isPartial, application.completionPercentage)}
+                              <div className="flex items-center gap-1.5 flex-wrap mb-3">
+                                {getStatusBadge(application.status, application.isPartial, application.completionPercentage)}
                                 {application.invitationSent && (
-                                      <Badge className="bg-gradient-to-r from-green-500 to-emerald-600 text-white border-0 shadow-sm">
-                                        <Mail className="h-3 w-3 mr-1" />
-                                        Interview Invitation
-                                      </Badge>
-                                    )}
-                                    {application.interviewScheduled && (
-                                      <Badge className="bg-gradient-to-r from-pink-500 to-rose-600 text-white border-0 shadow-sm">
-                                        <Calendar className="h-3 w-3 mr-1" />
-                                        Scheduled
-                                      </Badge>
-                                    )}
-                                  </div>
-                                </div>
+                                  <Badge className="bg-gradient-to-r from-green-500 to-emerald-600 text-white border-0 text-xs">
+                                    <Mail className="h-3 w-3 mr-1" />
+                                    Interview
+                                  </Badge>
+                                )}
+                                {application.interviewScheduled && (
+                                  <Badge className="bg-gradient-to-r from-pink-500 to-rose-600 text-white border-0 text-xs">
+                                    <Calendar className="h-3 w-3 mr-1" />
+                                    Scheduled
+                                  </Badge>
+                                )}
                               </div>
                               
                               <div className="flex items-center gap-2">
                                 <Button 
                                   size="sm"
-                                  className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0 shadow-md"
+                                  className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0 text-xs h-8"
                                   onClick={() => {
                                     let jobId: string;
                                     if (typeof application.jobId === 'string') {
@@ -741,45 +733,41 @@ export default function ApplicantDashboard() {
                   
                       {/* Pagination Controls */}
                       {getTotalPages(getFilteredApplications(applications, 'active')) > 1 && (
-                        <div className="flex items-center justify-between mt-6">
-                          <p className="text-sm text-gray-600">
-                            Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, getFilteredApplications(applications, 'active').length)} of {getFilteredApplications(applications, 'active').length} applications
+                        <div className="flex items-center justify-between mt-4 text-xs">
+                          <p className="text-gray-600">
+                            {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, getFilteredApplications(applications, 'active').length)} of {getFilteredApplications(applications, 'active').length}
                           </p>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1">
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                               disabled={currentPage === 1}
-                              className="hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 hover:text-white hover:border-0 disabled:opacity-50"
+                              className="h-7 px-2"
                             >
-                              <ChevronLeft className="h-4 w-4 mr-1" />
-                              Previous
+                              <ChevronLeft className="h-3 w-3" />
                             </Button>
                             
-                            <div className="flex items-center gap-1">
-                              {Array.from({ length: getTotalPages(getFilteredApplications(applications, 'active')) }, (_, i) => i + 1).map((page) => (
-                                <Button
-                                  key={page}
-                                  variant={currentPage === page ? 'default' : 'outline'}
-                                  size="sm"
-                                  onClick={() => setCurrentPage(page)}
-                                  className={currentPage === page ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white' : 'hover:bg-gray-100'}
-                                >
-                                  {page}
-                                </Button>
-                              ))}
-                            </div>
+                            {Array.from({ length: getTotalPages(getFilteredApplications(applications, 'active')) }, (_, i) => i + 1).map((page) => (
+                              <Button
+                                key={page}
+                                variant={currentPage === page ? 'default' : 'outline'}
+                                size="sm"
+                                onClick={() => setCurrentPage(page)}
+                                className={currentPage === page ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white h-7 w-7 p-0' : 'h-7 w-7 p-0'}
+                              >
+                                {page}
+                              </Button>
+                            ))}
 
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => setCurrentPage(prev => Math.min(getTotalPages(getFilteredApplications(applications, 'active')), prev + 1))}
                               disabled={currentPage === getTotalPages(getFilteredApplications(applications, 'active'))}
-                              className="hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 hover:text-white hover:border-0 disabled:opacity-50"
+                              className="h-7 px-2"
                             >
-                              Next
-                              <ChevronRight className="h-4 w-4 ml-1" />
+                              <ChevronRight className="h-3 w-3" />
                             </Button>
                           </div>
                         </div>
@@ -787,12 +775,12 @@ export default function ApplicantDashboard() {
                     </>
                   ) : (
                     <Card className="border-dashed border-2 border-gray-300 bg-gray-50/50">
-                      <CardContent className="p-12 text-center">
-                        <div className="h-20 w-20 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center mx-auto mb-4">
-                          <Briefcase className="h-10 w-10 text-blue-600" />
+                      <CardContent className="p-8 text-center">
+                        <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center mx-auto mb-3">
+                          <Briefcase className="h-6 w-6 text-blue-600" />
                         </div>
-                        <h4 className="text-xl font-bold text-gray-900 mb-2">No Active Applications</h4>
-                        <p className="text-gray-600 max-w-md mx-auto">Your active applications will appear here. Start applying to jobs to see them tracked here.</p>
+                        <h4 className="text-base font-semibold text-gray-900 mb-1">No Active Applications</h4>
+                        <p className="text-sm text-gray-600">Start applying to jobs to track them here.</p>
                       </CardContent>
                     </Card>
                   )}
@@ -800,50 +788,49 @@ export default function ApplicantDashboard() {
 
                 {/* Inactive Applications Section - Collapsible */}
                 {getFilteredApplications(applications, 'inactive').length > 0 && (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     <button
                       onClick={() => setShowInactive(!showInactive)}
-                      className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all duration-200 border border-gray-200"
+                      className="w-full flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-all duration-200 border border-gray-200"
                     >
-                      <div className="flex items-center gap-3">
-                        <h3 className="text-lg font-bold text-gray-700">Past Applications</h3>
-                        <Badge className="bg-gray-200 text-gray-700 shadow-sm px-3 py-1">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-sm font-semibold text-gray-700">Past Applications</h3>
+                        <Badge className="bg-gray-200 text-gray-700 text-xs px-2 py-0.5">
                       {getFilteredApplications(applications, 'inactive').length}
                     </Badge>
                   </div>
                       {showInactive ? (
-                        <ChevronUp className="h-5 w-5 text-gray-600" />
+                        <ChevronUp className="h-4 w-4 text-gray-600" />
                       ) : (
-                        <ChevronDown className="h-5 w-5 text-gray-600" />
+                        <ChevronDown className="h-4 w-4 text-gray-600" />
                       )}
                     </button>
                     
                     {showInactive && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in duration-300">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 animate-in fade-in duration-300">
                     {getFilteredApplications(applications, 'inactive').map((application) => (
-                          <Card key={application.id} className="group relative overflow-hidden bg-gray-50 hover:shadow-lg transition-all duration-300 border-gray-200">
-                            <CardContent className="p-5">
-                              <div className="flex items-start gap-3">
-                                <div className="h-12 w-12 rounded-lg bg-gray-300 flex items-center justify-center text-gray-600 font-bold text-lg flex-shrink-0">
+                          <Card key={application.id} className="group bg-gray-50 hover:bg-gray-100 transition-all duration-200 border-gray-200">
+                            <CardContent className="p-3">
+                            <div className="flex items-start gap-2">
+                                <div className="h-8 w-8 rounded-md bg-gray-300 flex items-center justify-center text-gray-600 font-bold text-xs flex-shrink-0">
                                   {(application.company?.name || application.company?.companyName || application.companyName || 'C')[0].toUpperCase()}
                                 </div>
                               <div className="flex-1 min-w-0">
-                                  <h4 className="text-base font-bold text-gray-800 mb-1">
+                                  <h4 className="text-xs font-bold text-gray-800 mb-0.5 truncate">
                                     {application.jobTitle}
                                   </h4>
-                                  <p className="text-sm font-semibold text-gray-600 mb-2">
+                                  <p className="text-xs text-gray-600 mb-1 truncate">
                                     {application.company?.name || 
                                      application.company?.companyName || 
                                      application.companyName ||
                                      'Company Name'}
                                   </p>
                                   
-                                  <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
-                                    <Clock className="h-3 w-3" />
-                                  <span>{new Date(application.applicationDate).toLocaleDateString()}</span>
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-xs text-gray-500">{new Date(application.applicationDate).toLocaleDateString()}</span>
+                                    <span className="text-xs">•</span>
+                                    {getStatusBadge(application.status, application.isPartial, application.completionPercentage)}
                                   </div>
-
-                                  {getStatusBadge(application.status, application.isPartial, application.completionPercentage)}
                               </div>
                             </div>
                           </CardContent>
@@ -855,17 +842,16 @@ export default function ApplicantDashboard() {
                 )}
               </>
             ) : (
-              <Card className="border-0 shadow-xl bg-gradient-to-br from-blue-50 to-purple-50">
-                <CardContent className="p-16 text-center">
-                  <div className="h-24 w-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mx-auto mb-6 shadow-xl">
-                    <Briefcase className="h-12 w-12 text-white" />
+              <Card className="border border-gray-200 bg-gradient-to-br from-blue-50 to-purple-50">
+                <CardContent className="p-8 text-center">
+                  <div className="h-16 w-16 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mx-auto mb-4">
+                    <Briefcase className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">No Applications Yet</h3>
-                  <p className="text-gray-600 max-w-md mx-auto mb-6">
-                    Your job applications will appear here once you start applying to positions. Track your progress all in one place!
+                  <h3 className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">No Applications Yet</h3>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Start applying to positions to track your progress here.
                   </p>
-                  <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg">
-                    <Sparkles className="h-4 w-4 mr-2" />
+                  <Button size="sm" className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white">
                     Explore Jobs
                   </Button>
                 </CardContent>
@@ -873,14 +859,14 @@ export default function ApplicantDashboard() {
             )}
           </TabsContent>
 
-          <TabsContent value="continue" className="space-y-6">
+          <TabsContent value="continue" className="space-y-4">
             {/* Unfinished Applications Header */}
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-orange-500 bg-clip-text text-transparent">Unfinished Applications</h2>
-                <p className="text-sm text-gray-600 mt-1">Complete your applications to increase your chances</p>
+                <h2 className="text-xl font-bold bg-gradient-to-r from-orange-600 to-orange-500 bg-clip-text text-transparent">Unfinished Applications</h2>
+                <p className="text-xs text-gray-600 mt-0.5">Complete your applications to increase your chances</p>
               </div>
-              <Badge className="bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md px-4 py-2">
+              <Badge className="bg-gradient-to-r from-orange-500 to-orange-600 text-white text-xs px-2 py-0.5">
                 {getFilteredApplications(applications, 'partial').length} pending
               </Badge>
             </div>
@@ -888,68 +874,64 @@ export default function ApplicantDashboard() {
             {/* Partial Applications Only */}
             {getFilteredApplications(applications, 'partial').length > 0 ? (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {getPaginatedApplications(getFilteredApplications(applications, 'partial')).map((application) => (
-                    <Card key={application.id} className="group relative overflow-hidden bg-white hover:shadow-xl transition-all duration-300 border-0">
+                    <Card key={application.id} className="group relative overflow-hidden bg-white hover:shadow-lg transition-all duration-300 border-0">
                       {/* Gradient border effect */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-orange-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ padding: '2px' }}>
+                      <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-orange-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ padding: '1px' }}>
                         <div className="h-full w-full bg-white"></div>
                       </div>
                       
-                      <CardContent className="relative p-6">
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start gap-3 mb-3">
-                              <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white font-bold text-xl shadow-lg flex-shrink-0">
-                                {(application.company?.name || application.company?.companyName || application.companyName || 'C')[0].toUpperCase()}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <h4 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-orange-600 transition-colors">
-                                {application.jobTitle}
-                              </h4>
-                                <p className="text-base font-semibold text-gray-700 mb-1">
-                                  {application.company?.name || 
-                                   application.company?.companyName || 
-                                   application.companyName ||
-                                   'Company Name'}
-                                </p>
-                              </div>
-                            </div>
-                            
-                            <div className="flex items-center gap-2 text-xs text-gray-500 mb-4">
-                              <Clock className="h-3 w-3" />
-                              <span>Last updated {new Date(application.lastUpdated || application.applicationDate).toLocaleDateString()}</span>
-                            </div>
-
-                            {/* Progress Bar */}
-                            <div className="mb-4">
-                              <div className="flex justify-between text-sm mb-2">
-                                <span className="font-medium text-gray-700">Progress</span>
-                                <span className="font-bold bg-gradient-to-r from-orange-600 to-orange-500 bg-clip-text text-transparent">
-                                  {application.completionPercentage || 0}%
-                                </span>
-                              </div>
-                              <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
-                                <div 
-                                  className="bg-gradient-to-r from-orange-500 to-orange-600 h-2.5 rounded-full transition-all duration-500 shadow-sm"
-                                  style={{ width: `${application.completionPercentage || 0}%` }}
-                                ></div>
-                              </div>
-                            </div>
-
-                            {application.completionPercentage && application.completionPercentage < 100 && (
-                              <div className="flex items-center gap-2 text-sm text-orange-700 bg-orange-50 px-3 py-2 rounded-lg mb-4">
-                                <AlertCircle className="h-4 w-4 flex-shrink-0" />
-                                <span className="font-medium">Complete this to be considered by recruiters</span>
-                              </div>
-                            )}
-                            </div>
+                      <CardContent className="relative p-4">
+                        <div className="flex items-start gap-3 mb-2">
+                          <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white font-bold text-sm shadow-md flex-shrink-0">
+                            {(application.company?.name || application.company?.companyName || application.companyName || 'C')[0].toUpperCase()}
                           </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-sm font-bold text-gray-900 mb-0.5 group-hover:text-orange-600 transition-colors truncate">
+                              {application.jobTitle}
+                            </h4>
+                            <p className="text-xs font-medium text-gray-600 truncate">
+                              {application.company?.name || 
+                               application.company?.companyName || 
+                               application.companyName ||
+                               'Company Name'}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-2 text-xs text-gray-500 mb-3">
+                          <Clock className="h-3 w-3" />
+                          <span>Last updated {new Date(application.lastUpdated || application.applicationDate).toLocaleDateString()}</span>
+                        </div>
+
+                        {/* Progress Bar */}
+                        <div className="mb-3">
+                          <div className="flex justify-between text-xs mb-1.5">
+                            <span className="font-medium text-gray-700">Progress</span>
+                            <span className="font-bold bg-gradient-to-r from-orange-600 to-orange-500 bg-clip-text text-transparent">
+                              {application.completionPercentage || 0}%
+                            </span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                            <div 
+                              className="bg-gradient-to-r from-orange-500 to-orange-600 h-2 rounded-full transition-all duration-500"
+                              style={{ width: `${application.completionPercentage || 0}%` }}
+                            ></div>
+                          </div>
+                        </div>
+
+                        {application.completionPercentage && application.completionPercentage < 100 && (
+                          <div className="flex items-center gap-1.5 text-xs text-orange-700 bg-orange-50 px-2 py-1.5 rounded-md mb-3">
+                            <AlertCircle className="h-3 w-3 flex-shrink-0" />
+                            <span className="font-medium">Complete to be considered</span>
+                          </div>
+                        )}
                           
                         <div className="flex items-center gap-2">
-                            <Button 
-                              size="sm"
-                            className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white border-0 shadow-md"
+                          <Button 
+                            size="sm"
+                            className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white border-0 text-xs h-8"
                               onClick={() => {
                                 // Navigate to continue application
                                 const companySlug = application.company?.slug || application.company?.name?.toLowerCase().replace(/\s+/g, '-') || 'company';
@@ -987,68 +969,64 @@ export default function ApplicantDashboard() {
 
                 {/* Pagination Controls for Unfinished */}
                 {getTotalPages(getFilteredApplications(applications, 'partial')) > 1 && (
-                  <div className="flex items-center justify-between mt-6">
-                    <p className="text-sm text-gray-600">
-                      Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, getFilteredApplications(applications, 'partial').length)} of {getFilteredApplications(applications, 'partial').length} applications
+                  <div className="flex items-center justify-between mt-4 text-xs">
+                    <p className="text-gray-600">
+                      {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, getFilteredApplications(applications, 'partial').length)} of {getFilteredApplications(applications, 'partial').length}
                     </p>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                         disabled={currentPage === 1}
-                        className="hover:bg-gradient-to-r hover:from-orange-500 hover:to-orange-600 hover:text-white hover:border-0 disabled:opacity-50"
+                        className="h-7 px-2"
                       >
-                        <ChevronLeft className="h-4 w-4 mr-1" />
-                        Previous
+                        <ChevronLeft className="h-3 w-3" />
                       </Button>
                       
-                      <div className="flex items-center gap-1">
-                        {Array.from({ length: getTotalPages(getFilteredApplications(applications, 'partial')) }, (_, i) => i + 1).map((page) => (
-                          <Button
-                            key={page}
-                            variant={currentPage === page ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => setCurrentPage(page)}
-                            className={currentPage === page ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white' : 'hover:bg-gray-100'}
-                          >
-                            {page}
-                          </Button>
-                        ))}
-                      </div>
+                      {Array.from({ length: getTotalPages(getFilteredApplications(applications, 'partial')) }, (_, i) => i + 1).map((page) => (
+                        <Button
+                          key={page}
+                          variant={currentPage === page ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setCurrentPage(page)}
+                          className={currentPage === page ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white h-7 w-7 p-0' : 'h-7 w-7 p-0'}
+                        >
+                          {page}
+                        </Button>
+                      ))}
 
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => setCurrentPage(prev => Math.min(getTotalPages(getFilteredApplications(applications, 'partial')), prev + 1))}
                         disabled={currentPage === getTotalPages(getFilteredApplications(applications, 'partial'))}
-                        className="hover:bg-gradient-to-r hover:from-orange-500 hover:to-orange-600 hover:text-white hover:border-0 disabled:opacity-50"
+                        className="h-7 px-2"
                       >
-                        Next
-                        <ChevronRight className="h-4 w-4 ml-1" />
+                        <ChevronRight className="h-3 w-3" />
                       </Button>
                     </div>
               </div>
                 )}
               </>
             ) : (
-              <Card className="border-0 shadow-xl bg-gradient-to-br from-orange-50 to-amber-50">
-                <CardContent className="p-16 text-center">
-                  <div className="h-24 w-24 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center mx-auto mb-6 shadow-xl">
-                    <CheckCircle className="h-12 w-12 text-white" />
+              <Card className="border border-gray-200 bg-gradient-to-br from-orange-50 to-amber-50">
+                <CardContent className="p-8 text-center">
+                  <div className="h-16 w-16 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle className="h-8 w-8 text-white" />
                   </div>
-                  <h4 className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-orange-500 bg-clip-text text-transparent mb-3">All Caught Up!</h4>
-                  <p className="text-gray-600 max-w-md mx-auto">
-                    You don't have any incomplete applications. When you start an application but don't finish it, you can come back here to continue.
+                  <h4 className="text-lg font-bold bg-gradient-to-r from-orange-600 to-orange-500 bg-clip-text text-transparent mb-2">All Caught Up!</h4>
+                  <p className="text-sm text-gray-600">
+                    No incomplete applications. Start applying to continue here later.
                   </p>
                 </CardContent>
               </Card>
             )}
           </TabsContent>
 
-          <TabsContent value="chat" className="space-y-6">
+          <TabsContent value="chat" className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-900">Messages</h2>
+              <h2 className="text-xl font-bold text-gray-900">Messages</h2>
               {selectedJobForChat && (
                 <Button 
                   variant="outline" 
@@ -1069,9 +1047,9 @@ export default function ApplicantDashboard() {
             />
           </TabsContent>
 
-          <TabsContent value="interviews" className="space-y-6">
+          <TabsContent value="interviews" className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-900">Interviews</h2>
+              <h2 className="text-xl font-bold text-gray-900">Interviews</h2>
               {getScheduledInterviews().length > 0 && (
                 <div className="flex gap-2">
                   {getUpcomingInterviews().length > 0 && (
@@ -1297,9 +1275,9 @@ export default function ApplicantDashboard() {
             )}
           </TabsContent>
 
-          <TabsContent value="profile" className="space-y-6">
+          <TabsContent value="profile" className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-900">Profile Settings</h2>
+              <h2 className="text-xl font-bold text-gray-900">Profile Settings</h2>
             </div>
             
             <Card>

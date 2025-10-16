@@ -54,6 +54,7 @@ export const ROUTES = {
   CHECKOUT: "/checkout",
   DASHBOARD: DASHBOARD_ROUTES,
   CONTACT: "/contact",
+  FAQ: "/faq",
   PRIVACY: "/privacy",
   TERMS: "/terms",
   COMPANY: "/company/:slug",

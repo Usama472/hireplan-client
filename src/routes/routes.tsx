@@ -14,6 +14,7 @@ import type { AppRoutesType } from "@/interfaces";
 import CompanyPage from "@/pages/company";
 import JobApplicationPage from "@/pages/company/apply";
 import ContactPage from "@/pages/contact";
+import FAQPage from "@/pages/faq";
 import DashboardPage from "@/pages/dashboard/jobs";
 import CreateJobPage from "@/pages/dashboard/jobs/create";
 import JobDraftsPage from "@/pages/dashboard/jobs/drafts";
@@ -146,6 +147,12 @@ export const appRoutes: AppRoutesType[] = [
     id: CONTACT_TEXT,
     url: ROUTES.CONTACT,
     element: <ContactPage />,
+    isPrivate: false,
+  },
+  {
+    id: "faq",
+    url: ROUTES.FAQ,
+    element: <FAQPage />,
     isPrivate: false,
   },
   {
