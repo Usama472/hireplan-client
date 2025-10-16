@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -23,6 +23,7 @@ import {
   X
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useSEO, addStructuredData, removeStructuredData } from "@/lib/hooks/useSEO";
 
 const faqs = [
   {
@@ -237,6 +238,42 @@ const faqs = [
 export default function FAQPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  // SEO configuration
+  useSEO({
+    title: "FAQ - HirePlan | Frequently Asked Questions About AI Recruitment",
+    description: "Get answers to common questions about HirePlan's AI-powered recruitment platform. Learn about features, pricing, integrations, security, and more.",
+    keywords: "HirePlan FAQ, recruitment software questions, ATS help, hiring platform support, AI recruitment answers",
+    ogTitle: "Frequently Asked Questions - HirePlan",
+    ogDescription: "Get answers to common questions about HirePlan's AI-powered recruitment platform.",
+    ogUrl: "https://hireplan.co/faq",
+    ogImage: "https://hireplan.co/og-image-faq.png",
+    canonical: "https://hireplan.co/faq",
+  });
+
+  // Add FAQ structured data
+  useEffect(() => {
+    const faqStructuredData = {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": faqs.flatMap(category => 
+        category.questions.map(faq => ({
+          "@type": "Question",
+          "name": faq.question,
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": faq.answer
+          }
+        }))
+      )
+    };
+
+    addStructuredData(faqStructuredData, 'faq-structured-data');
+
+    return () => {
+      removeStructuredData('faq-structured-data');
+    };
+  }, []);
 
   // Filter FAQs based on search query
   const filteredFaqs = useMemo(() => {

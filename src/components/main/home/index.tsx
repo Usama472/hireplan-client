@@ -8,10 +8,23 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router";
 import useAuthSessionContext from "@/lib/context/AuthSessionContext";
 import { ROUTES } from "@/constants";
+import { useSEO } from "@/lib/hooks/useSEO";
 
 export default function Home() {
   const navigate = useNavigate();
   const { status } = useAuthSessionContext();
+
+  // SEO configuration for home page
+  useSEO({
+    title: "HirePlan - AI-Powered Recruitment Platform | Hire 10x Faster",
+    description: "Transform your hiring process with HirePlan's AI-powered recruitment platform. Automate candidate screening, conduct smart interviews, and hire the right talent 10x faster with 95% accuracy.",
+    keywords: "AI recruitment software, applicant tracking system, ATS, automated hiring, candidate screening, recruitment automation, AI hiring platform, talent acquisition software, HR technology",
+    ogTitle: "HirePlan - AI-Powered Recruitment Platform | Hire 10x Faster",
+    ogDescription: "Transform your hiring process with AI. Automate candidate screening and hire the right talent 10x faster.",
+    ogUrl: "https://hireplan.co/",
+    ogImage: "https://hireplan.co/og-image.png",
+    canonical: "https://hireplan.co/",
+  });
 
   useEffect(() => {
     // Redirect authenticated users to dashboard

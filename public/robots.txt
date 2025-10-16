@@ -1,0 +1,26 @@
+# HirePlan Robots.txt
+# Allow all search engines to crawl the site
+
+User-agent: *
+Allow: /
+
+# Disallow private/authenticated areas
+Disallow: /dashboard/
+Disallow: /applicant/
+Disallow: /owner/
+Disallow: /company/*/apply
+Disallow: /interview/schedule/
+
+# Allow public pages
+Allow: /
+Allow: /faq
+Allow: /contact
+Allow: /privacy
+Allow: /terms
+
+# Sitemap location
+Sitemap: https://hireplan.co/sitemap.xml
+
+# Crawl delay (optional - helps prevent server overload)
+Crawl-delay: 1
+

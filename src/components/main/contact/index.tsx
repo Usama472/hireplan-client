@@ -23,6 +23,7 @@ import {
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useSEO } from "@/lib/hooks/useSEO";
 
 const contactSchema = z.object({
   firstName: z.string().min(2, "First name is required"),
@@ -48,6 +49,18 @@ const inquiryTypes = [
 export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  // SEO configuration for contact page
+  useSEO({
+    title: "Contact Us - HirePlan | Get in Touch with Our Team",
+    description: "Have questions about HirePlan? Contact our team for support, schedule a demo, or learn more about our AI-powered recruitment platform. We're here to help you transform your hiring process.",
+    keywords: "contact HirePlan, recruitment software support, schedule demo, hiring platform inquiry, ATS contact",
+    ogTitle: "Contact HirePlan - Get in Touch",
+    ogDescription: "Contact our team for support or schedule a demo of our AI-powered recruitment platform.",
+    ogUrl: "https://hireplan.co/contact",
+    ogImage: "https://hireplan.co/og-image-contact.png",
+    canonical: "https://hireplan.co/contact",
+  });
 
   const {
     register,
