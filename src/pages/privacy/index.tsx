@@ -1,8 +1,20 @@
-import React from "react";
 import { Shield } from "lucide-react";
 import { motion } from "framer-motion";
+import { useSEO } from "@/lib/hooks/useSEO";
 
 const PrivacyPolicy = () => {
+  // SEO configuration
+  useSEO({
+    title: "Privacy Policy - HirePlan | Data Protection & Privacy",
+    description: "Learn how HirePlan protects your privacy and handles your data. Read our comprehensive privacy policy covering data collection, usage, and your rights.",
+    keywords: "HirePlan privacy policy, data protection, privacy rights, data security, GDPR compliance, user data",
+    ogTitle: "Privacy Policy - HirePlan",
+    ogDescription: "Learn how HirePlan protects your privacy and handles your data securely.",
+    ogUrl: "https://hireplan.co/privacy",
+    canonical: "https://hireplan.co/privacy",
+    noindex: false,
+  });
+
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -52,15 +64,19 @@ const PrivacyPolicy = () => {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="bg-primary text-white py-16"
+        className="bg-primary text-white py-12 sm:py-16 relative overflow-hidden"
       >
-        <div className="max-w-5xl mx-auto px-6 text-center">
-          <motion.div variants={sectionVariants} className="mb-6">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-full mb-6">
-              <Shield className="w-8 h-8 text-white" />
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-purple-500/10 via-transparent to-blue-500/10 pointer-events-none"></div>
+        <div className="absolute top-10 sm:top-20 right-5 sm:right-10 w-32 sm:w-64 h-32 sm:h-64 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-20 pointer-events-none"></div>
+
+        <div className="relative max-w-5xl mx-auto px-6 text-center">
+          <motion.div variants={sectionVariants}>
+            <div className="inline-flex items-center space-x-2 bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-medium mb-6 border border-white/30">
+              <Shield className="h-4 w-4 text-white" />
+              <span>Privacy & Security</span>
             </div>
-            <h1 className="text-4xl font-bold mb-4">Privacy Policy</h1>
-            <p className="text-xl text-white/90 max-w-3xl mx-auto">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 tracking-tight">Privacy Policy</h1>
+            <p className="text-lg sm:text-xl text-white/90 max-w-3xl mx-auto leading-relaxed">
               Your privacy is important to us. This policy explains how we
               collect, use, and protect your personal information.
             </p>

@@ -39,7 +39,7 @@ export const DashboardSidebar = ({
     navSecondary: [
       {
         title: "Support",
-        url: "#",
+        url: "/dashboard/support",
         icon: LifeBuoy,
       },
       {

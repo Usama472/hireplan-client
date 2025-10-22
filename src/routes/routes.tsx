@@ -69,6 +69,9 @@ import OwnerSubscriptions from "@/pages/owner/subscriptions/index";
 import OwnerSupport from "@/pages/owner/support/index";
 import OwnerAnalytics from "@/pages/owner/analytics/index";
 
+// Support
+import SupportPage from "@/pages/dashboard/support";
+
 export const appRoutes: AppRoutesType[] = [
   {
     id: HOME_TEXT,
@@ -303,6 +306,12 @@ export const appRoutes: AppRoutesType[] = [
     id: "ai-followup",
     url: ROUTES.DASHBOARD.AI_FOLLOWUP,
     element: <AIFollowupPage />,
+    isPrivate: true,
+  },
+  {
+    id: "support",
+    url: "/dashboard/support",
+    element: <SupportPage />,
     isPrivate: true,
   },
   // Applicant routes

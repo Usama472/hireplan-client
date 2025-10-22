@@ -1,20 +1,40 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { FileText, Scale, Shield, Users } from 'lucide-react'
+import { useSEO } from '@/lib/hooks/useSEO'
 
 export default function TermsOfService() {
+  // SEO configuration
+  useSEO({
+    title: "Terms of Service - HirePlan | Legal Terms & Conditions",
+    description: "Read HirePlan's Terms of Service. Understand your rights and responsibilities when using our AI-powered recruitment platform.",
+    keywords: "HirePlan terms of service, legal terms, user agreement, terms and conditions, recruitment platform terms",
+    ogTitle: "Terms of Service - HirePlan",
+    ogDescription: "Read HirePlan's Terms of Service and understand your rights when using our platform.",
+    ogUrl: "https://hireplan.co/terms",
+    canonical: "https://hireplan.co/terms",
+    noindex: false,
+  });
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Scale className="w-8 h-8 text-indigo-600" />
+      {/* Hero Section */}
+      <section className="bg-primary text-white py-12 sm:py-16 relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-purple-500/10 via-transparent to-blue-500/10 pointer-events-none"></div>
+        <div className="absolute top-10 sm:top-20 right-5 sm:right-10 w-32 sm:w-64 h-32 sm:h-64 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-20 pointer-events-none"></div>
+
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="inline-flex items-center space-x-2 bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-medium mb-6 border border-white/30">
+            <Scale className="h-4 w-4 text-white" />
+            <span>Legal</span>
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Terms of Service</h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            These terms govern your use of HirePlan and our services.
+
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 tracking-tight">
+            Terms of Service
+          </h1>
+          <p className="text-lg sm:text-xl text-white/90 max-w-2xl mx-auto leading-relaxed mb-4">
+            These terms govern your use of HirePlan and our services
           </p>
-          <p className="text-sm text-gray-500 mt-4">
+          <p className="text-sm text-white/70">
             Last updated: {new Date().toLocaleDateString('en-US', { 
               year: 'numeric', 
               month: 'long', 
@@ -22,6 +42,10 @@ export default function TermsOfService() {
             })}
           </p>
         </div>
+      </section>
+
+      {/* Content Section */}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         <div className="space-y-8">
           {/* Acceptance */}
