@@ -336,8 +336,8 @@ export default function ProfilePage() {
   return (
     <div className="min-h-full">
       <div className="space-y-6">
-        {/* Enhanced Header - Matching Jobs Page Style */}
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100 px-6 py-4 relative overflow-hidden max-h-[80px]">
+        {/* Enhanced Header - Sticky */}
+        <div className="sticky top-0 z-30 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100 px-6 py-4 relative overflow-hidden max-h-[80px]">
           <div className="relative z-10">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
@@ -425,7 +425,7 @@ export default function ProfilePage() {
                 <div className="flex items-center gap-3 flex-wrap">
                   <Badge
                     className={cn(
-                      "px-3 py-1 text-sm font-medium capitalize border",
+                      "px-4 py-1.5 text-base font-semibold capitalize border h-8 inline-flex items-center",
                       getPlanColor(paymentPlan)
                     )}
                   >
@@ -433,7 +433,7 @@ export default function ProfilePage() {
                   </Badge>
                   <Badge
                     className={cn(
-                      "px-3 py-1 text-sm font-medium capitalize border",
+                      "px-4 py-1.5 text-base font-semibold capitalize border h-8 inline-flex items-center",
                       getStatusBadgeColor(subscriptionStatus)
                     )}
                   >
