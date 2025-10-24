@@ -1,4 +1,4 @@
-import { get, post } from "../apiHelper";
+import { get, post, put, del } from "../apiHelper";
 
 export interface CreateStaffPayload {
   firstName: string;
@@ -66,4 +66,28 @@ export const getStaff = async (
   }
 
   return await get("/users/staff", { params });
+};
+
+/**
+ * Update a staff member
+ * @param staffId - Staff member ID
+ * @param updates - Fields to update
+ * @returns Promise with updated staff member
+ */
+export const updateStaff = async (
+  staffId: string,
+  updates: Partial<CreateStaffPayload>
+): Promise<{ status: boolean; user: StaffResponse }> => {
+  return await put(`/users/staff/${staffId}`, updates);
+};
+
+/**
+ * Delete a staff member
+ * @param staffId - Staff member ID
+ * @returns Promise with deletion result
+ */
+export const deleteStaff = async (
+  staffId: string
+): Promise<{ status: boolean; message: string }> => {
+  return await del(`/users/staff/${staffId}`);
 };

@@ -17,8 +17,37 @@ import {
   UserX,
 } from "lucide-react";
 import type { StaffGridProps } from "./types";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useState } from "react";
 
-export function StaffGrid({ staffMembers }: StaffGridProps) {
+export function StaffGrid({ staffMembers, onEdit, onDelete }: StaffGridProps) {
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [staffToDelete, setStaffToDelete] = useState<string | null>(null);
+  const [staffNameToDelete, setStaffNameToDelete] = useState<string>("");
+
+  const handleDeleteClick = (staffId: string, staffName: string) => {
+    setStaffToDelete(staffId);
+    setStaffNameToDelete(staffName);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (staffToDelete && onDelete) {
+      onDelete(staffToDelete);
+      setDeleteDialogOpen(false);
+      setStaffToDelete(null);
+      setStaffNameToDelete("");
+    }
+  };
   const getStatusStyles = (status: string) => {
     if (status === "active") {
       return {
@@ -50,8 +79,8 @@ export function StaffGrid({ staffMembers }: StaffGridProps) {
               <div className="flex flex-col h-full">
                 {/* Header with role badge */}
                 <div className="p-5 border-b border-gray-100 flex items-center justify-between">
-                  <Badge className="bg-primary/10 text-primary border-none px-3 py-1">
-                    {staff.role}
+                  <Badge className="bg-purple-100 text-purple-700 border-none px-3 py-1.5 text-sm font-semibold">
+                    {staff.appRole?.name || 'No Role Assigned'}
                   </Badge>
 
                   <DropdownMenu>
@@ -61,14 +90,20 @@ export function StaffGrid({ staffMembers }: StaffGridProps) {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
+                      <DropdownMenuItem 
+                        className="cursor-pointer flex items-center gap-2"
+                        onClick={() => onEdit && onEdit(staff)}
+                      >
                         <Edit className="h-4 w-4" /> Edit
                       </DropdownMenuItem>
                       <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
-                        <Mail className="h-4 w-4" /> Email
+                        <Mail className="h-4 w-4" /> Resend Invite
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem className="cursor-pointer text-red-600 flex items-center gap-2">
+                      <DropdownMenuItem 
+                        className="cursor-pointer text-red-600 flex items-center gap-2"
+                        onClick={() => handleDeleteClick(staff.id, `${staff.firstName} ${staff.lastName}`)}
+                      >
                         <Trash2 className="h-4 w-4" /> Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -78,12 +113,15 @@ export function StaffGrid({ staffMembers }: StaffGridProps) {
                 {/* Staff info */}
                 <div className="p-5 flex-grow flex flex-col">
                   <h3 className="font-medium text-lg text-gray-900 mb-1">
-                    {staff.name}
+                    {staff.firstName} {staff.lastName}
                   </h3>
                   <p className="text-gray-600 text-sm mb-4">{staff.email}</p>
 
-                  {/* Status indicator */}
-                  <div className="mt-auto">
+                  {/* Role and Status */}
+                  <div className="mt-auto space-y-2">
+                    <div className="text-xs text-gray-500">
+                      <span className="font-medium">Company Role:</span> {staff.companyRole || 'N/A'}
+                    </div>
                     <div
                       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ${statusStyles.bg} ${statusStyles.text}`}
                     >
@@ -99,6 +137,27 @@ export function StaffGrid({ staffMembers }: StaffGridProps) {
           </Card>
         );
       })}
+      
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Staff Member?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete <strong>{staffNameToDelete}</strong>? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

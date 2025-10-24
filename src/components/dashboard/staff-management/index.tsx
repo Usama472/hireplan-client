@@ -18,9 +18,12 @@ import { toast } from "sonner";
 import { SearchBar } from "../jobs/search-bar";
 import AddRoleSheet from "./add-role-sheet";
 import AddStaffSheet from "./add-staff-sheet";
+import EditStaffDialog from "./edit-staff-dialog";
 import { DeleteRoleDialog } from "./delete-role-dialog";
 import { RolesGrid, RolesList } from "./role-components";
-import { StaffGrid, StaffList } from "./staff-components";
+import { StaffGrid } from "./staff-grid";
+import { StaffList } from "./staff-list";
+import type { StaffMember } from "./types";
 
 export default function StaffManagement() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -30,6 +33,8 @@ export default function StaffManagement() {
   // Staff state
   const [isAddStaffSheetOpen, setIsAddStaffSheetOpen] = useState(false);
   const [isCreatingStaff, setIsCreatingStaff] = useState(false);
+  const [editingStaff, setEditingStaff] = useState<StaffMember | null>(null);
+  const [isEditStaffDialogOpen, setIsEditStaffDialogOpen] = useState(false);
   const [staffState, setStaffState] = useState<{
     staff: StaffResponse[];
     page: number;
@@ -488,12 +493,40 @@ export default function StaffManagement() {
                     staffMembers={staffState.staff}
                     isLoading={staffState.isLoading}
                     searchQuery={searchQuery}
+                    onEdit={(staff: StaffMember) => {
+                      setEditingStaff(staff);
+                      setIsEditStaffDialogOpen(true);
+                    }}
+                    onDelete={async (staffId: string) => {
+                      try {
+                        await API.staff.deleteStaff(staffId);
+                        toast.success('Staff member deleted successfully');
+                        fetchStaff(staffState.page);
+                      } catch (error) {
+                        console.error('Failed to delete staff:', error);
+                        toast.error('Failed to delete staff member');
+                      }
+                    }}
                   />
                 ) : (
                   <StaffList
                     staffMembers={staffState.staff}
                     isLoading={staffState.isLoading}
                     searchQuery={searchQuery}
+                    onEdit={(staff: StaffMember) => {
+                      setEditingStaff(staff);
+                      setIsEditStaffDialogOpen(true);
+                    }}
+                    onDelete={async (staffId: string) => {
+                      try {
+                        await API.staff.deleteStaff(staffId);
+                        toast.success('Staff member deleted successfully');
+                        fetchStaff(staffState.page);
+                      } catch (error) {
+                        console.error('Failed to delete staff:', error);
+                        toast.error('Failed to delete staff member');
+                      }
+                    }}
                   />
                 )}
 
@@ -769,6 +802,17 @@ export default function StaffManagement() {
         onOpenChange={setIsAddStaffSheetOpen}
         onSubmit={handleAddStaff}
         isCreatingStaff={isCreatingStaff}
+      />
+
+      {/* Edit Staff Dialog */}
+      <EditStaffDialog
+        open={isEditStaffDialogOpen}
+        onOpenChange={setIsEditStaffDialogOpen}
+        staff={editingStaff}
+        onSuccess={() => {
+          toast.success('Staff member updated successfully');
+          fetchStaff(staffState.page);
+        }}
       />
 
       {/* Delete Confirmation Dialog */}

@@ -17,8 +17,37 @@ import {
   UserX,
 } from "lucide-react";
 import type { StaffListProps } from "./types";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useState } from "react";
 
-export function StaffList({ staffMembers }: StaffListProps) {
+export function StaffList({ staffMembers, onEdit, onDelete }: StaffListProps) {
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [staffToDelete, setStaffToDelete] = useState<string | null>(null);
+  const [staffNameToDelete, setStaffNameToDelete] = useState<string>("");
+
+  const handleDeleteClick = (staffId: string, staffName: string) => {
+    setStaffToDelete(staffId);
+    setStaffNameToDelete(staffName);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (staffToDelete && onDelete) {
+      onDelete(staffToDelete);
+      setDeleteDialogOpen(false);
+      setStaffToDelete(null);
+      setStaffNameToDelete("");
+    }
+  };
   const getStatusStyles = (status: string) => {
     if (status === "active") {
       return {
@@ -50,20 +79,20 @@ export function StaffList({ staffMembers }: StaffListProps) {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary font-semibold">
-                    {staff.name.charAt(0)}
+                    {staff.firstName.charAt(0)}{staff.lastName.charAt(0)}
                   </div>
 
                   <div className="flex-1 min-w-0">
                     <h3 className="font-medium text-base text-gray-900">
-                      {staff.name}
+                      {staff.firstName} {staff.lastName}
                     </h3>
                     <p className="text-sm text-gray-600">{staff.email}</p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-4">
-                  <Badge className="bg-primary/10 text-primary border-none px-3 py-1">
-                    {staff.role}
+                  <Badge className="bg-purple-100 text-purple-700 border-none px-3 py-1.5 text-sm font-semibold">
+                    {staff.appRole?.name || 'No Role Assigned'}
                   </Badge>
 
                   <div
@@ -82,14 +111,20 @@ export function StaffList({ staffMembers }: StaffListProps) {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
+                      <DropdownMenuItem 
+                        className="cursor-pointer flex items-center gap-2"
+                        onClick={() => onEdit && onEdit(staff)}
+                      >
                         <Edit className="h-4 w-4" /> Edit
                       </DropdownMenuItem>
                       <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
-                        <Mail className="h-4 w-4" /> Email
+                        <Mail className="h-4 w-4" /> Resend Invite
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem className="cursor-pointer text-red-600 flex items-center gap-2">
+                      <DropdownMenuItem 
+                        className="cursor-pointer text-red-600 flex items-center gap-2"
+                        onClick={() => handleDeleteClick(staff.id, `${staff.firstName} ${staff.lastName}`)}
+                      >
                         <Trash2 className="h-4 w-4" /> Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -100,6 +135,27 @@ export function StaffList({ staffMembers }: StaffListProps) {
           </Card>
         );
       })}
+      
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Staff Member?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete <strong>{staffNameToDelete}</strong>? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

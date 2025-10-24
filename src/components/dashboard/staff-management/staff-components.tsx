@@ -144,7 +144,7 @@ export function StaffGrid({
                     <span className="font-medium">Role</span>
                   </div>
                   <p className="text-sm font-semibold text-blue-900 mt-1 truncate">
-                    {staff.appRole.name}
+                    {staff.appRole?.name || 'No Role'}
                   </p>
                 </div>
                 <div className="bg-purple-50 rounded-xl p-3">
@@ -205,7 +205,7 @@ export function StaffGrid({
                   {staff.status}
                 </Badge>
                 <span className="text-sm font-medium text-primary">
-                  {staff.appRole.name}
+                  {staff.appRole?.name || 'No Role'}
                 </span>
               </div>
 
@@ -331,7 +331,7 @@ export function StaffList({
                   App Role
                 </p>
                 <p className="text-sm font-semibold text-blue-900 truncate">
-                  {staff.appRole.name}
+                  {staff.appRole?.name || 'No Role'}
                 </p>
               </div>
               <div className="bg-purple-50 rounded-lg p-2.5">
@@ -388,7 +388,7 @@ export function StaffList({
                 {staff.status}
               </Badge>
               <span className="text-sm font-medium text-primary border-l pl-4 border-gray-200">
-                {staff.appRole.name}
+                {staff.appRole?.name || 'No Role'}
               </span>
             </div>
           </div>

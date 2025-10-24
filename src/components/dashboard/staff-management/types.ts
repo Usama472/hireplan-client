@@ -41,11 +41,19 @@ export interface DeleteDialogProps {
 // Props for staff grid component
 export interface StaffGridProps {
   staffMembers: StaffMember[];
+  isLoading?: boolean;
+  searchQuery?: string;
+  onEdit?: (staff: StaffMember) => void;
+  onDelete?: (staffId: string) => void;
 }
 
 // Props for staff list component
 export interface StaffListProps {
   staffMembers: StaffMember[];
+  isLoading?: boolean;
+  searchQuery?: string;
+  onEdit?: (staff: StaffMember) => void;
+  onDelete?: (staffId: string) => void;
 }
 
 // Props for roles grid component
