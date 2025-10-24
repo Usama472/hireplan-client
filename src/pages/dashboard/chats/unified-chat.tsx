@@ -451,32 +451,32 @@ const UnifiedChatPage: React.FC = () => {
   return (
     <div className="min-h-[calc(100vh-8rem)] flex bg-gray-50">
       {/* Left Sidebar - Applicants List (Always Visible) */}
-      <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
+      <div className="w-72 bg-white border-r border-gray-200 flex flex-col">
         {/* Sidebar Header */}
-        <div className="p-4 border-b border-gray-200">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold text-gray-900">Applicants</h2>
-            <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+        <div className="p-2.5 border-b border-gray-200">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-base font-semibold text-gray-900">Applicants</h2>
+            <Badge variant="secondary" className="bg-blue-100 text-blue-700 text-xs py-0 px-1.5">
               {filteredApplicants.length}
             </Badge>
           </div>
           
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
             <Input
               placeholder="Search applicants..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pl-9 h-8 text-xs"
             />
           </div>
         </div>
 
         {/* Filters */}
-        <div className="p-4 border-b border-gray-200 space-y-2">
+        <div className="p-2.5 border-b border-gray-200 space-y-1.5">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full h-8 text-xs">
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
             <SelectContent>
@@ -488,7 +488,7 @@ const UnifiedChatPage: React.FC = () => {
           </Select>
           
           <Select value={channelFilter} onValueChange={setChannelFilter}>
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full h-8 text-xs">
               <SelectValue placeholder="Filter by channel" />
             </SelectTrigger>
             <SelectContent>
@@ -502,31 +502,31 @@ const UnifiedChatPage: React.FC = () => {
 
         {/* Applicants List */}
         <ScrollArea className="flex-1">
-          <div className="p-2 space-y-1">
+          <div className="p-1.5 space-y-0.5">
             {loading ? (
               // Loading skeleton
               Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="p-3 rounded-lg animate-pulse">
-                  <div className="flex items-start gap-3">
-                    <div className="h-10 w-10 bg-gray-200 rounded-full"></div>
-                    <div className="flex-1 space-y-2">
-                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                      <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                <div key={i} className="p-2 rounded-lg animate-pulse">
+                  <div className="flex items-start gap-2">
+                    <div className="h-8 w-8 bg-gray-200 rounded-full"></div>
+                    <div className="flex-1 space-y-1.5">
+                      <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                      <div className="h-2.5 bg-gray-200 rounded w-1/2"></div>
                     </div>
                   </div>
                 </div>
               ))
             ) : filteredApplicants.length === 0 ? (
-              <div className="p-8 text-center">
-                <Users className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500">No applicants found</p>
+              <div className="p-6 text-center">
+                <Users className="h-10 w-10 text-gray-300 mx-auto mb-2" />
+                <p className="text-gray-500 text-xs">No applicants found</p>
               </div>
             ) : (
               filteredApplicants.map((applicant) => (
                 <div
                   key={applicant.applicantId}
                   onClick={() => handleApplicantSelect(applicant)}
-                  className={`p-3 rounded-lg cursor-pointer transition-all duration-200 ${
+                  className={`p-2 rounded-lg cursor-pointer transition-all duration-200 ${
                     selectedApplicant?.applicantId === applicant.applicantId
                       ? 'bg-blue-50 border border-blue-200 shadow-sm'
                       : 'hover:bg-gray-50'

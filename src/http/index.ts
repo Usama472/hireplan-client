@@ -19,6 +19,7 @@ import * as jobApi from "./job/api";
 import * as jobDraftApi from "./job-draft/api";
 import * as meetingApi from "./meeting/api";
 import * as microsoftApi from "./microsoft/api";
+import * as notificationApi from "./notification/api";
 import * as roleApi from "./role/api";
 import * as smsApi from "./sms/api";
 import * as staffApi from "./staff/api";
@@ -46,6 +47,7 @@ const API = {
   emailTemplate: emailTemplateApi,
   globalSetting: globalSettingApi,
   interview: interviewApi,
+  notification: notificationApi,
   role: roleApi,
   sms: smsApi,
   staff: staffApi,

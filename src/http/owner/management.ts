@@ -7,6 +7,7 @@ export interface Company {
   industry: string;
   companySize: string;
   status: 'active' | 'suspended' | 'inactive';
+  maxJobPostings?: number | null; // null or undefined = unlimited
   createdAt: string;
 }
 

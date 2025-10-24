@@ -7,9 +7,10 @@ interface JobsListProps {
   jobs: JobFormDataWithId[];
   onEdit?: (job: JobFormDataWithId) => void;
   onDelete?: (job: JobFormDataWithId) => void;
+  onClose?: (job: JobFormDataWithId) => void;
 }
 
-export function JobsList({ jobs, onEdit, onDelete }: JobsListProps) {
+export function JobsList({ jobs, onEdit, onDelete, onClose }: JobsListProps) {
   const navigate = useNavigate();
   const handleViewDetails = (id: string) => {
     navigate(`${ROUTES.DASHBOARD.VIEW_JOB}/${id}`);
@@ -22,6 +23,7 @@ export function JobsList({ jobs, onEdit, onDelete }: JobsListProps) {
           job={job}
           onEdit={onEdit}
           onDelete={onDelete}
+          onClose={onClose}
           onViewDetails={() => handleViewDetails(job.id)}
         />
       ))}

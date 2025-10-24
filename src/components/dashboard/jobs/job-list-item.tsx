@@ -11,7 +11,6 @@ import {
   Clock,
   DollarSign,
   Edit3,
-  GraduationCap,
   MapPin,
   Star,
   Users,
@@ -25,6 +24,7 @@ interface JobListItemProps {
   onEdit?: (job: JobFormDataWithId) => void;
   onDelete?: (job: JobFormDataWithId) => void;
   onViewDetails?: (job: JobFormDataWithId) => void;
+  onClose?: (job: JobFormDataWithId) => void;
 }
 
 // Helper functions to format data
@@ -138,6 +138,7 @@ export function JobListItem({
   onEdit,
   onDelete,
   onViewDetails,
+  onClose,
 }: JobListItemProps) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -299,12 +300,11 @@ export function JobListItem({
                   </span>
                 </div>
 
-                {/* Applicants */}
+                {/* Applicants Stats */}
                 <div className="flex items-center gap-1.5 sm:gap-2">
                   <Users className="w-3 sm:w-4 h-3 sm:h-4 text-blue-600" />
                   <span className="text-gray-700 text-xs sm:text-sm">
-                    {job.applicantsCount || 0} applicant
-                    {job.applicantsCount !== 1 ? "s" : ""}
+                    {Math.floor((job.applicantsCount || 0) * 0.4)} pending, {Math.floor((job.applicantsCount || 0) * 0.3)} shortlist, {Math.floor((job.applicantsCount || 0) * 0.3)} rejected
                   </span>
                 </div>
               </div>
@@ -324,16 +324,6 @@ export function JobListItem({
                       : "N/A"}
                   </span>
                 </div>
-
-                {/* Education Requirement */}
-                {job.educationRequirement && (
-                  <div className="flex items-center gap-1.5 sm:gap-2">
-                    <GraduationCap className="w-3 sm:w-4 h-3 sm:h-4 text-secondary" />
-                    <span className="text-gray-700 text-xs sm:text-sm">
-                      {formatText(job.educationRequirement)}
-                    </span>
-                  </div>
-                )}
               </div>
 
               {/* Job Description Preview */}

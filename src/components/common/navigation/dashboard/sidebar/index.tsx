@@ -164,7 +164,7 @@ export const DashboardSidebar = ({
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link
-                to="/"
+                to={ROUTES.DASHBOARD.MAIN}
                 className="hover:bg-gray-50 rounded-xl p-3 transition-all duration-300 group relative z-10"
               >
                 <div className="flex items-center gap-4">

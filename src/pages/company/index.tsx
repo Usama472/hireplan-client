@@ -1,17 +1,9 @@
 import CompanyJobCard from "@/components/company/company-job-card";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import API from "@/http";
 import type { JobFormDataWithId } from "@/interfaces";
-import { Building, MapPin, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Building, ChevronLeft, ChevronRight } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 
@@ -155,7 +147,7 @@ const CompanyPage: React.FC = () => {
   const [jobs, setJobs] = useState<JobFormDataWithId[]>([]);
 
   const [selectedLocation, setSelectedLocation] = useState<string>("all");
-  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [selectedJobTitle, setSelectedJobTitle] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const jobsPerPage = 6;
 
@@ -171,33 +163,19 @@ const CompanyPage: React.FC = () => {
     return [...new Set(locations)].sort();
   }, [jobs]);
 
-  // Filter jobs based on search query and selected location
+  // Get unique job titles
+  const uniqueJobTitles = useMemo(() => {
+    const titles = jobs.map((job) => job.jobBoardTitle);
+    return [...new Set(titles)].sort();
+  }, [jobs]);
+
+  // Filter jobs based on title and location
   const filteredJobs = useMemo(() => {
     let filtered = jobs;
 
-    // Filter by search query
-    if (searchQuery.trim()) {
-      filtered = filtered.filter((job) => {
-        const searchTerm = searchQuery.toLowerCase();
-        return (
-          job.jobBoardTitle.toLowerCase().includes(searchTerm) ||
-          job.jobDescription.toLowerCase().includes(searchTerm) ||
-          job.employmentType?.toLowerCase().includes(searchTerm) ||
-          job.workplaceType?.toLowerCase().includes(searchTerm) ||
-          (job.requiredQualifications && 
-            job.requiredQualifications.some(qual => 
-              qual.text.toLowerCase().includes(searchTerm)
-            )) ||
-          (job.preferredQualifications && 
-            job.preferredQualifications.some(qual => 
-              qual.text.toLowerCase().includes(searchTerm)
-            )) ||
-          (job.jobRequirements && 
-            job.jobRequirements.some(req => 
-              req.toLowerCase().includes(searchTerm)
-            ))
-        );
-      });
+    // Filter by job title
+    if (selectedJobTitle !== "all") {
+      filtered = filtered.filter((job) => job.jobBoardTitle === selectedJobTitle);
     }
 
     // Filter by location
@@ -212,7 +190,7 @@ const CompanyPage: React.FC = () => {
     }
 
     return filtered;
-  }, [jobs, selectedLocation, searchQuery]);
+  }, [jobs, selectedLocation, selectedJobTitle]);
 
   // Pagination logic
   const totalPages = Math.ceil(filteredJobs.length / jobsPerPage);
@@ -225,7 +203,7 @@ const CompanyPage: React.FC = () => {
   // Reset to first page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, selectedLocation]);
+  }, [selectedJobTitle, selectedLocation]);
 
 
   useEffect(() => {
@@ -378,150 +356,70 @@ const CompanyPage: React.FC = () => {
           />
         )}
         <div className="container mx-auto px-4 py-6">
-          {/* Search and Filters */}
           {jobs.length > 0 && (
             <div className="mb-8">
-              {/* Header Section */}
-              <div className="mb-8">
-                <div className="text-center">
-                  <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                    Open Positions
-                  </h2>
-                  <p className="text-lg text-gray-600">
-                    {searchQuery.trim() || selectedLocation !== "all"
-                      ? `${filteredJobs.length} jobs found`
-                      : `${jobs.length} total jobs available`}
-                  </p>
-                </div>
+              {/* Header */}
+              <div className="mb-6 text-center">
+                <h2 className="text-3xl font-bold text-gray-900 mb-2">Open Positions</h2>
+                <p className="text-lg text-gray-600">
+                  {selectedJobTitle !== "all" || selectedLocation !== "all"
+                    ? `${filteredJobs.length} jobs found`
+                    : `${jobs.length} total jobs available`}
+                </p>
               </div>
 
-              {/* Enhanced Search and Filter Section */}
-              <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 mb-8">
-                <div className="flex flex-col lg:flex-row gap-4">
-                  {/* Search Bar */}
-                  <div className="flex-1">
-                    <label className="block text-sm font-semibold text-gray-700 mb-3">
-                      Search Jobs
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <Search className="h-5 w-5 text-gray-400" />
-                      </div>
-                      <Input
-                        type="text"
-                        placeholder="Search by title, description, skills, or requirements..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-12 h-14 text-base border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-gray-50 focus:bg-white"
-                      />
-                      {searchQuery && (
-                        <button
-                          onClick={() => setSearchQuery("")}
-                          className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600"
-                        >
-                          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      )}
-                    </div>
-                  </div>
+              {/* Filters */}
+              <div className="bg-white rounded-lg shadow border border-gray-200 p-6 mb-8">
+                <div className="flex flex-col sm:flex-row gap-4 mb-4">
+                  <select
+                    value={selectedJobTitle}
+                    onChange={(e) => setSelectedJobTitle(e.target.value)}
+                    className="flex-1 h-14 px-4 text-xl font-bold text-gray-900 bg-white border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                  >
+                    <option value="all">All Job Titles ({jobs.length})</option>
+                    {uniqueJobTitles.map((title) => {
+                      const count = jobs.filter((job) => job.jobBoardTitle === title).length;
+                      return <option key={title} value={title}>{title} ({count})</option>;
+                    })}
+                  </select>
 
-                  {/* Location Filter */}
-                  <div className="lg:w-80">
-                    <label className="block text-sm font-semibold text-gray-700 mb-3">
-                      Filter by Location
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <MapPin className="h-5 w-5 text-gray-400" />
-                      </div>
-                      <Select
-                        value={selectedLocation}
-                        onValueChange={setSelectedLocation}
-                      >
-                        <SelectTrigger className="pl-12 h-14 text-base border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-gray-50 focus:bg-white">
-                          <SelectValue placeholder="All locations" />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-xl border-2 border-gray-200 shadow-xl">
-                          <SelectItem value="all" className="text-base py-3 px-4 rounded-lg">
-                            <div className="flex items-center justify-between w-full">
-                              <span>All locations</span>
-                              <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full ml-2">
-                                {jobs.length}
-                              </span>
-                            </div>
-                          </SelectItem>
-                          {uniqueLocations.map((location) => {
-                            const jobCount = jobs.filter(
-                              (job) =>
-                                job.jobLocation &&
-                                `${job.jobLocation.city}, ${job.jobLocation.state}` ===
-                                  location
-                            ).length;
-                            return (
-                              <SelectItem key={location} value={location} className="text-base py-3 px-4 rounded-lg">
-                                <div className="flex items-center justify-between w-full">
-                                  <span>{location}</span>
-                                  <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full ml-2">
-                                    {jobCount}
-                                  </span>
-                                </div>
-                              </SelectItem>
-                            );
-                          })}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
+                  <select
+                    value={selectedLocation}
+                    onChange={(e) => setSelectedLocation(e.target.value)}
+                    className="sm:w-72 h-14 px-4 text-xl font-bold text-gray-900 bg-white border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                  >
+                    <option value="all">All Locations ({jobs.length})</option>
+                    {uniqueLocations.map((location) => {
+                      const count = jobs.filter(
+                        (job) => job.jobLocation && `${job.jobLocation.city}, ${job.jobLocation.state}` === location
+                      ).length;
+                      return <option key={location} value={location}>{location} ({count})</option>;
+                    })}
+                  </select>
                 </div>
 
-                {/* Active Filters Display */}
-                {(searchQuery.trim() || selectedLocation !== "all") && (
-                  <div className="mt-6 pt-6 border-t border-gray-200">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-sm font-medium text-gray-700">Active filters:</span>
-                      
-                      {searchQuery.trim() && (
-                        <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1.5 rounded-full text-sm font-medium">
-                          <Search className="h-3 w-3" />
-                          <span>"{searchQuery}"</span>
-                          <button
-                            onClick={() => setSearchQuery("")}
-                            className="hover:bg-blue-200 rounded-full p-0.5 transition-colors"
-                          >
-                            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          </button>
-                        </div>
-                      )}
-                      
-                      {selectedLocation !== "all" && (
-                        <div className="inline-flex items-center gap-2 bg-green-100 text-green-800 px-3 py-1.5 rounded-full text-sm font-medium">
-                          <MapPin className="h-3 w-3" />
-                          <span>{selectedLocation}</span>
-                          <button
-                            onClick={() => setSelectedLocation("all")}
-                            className="hover:bg-green-200 rounded-full p-0.5 transition-colors"
-                          >
-                            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          </button>
-                        </div>
-                      )}
-                      
-                      <button
-                        onClick={() => {
-                          setSearchQuery("");
-                          setSelectedLocation("all");
-                        }}
-                        className="text-sm text-gray-500 hover:text-gray-700 underline ml-2"
-                      >
-                        Clear all
-                      </button>
-                    </div>
+                {/* Active Filters */}
+                {(selectedJobTitle !== "all" || selectedLocation !== "all") && (
+                  <div className="pt-4 border-t border-gray-200 flex flex-wrap items-center gap-3">
+                    <span className="text-lg font-bold text-gray-900">Viewing:</span>
+                    {selectedJobTitle !== "all" && (
+                      <span className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 h-10 rounded-lg text-lg font-bold">
+                        {selectedJobTitle}
+                        <button onClick={() => setSelectedJobTitle("all")} className="hover:bg-blue-700 rounded-md p-1 text-2xl leading-none font-bold">×</button>
+                      </span>
+                    )}
+                    {selectedLocation !== "all" && (
+                      <span className="inline-flex items-center gap-2 bg-green-600 text-white px-4 h-10 rounded-lg text-lg font-bold">
+                        {selectedLocation}
+                        <button onClick={() => setSelectedLocation("all")} className="hover:bg-green-700 rounded-md p-1 text-2xl leading-none font-bold">×</button>
+                      </span>
+                    )}
+                    <button
+                      onClick={() => { setSelectedJobTitle("all"); setSelectedLocation("all"); }}
+                      className="text-lg text-blue-600 hover:text-blue-700 underline font-bold"
+                    >
+                      Clear All
+                    </button>
                   </div>
                 )}
               </div>
@@ -534,45 +432,18 @@ const CompanyPage: React.FC = () => {
               paginatedJobs.map((job) => (
                 <CompanyJobCard key={job.id} job={job} />
               ))
-            ) : filteredJobs.length === 0 && (searchQuery.trim() || selectedLocation !== "all") ? (
-              <div className="col-span-full">
-                <Card className="border-2 border-dashed border-gray-300 bg-gray-50">
-                  <div className="text-center py-12 px-6">
-                    <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Search className="h-6 w-6 text-gray-400" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      No jobs found
-                    </h3>
-                    <p className="text-gray-600 mb-4 max-w-sm mx-auto text-sm">
-                      {searchQuery.trim() 
-                        ? `No jobs match "${searchQuery}"`
-                        : `No jobs found in ${selectedLocation}`}
-                      . Try adjusting your search or filters.
-                    </p>
-                    <div className="flex gap-2 justify-center">
-                      {searchQuery.trim() && (
-                        <Button
-                          onClick={() => setSearchQuery("")}
-                          variant="outline"
-                          size="sm"
-                        >
-                          Clear Search
-                        </Button>
-                      )}
-                      {selectedLocation !== "all" && (
-                        <Button
-                          onClick={() => setSelectedLocation("all")}
-                          variant="outline"
-                          size="sm"
-                        >
-                          <MapPin className="h-4 w-4 mr-2" />
-                          View All Jobs
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </Card>
+            ) : filteredJobs.length === 0 && (selectedJobTitle !== "all" || selectedLocation !== "all") ? (
+              <div className="col-span-full text-center py-12">
+                <p className="text-gray-600 mb-4">No jobs match your filters.</p>
+                <Button
+                  onClick={() => {
+                    setSelectedJobTitle("all");
+                    setSelectedLocation("all");
+                  }}
+                  variant="outline"
+                >
+                  Clear Filters
+                </Button>
               </div>
             ) : jobs.length === 0 ? (
               <div className="col-span-full text-center py-12">

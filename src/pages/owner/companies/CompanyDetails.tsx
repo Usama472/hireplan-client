@@ -16,8 +16,14 @@ import {
   Calendar,
   Briefcase,
   X,
-  Loader2
+  Loader2,
+  Shield,
+  Save,
+  Edit
 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
+import axios from 'axios';
 import type { Company, User } from '@/http/owner';
 import { ownerManagementService } from '@/http/owner';
 
@@ -32,6 +38,15 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = ({ company, onClose }) => 
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const [isLoadingJobs, setIsLoadingJobs] = useState(false);
   const [activeTab, setActiveTab] = useState<'info' | 'users' | 'jobs'>('info');
+  
+  // Max Job Postings state
+  const [maxJobPostings, setMaxJobPostings] = useState<string>(
+    company.maxJobPostings !== null && company.maxJobPostings !== undefined 
+      ? company.maxJobPostings.toString() 
+      : ''
+  );
+  const [isEditingMaxJobs, setIsEditingMaxJobs] = useState(false);
+  const [isSavingMaxJobs, setIsSavingMaxJobs] = useState(false);
 
   useEffect(() => {
     if (activeTab === 'users') {
@@ -59,11 +74,43 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = ({ company, onClose }) => 
       setIsLoadingJobs(true);
       const jobsData = await ownerManagementService.getCompanyJobs(company.id);
       setJobs(jobsData);
-    } catch (error) {
-      console.error('Error fetching jobs:', error);
-      setJobs([]);
     } finally {
       setIsLoadingJobs(false);
+    }
+  };
+
+  const handleSaveMaxJobPostings = async () => {
+    try {
+      setIsSavingMaxJobs(true);
+      
+      // Convert to number or null
+      const value = maxJobPostings === '' ? null : parseInt(maxJobPostings, 10);
+      
+      if (value !== null && (isNaN(value) || value < 0)) {
+        toast.error('Please enter a valid number (0 or greater) or leave empty for unlimited');
+        return;
+      }
+      
+      // Make API call to update
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://hireplan.co/api/v1';
+      const token = localStorage.getItem('access_token');
+      
+      await axios.put(
+        `${apiUrl}/company/${company.id}/max-job-postings`,
+        { maxJobPostings: value },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      toast.success(`Job posting limit ${value === null ? 'removed (unlimited)' : `set to ${value}`}`);
+      setIsEditingMaxJobs(false);
+      
+      // Update local company data
+      company.maxJobPostings = value;
+    } catch (error: any) {
+      console.error('Error updating max job postings:', error);
+      toast.error(error?.response?.data?.message || 'Failed to update job posting limit');
+    } finally {
+      setIsSavingMaxJobs(false);
     }
   };
   return (
@@ -158,6 +205,107 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = ({ company, onClose }) => 
                     <Badge className="bg-gray-100 text-gray-800 text-sm px-3 py-1">Inactive</Badge>
                   )}
                 </div>
+              </div>
+
+              {/* Max Job Postings Section */}
+              <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center">
+                    <Shield className="w-5 h-5 mr-3 text-blue-600" />
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">Monthly Job Posting Limit</h3>
+                      <p className="text-sm text-gray-600">Control maximum job postings per month for this company</p>
+                    </div>
+                  </div>
+                  {!isEditingMaxJobs && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsEditingMaxJobs(true)}
+                      className="flex items-center"
+                    >
+                      <Edit className="w-4 h-4 mr-2" />
+                      Edit Limit
+                    </Button>
+                  )}
+                </div>
+
+                {isEditingMaxJobs ? (
+                  <div className="flex items-center space-x-3">
+                    <div className="flex-1">
+                      <Input
+                        type="number"
+                        min="0"
+                        placeholder="Leave empty for unlimited"
+                        value={maxJobPostings}
+                        onChange={(e) => setMaxJobPostings(e.target.value)}
+                        className="h-10"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Set monthly limit (resets on 1st of each month) or leave empty for unlimited
+                      </p>
+                    </div>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={handleSaveMaxJobPostings}
+                      disabled={isSavingMaxJobs}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      {isSavingMaxJobs ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="w-4 h-4 mr-2" />
+                          Save
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setIsEditingMaxJobs(false);
+                        setMaxJobPostings(
+                          company.maxJobPostings !== null && company.maxJobPostings !== undefined
+                            ? company.maxJobPostings.toString()
+                            : ''
+                        );
+                      }}
+                      disabled={isSavingMaxJobs}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200">
+                    <div>
+                      <p className="text-sm font-medium text-gray-700">Current Limit:</p>
+                      <p className="text-2xl font-bold text-blue-600">
+                        {company.maxJobPostings !== null && company.maxJobPostings !== undefined
+                          ? company.maxJobPostings
+                          : '∞'}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {company.maxJobPostings !== null && company.maxJobPostings !== undefined
+                          ? `${company.maxJobPostings} job posting${company.maxJobPostings !== 1 ? 's' : ''} per month`
+                          : 'Unlimited job postings'}
+                      </p>
+                    </div>
+                    {jobs.length > 0 && (
+                      <div className="text-right">
+                        <p className="text-sm font-medium text-gray-700">Total Jobs:</p>
+                        <p className="text-xl font-semibold text-gray-900">{jobs.length}</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          All time
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           )}

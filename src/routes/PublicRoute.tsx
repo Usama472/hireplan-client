@@ -1,7 +1,5 @@
-import { LoadingScreen } from "@/components/common/LoadingScreen";
 import { Footer } from "@/components/common/navigation/main/footer";
 import { Header } from "@/components/common/navigation/main/header";
-import useAuthSessionContext from "@/lib/context/AuthSessionContext";
 import { ScrollToTop } from "@/lib/hooks/ScrollToTop";
 import { type FC } from "react";
 import { useLocation } from "react-router-dom";
@@ -12,24 +10,13 @@ export type PublicRouteProps = {
 
 const PublicRoute: FC<PublicRouteProps> = ({ children }) => {
   const location = useLocation();
-  const { status } = useAuthSessionContext();
   const path = location.pathname;
 
-  const hideLayoutFor = ["/signup"];
-  
-  // Skip loading for landing page and other critical public pages
-  const skipLoadingFor = ["/", "/contact", "/privacy", "/terms", "/company", "/apply", "/interview", "/applicant"];
-  const shouldSkipLoading = skipLoadingFor.some(route => 
-    path === route || path.startsWith(route + '/')
-  );
+  // No loading screen - just render immediately
+  // AuthRedirection will handle any necessary redirects
 
-  // Show loading for auth-dependent public pages
-  if (status === 'loading' && !shouldSkipLoading) {
-    return <LoadingScreen message="Loading..." />;
-  }
-
-  // Hide layout for specific routes and all company routes
-  const shouldHideLayout = hideLayoutFor.includes(path) || path.startsWith("/company/") || path.startsWith("/applicant/") || path.startsWith("/owner/");
+  // Hide layout only for company, applicant, and owner routes
+  const shouldHideLayout = path.startsWith("/company/") || path.startsWith("/applicant/") || path.startsWith("/owner/");
 
   return shouldHideLayout ? (
     <>

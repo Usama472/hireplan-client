@@ -2,10 +2,10 @@ import type React from "react";
 
 import { Button } from "@components/ui/button";
 import { Separator } from "@components/ui/separator";
-import { APP_NAME, GithubIcon, GoogleIcon, ROUTES } from "@constants/index";
+import { GithubIcon, GoogleIcon, ROUTES } from "@constants/index";
 import { cn } from "@lib/utils";
 import { useNavigate } from "react-router";
-import { Building2, Users, Zap } from "lucide-react";
+import { Users, Zap } from "lucide-react";
 
 interface AuthWrapperProps {
   children: React.ReactNode;
@@ -34,93 +34,54 @@ export const AuthLayout = ({
 }: AuthWrapperProps) => {
   const navigate = useNavigate();
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 relative">
-      {/* Logo */}
-      <div
-        className="absolute top-6 left-8 text-2xl font-bold tracking-tight cursor-pointer z-10 group"
-        onClick={() => navigate(ROUTES.HOME)}
-      >
-        <div className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent group-hover:scale-105 transition-transform duration-200">
-          {APP_NAME}
-        </div>
-      </div>
-
-      {/* Navbar Header */}
-      <div className="fixed top-0 left-0 right-0 flex items-center justify-between p-3 sm:p-4 bg-background border-b border-border shadow-md z-20">
-        <div className="flex items-center space-x-2 sm:space-x-4">
-          <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-blue-600 rounded-xl shadow-md">
-            <Building2 className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
-          </div>
-          <div className="min-w-0">
-            <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent truncate">
-              {title}
-            </h1>
-            <p className="text-muted-foreground text-xs sm:text-sm truncate">
-              Welcome back! Please enter your details
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center space-x-3 sm:space-x-6">
-          <div className="hidden sm:flex items-center space-x-4">
-            <div className="text-right">
-              <div className="text-sm text-muted-foreground">
-                Step {currentStep} of {totalSteps}
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 relative overflow-y-auto pt-16">
+      {/* Main Content - Compact */}
+      <div className="relative z-10 flex items-start justify-center min-h-[calc(100vh-64px)] px-3 sm:px-4 py-6">
+        <div className="w-full max-w-3xl">
+          {/* Progress Bar - Above Card */}
+          {totalSteps > 1 && (
+            <div className="mb-4 bg-white border border-gray-200 rounded-xl shadow-sm p-3">
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-sm font-semibold text-gray-900">{title}</h2>
+                <div className="text-xs text-gray-600">
+                  Step {currentStep} of {totalSteps}
+                </div>
               </div>
-              <div className="text-xs text-muted-foreground/70">
-                {Math.round(progressPercentage)}% complete
+              <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${progressPercentage}%` }}
+                ></div>
               </div>
             </div>
-            <div className="w-16 h-2 bg-muted rounded-full overflow-hidden">
-              <div
-                className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${progressPercentage}%` }}
-              ></div>
-            </div>
-          </div>
-          <div className="border-l border-border pl-3 sm:pl-6">
-            <span className="text-xs sm:text-sm text-muted-foreground hidden sm:inline">
-              {footerText}{" "}
-            </span>
-            <Button
-              variant="link"
-              onClick={() => navigate(footerLinkHref)}
-              className="font-bold underline-offset-4 hover:underline px-1 h-auto p-0 text-xs sm:text-sm text-secondary"
-            >
-              {footerLinkText}
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="relative z-10 flex items-center justify-center min-h-screen px-3 sm:px-4 pt-20 sm:pt-24 pb-8">
-        <div className="w-full max-w-4xl">
-          {/* Auth Card */}
-          <div className="bg-white border-0 md:border md:border-gray-200 rounded-md shadow-sm p-6 md:p-10">
+          )}
+          
+          {/* Auth Card - More Compact */}
+          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 sm:p-7">
             {/* Form Content */}
-            <div className="space-y-8">
+            <div className="space-y-5">
               {children}
 
               {showSocial && (
-                <div className="space-y-5">
+                <div className="space-y-4">
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
                       <Separator className="w-full" />
                     </div>
                     <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-white px-4 text-gray-500 font-medium">
+                      <span className="bg-white px-3 text-gray-500 font-medium">
                         Or continue with
                       </span>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-3">
                     <Button
                       variant="outline"
                       type="button"
                       disabled={isLoading}
                       onClick={() => navigate(ROUTES.DASHBOARD.MAIN)}
-                      className="h-12 border-gray-200 hover:border-primary/30 hover:bg-primary/5 transition-all duration-200 text-sm"
+                      className="h-10 border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 text-sm"
                     >
                       <GoogleIcon />
                       <span className="ml-2">Google</span>
@@ -129,7 +90,7 @@ export const AuthLayout = ({
                       variant="outline"
                       type="button"
                       disabled={isLoading}
-                      className="h-12 border-gray-200 hover:border-primary/30 hover:bg-primary/5 transition-all duration-200 text-sm"
+                      className="h-10 border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 text-sm"
                     >
                       <GithubIcon />
                       <span className="ml-2">GitHub</span>
@@ -138,18 +99,32 @@ export const AuthLayout = ({
                 </div>
               )}
             </div>
+            
+            {/* Footer */}
+            <div className="mt-6 text-center">
+              <p className="text-sm text-gray-600">
+                {footerText}{" "}
+                <Button
+                  variant="link"
+                  onClick={() => navigate(footerLinkHref)}
+                  className="font-medium text-blue-600 hover:text-blue-700 underline-offset-4 hover:underline px-0 h-auto p-0 text-sm"
+                >
+                  {footerLinkText}
+                </Button>
+              </p>
+            </div>
           </div>
 
-          {/* Bottom Features */}
-          <div className="mt-8 text-center">
-            <div className="flex items-center justify-center space-x-6 text-xs text-gray-500">
+          {/* Bottom Features - Compact */}
+          <div className="mt-4 text-center">
+            <div className="flex items-center justify-center space-x-5 text-xs text-gray-500">
               <div className="flex items-center space-x-1">
                 <Users className="h-3 w-3" />
-                <span>Secure Login</span>
+                <span>Secure</span>
               </div>
               <div className="flex items-center space-x-1">
                 <Zap className="h-3 w-3" />
-                <span>Fast Access</span>
+                <span>Fast</span>
               </div>
             </div>
           </div>

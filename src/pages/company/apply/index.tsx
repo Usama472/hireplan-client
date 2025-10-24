@@ -101,7 +101,7 @@ const JobApplicationPage: React.FC = () => {
     resume: null,
     email: '',
     phone: '',
-    smsConsent: false,
+    smsConsent: true,
     customQuestionAnswers: [],
     customFields: [],
   })

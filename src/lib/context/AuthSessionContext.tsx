@@ -4,6 +4,7 @@ import createGenericContext from '@/lib/utils/create-generic-context'
 import { useEffect, useState, type PropsWithChildren } from 'react'
 import { AuthBroadcastChannel } from '../AuthBroadcastChannel'
 import simpleSubscriptionAPI from '@/http/subscription/simple-api'
+import { clientAccessToken } from '@/constants'
 
 interface SubscriptionStatus {
   hasActiveSubscription: boolean
@@ -28,12 +29,53 @@ const [_useAuthSessionContext, AuthSessionContextProvider] =
   createGenericContext<AuthSessionContext>()
 
 export const AuthSessionProvider = ({ children }: PropsWithChildren) => {
+  // Check for cached data on mount for instant render
+  const getInitialState = () => {
+    if (typeof window === 'undefined') {
+      return {
+        data: undefined,
+        status: 'loading' as const,
+        role: null,
+        subscription: null,
+        subscriptionLoading: false,
+      };
+    }
+    
+    const token = localStorage.getItem('clientAccessToken');
+    const cachedProfile = localStorage.getItem('cachedUserProfile');
+    
+    if (token && cachedProfile) {
+      try {
+        const profile = JSON.parse(cachedProfile);
+        return {
+          data: { user: profile, accessToken: token },
+          status: 'authenticated' as const,
+          role: profile.role,
+          subscription: null,
+          subscriptionLoading: false,
+        };
+      } catch {
+        return {
+          data: undefined,
+          status: 'loading' as const,
+          role: null,
+          subscription: null,
+          subscriptionLoading: false,
+        };
+      }
+    }
+    
+    return {
+      data: undefined,
+      status: 'loading' as const,
+      role: null,
+      subscription: null,
+      subscriptionLoading: false,
+    };
+  };
+  
   const [state, setState] = useState<AuthSessionContext>({
-    data: undefined,
-    status: 'loading',
-    role: null,
-    subscription: null,
-    subscriptionLoading: false,
+    ...getInitialState(),
     updateUser: () => {},
     refreshSubscription: async () => {},
   })
@@ -66,6 +108,29 @@ export const AuthSessionProvider = ({ children }: PropsWithChildren) => {
   }
 
   useEffect(() => {
+    // Check if we're on a public route - if so, delay auth check
+    const publicRoutes = ['/', '/contact', '/privacy', '/terms', '/faq', '/signup', '/login', '/forgot-password']
+    const isPublicRoute = publicRoutes.some(route => 
+      window.location.pathname === route || 
+      window.location.pathname.startsWith('/company/') ||
+      window.location.pathname.startsWith('/apply/') ||
+      window.location.pathname.startsWith('/interview/')
+    )
+    
+    // For public routes, skip auth check entirely - set as unauthenticated immediately
+    if (isPublicRoute && !localStorage.getItem(clientAccessToken)) {
+      setState(prev => ({
+        ...prev,
+        data: null,
+        status: 'unauthenticated',
+        role: null,
+        subscription: null,
+        subscriptionLoading: false,
+      }))
+      return
+    }
+    
+    // Start loading session in background (non-blocking) only if needed
     const setSessionState = async () => {
       try {
         const session = await getSession({ shouldBroadcast: false })
@@ -81,21 +146,33 @@ export const AuthSessionProvider = ({ children }: PropsWithChildren) => {
             subscriptionLoading: false,
           }))
         } else {
-          // Always fetch fresh subscription status after authentication
-          console.log('👤 User object:', session.user)
-          const userId = session.user.id || session.user._id
-          console.log('🆔 Using User ID:', userId)
-          setState(prev => ({ ...prev, subscriptionLoading: true }))
-          const subscriptionStatus = await fetchSubscriptionStatus(userId)
-          
+          // Set session data immediately - don't wait for subscription
           setState(prev => ({
             ...prev,
             data: session,
             status: 'authenticated',
             role: session?.user.role,
-            subscription: subscriptionStatus,
-            subscriptionLoading: false,
+            subscriptionLoading: true,
           }))
+          
+          // Fetch subscription in background (non-blocking)
+          console.log('👤 User object:', session.user)
+          const userId = session.user.id || session.user._id
+          console.log('🆔 Using User ID:', userId)
+          
+          fetchSubscriptionStatus(userId).then(subscriptionStatus => {
+            setState(prev => ({
+              ...prev,
+              subscription: subscriptionStatus,
+              subscriptionLoading: false,
+            }))
+          }).catch(() => {
+            setState(prev => ({
+              ...prev,
+              subscription: null,
+              subscriptionLoading: false,
+            }))
+          })
         }
       } catch (error) {
         console.error('Authentication error:', error)
@@ -110,6 +187,7 @@ export const AuthSessionProvider = ({ children }: PropsWithChildren) => {
       }
     }
     
+    // Don't await - let it run in background
     setSessionState()
     AuthBroadcastChannel().addEventListener('message', setSessionState)
     return () => {

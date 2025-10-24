@@ -56,7 +56,7 @@ export const usePaginationQuery = <T, R>({
       setSearchQuery(query);
       setPaginationParams((prev) => ({ ...prev, page: 1 }));
     }, 500),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
     []
   );
 

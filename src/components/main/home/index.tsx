@@ -4,16 +4,11 @@ import { CompactHowItWorks } from "./compact-how-it-works";
 import { PricingSection } from "./pricing-section";
 import { SMSOptIn } from "./sms-opt-in";
 import { MessageSquare } from "lucide-react";
-import { useEffect } from "react";
-import { useNavigate } from "react-router";
-import useAuthSessionContext from "@/lib/context/AuthSessionContext";
-import { ROUTES } from "@/constants";
 import { useSEO } from "@/lib/hooks/useSEO";
 
 export default function Home() {
-  const navigate = useNavigate();
-  const { status } = useAuthSessionContext();
-
+  // Redirect is handled by AuthRedirection component - no need to do it here
+  
   // SEO configuration for home page
   useSEO({
     title: "HirePlan - AI-Powered Recruitment Platform | Hire 10x Faster",
@@ -26,12 +21,6 @@ export default function Home() {
     canonical: "https://hireplan.co/",
   });
 
-  useEffect(() => {
-    // Redirect authenticated users to dashboard
-    if (status === 'authenticated') {
-      navigate(ROUTES.DASHBOARD.MAIN);
-    }
-  }, [status, navigate]);
   return (
     <main>
       <HeroSection />

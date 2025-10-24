@@ -101,19 +101,19 @@ export default function AvailabilityManager() {
     <div className="min-h-full bg-gray-50">
       <div className="space-y-0">
         {/* Mobile-First Enhanced Header */}
-        <div className="bg-white border-b border-gray-200 px-3 sm:px-6 py-4 relative overflow-hidden">
+        <div className="bg-white border-b border-gray-200 px-2.5 sm:px-4 py-2.5 relative overflow-hidden">
           {/* Mobile Layout */}
           <div className="block sm:hidden">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-gray-100 rounded-xl flex-shrink-0">
-                <CalendarDays className="h-5 w-5 text-gray-600" />
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 bg-gray-100 rounded-lg flex-shrink-0">
+                <CalendarDays className="h-4 w-4 text-gray-600" />
               </div>
               <div className="flex flex-col min-w-0 flex-1">
-                <h1 className="text-lg font-bold text-gray-900 truncate">
+                <h1 className="text-base font-bold text-gray-900 truncate">
                   Availability
                 </h1>
-                <div className="flex items-center gap-2">
-                  <p className="text-sm text-gray-600 truncate">
+                <div className="flex items-center gap-1.5">
+                  <p className="text-xs text-gray-600 truncate">
                     Manage booking & calendar
                   </p>
                   {totalBookedAppointments > 0 && (
@@ -132,20 +132,20 @@ export default function AvailabilityManager() {
           {/* Desktop Layout */}
           <div className="hidden sm:block relative z-10">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-gray-100 rounded-xl">
-                  <CalendarDays className="h-6 w-6 text-gray-600" />
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-gray-100 rounded-lg">
+                  <CalendarDays className="h-4.5 w-4.5 text-gray-600" />
                 </div>
                 <div className="flex flex-col">
-                  <h1 className="text-xl font-bold text-gray-900">
+                  <h1 className="text-lg font-bold text-gray-900">
                     Availability
                   </h1>
-                  <p className="text-gray-600 flex items-center gap-2">
+                  <p className="text-gray-600 flex items-center gap-1.5 text-xs">
                     Manage your booking pages and calendar availability
                     {totalBookedAppointments > 0 && (
                       <Badge
                         variant="secondary"
-                        className="bg-gray-100 text-gray-700 text-xs"
+                        className="bg-gray-100 text-gray-700 text-xs py-0 px-1.5"
                       >
                         {totalBookedAppointments} booked
                       </Badge>
@@ -158,39 +158,39 @@ export default function AvailabilityManager() {
         </div>
 
         {/* Mobile-Optimized Content */}
-        <div className="py-4 sm:py-6 px-3 sm:px-6 max-w-7xl mx-auto">
+        <div className="py-2.5 sm:py-3 px-2.5 sm:px-4 max-w-7xl mx-auto">
           <ProfileTabs
             activeTab={activeMainTab}
             onTabChange={setActiveMainTab}
             tabs={availabilityTabs}
           >
             {activeMainTab === "templates" && (
-              <div className="space-y-4 sm:space-y-6">
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 sm:p-6">
+              <div className="space-y-2.5 sm:space-y-3">
+                <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-2.5 sm:p-3">
                   <ScheduleTemplates />
                 </div>
               </div>
             )}
 
             {activeMainTab === "booked-slots" && (
-              <div className="space-y-4 sm:space-y-6">
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 sm:p-6">
+              <div className="space-y-2.5 sm:space-y-3">
+                <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-2.5 sm:p-3">
                   <BookedSlots />
                 </div>
               </div>
             )}
 
             {activeMainTab === "calendar-settings" && (
-              <div className="space-y-4 sm:space-y-6">
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 sm:p-6">
+              <div className="space-y-2.5 sm:space-y-3">
+                <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-2.5 sm:p-3">
                   <CalendarSettings />
                 </div>
               </div>
             )}
 
             {activeMainTab === "meeting-settings" && (
-              <div className="space-y-4 sm:space-y-6">
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 sm:p-6">
+              <div className="space-y-2.5 sm:space-y-3">
+                <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-2.5 sm:p-3">
                   <MeetingSettings />
                 </div>
               </div>

@@ -1,59 +1,26 @@
 'use client'
-import { LoadingScreen } from '@/components/common/LoadingScreen'
-import { type PropsWithChildren, useEffect, useState } from 'react'
-import useAuthSessionContext from '../context/AuthSessionContext'
-
-const UnauthenticatedRoutes = ['/login', '/signup']
-const AuthVerificationRoutes = ['/verification']
-const AuthenticatedRoutes = ['/dashboard'] as string[]
-const PublicRoutes = ['/', '/contact', '/privacy', '/terms', '/company', '/apply', '/interview', '/outlook/auth', '/zoom/auth', '/applicant']
+import { type PropsWithChildren } from 'react'
 
 const AuthRedirection = ({ children }: PropsWithChildren) => {
-  const [isReloading, setReloading] = useState(false)
-  
-  // Check if current route is public first
-  const isPublicRoute = PublicRoutes.some(route => 
-    window.location.pathname === route || 
-    window.location.pathname.startsWith(route + '/')
-  )
-
-  // For public routes, render immediately without any auth checks
-  if (isPublicRoute) {
-    return <>{children}</>
+  // Check auth completely synchronously - no useEffect delays
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('hireme-client-token');
+    const currentPath = window.location.pathname;
+    
+    // INSTANT redirect: If logged in and on login/signup/home, redirect NOW
+    if (token && (currentPath === '/' || currentPath === '/login' || currentPath === '/signup')) {
+      window.location.href = '/dashboard/jobs';
+      return null; // Don't render anything while redirecting
+    }
+    
+    // INSTANT redirect: If NOT logged in and on dashboard, redirect NOW
+    if (!token && currentPath.startsWith('/dashboard')) {
+      window.location.href = '/login';
+      return null; // Don't render anything while redirecting
+    }
   }
-  
-  // Only use auth context for non-public routes
-  const { status } = useAuthSessionContext()
 
-  useEffect(() => {
-    if (AuthVerificationRoutes.includes(window.location.pathname)) {
-      return
-    }
-    if (
-      status === 'unauthenticated' &&
-      AuthenticatedRoutes.some((v) => window.location.pathname.includes(v))
-    ) {
-      window.location.href = '/login'
-    }
-    if (
-      status === 'authenticated' &&
-      UnauthenticatedRoutes.some((v) => window.location.pathname.includes(v))
-    ) {
-      window.location.href = '/dashboard/jobs'
-    }
-  }, [status])
-
-  useEffect(() => {
-    setReloading(false)
-    const handleBeforeUnload = () => {
-      setReloading(true)
-      return
-    }
-    window.addEventListener('beforeunload', handleBeforeUnload)
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
-  }, [])
-
-  // Remove global loading - let individual components handle their own loading states
+  // Render page for valid routes only
   return <>{children}</>
 }
 

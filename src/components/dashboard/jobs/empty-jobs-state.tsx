@@ -1,12 +1,11 @@
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Briefcase, Plus } from "lucide-react";
 import { ROUTES } from "@/constants";
+import { Briefcase, Plus, Search, FileText, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface EmptyJobsStateProps {
-  onClearFilters: () => void;
-  hasFilters: boolean;
+  onClearFilters?: () => void;
+  hasFilters?: boolean;
 }
 
 export function EmptyJobsState({
@@ -15,59 +14,99 @@ export function EmptyJobsState({
 }: EmptyJobsStateProps) {
   const navigate = useNavigate();
 
-  return (
-    <Card className="border-0 shadow-none bg-gradient-to-br from-gray-50 to-white">
-      <CardContent className="p-12 text-center">
-        {/* Enhanced Icon with Gradient Background */}
-        <div className="relative w-20 h-20 mx-auto mb-6">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-full"></div>
-          <div className="absolute inset-2 bg-white rounded-full shadow-sm flex items-center justify-center">
-            <Briefcase className="w-8 h-8 text-primary" />
-          </div>
+  if (hasFilters) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 px-4">
+        <div className="p-3 bg-gray-100 rounded-xl mb-4">
+          <Search className="h-8 w-8 text-gray-400" />
         </div>
         
-        {/* Enhanced Typography */}
-        <h3 className="text-xl font-bold text-gray-900 mb-3">
-          {hasFilters ? "No jobs found" : "Ready to hire amazing talent?"}
+        <h3 className="text-lg font-bold text-gray-900 mb-1.5">
+          No jobs match your search
         </h3>
-        <p className="text-gray-600 mb-8 max-w-md mx-auto leading-relaxed">
-          {hasFilters
-            ? "Try adjusting your filters or search terms to find the jobs you're looking for"
-            : "Create your first job posting and start attracting top candidates with HirePlan's powerful tools"}
+        <p className="text-gray-600 mb-5 text-center max-w-md text-sm">
+          Try adjusting your filters or search criteria.
         </p>
         
-        {/* Enhanced Buttons */}
-        {hasFilters ? (
-          <div className="space-y-3">
-            <Button 
-              onClick={onClearFilters}
-              variant="outline"
-              className="border-primary/20 text-primary hover:bg-primary/5"
-            >
-              Clear Filters
-            </Button>
-            <p className="text-sm text-gray-500">or try a different search term</p>
+        <Button
+          onClick={onClearFilters}
+          variant="outline"
+          size="sm"
+          className="border-gray-300"
+        >
+          <Search className="w-4 h-4 mr-2" />
+          Clear filters
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col items-center justify-center py-12 px-4">
+      <div className="p-4 bg-primary rounded-xl shadow-sm mb-5">
+        <Briefcase className="h-10 w-10 text-white" />
+      </div>
+      
+      <h3 className="text-xl font-bold text-gray-900 mb-2">
+        No jobs posted yet
+      </h3>
+      <p className="text-gray-600 mb-6 text-center max-w-md text-sm">
+        Create your first job posting and start attracting talented candidates.
+      </p>
+      
+      <div className="flex flex-col sm:flex-row gap-2.5">
+        <Button
+          onClick={() => navigate(ROUTES.DASHBOARD.CREATE_JOB)}
+          className="bg-primary hover:bg-primary/90"
+          size="sm"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Create your first job
+        </Button>
+        
+        <Button
+          onClick={() => navigate(ROUTES.DASHBOARD.JOB_TEMPLATES)}
+          variant="outline"
+          size="sm"
+          className="border-gray-300"
+        >
+          <FileText className="w-4 h-4 mr-2" />
+          Browse templates
+        </Button>
+      </div>
+      
+      {/* Compact Feature highlights */}
+      <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl">
+        <div className="text-center p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all duration-200">
+          <div className="w-8 h-8 bg-blue-50 rounded-md flex items-center justify-center mx-auto mb-2">
+            <Briefcase className="w-4 h-4 text-blue-600" />
           </div>
-        ) : (
-          <div className="space-y-4">
-            <Button
-              onClick={() => navigate(ROUTES.DASHBOARD.CREATE_JOB)}
-              variant="secondary"
-              className="text-white shadow-md hover:shadow-lg transition-all duration-200"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Create Your First Job
-            </Button>
-            <div className="flex items-center justify-center gap-4 text-sm text-gray-500">
-              <span>✨ AI-powered matching</span>
-              <span>•</span>
-              <span>📊 Advanced analytics</span>
-              <span>•</span>
-              <span>🚀 Quick setup</span>
-            </div>
+          <h4 className="font-semibold text-gray-900 mb-1 text-xs">Quick Setup</h4>
+          <p className="text-xs text-gray-600">
+            Professional postings in minutes
+          </p>
+        </div>
+        
+        <div className="text-center p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all duration-200">
+          <div className="w-8 h-8 bg-purple-50 rounded-md flex items-center justify-center mx-auto mb-2">
+            <Zap className="w-4 h-4 text-purple-600" />
           </div>
-        )}
-      </CardContent>
-    </Card>
+          <h4 className="font-semibold text-gray-900 mb-1 text-xs">AI-Powered</h4>
+          <p className="text-xs text-gray-600">
+            Smart matching & automation
+          </p>
+        </div>
+        
+        <div className="text-center p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all duration-200">
+          <div className="w-8 h-8 bg-emerald-50 rounded-md flex items-center justify-center mx-auto mb-2">
+            <Search className="w-4 h-4 text-emerald-600" />
+          </div>
+          <h4 className="font-semibold text-gray-900 mb-1 text-xs">Wide Reach</h4>
+          <p className="text-xs text-gray-600">
+            Maximum candidate visibility
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }

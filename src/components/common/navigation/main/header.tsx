@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { APP_NAME, ROUTES } from "@/constants";
-import useAuthSessionContext from "@/lib/context/AuthSessionContext";
+import { APP_NAME, ROUTES, clientAccessToken } from "@/constants";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router";
@@ -8,7 +7,8 @@ import { useNavigate, Link } from "react-router";
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
-  const { status } = useAuthSessionContext();
+  // Check auth directly from localStorage to avoid loading full auth context
+  const isAuthenticated = typeof window !== 'undefined' && localStorage.getItem(clientAccessToken);
 
   const navigation = [
     { name: "Features", href: "#features" },
@@ -51,11 +51,11 @@ export function Header() {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center min-w-0">
             <Link
-              to="/"
+              to={isAuthenticated ? ROUTES.DASHBOARD.MAIN : "/"}
               className="flex items-center space-x-2 min-w-0 hover:opacity-80 transition-opacity"
             >
               <img src="../../../../../public/logo.png" className="w-8 h-8 flex-shrink-0" />
-              <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent truncate">
+              <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent truncate">
                 {APP_NAME}
               </span>
             </Link>
@@ -89,7 +89,7 @@ export function Header() {
           </nav>
 
           <div className="hidden md:flex items-center space-x-2 lg:space-x-3">
-            {status === "authenticated" ? (
+            {isAuthenticated ? (
               <>
                 <Button
                   variant="secondary"
@@ -163,7 +163,7 @@ export function Header() {
                 );
               })}
               <div className="pt-4 space-y-2 border-t border-gray-100 mt-4">
-                {status === "authenticated" ? (
+                {isAuthenticated ? (
                   <Button
                     variant="secondary"
                     asChild

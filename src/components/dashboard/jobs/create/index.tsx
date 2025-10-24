@@ -724,42 +724,42 @@ export default function CreateJob() {
   };
 
   return (
-    <main className="pb-16 min-h-full">
+    <main className="pb-8 min-h-full">
       {/* Enhanced Header - Professional Mobile Design */}
-      <div className="bg-white border-b border-gray-100 px-4 sm:px-6 pt-4 sm:pt-6 relative overflow-hidden">
+      <div className="bg-white border-b border-gray-100 px-3 sm:px-4 pt-2 sm:pt-3 relative overflow-hidden">
         <div className="relative z-10">
           {/* Mobile Header - Professional Design */}
-          <div className="block sm:hidden mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="p-3 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl border border-primary/10">
-                  <FileText className="h-5 w-5 text-primary" />
+          <div className="block sm:hidden mb-3">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg border border-primary/10">
+                  <FileText className="h-4 w-4 text-primary" />
                 </div>
                 <div>
-                  <h1 className="text-lg font-bold text-gray-900 leading-tight">
+                  <h1 className="text-base font-bold text-gray-900 leading-tight">
                     Create Job
                   </h1>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-xs text-gray-600">
                     Step {currentStep} of {totalSteps}
                   </p>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-xl font-bold text-gray-900">
+                <div className="text-lg font-bold text-gray-900">
                   {Math.round(((currentStep - 1) / (totalSteps - 1)) * 100)}%
                 </div>
-                <p className="text-sm text-gray-600 font-medium">Complete</p>
+                <p className="text-xs text-gray-600 font-medium">Complete</p>
               </div>
             </div>
 
             {/* Mobile Action Buttons - Professional Touch Targets */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-1 px-1">
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 -mx-1 px-1">
               <Button
                 variant="outline"
                 onClick={() => setShowSaveTemplateDialog(true)}
-                className="bg-white hover:bg-gray-50 border-gray-200 text-gray-700 hover:text-gray-900 rounded-xl h-11 px-3 text-sm font-medium whitespace-nowrap flex-shrink-0 shadow-none"
+                className="bg-white hover:bg-gray-50 border-gray-200 text-gray-700 hover:text-gray-900 rounded-lg h-8 px-2.5 text-xs font-medium whitespace-nowrap flex-shrink-0 shadow-none"
               >
-                <FileText className="h-4 w-4 mr-1.5" />
+                <FileText className="h-3.5 w-3.5 mr-1" />
                 <span className="hidden sm:inline">Save Template</span>
                 <span className="sm:hidden">Save</span>
               </Button>
@@ -770,17 +770,17 @@ export default function CreateJob() {
                     state: { fromJobCreation: true },
                   })
                 }
-                className="bg-white hover:bg-gray-50 border-gray-200 text-gray-700 hover:text-gray-900 rounded-xl h-11 px-3 text-sm font-medium whitespace-nowrap flex-shrink-0 shadow-none"
+                className="bg-white hover:bg-gray-50 border-gray-200 text-gray-700 hover:text-gray-900 rounded-lg h-8 px-2.5 text-xs font-medium whitespace-nowrap flex-shrink-0 shadow-none"
               >
-                <Layers className="h-4 w-4 mr-1.5" />
+                <Layers className="h-3.5 w-3.5 mr-1" />
                 Templates
               </Button>
               <Button
                 variant="outline"
                 onClick={loadTestData}
-                className="bg-white hover:bg-gray-50 border-gray-200 text-gray-700 hover:text-gray-900 rounded-xl h-11 px-3 text-sm font-medium whitespace-nowrap flex-shrink-0 shadow-none"
+                className="bg-white hover:bg-gray-50 border-gray-200 text-gray-700 hover:text-gray-900 rounded-lg h-8 px-2.5 text-xs font-medium whitespace-nowrap flex-shrink-0 shadow-none"
               >
-                <Database className="h-4 w-4 mr-1.5" />
+                <Database className="h-3.5 w-3.5 mr-1" />
                 <span className="hidden sm:inline">Load Data</span>
                 <span className="sm:hidden">Load</span>
               </Button>
@@ -788,37 +788,37 @@ export default function CreateJob() {
           </div>
 
           {/* Desktop Header - Enhanced Professional Design */}
-          <div className="hidden sm:flex items-center justify-between mb-8">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl border border-primary/10">
-                <FileText className="h-6 w-6 text-primary" />
+          <div className="hidden sm:flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg border border-primary/10">
+                <FileText className="h-5 w-5 text-primary" />
               </div>
               <div className="flex flex-col">
-                <h1 className="text-2xl font-bold text-gray-900 leading-tight">
+                <h1 className="text-xl font-bold text-gray-900 leading-tight">
                   Create New Job
                 </h1>
-                <div className="text-gray-600 flex items-center gap-3 mt-1">
+                <div className="text-sm text-gray-600 flex items-center gap-2 mt-0.5">
                   <span>
                     Set up your job posting with detailed requirements
                   </span>
                   <Badge
                     variant="secondary"
-                    className="bg-primary/10 text-primary font-medium text-xs px-2 py-0.5 rounded-full border border-primary/20"
+                    className="bg-primary/10 text-primary font-medium text-xs px-1.5 py-0 rounded-full border border-primary/20"
                   >
                     Step {currentStep} of {totalSteps}
                   </Badge>
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               {/* Template Action Buttons */}
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
                   onClick={() => setShowSaveTemplateDialog(true)}
-                  className="bg-white hover:bg-gray-50 border-gray-200 text-gray-700 hover:text-gray-900 rounded-xl h-10 px-6 font-medium transition-all duration-200 shadow-none"
+                  className="bg-white hover:bg-gray-50 border-gray-200 text-gray-700 hover:text-gray-900 rounded-lg h-8 px-3 text-xs font-medium transition-all duration-200 shadow-none"
                 >
-                  <FileText className="h-4 w-4 mr-2" />
+                  <FileText className="h-3.5 w-3.5 mr-1.5" />
                   Save as Template
                 </Button>
                 <Button
@@ -828,36 +828,36 @@ export default function CreateJob() {
                       state: { fromJobCreation: true },
                     })
                   }
-                  className="bg-white hover:bg-gray-50 border-gray-200 text-gray-700 hover:text-gray-900 rounded-xl h-10 px-6 font-medium transition-all duration-200 shadow-none"
+                  className="bg-white hover:bg-gray-50 border-gray-200 text-gray-700 hover:text-gray-900 rounded-lg h-8 px-3 text-xs font-medium transition-all duration-200 shadow-none"
                 >
-                  <Layers className="h-4 w-4 mr-2" />
+                  <Layers className="h-3.5 w-3.5 mr-1.5" />
                   {selectedTemplate ? "Change Template" : "Browse Templates"}
                 </Button>
                 <Button
                   variant="outline"
                   onClick={loadTestData}
-                  className="bg-primary/10 hover:bg-primary/20 border-primary/20 text-primary hover:text-primary rounded-xl h-10 px-6 font-medium transition-all duration-200 shadow-none"
+                  className="bg-primary/10 hover:bg-primary/20 border-primary/20 text-primary hover:text-primary rounded-lg h-8 px-3 text-xs font-medium transition-all duration-200 shadow-none"
                 >
-                  <Database className="h-4 w-4 mr-2" />
+                  <Database className="h-3.5 w-3.5 mr-1.5" />
                   Load Test Data
                 </Button>
               </div>
 
-              <div className="h-8 w-px bg-gray-200" />
+              <div className="h-6 w-px bg-gray-200" />
 
               {/* Progress Display */}
               <div className="text-right">
-                <div className="text-2xl font-bold text-gray-900">
+                <div className="text-lg font-bold text-gray-900">
                   {Math.round(((currentStep - 1) / (totalSteps - 1)) * 100)}%
                 </div>
-                <p className="text-sm text-gray-600 font-medium">Complete</p>
+                <p className="text-xs text-gray-600 font-medium">Complete</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Progress Stepper */}
-        <div className="w-full px-4 sm:px-6 mt-6 sm:mt-8">
+        <div className="w-full px-3 sm:px-4 mt-3 sm:mt-4">
           <EnhancedProgressStepper
             steps={steps}
             currentStep={currentStep}
@@ -866,7 +866,7 @@ export default function CreateJob() {
               (_, i) => i + 1
             )}
             variant="horizontal"
-            size="md"
+            size="sm"
             showProgress={true}
             clickable={true}
             onStepClick={(stepIndex) => {
@@ -881,37 +881,37 @@ export default function CreateJob() {
         </div>
       </div>
 
-      <div className="max-w-[1400px] mx-auto md:px-6 mt-6 sm:mt-8">
+      <div className="max-w-[1400px] mx-auto md:px-4 mt-3 sm:mt-4">
         {/* Template Status & Actions - Professional Mobile Design */}
-        <div className="mb-6 sm:mb-8">
+        <div className="mb-3 sm:mb-4">
           {selectedTemplate && (
-            <div className="flex items-center gap-3 bg-primary/10 border border-primary/20 rounded-xl px-4 py-3 mb-4">
-              <Sparkles className="h-5 w-5 text-primary flex-shrink-0" />
-              <span className="text-sm font-medium text-primary truncate">
+            <div className="flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-lg px-3 py-2 mb-2">
+              <Sparkles className="h-4 w-4 text-primary flex-shrink-0" />
+              <span className="text-xs font-medium text-primary truncate">
                 Using template: {selectedTemplate.name}
               </span>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate(ROUTES.DASHBOARD.JOB_TEMPLATES)}
-                className="h-8 w-8 p-0 text-primary hover:text-primary/80 hover:bg-primary/10 flex-shrink-0 rounded-lg"
+                className="h-6 w-6 p-0 text-primary hover:text-primary/80 hover:bg-primary/10 flex-shrink-0 rounded-lg"
               >
-                <RotateCcw className="h-4 w-4" />
+                <RotateCcw className="h-3.5 w-3.5" />
               </Button>
             </div>
           )}
 
           {/* Auto-save status indicator */}
           {lastSaved && (
-            <div className="text-sm text-gray-500 flex items-center gap-2 justify-center sm:justify-start bg-green-50 border border-green-200 rounded-lg px-3 py-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <div className="text-xs text-gray-500 flex items-center gap-1.5 justify-center sm:justify-start bg-green-50 border border-green-200 rounded-lg px-2.5 py-1.5">
+              <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
               <span>Auto-saved {lastSaved.toLocaleTimeString()}</span>
             </div>
           )}
         </div>
 
-        <Card className="shadow-none border-none md:border border-gray-100bg-white rounded-xl">
-          <CardContent className="px-4 md:px-8 py-6 sm:py-8">
+        <Card className="shadow-none border-none md:border border-gray-100 bg-white rounded-lg">
+          <CardContent className="px-3 md:px-5 py-4 sm:py-5">
             <FormProvider {...form}>
               <form
                 onSubmit={(e) => {
@@ -921,7 +921,7 @@ export default function CreateJob() {
                   onSubmit(formData as JobFormSchema);
                   return false;
                 }}
-                className="space-y-8"
+                className="space-y-5"
               >
                 {renderCurrentStep()}
                 <StepControls

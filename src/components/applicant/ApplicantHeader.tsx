@@ -8,7 +8,7 @@ export function ApplicantHeader() {
           <div className="flex items-center min-w-0">
             <div className="flex items-center space-x-2 min-w-0">
               <img src="/logo.png" alt="HirePlan" className="w-8 h-8 flex-shrink-0" />
-              <span className="text-lg sm:text-xl font-bold truncate text-gray-900">
+              <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent truncate">
                 {APP_NAME}
               </span>
             </div>

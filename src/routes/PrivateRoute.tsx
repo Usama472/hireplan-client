@@ -1,18 +1,12 @@
-import { LoadingScreen } from "@/components/common/LoadingScreen";
 import { DashboardSidebar } from "@/components/common/navigation/dashboard/sidebar";
-import { MobileHeader } from "@/components/common/MobileHeader";
+import { DashboardHeader } from "@/components/common/DashboardHeader";
 import type { DefaultLayoutProps } from "@/interfaces";
-import useAuthSessionContext from "@/lib/context/AuthSessionContext";
 import { ScrollToTop } from "@/lib/hooks/ScrollToTop";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 export const PrivateRoute = ({ children }: DefaultLayoutProps) => {
-  const { status } = useAuthSessionContext();
-
-  // Show loading state for private routes
-  if (status === "loading") {
-    return <LoadingScreen message="Loading dashboard..." />;
-  }
+  // Render immediately - don't wait for auth
+  // The dashboard will show skeletons while data loads
 
   // if (!subscription || subscription.subscriptionStatus === "none") {
   //   return (
@@ -43,7 +37,7 @@ export const PrivateRoute = ({ children }: DefaultLayoutProps) => {
       <ScrollToTop />
       <DashboardSidebar />
       <SidebarInset className="min-h-screen max-h-screen bg-blue-50/30 flex flex-col">
-        <MobileHeader />
+        <DashboardHeader />
         <div className="flex-1 overflow-y-auto w-full px-2 sm:px-4 lg:px-6 py-4">
           {children}
         </div>

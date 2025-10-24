@@ -12,7 +12,22 @@ import useAuthSessionContext from "@/lib/context/AuthSessionContext";
 import { usePaginationQuery } from "@/lib/hooks/usePaginateQuery";
 import usePermission from "@/lib/hooks/usePermission";
 import { errorResolver } from "@/lib/utils";
-import { Briefcase, Grid3X3, List, Plus } from "lucide-react";
+import { 
+  Briefcase, 
+  Grid3X3, 
+  List, 
+  Plus, 
+  Search, 
+  Filter,
+  TrendingUp,
+  Eye,
+  Users,
+  Target,
+  Building2,
+  ArrowUpRight,
+  AlertCircle,
+  X as CloseIcon
+} from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -23,6 +38,7 @@ import { JobsListSkeleton } from "./job-list-item-skeleton";
 import { JobsGrid } from "./jobs-grid";
 import { JobsList } from "./jobs-list";
 import { SearchBar } from "./search-bar";
+import { useNotifications } from "@/lib/hooks/use-notifications";
 
 interface JobsResponse {
   jobs: {
@@ -43,9 +59,13 @@ export default function JobsPage() {
     null
   );
   const [isDeleting, setIsDeleting] = useState(false);
+  const [locationFilter, setLocationFilter] = useState<string>("all");
   const navigate = useNavigate();
   const { data: session } = useAuthSessionContext();
   const company = session?.user?.company;
+  
+  // Get expired job notifications from the notification system
+  const { expiredJobNotifications, refetch: refetchNotifications } = useNotifications();
 
   const {
     data: jobsData,
@@ -77,10 +97,7 @@ export default function JobsPage() {
       await API.job.deleteJob(job.id);
       toast.success("Job deleted successfully");
 
-      // Refetch the jobs list to update the UI
       await refetch();
-
-      // Close the modal
       setShowDeleteModal(false);
       setJobToDelete(null);
     } catch (error) {
@@ -93,7 +110,7 @@ export default function JobsPage() {
   };
 
   const handleCloseDeleteModal = () => {
-    if (isDeleting) return; // Prevent closing while deleting
+    if (isDeleting) return;
     setShowDeleteModal(false);
     setJobToDelete(null);
   };
@@ -106,227 +123,269 @@ export default function JobsPage() {
     setSearchQuery("");
   };
 
-  // Get jobs array from pagination data
+  const handleCloseJob = async (jobId: string, notificationId?: string) => {
+    if (!jobId) return;
+
+    try {
+      await API.job.updateJob(jobId, { status: "closed" } as any);
+      
+      // Dismiss the notification if provided
+      if (notificationId) {
+        await API.notification.dismissNotification(notificationId);
+      }
+      
+      toast.success("Job closed successfully");
+      await refetch();
+      await refetchNotifications();
+    } catch (error) {
+      const errorMessage = errorResolver(error);
+      console.error("Error closing job:", error);
+      toast.error(`Failed to close job: ${errorMessage}`);
+    }
+  };
+
+  const handleDismissNotification = async (notificationId: string) => {
+    try {
+      await API.notification.dismissNotification(notificationId);
+      await refetchNotifications();
+    } catch (error) {
+      console.error("Error dismissing notification:", error);
+      toast.error("Failed to dismiss notification");
+    }
+  };
+
+  // Wrapper for job card close action (doesn't have notification context)
+  const handleJobCardClose = async (job: JobFormDataWithId) => {
+    await handleCloseJob(job.id);
+  };
+
   const jobs = jobsData || [];
-  const hasJobs = jobs.length > 0;
   const hasSearchQuery = searchQuery !== "";
 
-  // Compute location string for each job
   const jobsWithLocation = jobs.map((job) => ({
     ...job,
     location: job.jobLocation
       ? `${job.jobLocation.city}, ${job.jobLocation.state}`
-      : "Location not specified",
+      : "Remote",
   }));
 
+  // Get unique locations for filter
+  const uniqueLocations = Array.from(
+    new Set(
+      jobsWithLocation
+        .map((job) => job.location)
+        .filter((loc) => loc !== "Location not specified")
+    )
+  ).sort();
+
+  // Apply location filter
+  const filteredJobs = locationFilter === "all" 
+    ? jobsWithLocation 
+    : jobsWithLocation.filter((job) => job.location === locationFilter);
+
+  const totalApplicants = filteredJobs.reduce((total, job) => total + (job.applicantsCount || 0), 0);
+  const totalViews = filteredJobs.reduce((total, job) => total + (job.views || 0), 0);
+  const avgApplicants = filteredJobs.length > 0 ? Math.round(totalApplicants / filteredJobs.length) : 0;
+
   return (
-    <div className="min-h-full bg-gray-50/30">
-      <div className="space-y-6 sm:space-y-8">
-        {/* Enhanced Header - Professional Mobile UI */}
-        <div className="bg-white border-b border-gray-100 px-4 sm:px-6 py-4 sm:py-6 relative overflow-hidden">
-          <div className="relative z-10">
-            <div className="flex flex-col gap-4 sm:gap-6">
-              {/* Title Section - Improved Visual Hierarchy */}
-              <div className="flex items-center gap-4 min-w-0">
-                <div className="p-3 sm:p-3 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl flex-shrink-0 border border-primary/10">
-                  <Briefcase className="h-5 sm:h-5 lg:h-6 w-5 sm:w-5 lg:w-6 text-primary" />
+    <div className="min-h-full bg-gray-50/50">
+      {/* Compact Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-2.5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            {/* Title Section */}
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 bg-primary rounded-lg shadow-sm">
+                <Briefcase className="h-4 w-4 text-white" />
+              </div>
+              <div>
+                <h1 className="text-lg sm:text-xl font-bold text-gray-900">
+                  Job Postings
+                </h1>
+                <p className="text-gray-600 text-xs">
+                  Manage your active listings
+                </p>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-1.5">
+              <Button
+                onClick={async () => {
+                  let slug = (company as any)?.slug;
+                  if (!slug && (company as any)?._id) {
+                    // Fallback: fetch company slug from API
+                    try {
+                      const response = await API.company.getCompanySlug((company as any)._id);
+                      slug = response?.slug;
+                    } catch (error) {
+                      console.error('Error fetching company slug:', error);
+                    }
+                  }
+                  if (slug) {
+                    navigate(`/company/${slug}`);
+                  } else {
+                    toast.error('Company career page not available. Please contact support.');
+                  }
+                }}
+                variant="outline"
+                className="hover:bg-gray-50 border-gray-300 gap-1.5 h-8 px-2.5 text-xs"
+              >
+                <Building2 className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Career Page</span>
+              </Button>
+              {canCreateJob && (
+                <Button
+                  onClick={() => navigate(ROUTES.DASHBOARD.CREATE_JOB)}
+                  className="bg-primary hover:bg-primary/90 gap-1.5 h-8 px-2.5 text-xs"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Create Job</span>
+                  <span className="sm:hidden">New</span>
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-3 space-y-3">
+        {/* Compact Stats Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-2.5">
+          {/* Active Jobs */}
+          <div className="group bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md hover:border-gray-300 transition-all duration-300">
+              <div className="p-2.5">
+              <div className="flex items-center justify-between mb-2">
+                <div className="p-1.5 bg-blue-50 rounded-md group-hover:bg-blue-100 transition-colors">
+                  <Briefcase className="h-3.5 w-3.5 text-blue-600" />
                 </div>
-                <div className="flex flex-col min-w-0 flex-1 justify-center">
-                  <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 leading-tight mb-1">
-                    Job Postings
-                  </h1>
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm sm:text-sm text-gray-600">
-                      Manage and track your postings
-                    </span>
-                    <Badge
-                      variant="secondary"
-                      className="bg-primary/10 text-primary font-medium text-xs px-2 py-0.5 rounded-full border border-primary/20"
+                <span className="text-xs font-medium text-green-600 flex items-center gap-0.5">
+                  <TrendingUp className="w-2.5 h-2.5" />
+                </span>
+              </div>
+              <p className="text-xs font-medium text-gray-600 mb-0.5">Active Jobs</p>
+              <p className="text-xl font-bold text-gray-900">{filteredJobs.length}</p>
+            </div>
+          </div>
+
+          {/* Total Applications */}
+          <div className="group bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md hover:border-gray-300 transition-all duration-300">
+            <div className="p-2.5">
+              <div className="flex items-center justify-between mb-2">
+                <div className="p-1.5 bg-purple-50 rounded-md group-hover:bg-purple-100 transition-colors">
+                  <Users className="h-3.5 w-3.5 text-purple-600" />
+                </div>
+                <span className="text-xs font-medium text-green-600 flex items-center gap-0.5">
+                  <ArrowUpRight className="w-2.5 h-2.5" />
+                </span>
+              </div>
+              <p className="text-xs font-medium text-gray-600 mb-0.5">Applications</p>
+              <p className="text-xl font-bold text-gray-900">{totalApplicants}</p>
+            </div>
+          </div>
+
+          {/* Total Views */}
+          <div className="group bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md hover:border-gray-300 transition-all duration-300">
+            <div className="p-2.5">
+              <div className="flex items-center justify-between mb-2">
+                <div className="p-1.5 bg-emerald-50 rounded-md group-hover:bg-emerald-100 transition-colors">
+                  <Eye className="h-3.5 w-3.5 text-emerald-600" />
+                </div>
+                <span className="text-xs font-medium text-green-600 flex items-center gap-0.5">
+                  <TrendingUp className="w-2.5 h-2.5" />
+                </span>
+              </div>
+              <p className="text-xs font-medium text-gray-600 mb-0.5">Job Views</p>
+              <p className="text-xl font-bold text-gray-900">{totalViews.toLocaleString()}</p>
+            </div>
+          </div>
+
+          {/* Average Applications */}
+          <div className="group bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md hover:border-gray-300 transition-all duration-300">
+            <div className="p-2.5">
+              <div className="flex items-center justify-between mb-2">
+                <div className="p-1.5 bg-amber-50 rounded-md group-hover:bg-amber-100 transition-colors">
+                  <Target className="h-3.5 w-3.5 text-amber-600" />
+                </div>
+              </div>
+              <p className="text-xs font-medium text-gray-600 mb-0.5">Avg per Job</p>
+              <p className="text-xl font-bold text-gray-900">{avgApplicants}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Expired Jobs Notifications */}
+        {expiredJobNotifications.length > 0 && (
+          <div className="space-y-2">
+            {expiredJobNotifications.map((notification) => (
+              <div
+                key={notification._id}
+                className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-start gap-3"
+              >
+                <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <h4 className="text-sm font-semibold text-amber-900">
+                        Job Posting Expired
+                      </h4>
+                      <p className="text-sm text-amber-800 mt-0.5">
+                        <span className="font-medium">{notification.metadata?.jobTitle || 'Job'}</span> ended on{" "}
+                        {notification.metadata?.endDate && new Date(notification.metadata.endDate).toLocaleDateString("en-US", {
+                          month: "long",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                        . Would you like to close this job posting?
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => handleDismissNotification(notification._id)}
+                      className="text-amber-600 hover:text-amber-800 transition-colors p-1"
+                      aria-label="Dismiss notification"
                     >
-                      {jobs.length} active
-                    </Badge>
+                      <CloseIcon className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <div className="flex gap-2 mt-3">
+                    <Button
+                      size="sm"
+                      onClick={() => handleCloseJob(notification.relatedJobId!, notification._id)}
+                      className="bg-amber-600 hover:bg-amber-700 text-white text-xs h-7"
+                    >
+                      Close Job
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleDismissNotification(notification._id)}
+                      className="border-amber-300 text-amber-700 hover:bg-amber-100 text-xs h-7"
+                    >
+                      Dismiss
+                    </Button>
                   </div>
                 </div>
               </div>
-
-              {/* Action Buttons - Professional Touch Targets */}
-              <div className="flex items-center gap-3 w-full">
-                <Button
-                  onClick={() => navigate(`/company/${company?.slug}`)}
-                  variant="outline"
-                  className="bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 hover:border-gray-300 gap-2 px-4 sm:px-6 font-medium transition-all duration-200 text-sm flex-1 sm:flex-initial h-11 sm:h-10 rounded-md shadow-none"
-                >
-                  <span className="hidden sm:inline">Website View</span>
-                  <span className="sm:hidden">View Site</span>
-                </Button>
-                {canCreateJob && (
-                  <Button
-                    onClick={() => navigate(ROUTES.DASHBOARD.CREATE_JOB)}
-                    variant="secondary"
-                    className="text-white border-0 transition-all duration-200 gap-2 px-4 sm:px-6 font-medium flex-1 sm:flex-initial h-11 sm:h-10 rounded-md shadow-none"
-                  >
-                    <Plus className="w-4 sm:w-4 h-4 sm:h-4" />
-                    <span className="hidden sm:inline">Create Job</span>
-                    <span className="sm:hidden">Create</span>
-                  </Button>
-                )}
-              </div>
-            </div>
+            ))}
           </div>
-        </div>
+        )}
 
-        {/* Stats Cards Section - Professional Mobile Design */}
-        <div className="px-4 sm:px-6">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-6 mb-6 sm:mb-8">
-            {/* Active Jobs Card */}
-            <div className="bg-white border border-gray-200 rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6 hover:border-primary/20 transition-all duration-300">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs sm:text-sm font-medium text-gray-600 mb-0.5 sm:mb-1">
-                    Active Jobs
-                  </p>
-                  <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
-                    {jobs.length}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-0.5 sm:mt-1 hidden sm:block">
-                    Currently posted
-                  </p>
-                </div>
-                <div className="w-8 sm:w-10 lg:w-12 h-8 sm:h-10 lg:h-12 bg-green-100 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 self-end sm:self-auto">
-                  <Briefcase className="h-4 sm:h-5 lg:h-6 w-4 sm:w-5 lg:w-6 text-green-600" />
-                </div>
-              </div>
-            </div>
-
-            {/* Total Applications Card */}
-            <div className="bg-white border border-gray-200 rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6 hover:border-primary/20 transition-all duration-300">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs sm:text-sm font-medium text-gray-600 mb-0.5 sm:mb-1">
-                    Applications
-                  </p>
-                  <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
-                    {jobs.reduce(
-                      (total, job) => total + (job.applicantsCount || 0),
-                      0
-                    )}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-0.5 sm:mt-1 hidden sm:block">
-                    Across all jobs
-                  </p>
-                </div>
-                <div className="w-8 sm:w-10 lg:w-12 h-8 sm:h-10 lg:h-12 bg-blue-100 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 self-end sm:self-auto">
-                  <svg
-                    className="h-4 sm:h-5 lg:h-6 w-4 sm:w-5 lg:w-6 text-blue-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                    />
-                  </svg>
-                </div>
-              </div>
-            </div>
-
-            {/* Recent Views Card */}
-            <div className="bg-white border border-gray-200 rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6 hover:border-primary/20 transition-all duration-300">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs sm:text-sm font-medium text-gray-600 mb-0.5 sm:mb-1">
-                    Views
-                  </p>
-                  <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
-                    {jobs.reduce((total, job) => total + (job.views || 0), 0)}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-0.5 sm:mt-1 hidden sm:block">
-                    Last 30 days
-                  </p>
-                </div>
-                <div className="w-8 sm:w-10 lg:w-12 h-8 sm:h-10 lg:h-12 bg-purple-100 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 self-end sm:self-auto">
-                  <svg
-                    className="h-4 sm:h-5 lg:h-6 w-4 sm:w-5 lg:w-6 text-purple-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                    />
-                  </svg>
-                </div>
-              </div>
-            </div>
-
-            {/* Average Applications Card */}
-            <div className="bg-white border border-gray-200 rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6 hover:border-primary/20 transition-all duration-300">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs sm:text-sm font-medium text-gray-600 mb-0.5 sm:mb-1">
-                    Avg Apps
-                  </p>
-                  <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
-                    {jobs.length > 0
-                      ? Math.round(
-                          jobs.reduce(
-                            (total, job) => total + (job.applicantsCount || 0),
-                            0
-                          ) / jobs.length
-                        )
-                      : 0}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-0.5 sm:mt-1 hidden sm:block">
-                    Per job posting
-                  </p>
-                </div>
-                <div className="w-8 sm:w-10 lg:w-12 h-8 sm:h-10 lg:h-12 bg-orange-100 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 self-end sm:self-auto">
-                  <svg
-                    className="h-4 sm:h-5 lg:h-6 w-4 sm:w-5 lg:w-6 text-orange-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                    />
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="px-4 sm:px-6">
-          {/* Search and Controls Section - Professional Mobile UX */}
-          <div className="mb-6 sm:mb-8">
+        {/* Compact Search and Filters */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="p-2.5">
             <Tabs
               value={viewMode}
               onValueChange={(value) => setViewMode(value as "grid" | "list")}
             >
-              {/* Enhanced Search and View Controls */}
-              <div className="mb-6 space-y-4">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  {/* Search Bar */}
-                  <div className="flex-1 max-w-full sm:max-w-lg">
+              <div className="space-y-2.5">
+                {/* Search Bar and View Toggle */}
+                <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center justify-between">
+                  {/* Search */}
+                  <div className="flex-1 max-w-2xl">
                     <div className="relative">
+                      <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
                       <SearchBar
-                        placeholder="Search jobs by title, location..."
+                        placeholder="Search by job title, location..."
                         onSearch={handleSearch}
                         onClear={handleClearSearch}
                         searchQuery={searchQuery as string}
@@ -334,172 +393,159 @@ export default function JobsPage() {
                     </div>
                   </div>
 
-                  {/* View Mode Tabs - Professional Design */}
-                  <div className="flex items-center justify-center sm:justify-end">
-                    <div className="inline-flex bg-gray-50 border border-gray-200 rounded-xl p-1 gap-1 shadow-sm">
-                      <button
-                        onClick={() => setViewMode("grid")}
-                        className={`inline-flex items-center justify-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 min-w-[44px] h-10 ${
-                          viewMode === "grid"
-                            ? "bg-white text-gray-900 shadow-sm border border-gray-200"
-                            : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
-                        }`}
-                      >
-                        <Grid3X3 className="w-4 h-4" />
-                        <span className="hidden sm:inline ml-2">Grid</span>
-                      </button>
-                      <button
-                        onClick={() => setViewMode("list")}
-                        className={`inline-flex items-center justify-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 min-w-[44px] h-10 ${
-                          viewMode === "list"
-                            ? "bg-white text-gray-900 shadow-sm border border-gray-200"
-                            : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
-                        }`}
-                      >
-                        <List className="w-4 h-4" />
-                        <span className="hidden sm:inline ml-2">List</span>
-                      </button>
-                    </div>
+                  {/* View Toggle */}
+                  <div className="inline-flex bg-gray-100 rounded-md p-0.5">
+                    <button
+                      onClick={() => setViewMode("grid")}
+                      className={`inline-flex items-center justify-center px-2.5 py-1 rounded text-xs font-medium transition-all duration-200 ${
+                        viewMode === "grid"
+                          ? "bg-white text-gray-900 shadow-sm"
+                          : "text-gray-600 hover:text-gray-900"
+                      }`}
+                    >
+                      <Grid3X3 className="w-3 h-3 mr-1" />
+                      Grid
+                    </button>
+                    <button
+                      onClick={() => setViewMode("list")}
+                      className={`inline-flex items-center justify-center px-2.5 py-1 rounded text-xs font-medium transition-all duration-200 ${
+                        viewMode === "list"
+                          ? "bg-white text-gray-900 shadow-sm"
+                          : "text-gray-600 hover:text-gray-900"
+                      }`}
+                    >
+                      <List className="w-3 h-3 mr-1" />
+                      List
+                    </button>
                   </div>
                 </div>
 
-                {/* Additional Filters Row */}
-                <div className="flex flex-wrap gap-3 items-center justify-between">
-                  {/* Filter Options */}
-                  <div className="flex flex-wrap gap-3 items-center">
-                    <select className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
-                      <option value="">All Statuses</option>
-                      <option value="active">Active</option>
-                      <option value="draft">Draft</option>
-                      <option value="paused">Paused</option>
-                      <option value="closed">Closed</option>
-                    </select>
-                    
-                    <select className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                {/* Compact Filters */}
+                <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+                  <div className="flex flex-wrap gap-2">
+                    <Button variant="outline" size="sm" className="gap-1.5 text-xs h-8 border-gray-300">
+                      <Filter className="w-3.5 h-3.5" />
+                      All Statuses
+                    </Button>
+                    <select className="px-3 py-1.5 bg-white border border-gray-300 rounded-md text-xs text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-1 focus:ring-primary/20 focus:border-primary transition-all h-8">
                       <option value="">All Types</option>
                       <option value="full-time">Full-time</option>
                       <option value="part-time">Part-time</option>
                       <option value="contract">Contract</option>
                       <option value="internship">Internship</option>
                     </select>
-
-                    <select className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
-                      <option value="">Sort by</option>
-                      <option value="newest">Newest First</option>
-                      <option value="oldest">Oldest First</option>
-                      <option value="most-applicants">Most Applicants</option>
-                      <option value="least-applicants">Least Applicants</option>
-                      <option value="highest-salary">Highest Salary</option>
-                      <option value="lowest-salary">Lowest Salary</option>
+                    <select 
+                      value={locationFilter}
+                      onChange={(e) => setLocationFilter(e.target.value)}
+                      className="px-3 py-1.5 bg-white border border-gray-300 rounded-md text-xs text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-1 focus:ring-primary/20 focus:border-primary transition-all h-8"
+                    >
+                      <option value="all">All Locations</option>
+                      {uniqueLocations.map((location) => (
+                        <option key={location} value={location}>
+                          {location}
+                        </option>
+                      ))}
+                    </select>
+                    <select className="px-3 py-1.5 bg-white border border-gray-300 rounded-md text-xs text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-1 focus:ring-primary/20 focus:border-primary transition-all h-8">
+                      <option value="">Sort: Newest</option>
+                      <option value="oldest">Oldest</option>
+                      <option value="most-applicants">Most Apps</option>
+                      <option value="least-applicants">Least Apps</option>
                     </select>
                   </div>
 
-                  {/* Results Summary */}
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <span>{hasSearchQuery && "Filtered:"}</span>
-                    <span className="font-medium text-gray-900">{jobs.length}</span>
-                    <span>job{jobs.length !== 1 ? 's' : ''}</span>
-                    {hasSearchQuery && (
-                      <button 
-                        onClick={handleClearSearch}
-                        className="text-primary hover:text-primary/80 font-medium ml-2"
+                  {/* Results */}
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="text-xs px-2 py-0.5">
+                      {filteredJobs.length} {filteredJobs.length === 1 ? 'job' : 'jobs'}
+                    </Badge>
+                    {(hasSearchQuery || locationFilter !== "all") && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          handleClearSearch();
+                          setLocationFilter("all");
+                        }}
+                        className="text-primary hover:text-primary/80 text-xs h-7"
                       >
-                        Clear filters
-                      </button>
+                        Clear
+                      </Button>
                     )}
                   </div>
                 </div>
               </div>
 
-              <TabsContent value="grid" className="space-y-4 sm:space-y-6">
+              {/* Content */}
+              <TabsContent value="grid" className="mt-6">
                 {loading ? (
                   <JobsGridSkeleton />
-                ) : hasJobs ? (
+                ) : filteredJobs.length > 0 ? (
                   <JobsGrid
-                    jobs={jobsWithLocation}
+                    jobs={filteredJobs}
                     onEdit={handleJobEdit}
                     onDelete={handleJobDelete}
+                    onClose={handleJobCardClose}
                   />
                 ) : (
                   <EmptyJobsState
-                    onClearFilters={handleClearSearch}
-                    hasFilters={hasSearchQuery}
+                    onClearFilters={() => {
+                      handleClearSearch();
+                      setLocationFilter("all");
+                    }}
+                    hasFilters={hasSearchQuery || locationFilter !== "all"}
                   />
                 )}
               </TabsContent>
 
-              <TabsContent value="list" className="space-y-2 sm:space-y-4">
+              <TabsContent value="list" className="mt-6">
                 {loading ? (
                   <JobsListSkeleton />
-                ) : hasJobs ? (
+                ) : filteredJobs.length > 0 ? (
                   <JobsList
-                    jobs={jobsWithLocation}
+                    jobs={filteredJobs}
                     onEdit={handleJobEdit}
                     onDelete={handleJobDelete}
+                    onClose={handleJobCardClose}
                   />
                 ) : (
                   <EmptyJobsState
-                    onClearFilters={handleClearSearch}
-                    hasFilters={hasSearchQuery}
+                    onClearFilters={() => {
+                      handleClearSearch();
+                      setLocationFilter("all");
+                    }}
+                    hasFilters={hasSearchQuery || locationFilter !== "all"}
                   />
                 )}
               </TabsContent>
             </Tabs>
           </div>
-
-          {/* Enhanced Pagination with Page Info */}
-          {!loading && hasJobs && (
-            <div className="mt-8 sm:mt-10 space-y-4">
-              {/* Pagination Info */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-3 bg-white rounded-lg border border-gray-100">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <span className="flex items-center gap-1">
-                    <Briefcase className="w-4 h-4" />
-                    Showing
-                  </span>
-                  <span className="font-medium text-gray-900">
-                    {Math.min((pageParams.currentPage - 1) * pageParams.pageSize + 1, pageParams.totalRows || 0)}
-                  </span>
-                  to 
-                  <span className="font-medium text-gray-900">
-                    {Math.min(pageParams.currentPage * pageParams.pageSize, pageParams.totalRows || 0)}
-                  </span>
-                  of 
-                  <span className="font-medium text-gray-900">
-                    {pageParams.totalRows || 0}
-                  </span>
-                  jobs
-                </div>
-                
-                {/* Page size selector for larger screens */}
-                <div className="hidden sm:flex items-center gap-2 text-sm text-gray-600">
-                  <span>Jobs per page:</span>
-                  <select 
-                    value={pageParams.pageSize}
-                    onChange={(e) => {
-                      // This would need to be implemented in the pagination hook
-                      console.log('Page size changed to:', e.target.value);
-                    }}
-                    className="px-2 py-1 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                  >
-                    <option value={6}>6</option>
-                    <option value={12}>12</option>
-                    <option value={24}>24</option>
-                    <option value={36}>36</option>
-                  </select>
-                </div>
-              </div>
-              
-              {/* Pagination Controls */}
-              <div className="flex justify-center">
-                <PaginationButton {...pageParams} className="bg-white rounded-lg border border-gray-100 px-4 py-3" />
-              </div>
-            </div>
-          )}
         </div>
+
+        {/* Compact Pagination */}
+        {!loading && filteredJobs.length > 0 && (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 px-4 py-3">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="flex items-center gap-2 text-xs text-gray-600">
+                <span>Showing</span>
+                <span className="font-semibold text-gray-900">
+                  {Math.min((pageParams.currentPage - 1) * pageParams.pageSize + 1, pageParams.totalRows || 0)}
+                </span>
+                to
+                <span className="font-semibold text-gray-900">
+                  {Math.min(pageParams.currentPage * pageParams.pageSize, pageParams.totalRows || 0)}
+                </span>
+                of
+                <span className="font-semibold text-gray-900">{pageParams.totalRows || 0}</span>
+              </div>
+
+              <PaginationButton {...pageParams} />
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Modal */}
       {jobToDelete && (
         <DeleteJobModal
           job={jobToDelete}

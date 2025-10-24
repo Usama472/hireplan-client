@@ -284,33 +284,33 @@ export default function ApplicantsPage() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-3 space-y-3">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Applicants</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-xl font-bold text-gray-900">Applicants</h1>
+          <p className="text-gray-600 mt-0.5 text-xs">
             Manage and review all job applicants across your organization
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <Badge variant="outline" className="bg-blue-50 text-blue-700">
-            {totalResults} Total Applicants
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="bg-blue-50 text-blue-700 text-xs px-2 py-0.5">
+            {totalResults} Total
           </Badge>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-2.5">
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <Clock className="w-5 h-5 text-yellow-600" />
+          <CardContent className="p-2.5">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 bg-yellow-100 rounded-lg">
+                <Clock className="w-3.5 h-3.5 text-yellow-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Pending Review</p>
-                <p className="text-2xl font-bold text-yellow-600">
+                <p className="text-xs text-gray-600">Pending Review</p>
+                <p className="text-xl font-bold text-yellow-600">
                   {applicants.filter(a => a.status === "pending").length}
                 </p>
               </div>
@@ -319,14 +319,14 @@ export default function ApplicantsPage() {
         </Card>
         
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <CheckCircle className="w-5 h-5 text-green-600" />
+          <CardContent className="p-2.5">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 bg-green-100 rounded-lg">
+                <CheckCircle className="w-3.5 h-3.5 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Shortlisted</p>
-                <p className="text-2xl font-bold text-green-600">
+                <p className="text-xs text-gray-600">Shortlisted</p>
+                <p className="text-xl font-bold text-green-600">
                   {applicants.filter(a => a.status === "shortlisted").length}
                 </p>
               </div>
@@ -335,14 +335,14 @@ export default function ApplicantsPage() {
         </Card>
         
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Brain className="w-5 h-5 text-blue-600" />
+          <CardContent className="p-2.5">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 bg-blue-100 rounded-lg">
+                <Brain className="w-3.5 h-3.5 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">AI Evaluated</p>
-                <p className="text-2xl font-bold text-blue-600">
+                <p className="text-xs text-gray-600">AI Evaluated</p>
+                <p className="text-xl font-bold text-blue-600">
                   {applicants.filter(a => a.aiEvaluation?.totalScore).length}
                 </p>
               </div>
@@ -351,14 +351,14 @@ export default function ApplicantsPage() {
         </Card>
         
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <Calendar className="w-5 h-5 text-purple-600" />
+          <CardContent className="p-2.5">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 bg-purple-100 rounded-lg">
+                <Calendar className="w-3.5 h-3.5 text-purple-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Interviews Scheduled</p>
-                <p className="text-2xl font-bold text-purple-600">
+                <p className="text-xs text-gray-600">Interviews Scheduled</p>
+                <p className="text-xl font-bold text-purple-600">
                   {applicants.filter(a => a.interviewScheduled).length}
                 </p>
               </div>
@@ -369,28 +369,28 @@ export default function ApplicantsPage() {
 
       {/* Filters and Search */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="w-5 h-5" />
+        <CardHeader className="p-2.5">
+          <CardTitle className="flex items-center gap-1.5 text-base">
+            <Filter className="w-4 h-4" />
             Filters & Search
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <CardContent className="space-y-2.5 p-2.5 pt-0">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-2">
             {/* Search */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
               <Input
-                placeholder="Search by name, email, or location..."
+                placeholder="Search by name, email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-9 h-8 text-xs"
               />
             </div>
 
             {/* Status Filter */}
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger>
+              <SelectTrigger className="h-8 text-xs">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
@@ -404,7 +404,7 @@ export default function ApplicantsPage() {
 
             {/* Job Filter */}
             <Select value={jobFilter} onValueChange={setJobFilter}>
-              <SelectTrigger>
+              <SelectTrigger className="h-8 text-xs">
                 <SelectValue placeholder="Filter by job" />
               </SelectTrigger>
               <SelectContent>
@@ -419,7 +419,7 @@ export default function ApplicantsPage() {
 
             {/* AI Score Filter */}
             <Select value={aiScoreFilter} onValueChange={setAiScoreFilter}>
-              <SelectTrigger>
+              <SelectTrigger className="h-8 text-xs">
                 <SelectValue placeholder="Filter by AI score" />
               </SelectTrigger>
               <SelectContent>
@@ -434,7 +434,7 @@ export default function ApplicantsPage() {
 
             {/* Location Filter */}
             <Select value={locationFilter} onValueChange={setLocationFilter}>
-              <SelectTrigger>
+              <SelectTrigger className="h-8 text-xs">
                 <SelectValue placeholder="Filter by location" />
               </SelectTrigger>
               <SelectContent>
@@ -450,23 +450,23 @@ export default function ApplicantsPage() {
 
           {/* Active Filters & Actions */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-1.5 flex-wrap">
               {(searchTerm || (statusFilter && statusFilter !== "all") || (jobFilter && jobFilter !== "all") || (aiScoreFilter && aiScoreFilter !== "all") || (locationFilter && locationFilter !== "all")) && (
                 <>
-                  <span className="text-sm text-gray-500">Active filters:</span>
+                  <span className="text-xs text-gray-500">Active filters:</span>
                   {searchTerm && (
-                    <Badge variant="secondary" className="flex items-center gap-1">
+                    <Badge variant="secondary" className="flex items-center gap-1 text-xs py-0 px-1.5">
                       Search: "{searchTerm}"
                       <button onClick={() => setSearchTerm("")}>
-                        <X className="h-3 w-3" />
+                        <X className="h-2.5 w-2.5" />
                       </button>
                     </Badge>
                   )}
                   {statusFilter && statusFilter !== "all" && (
-                    <Badge variant="secondary" className="flex items-center gap-1">
+                    <Badge variant="secondary" className="flex items-center gap-1 text-xs py-0 px-1.5">
                       Status: {statusFilter}
                       <button onClick={() => setStatusFilter("all")}>
-                        <X className="h-3 w-3" />
+                        <X className="h-2.5 w-2.5" />
                       </button>
                     </Badge>
                   )}
