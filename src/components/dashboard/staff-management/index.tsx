@@ -507,6 +507,17 @@ export default function StaffManagement() {
                         toast.error('Failed to delete staff member');
                       }
                     }}
+                    onResendInvite={async (staffId: string, staffName: string) => {
+                      try {
+                        // Generate new password
+                        const newPassword = Math.random().toString(36).slice(-12) + 'Aa1!';
+                        await API.staff.resendInvite(staffId, newPassword);
+                        toast.success(`Invitation email resent to ${staffName}`);
+                      } catch (error) {
+                        console.error('Failed to resend invite:', error);
+                        toast.error('Failed to resend invitation');
+                      }
+                    }}
                   />
                 ) : (
                   <StaffList
@@ -525,6 +536,17 @@ export default function StaffManagement() {
                       } catch (error) {
                         console.error('Failed to delete staff:', error);
                         toast.error('Failed to delete staff member');
+                      }
+                    }}
+                    onResendInvite={async (staffId: string, staffName: string) => {
+                      try {
+                        // Generate new password
+                        const newPassword = Math.random().toString(36).slice(-12) + 'Aa1!';
+                        await API.staff.resendInvite(staffId, newPassword);
+                        toast.success(`Invitation email resent to ${staffName}`);
+                      } catch (error) {
+                        console.error('Failed to resend invite:', error);
+                        toast.error('Failed to resend invitation');
                       }
                     }}
                   />

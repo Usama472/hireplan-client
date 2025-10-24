@@ -45,6 +45,7 @@ export interface StaffGridProps {
   searchQuery?: string;
   onEdit?: (staff: StaffMember) => void;
   onDelete?: (staffId: string) => void;
+  onResendInvite?: (staffId: string, staffName: string) => void;
 }
 
 // Props for staff list component
@@ -54,6 +55,7 @@ export interface StaffListProps {
   searchQuery?: string;
   onEdit?: (staff: StaffMember) => void;
   onDelete?: (staffId: string) => void;
+  onResendInvite?: (staffId: string, staffName: string) => void;
 }
 
 // Props for roles grid component

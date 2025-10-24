@@ -1,4 +1,5 @@
 import CompanyJobCard from "@/components/company/company-job-card";
+import JobDetailModal from "@/components/company/job-detail-modal";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import API from "@/http";
@@ -148,6 +149,8 @@ const CompanyPage: React.FC = () => {
 
   const [selectedLocation, setSelectedLocation] = useState<string>("all");
   const [selectedJobTitle, setSelectedJobTitle] = useState<string>("all");
+  const [selectedJob, setSelectedJob] = useState<JobFormDataWithId | null>(null);
+  const [showJobModal, setShowJobModal] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const jobsPerPage = 6;
 
@@ -430,7 +433,16 @@ const CompanyPage: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
             {paginatedJobs.length > 0 ? (
               paginatedJobs.map((job) => (
-                <CompanyJobCard key={job.id} job={job} />
+                <div
+                  key={job.id}
+                  onClick={() => {
+                    setSelectedJob(job);
+                    setShowJobModal(true);
+                  }}
+                  className="cursor-pointer"
+                >
+                  <CompanyJobCard job={job} />
+                </div>
               ))
             ) : filteredJobs.length === 0 && (selectedJobTitle !== "all" || selectedLocation !== "all") ? (
               <div className="col-span-full text-center py-12">
@@ -540,6 +552,13 @@ const CompanyPage: React.FC = () => {
             </div>
           )}
         </div>
+
+        {/* Job Detail Modal */}
+        <JobDetailModal
+          job={selectedJob}
+          open={showJobModal}
+          onOpenChange={setShowJobModal}
+        />
 
         {scrapedData?.footer && (
           <div

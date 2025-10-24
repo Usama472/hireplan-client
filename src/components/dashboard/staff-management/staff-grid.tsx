@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
 
-export function StaffGrid({ staffMembers, onEdit, onDelete }: StaffGridProps) {
+export function StaffGrid({ staffMembers, onEdit, onDelete, onResendInvite }: StaffGridProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [staffToDelete, setStaffToDelete] = useState<string | null>(null);
   const [staffNameToDelete, setStaffNameToDelete] = useState<string>("");
@@ -96,7 +96,10 @@ export function StaffGrid({ staffMembers, onEdit, onDelete }: StaffGridProps) {
                       >
                         <Edit className="h-4 w-4" /> Edit
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
+                      <DropdownMenuItem 
+                        className="cursor-pointer flex items-center gap-2"
+                        onClick={() => onResendInvite && onResendInvite(staff.id, `${staff.firstName} ${staff.lastName}`)}
+                      >
                         <Mail className="h-4 w-4" /> Resend Invite
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />

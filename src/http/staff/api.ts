@@ -91,3 +91,16 @@ export const deleteStaff = async (
 ): Promise<{ status: boolean; message: string }> => {
   return await del(`/users/staff/${staffId}`);
 };
+
+/**
+ * Resend invitation email to a staff member
+ * @param staffId - Staff member ID
+ * @param password - New temporary password (optional)
+ * @returns Promise with result
+ */
+export const resendInvite = async (
+  staffId: string,
+  password?: string
+): Promise<{ status: boolean; message: string }> => {
+  return await post(`/users/staff/${staffId}/resend-invite`, { password });
+};
