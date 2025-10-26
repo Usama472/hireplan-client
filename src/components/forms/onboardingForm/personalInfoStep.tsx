@@ -48,25 +48,9 @@ function isJobCategoryKey(key: string | undefined): key is JobCategoryKey {
 }
 
 export function PersonalInfoStep() {
-  const [selectedCategory, setSelectedCategory] = useState<JobCategoryKey | "">(
-    ""
-  );
-  const { setValue, watch } = useFormContext();
+  const [selectedCategory] = useState<JobCategoryKey | "">("");
+  const { watch } = useFormContext();
   const jobCategory = watch("jobCategory");
-
-  const handleCategoryChange = (category: string) => {
-    // Only set if category is valid key
-    if (isJobCategoryKey(category)) {
-      setSelectedCategory(category);
-      setValue("jobCategory", category);
-      setValue("jobTitle", ""); // Reset job title when category changes
-    } else {
-      // Handle invalid category (reset values)
-      setSelectedCategory("");
-      setValue("jobCategory", "");
-      setValue("jobTitle", "");
-    }
-  };
 
   const categoryOptions = Object.keys(JOB_CATEGORIES).map((category) => ({
     value: category,
@@ -75,7 +59,7 @@ export function PersonalInfoStep() {
 
   // Get titles safely using type guard
   const getTitleOptions = () => {
-    const categoryKey = selectedCategory || jobCategory;
+    const categoryKey = jobCategory;
     if (isJobCategoryKey(categoryKey)) {
       return JOB_CATEGORIES[categoryKey].map((title) => ({
         value: title,
@@ -88,59 +72,39 @@ export function PersonalInfoStep() {
   const titleOptions = getTitleOptions();
 
   return (
-    <div className="space-y-2">
-      <div className="grid grid-cols-1 md:grid-cols-2 md:gap-6">
-        <InputField
-          name="firstName"
-          label="First Name"
-          placeholder="Enter your first name"
-          showIsRequired
-        />
-        <InputField
-          name="lastName"
-          label="Last Name"
-          placeholder="Enter your last name"
-          showIsRequired
-        />
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <InputField name="firstName" placeholder="First Name *" />
+        <InputField name="lastName" placeholder="Last Name *" />
       </div>
 
       <InputField
         name="email"
         type={INPUT_TYPES.EMAIL}
-        label="Email Address"
-        placeholder="Enter your email address"
-        showIsRequired
+        placeholder="Email Address *"
       />
 
       <InputField
         name="password"
         type={INPUT_TYPES.PASSWORD}
-        label="Password"
-        placeholder="Create a secure password"
-        showIsRequired
+        placeholder="Password *"
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 md:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <InputField
           name="jobCategory"
           type={INPUT_TYPES.SELECT}
-          label="Role Category"
-          placeholder="Select your role category"
+          placeholder="Role Category *"
           selectOptions={categoryOptions}
-          showIsRequired
         />
         <InputField
           name="jobTitle"
           type={INPUT_TYPES.SELECT}
-          label="Job Title"
           placeholder={
-            selectedCategory || jobCategory
-              ? "Select your specific role"
-              : "Select category first"
+            jobCategory ? "Specific Role *" : "Select category first *"
           }
           selectOptions={titleOptions}
           disabled={!selectedCategory && !jobCategory}
-          showIsRequired
         />
       </div>
     </div>

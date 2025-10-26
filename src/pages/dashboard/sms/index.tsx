@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import React, { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   MessageSquare,
   FileText,
@@ -11,13 +11,13 @@ import {
   Settings,
   Users,
   Phone,
-} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import SMSTemplateList from '@/components/dashboard/sms/SMSTemplateList';
-import { ROUTES } from '@/constants';
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import SMSTemplateList from "@/components/dashboard/sms/SMSTemplateList";
+import { ROUTES } from "@/constants";
 
 export default function SMSPage() {
-  const [activeTab, setActiveTab] = useState('templates');
+  const [activeTab, setActiveTab] = useState("templates");
   const navigate = useNavigate();
 
   const handleCreateTemplate = () => {
@@ -35,7 +35,10 @@ export default function SMSPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Button onClick={handleCreateTemplate} className="flex items-center gap-2">
+          <Button
+            onClick={handleCreateTemplate}
+            className="flex items-center gap-2"
+          >
             <Plus className="h-4 w-4" />
             New Template
           </Button>
@@ -56,7 +59,7 @@ export default function SMSPage() {
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Chat Invites</CardTitle>
@@ -64,12 +67,10 @@ export default function SMSPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">—</div>
-            <p className="text-xs text-muted-foreground">
-              Sent this month
-            </p>
+            <p className="text-xs text-muted-foreground">Sent this month</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Response Rate</CardTitle>
@@ -82,7 +83,7 @@ export default function SMSPage() {
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Chats</CardTitle>
@@ -129,14 +130,17 @@ export default function SMSPage() {
             <CardContent>
               <div className="text-center py-8">
                 <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Send Chat Invitations</h3>
+                <h3 className="text-lg font-semibold mb-2">
+                  Send Chat Invitations
+                </h3>
                 <p className="text-muted-foreground mb-4 max-w-md mx-auto">
-                  Chat invitations are sent directly from the applicant details page. 
-                  Use SMS templates to create personalized messages with chat links.
+                  Chat invitations are sent directly from the applicant details
+                  page. Use SMS templates to create personalized messages with
+                  chat links.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-2 justify-center">
                   <Button
-                    onClick={() => setActiveTab('templates')}
+                    onClick={() => setActiveTab("templates")}
                     variant="outline"
                     className="flex items-center gap-2"
                   >
@@ -160,58 +164,63 @@ export default function SMSPage() {
             <CardContent>
               <div className="space-y-6">
                 <div className="space-y-4">
-                  <h3 className="text-base font-semibold">10DLC Compliance Configuration</h3>
+                  <h3 className="text-base font-semibold">
+                    10DLC Compliance Configuration
+                  </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">Brand Registration</label>
+                      <label className="text-sm font-medium">
+                        Brand Registration
+                      </label>
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline">
-                          Required
-                        </Badge>
+                        <Badge variant="outline">Required</Badge>
                       </div>
                       <p className="text-xs text-muted-foreground">
                         Register your brand with The Campaign Registry (TCR)
                       </p>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">Campaign Registration</label>
+                      <label className="text-sm font-medium">
+                        Campaign Registration
+                      </label>
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline">
-                          Required
-                        </Badge>
+                        <Badge variant="outline">Required</Badge>
                       </div>
                       <p className="text-xs text-muted-foreground">
                         Register hiring/recruiting use case campaign
                       </p>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">SMS Consent Tracking</label>
+                      <label className="text-sm font-medium">
+                        SMS Consent Tracking
+                      </label>
                       <div className="flex items-center gap-2">
-                        <Badge variant="default">
-                          Enabled
-                        </Badge>
+                        <Badge variant="default">Enabled</Badge>
                       </div>
                       <p className="text-xs text-muted-foreground">
                         Applicants provide SMS consent during application
                       </p>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">STOP/START Handling</label>
+                      <label className="text-sm font-medium">
+                        STOP/START Handling
+                      </label>
                       <div className="flex items-center gap-2">
-                        <Badge variant="default">
-                          Enabled
-                        </Badge>
+                        <Badge variant="default">Enabled</Badge>
                       </div>
                       <p className="text-xs text-muted-foreground">
                         Automatic opt-out/opt-in keyword processing
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="p-4 bg-amber-50 rounded-lg border border-amber-200">
-                    <h4 className="font-medium text-amber-900 mb-2">10DLC Setup Required</h4>
+                    <h4 className="font-medium text-amber-900 mb-2">
+                      10DLC Setup Required
+                    </h4>
                     <p className="text-sm text-amber-800 mb-3">
-                      To send SMS messages, you must complete 10DLC brand and campaign registration with Twilio/TCR.
+                      To send SMS messages, you must complete 10DLC brand and
+                      campaign registration with Twilio/TCR.
                     </p>
                     <ul className="text-xs text-amber-700 space-y-1">
                       <li>• Register your business brand (~$4 fee)</li>
@@ -223,25 +232,27 @@ export default function SMSPage() {
                 </div>
 
                 <div className="space-y-4">
-                  <h3 className="text-base font-semibold">Twilio Configuration</h3>
+                  <h3 className="text-base font-semibold">
+                    Twilio Configuration
+                  </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">Account Status</label>
+                      <label className="text-sm font-medium">
+                        Account Status
+                      </label>
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline">
-                          Not Configured
-                        </Badge>
+                        <Badge variant="outline">Not Configured</Badge>
                       </div>
                       <p className="text-xs text-muted-foreground">
                         SMS functionality requires Twilio configuration
                       </p>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">Phone Number</label>
+                      <label className="text-sm font-medium">
+                        Phone Number
+                      </label>
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline">
-                          Not Set
-                        </Badge>
+                        <Badge variant="outline">Not Set</Badge>
                       </div>
                       <p className="text-xs text-muted-foreground">
                         Configure your SMS sender number
@@ -255,7 +266,9 @@ export default function SMSPage() {
                   <div className="space-y-3">
                     <div className="flex items-center justify-between p-3 border rounded-lg">
                       <div>
-                        <div className="font-medium text-sm">Seamless Chat Portal</div>
+                        <div className="font-medium text-sm">
+                          Seamless Chat Portal
+                        </div>
                         <div className="text-xs text-muted-foreground">
                           SMS links automatically direct to secure chat portal
                         </div>
@@ -273,7 +286,9 @@ export default function SMSPage() {
                     </div>
                     <div className="flex items-center justify-between p-3 border rounded-lg">
                       <div>
-                        <div className="font-medium text-sm">Auto-Authentication</div>
+                        <div className="font-medium text-sm">
+                          Auto-Authentication
+                        </div>
                         <div className="text-xs text-muted-foreground">
                           Applicants access chat without login
                         </div>
@@ -284,7 +299,9 @@ export default function SMSPage() {
                 </div>
 
                 <div className="space-y-4">
-                  <h3 className="text-base font-semibold">Template Variables</h3>
+                  <h3 className="text-base font-semibold">
+                    Template Variables
+                  </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                     <div>
                       <h4 className="font-medium mb-2">Applicant Data</h4>

@@ -138,6 +138,7 @@ export function JobListItem({
   onEdit,
   onDelete,
   onViewDetails,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onClose,
 }: JobListItemProps) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -173,17 +174,17 @@ export function JobListItem({
     <>
       <Card
         onClick={handleCardClick}
-        className="group bg-white border border-gray-100 hover:border-primary/30 hover:shadow-xl transition-all duration-300 rounded-xl overflow-hidden cursor-pointer hover:bg-gray-50/30 active:scale-[0.99]"
+        className="group bg-white border border-gray-200 hover:border-blue-300 transition-all duration-200 rounded-md overflow-hidden cursor-pointer"
       >
-        <CardContent className="p-4 sm:p-5 lg:p-6">
-          <div className="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-6">
+        <CardContent className="p-5 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-start gap-5 sm:gap-6">
             {/* Main Content */}
             <div className="flex-1 min-w-0 space-y-3 sm:space-y-4">
               {/* Header Row */}
-              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                 <div className="flex-1 min-w-0">
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
-                    <h3 className="font-semibold text-lg sm:text-xl text-gray-900 group-hover:text-primary transition-colors line-clamp-2 leading-tight">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-3">
+                    <h3 className="font-semibold text-lg sm:text-xl text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2 leading-relaxed">
                       {job.jobTitle || job.jobBoardTitle}
                     </h3>
 
@@ -191,25 +192,18 @@ export function JobListItem({
                     {daysLeft !== null && (
                       <div
                         className={cn(
-                          "inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded border text-xs font-medium flex-shrink-0",
+                          "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-xs font-medium flex-shrink-0",
                           daysLeft <= 7 &&
                             daysLeft > 0 &&
                             "bg-amber-50 text-amber-700 border-amber-200",
                           daysLeft <= 0 &&
                             "bg-red-50 text-red-700 border-red-200",
                           daysLeft > 7 &&
-                            "bg-gray-50 text-gray-700 border-gray-200"
+                            "bg-blue-50 text-blue-700 border-blue-200"
                         )}
                       >
-                        <Clock
-                          className={cn(
-                            "w-3 h-3",
-                            daysLeft <= 7 && daysLeft > 0 && "text-amber-600",
-                            daysLeft <= 0 && "text-red-600",
-                            daysLeft > 7 && "text-gray-600"
-                          )}
-                        />
-                        <span className="text-xs">
+                        <Clock className="w-3.5 h-3.5" />
+                        <span>
                           {daysLeft > 0
                             ? `${daysLeft}d left`
                             : daysLeft === 0
@@ -221,40 +215,40 @@ export function JobListItem({
                   </div>
 
                   {/* Location & Workplace Type */}
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-sm text-gray-600 mb-2 sm:mb-3">
-                    <div className="flex items-center">
-                      <MapPin className="w-3 sm:w-4 h-3 sm:h-4 text-primary mr-1 sm:mr-1.5" />
-                      <span className="text-xs sm:text-sm">{location}</span>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 text-sm text-gray-600">
+                    <div className="flex items-center gap-1.5">
+                      <MapPin className="w-4 h-4 text-gray-400" />
+                      <span className="font-medium">{location}</span>
                     </div>
                     <div className="hidden sm:block h-1 w-1 rounded-full bg-gray-300" />
-                    <span className="font-medium text-gray-700 text-xs sm:text-sm">
+                    <span className="font-medium text-blue-600">
                       {formatText(job.workplaceType, "Remote")}
                     </span>
                   </div>
                 </div>
 
                 {/* Status & Priority Badges */}
-                <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0 order-first sm:order-last">
+                <div className="flex items-center gap-2 flex-shrink-0 order-first sm:order-last">
                   <div
                     className={cn(
-                      "px-2 sm:px-2.5 py-0.5 sm:py-1 rounded border text-xs font-medium",
+                      "px-2.5 py-1 rounded-md border text-xs font-medium",
                       statusConfig.bg,
                       statusConfig.text,
                       statusConfig.border
                     )}
                   >
-                    <div className="flex items-center gap-1 sm:gap-1.5">
+                    <div className="flex items-center gap-1.5">
                       <StatusIcon
-                        className={cn("w-3 h-3", statusConfig.iconColor)}
+                        className={cn("w-3.5 h-3.5", statusConfig.iconColor)}
                       />
-                      <span className="capitalize text-xs">{job.status}</span>
+                      <span className="capitalize">{job.status}</span>
                     </div>
                   </div>
 
                   {priorityConfig && (
                     <div
                       className={cn(
-                        "px-2 py-0.5 sm:py-1 rounded border text-xs font-medium",
+                        "px-2.5 py-1 rounded-md border text-xs font-medium",
                         priorityConfig.bg,
                         priorityConfig.text,
                         priorityConfig.border
@@ -267,24 +261,24 @@ export function JobListItem({
               </div>
 
               {/* Key Information Row */}
-              <div className="grid grid-cols-2 sm:flex sm:items-center gap-3 sm:gap-6 text-sm">
+              <div className="grid grid-cols-2 sm:flex sm:items-center gap-4 sm:gap-6 text-sm">
                 {/* Salary */}
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <DollarSign className="w-3 sm:w-4 h-3 sm:h-4 text-green-600" />
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:gap-1">
-                    <span className="font-medium text-gray-900 text-xs sm:text-sm">
+                <div className="flex items-center gap-2">
+                  <DollarSign className="w-4 h-4 text-emerald-600" />
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:gap-1.5">
+                    <span className="font-bold text-gray-900 text-sm">
                       {salary}
                     </span>
-                    <span className="text-gray-500 text-xs">
+                    <span className="text-gray-600 text-xs font-medium">
                       {salaryPeriod}
                     </span>
                   </div>
                 </div>
 
                 {/* Employment Type */}
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <Briefcase className="w-3 sm:w-4 h-3 sm:h-4 text-primary" />
-                  <span className="text-gray-700 text-xs sm:text-sm">
+                <div className="flex items-center gap-2">
+                  <Briefcase className="w-4 h-4 text-blue-600" />
+                  <span className="text-gray-700 text-sm font-medium">
                     {job.employmentType
                       ?.replace("-", " ")
                       .replace(/\b\w/g, (l) => l.toUpperCase())}
@@ -292,19 +286,26 @@ export function JobListItem({
                 </div>
 
                 {/* Positions */}
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <Users className="w-3 sm:w-4 h-3 sm:h-4 text-primary" />
-                  <span className="text-gray-700 text-xs sm:text-sm">
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-purple-600" />
+                  <span className="text-gray-700 text-sm font-medium">
                     {job.positionsToHire || 1} position
                     {job.positionsToHire !== 1 ? "s" : ""}
                   </span>
                 </div>
 
                 {/* Applicants Stats */}
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <Users className="w-3 sm:w-4 h-3 sm:h-4 text-blue-600" />
-                  <span className="text-gray-700 text-xs sm:text-sm">
-                    {Math.floor((job.applicantsCount || 0) * 0.4)} pending, {Math.floor((job.applicantsCount || 0) * 0.3)} shortlist, {Math.floor((job.applicantsCount || 0) * 0.3)} rejected
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-orange-600" />
+                  <span className="text-gray-700 text-sm">
+                    <span className="font-medium">
+                      {Math.floor((job.applicantsCount || 0) * 0.4)}
+                    </span>{" "}
+                    pending,{" "}
+                    <span className="font-medium">
+                      {Math.floor((job.applicantsCount || 0) * 0.3)}
+                    </span>{" "}
+                    shortlist
                   </span>
                 </div>
               </div>
@@ -338,22 +339,20 @@ export function JobListItem({
               )}
             </div>
 
-            {/* Actions Section - Professional Mobile Design */}
-            <div className="flex sm:flex-col items-center sm:items-end gap-3 sm:gap-4 flex-shrink-0 w-full sm:w-auto justify-between sm:justify-start mt-4 sm:mt-0">
+            {/* Actions Section */}
+            <div className="flex sm:flex-col items-center sm:items-end gap-3 flex-shrink-0 w-full sm:w-auto justify-between sm:justify-start mt-4 sm:mt-0">
               {/* Action Buttons */}
-              <div className="flex sm:flex-col gap-3 w-full sm:w-36">
+              <div className="flex sm:flex-col gap-2 w-full sm:w-36">
                 <Button
-                  variant="outline"
+                  variant="outline-secondary"
                   size="sm"
-                  className="flex-1 sm:w-full h-11 sm:h-10 font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] text-sm border-primary/20 text-primary hover:bg-primary/5 hover:border-primary/40 rounded-lg"
                   onClick={(e) => {
                     e.stopPropagation();
                     onEdit?.(job);
                   }}
                 >
                   <Edit3 className="w-4 h-4 mr-2" />
-                  <span className="hidden sm:inline">Edit Job</span>
-                  <span className="sm:hidden">Edit</span>
+                  Edit
                 </Button>
                 <Button
                   size="sm"
@@ -361,20 +360,10 @@ export function JobListItem({
                     e.stopPropagation();
                     onViewDetails?.(job);
                   }}
-                  className="flex-1 sm:w-full h-11 sm:h-10 font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] bg-primary hover:bg-primary/90 text-white shadow-sm hover:shadow-md text-sm rounded-lg"
                 >
-                  <ArrowRight className="w-4 h-4 mr-2" />
-                  <span className="hidden sm:inline">View Details</span>
-                  <span className="sm:hidden">View</span>
+                  View
+                  <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
-              </div>
-
-              {/* Hover Indicator - Desktop Only */}
-              <div className="hidden sm:block opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                <div className="flex items-center gap-1 text-xs text-primary font-medium bg-white/80 backdrop-blur-sm px-2 py-1 rounded-md">
-                  Click for details
-                  <ArrowRight className="w-3 h-3" />
-                </div>
               </div>
             </div>
           </div>

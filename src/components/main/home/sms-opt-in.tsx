@@ -87,65 +87,66 @@ export function SMSOptIn() {
       <Card className="bg-white border-2 border-gray-200 shadow-lg">
         <CardContent className="p-4 sm:p-6 lg:p-8">
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-          <div className="flex-1">
-            <div className="relative group">
-              <Phone className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 sm:w-5 h-4 sm:h-5 group-focus-within:text-gray-600 transition-colors duration-200 z-10" />
-              <Input
-                id="phone"
-                type="tel"
-                value={phoneNumber}
-                onChange={handlePhoneChange}
-                placeholder="(555) 123-4567"
-                className="pl-10 sm:pl-12 h-12 sm:h-14 text-sm sm:text-base bg-white border-2 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-gray-900 transition-all duration-200 placeholder:text-gray-500 shadow-sm"
-                maxLength={14}
-                required
-              />
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+              <div className="flex-1">
+                <div className="relative group">
+                  <Phone className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 sm:w-5 h-4 sm:h-5 group-focus-within:text-gray-600 transition-colors duration-200 z-10" />
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={phoneNumber}
+                    onChange={handlePhoneChange}
+                    placeholder="(555) 123-4567"
+                    className="pl-10 sm:pl-12 h-12 sm:h-14 text-sm sm:text-base bg-white border-2 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-gray-900 transition-all duration-200 placeholder:text-gray-500 shadow-sm"
+                    maxLength={14}
+                    required
+                  />
+                </div>
+              </div>
+              <Button
+                type="submit"
+                disabled={!phoneNumber || !agreed || isSubmitting}
+                variant="secondary"
+                className="h-12 sm:h-14 px-6 sm:px-8 font-bold text-white transition-all duration-200 group z-10 shadow-lg hover:shadow-xl text-sm sm:text-base"
+              >
+                {isSubmitting ? "Joining..." : "Join Now"}
+                <ArrowRight className="ml-2 h-4 sm:h-5 w-4 sm:w-5 group-hover:translate-x-1 transition-transform duration-200" />
+              </Button>
             </div>
-          </div>
-          <Button
-            type="submit"
-            disabled={!phoneNumber || !agreed || isSubmitting}
-            variant="secondary"
-            className="h-12 sm:h-14 px-6 sm:px-8 font-bold bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200 group z-10 shadow-lg hover:shadow-xl text-sm sm:text-base"
-          >
-            {isSubmitting ? "Joining..." : "Join Now"}
-            <ArrowRight className="ml-2 h-4 sm:h-5 w-4 sm:w-5 group-hover:translate-x-1 transition-transform duration-200" />
-          </Button>
-        </div>
 
-        <div className="flex items-start space-x-3">
-          <Checkbox
-            id="sms-consent"
-            checked={agreed}
-            onCheckedChange={(checked) => setAgreed(checked as boolean)}
-            className="mt-1 flex-shrink-0"
-          />
-          <div className="text-sm text-gray-700 leading-relaxed space-y-2">
-            <p>
-              I agree to receive hiring tips and platform updates from HirePlan
-              (frequency varies). Msg & data rates may apply. Reply STOP to opt
-              out or HELP for help. Not required to use our services.
-            </p>
-            <p>
-              See our{" "}
-              <span
-                onClick={() => navigate("/privacy")}
-                className="text-blue-600 hover:text-blue-700 underline font-semibold cursor-pointer"
-              >
-                Privacy Policy
-              </span>{" "}
-              and{" "}
-              <span
-                onClick={() => navigate("/terms")}
-                className="text-blue-600 hover:text-blue-700 underline font-semibold cursor-pointer"
-              >
-                Terms
-              </span>
-              .
-            </p>
-          </div>
-        </div>
+            <div className="flex items-start space-x-3">
+              <Checkbox
+                id="sms-consent"
+                checked={agreed}
+                onCheckedChange={(checked) => setAgreed(checked as boolean)}
+                className="mt-1 flex-shrink-0"
+              />
+              <div className="text-sm text-gray-700 leading-relaxed space-y-2">
+                <p>
+                  I agree to receive hiring tips and platform updates from
+                  HirePlan (frequency varies). Msg & data rates may apply. Reply
+                  STOP to opt out or HELP for help. Not required to use our
+                  services.
+                </p>
+                <p>
+                  See our{" "}
+                  <span
+                    onClick={() => navigate("/privacy")}
+                    className="text-blue-600 hover:text-blue-700 underline font-semibold cursor-pointer"
+                  >
+                    Privacy Policy
+                  </span>{" "}
+                  and{" "}
+                  <span
+                    onClick={() => navigate("/terms")}
+                    className="text-blue-600 hover:text-blue-700 underline font-semibold cursor-pointer"
+                  >
+                    Terms
+                  </span>
+                  .
+                </p>
+              </div>
+            </div>
           </form>
 
           <div className="mt-6 sm:mt-8 text-center">

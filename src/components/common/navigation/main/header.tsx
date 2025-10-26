@@ -8,7 +8,8 @@ export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
   // Check auth directly from localStorage to avoid loading full auth context
-  const isAuthenticated = typeof window !== 'undefined' && localStorage.getItem(clientAccessToken);
+  const isAuthenticated =
+    typeof window !== "undefined" && localStorage.getItem(clientAccessToken);
 
   const navigation = [
     { name: "Features", href: "#features" },
@@ -54,7 +55,10 @@ export function Header() {
               to={isAuthenticated ? ROUTES.DASHBOARD.MAIN : "/"}
               className="flex items-center space-x-2 min-w-0 hover:opacity-80 transition-opacity"
             >
-              <img src="../../../../../public/logo.png" className="w-8 h-8 flex-shrink-0" />
+              <img
+                src="../../../../../public/logo.png"
+                className="w-8 h-8 flex-shrink-0"
+              />
               <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent truncate">
                 {APP_NAME}
               </span>
@@ -91,10 +95,7 @@ export function Header() {
           <div className="hidden md:flex items-center space-x-2 lg:space-x-3">
             {isAuthenticated ? (
               <>
-                <Button
-                  variant="secondary"
-                  asChild
-                >
+                <Button variant="secondary" asChild>
                   <Link to={ROUTES.DASHBOARD.MAIN}>Dashboard</Link>
                 </Button>
               </>
@@ -107,10 +108,7 @@ export function Header() {
                 >
                   <Link to="/login">Sign In</Link>
                 </Button>
-                <Button
-                  asChild
-                  className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 lg:px-4"
-                >
+                <Button asChild>
                   <Link to={ROUTES.SIGNUP}>Get Started</Link>
                 </Button>
               </>
@@ -164,12 +162,11 @@ export function Header() {
               })}
               <div className="pt-4 space-y-2 border-t border-gray-100 mt-4">
                 {isAuthenticated ? (
-                  <Button
-                    variant="secondary"
-                    asChild
-                    className="w-full"
-                  >
-                    <Link to={ROUTES.DASHBOARD.MAIN} onClick={() => setIsMenuOpen(false)}>
+                  <Button variant="secondary" asChild className="w-full">
+                    <Link
+                      to={ROUTES.DASHBOARD.MAIN}
+                      onClick={() => setIsMenuOpen(false)}
+                    >
                       Dashboard
                     </Link>
                   </Button>
@@ -184,11 +181,11 @@ export function Header() {
                         Sign In
                       </Link>
                     </Button>
-                    <Button
-                      asChild
-                      className="bg-blue-600 hover:bg-blue-700 text-white w-full"
-                    >
-                      <Link to={ROUTES.SIGNUP} onClick={() => setIsMenuOpen(false)}>
+                    <Button variant="default">
+                      <Link
+                        to={ROUTES.SIGNUP}
+                        onClick={() => setIsMenuOpen(false)}
+                      >
                         Get Started
                       </Link>
                     </Button>

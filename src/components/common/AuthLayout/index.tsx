@@ -5,7 +5,6 @@ import { Separator } from "@components/ui/separator";
 import { GithubIcon, GoogleIcon, ROUTES } from "@constants/index";
 import { cn } from "@lib/utils";
 import { useNavigate } from "react-router";
-import { Users, Zap } from "lucide-react";
 
 interface AuthWrapperProps {
   children: React.ReactNode;
@@ -22,115 +21,100 @@ interface AuthWrapperProps {
 
 export const AuthLayout = ({
   children,
-  title,
-  footerText,
-  footerLinkText,
-  footerLinkHref,
   showSocial = true,
   isLoading = false,
   currentStep = 1,
   totalSteps = 1,
-  progressPercentage = 0,
 }: AuthWrapperProps) => {
   const navigate = useNavigate();
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 relative overflow-y-auto pt-16">
-      {/* Main Content - Compact */}
-      <div className="relative z-10 flex items-start justify-center min-h-[calc(100vh-64px)] px-3 sm:px-4 py-6">
-        <div className="w-full max-w-3xl">
-          {/* Progress Bar - Above Card */}
-          {totalSteps > 1 && (
-            <div className="mb-4 bg-white border border-gray-200 rounded-xl shadow-sm p-3">
-              <div className="flex items-center justify-between mb-2">
-                <h2 className="text-sm font-semibold text-gray-900">{title}</h2>
-                <div className="text-xs text-gray-600">
-                  Step {currentStep} of {totalSteps}
-                </div>
-              </div>
-              <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${progressPercentage}%` }}
-                ></div>
-              </div>
-            </div>
-          )}
-          
-          {/* Auth Card - More Compact */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 sm:p-7">
-            {/* Form Content */}
-            <div className="space-y-5">
-              {children}
-
-              {showSocial && (
-                <div className="space-y-4">
-                  <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                      <Separator className="w-full" />
+    <>
+      <div className="bg-gradient-to-br from-gray-50 to-gray-100 relative overflow-y-auto">
+        <div className="relative z-10 flex items-center justify-center min-h-[calc(100vh-164px)] px-3 sm:px-4 mb-20 mt-10">
+          <div className="w-full max-w-4xl">
+            {totalSteps > 1 && (
+              <div className="mb-4 bg-white border border-gray-200 rounded-md p-4">
+                <div className="flex items-center justify-between gap-4">
+                  {/* Left Side: Title and Step */}
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-md bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-bold">
+                      {currentStep}
                     </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-white px-3 text-gray-500 font-medium">
-                        Or continue with
-                      </span>
+                    <div>
+                      <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-0.5">
+                        Create Your Account
+                      </h2>
+                      <p className="text-xs text-gray-400">
+                        Step {currentStep} of {totalSteps}
+                      </p>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  {/* Right Side: Already have account */}
+                  <div className="hidden sm:flex flex-col items-end gap-1">
+                    <span className="text-xs text-gray-500">
+                      Already have an account?
+                    </span>
                     <Button
                       variant="outline"
-                      type="button"
-                      disabled={isLoading}
-                      onClick={() => navigate(ROUTES.DASHBOARD.MAIN)}
-                      className="h-10 border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 text-sm"
+                      size="sm"
+                      onClick={() => navigate(ROUTES.LOGIN)}
+                      className="h-8 px-4 text-xs border border-gray-300 hover:border-blue-600 hover:bg-blue-50 hover:text-blue-600 transition-all font-medium rounded-md"
                     >
-                      <GoogleIcon />
-                      <span className="ml-2">Google</span>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      type="button"
-                      disabled={isLoading}
-                      className="h-10 border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 text-sm"
-                    >
-                      <GithubIcon />
-                      <span className="ml-2">GitHub</span>
+                      Sign in
                     </Button>
                   </div>
                 </div>
-              )}
-            </div>
-            
-            {/* Footer */}
-            <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600">
-                {footerText}{" "}
-                <Button
-                  variant="link"
-                  onClick={() => navigate(footerLinkHref)}
-                  className="font-medium text-blue-600 hover:text-blue-700 underline-offset-4 hover:underline px-0 h-auto p-0 text-sm"
-                >
-                  {footerLinkText}
-                </Button>
-              </p>
-            </div>
-          </div>
-
-          {/* Bottom Features - Compact */}
-          <div className="mt-4 text-center">
-            <div className="flex items-center justify-center space-x-5 text-xs text-gray-500">
-              <div className="flex items-center space-x-1">
-                <Users className="h-3 w-3" />
-                <span>Secure</span>
               </div>
-              <div className="flex items-center space-x-1">
-                <Zap className="h-3 w-3" />
-                <span>Fast</span>
+            )}
+            {/* Auth Card - More Compact */}
+            <div className="bg-white border border-gray-200 rounded-md p-6">
+              {/* Form Content */}
+              <div className="space-y-5">
+                {children}
+
+                {showSocial && (
+                  <div className="space-y-4">
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <Separator className="w-full" />
+                      </div>
+                      <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-white px-3 text-gray-500 font-medium">
+                          Or continue with
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <Button
+                        variant="outline"
+                        type="button"
+                        disabled={isLoading}
+                        onClick={() => navigate(ROUTES.DASHBOARD.MAIN)}
+                        className="h-10 border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 text-sm"
+                      >
+                        <GoogleIcon />
+                        <span className="ml-2">Google</span>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        type="button"
+                        disabled={isLoading}
+                        className="h-10 border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 text-sm"
+                      >
+                        <GithubIcon />
+                        <span className="ml-2">GitHub</span>
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

@@ -237,7 +237,6 @@ export function SubscriptionGuard({
             <Button
               variant="outline"
               onClick={() => navigate("/dashboard/jobs")}
-              className="flex-1 h-10 text-gray-700 hover:text-gray-800 hover:bg-gray-50 font-medium rounded-lg transition-colors border border-gray-200 hover:border-gray-300 shadow-none"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Go Back

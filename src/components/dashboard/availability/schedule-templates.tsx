@@ -1087,7 +1087,6 @@ export function ScheduleTemplates({
               )}
             </div>
             <Button
-              size="sm"
               variant="outline"
               onClick={() => setIsCreateDialogOpen(true)}
             >

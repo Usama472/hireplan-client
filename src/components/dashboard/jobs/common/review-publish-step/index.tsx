@@ -142,12 +142,7 @@ export function ReviewPublishStep({
                 </div>
               </div>
               {mode === "edit" && (
-                <Button
-                  onClick={onSave}
-                  disabled={isSubmitting}
-                  size="sm"
-                  className="bg-primary hover:bg-primary/90"
-                >
+                <Button onClick={onSave} disabled={isSubmitting} size="sm">
                   Save Changes
                 </Button>
               )}

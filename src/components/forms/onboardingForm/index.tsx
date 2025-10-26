@@ -146,7 +146,7 @@ export default function RecruiterOnboardingForm({
         city: formData.city,
         state: formData.state,
         zipCode: formData.zipCode,
-        country: 'US',
+        country: "US",
         privacyPolicyAccepted: formData.privacyPolicyAccepted,
         termsOfServiceAccepted: formData.termsOfServiceAccepted,
       });
@@ -196,7 +196,7 @@ export default function RecruiterOnboardingForm({
               }
               handleSubmit(onSubmit)(e);
             }}
-            className="space-y-6"
+            className="space-y-8"
           >
             {renderCurrentStep()}
 

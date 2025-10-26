@@ -1,15 +1,12 @@
 import { Button } from "@/components/ui/button";
-import {
-  Rocket,
-  ArrowRight,
-  Users,
-  Briefcase,
-  Zap,
-} from "lucide-react";
+import { Rocket, ArrowRight, Users, Briefcase, Zap } from "lucide-react";
 import { motion } from "framer-motion";
+import { ROUTES } from "@/constants/routes";
+import { useNavigate } from "react-router-dom";
 
 export function HeroSection() {
   // Simplified animation variants
+  const navigate = useNavigate();
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -73,8 +70,8 @@ export function HeroSection() {
             variants={itemVariants}
             className="text-base sm:text-lg text-white/80 max-w-2xl mx-auto leading-relaxed mb-6 sm:mb-8 px-2"
           >
-            AI-powered candidate matching that eliminates 90% of manual screening. 
-            Find perfect candidates in minutes, not weeks.
+            AI-powered candidate matching that eliminates 90% of manual
+            screening. Find perfect candidates in minutes, not weeks.
           </motion.p>
 
           {/* Key Benefits - Simplified */}
@@ -86,33 +83,42 @@ export function HeroSection() {
               <div className="w-10 sm:w-12 h-10 sm:h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center mx-auto mb-2 sm:mb-3">
                 <Briefcase className="h-5 sm:h-6 w-5 sm:w-6 text-white" />
               </div>
-              <h3 className="text-white font-semibold text-xs sm:text-sm mb-1 sm:mb-2">Job Management</h3>
-              <p className="text-white/70 text-xs">Create and manage job postings</p>
+              <h3 className="text-white font-semibold text-xs sm:text-sm mb-1 sm:mb-2">
+                Job Management
+              </h3>
+              <p className="text-white/70 text-xs">
+                Create and manage job postings
+              </p>
             </div>
 
             <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-3 sm:p-4 text-center">
               <div className="w-10 sm:w-12 h-10 sm:h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-2 sm:mb-3">
                 <Users className="h-5 sm:h-6 w-5 sm:w-6 text-white" />
               </div>
-              <h3 className="text-white font-semibold text-xs sm:text-sm mb-1 sm:mb-2">AI Screening</h3>
-              <p className="text-white/70 text-xs">Automatically evaluate candidates</p>
+              <h3 className="text-white font-semibold text-xs sm:text-sm mb-1 sm:mb-2">
+                AI Screening
+              </h3>
+              <p className="text-white/70 text-xs">
+                Automatically evaluate candidates
+              </p>
             </div>
 
             <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-3 sm:p-4 text-center">
               <div className="w-10 sm:w-12 h-10 sm:h-12 bg-gradient-to-br from-purple-400 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-2 sm:mb-3">
                 <Zap className="h-5 sm:h-6 w-5 sm:w-6 text-white" />
               </div>
-              <h3 className="text-white font-semibold text-xs sm:text-sm mb-1 sm:mb-2">Auto Communication</h3>
-              <p className="text-white/70 text-xs">Send AI-generated messages</p>
+              <h3 className="text-white font-semibold text-xs sm:text-sm mb-1 sm:mb-2">
+                Auto Communication
+              </h3>
+              <p className="text-white/70 text-xs">
+                Send AI-generated messages
+              </p>
             </div>
           </motion.div>
 
           {/* CTA Button */}
           <motion.div variants={itemVariants} className="mb-6 sm:mb-8 px-2">
-            <Button
-              size="lg"
-              className="h-11 sm:h-12 px-6 sm:px-8 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md shadow-lg hover:shadow-xl transition-all duration-300 text-sm sm:text-base w-full sm:w-auto"
-            >
+            <Button onClick={() => navigate(ROUTES.SIGNUP)}>
               <Rocket className="h-4 w-4 mr-2" />
               Get Started
               <ArrowRight className="h-4 w-4 ml-2" />

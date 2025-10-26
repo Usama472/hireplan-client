@@ -74,17 +74,20 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
     return acc && acc[part] !== undefined;
   }, dirtyFields);
 
-  const renderFormLabel = (labelText?: string) => (
-    <FormLabel
-      className={cn(
-        "paragraph-medium text-dark400_light700",
-        fieldError && "text-red-500"
-      )}
-    >
-      {capitalizeText(labelText || "")}
-      {showIsRequired && <span className="text-red-400">{` * `}</span>}
-    </FormLabel>
-  );
+  const renderFormLabel = (labelText?: string) => {
+    if (!labelText) return null;
+    return (
+      <FormLabel
+        className={cn(
+          "paragraph-medium text-dark400_light700",
+          fieldError && "text-red-500"
+        )}
+      >
+        {capitalizeText(labelText || "")}
+        {showIsRequired && <span className="text-red-400">{` * `}</span>}
+      </FormLabel>
+    );
+  };
 
   const commonInputProps = {
     placeholder,
@@ -97,8 +100,8 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
     defaultValue,
     disabled,
     className: cn(
-      "paragraph-regular background-light900_dark300 light-border-2 text-dark300_light700 no-focus min-h-12 resize-none rounded-1.5 border",
-      fieldError && "border-red-500 focus:border-red-500"
+      "h-12 bg-white border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 transition-all text-gray-900 placeholder:text-gray-400",
+      fieldError && "border-red-500 focus:border-red-500 focus:ring-red-500/20"
     ),
   };
 
@@ -140,7 +143,7 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
                     onChange={(e) => field.onChange(e.target.checked)}
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-xs text-red-500 mt-1.5" />
                 {description && (
                   <FormDescription className="body-regular mt-2.5 text-light-400">
                     {description}
@@ -163,16 +166,14 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
                   <FormControl>
                     <SelectTrigger
                       className={cn(
-                        "w-full",
+                        "h-12 bg-white border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 transition-all text-gray-900",
                         fieldError &&
-                          "border-red-500 focus-visible:ring-red-500",
-                        isDirty &&
-                          !fieldError &&
-                          "border-blue-300 focus-visible:ring-blue-500"
+                          "border-red-500 focus:border-red-500 focus:ring-red-500/20"
                       )}
                     >
                       <SelectValue
-                        placeholder={capitalizeText(placeholder || "")}
+                        placeholder={placeholder || ""}
+                        className="text-gray-400"
                       />
                     </SelectTrigger>
                   </FormControl>
@@ -185,7 +186,7 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
                     ))}
                   </SelectContent>
                 </Select>
-                <FormMessage />
+                <FormMessage className="text-xs text-red-500 mt-1.5" />
                 {description && (
                   <FormDescription className="body-regular mt-2.5 text-light-400">
                     {description}
@@ -237,7 +238,7 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
                     />
                   </div>
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-xs text-red-500 mt-1.5" />
                 {description && (
                   <FormDescription className="body-regular mt-2.5 text-light-400">
                     {description}
@@ -280,7 +281,7 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
                     />
                   </PopoverContent>
                 </Popover>
-                <FormMessage />
+                <FormMessage className="text-xs text-red-500 mt-1.5" />
                 {description && (
                   <FormDescription className="body-regular mt-2.5 text-light-400">
                     {description}
@@ -308,7 +309,7 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
                       onChange={handleChange}
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-xs text-red-500 mt-1.5" />
                   {description && (
                     <FormDescription className="body-regular mt-2.5 text-light-400">
                       {description}
@@ -349,7 +350,7 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
                     )}
                   </div>
                 </FormControl>
-                <FormMessage className="text-red-500" />
+                <FormMessage className="text-xs text-red-500 mt-1.5" />
                 {description && (
                   <FormDescription className="body-regular mt-2.5 text-light-400">
                     {description}

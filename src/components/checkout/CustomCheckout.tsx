@@ -1,55 +1,55 @@
-import React, { useState, useEffect } from 'react';
-import { loadStripe } from '@stripe/stripe-js';
+import React, { useState, useEffect } from "react";
+import { loadStripe } from "@stripe/stripe-js";
 import {
   Elements,
   CardElement,
   useStripe,
-  useElements
-} from '@stripe/react-stripe-js';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { 
-  CreditCard, 
-  Shield, 
-  Check, 
-  ArrowLeft, 
+  useElements,
+} from "@stripe/react-stripe-js";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import {
+  CreditCard,
+  Shield,
+  Check,
+  ArrowLeft,
   Lock,
-  AlertCircle 
-} from 'lucide-react';
-import { PLANS } from '@/constants/form-constants';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { toast } from 'sonner';
-import { simpleSubscriptionAPI } from '@/http/subscription/simple-api';
-import { PromoCodeInput } from './PromoCodeInput';
+  AlertCircle,
+} from "lucide-react";
+import { PLANS } from "@/constants/form-constants";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { toast } from "sonner";
+import { simpleSubscriptionAPI } from "@/http/subscription/simple-api";
+import { PromoCodeInput } from "./PromoCodeInput";
 
 // Initialize Stripe dynamically from backend config
 let stripePromise: Promise<any> | null = null;
 
 const initializeStripe = async () => {
   if (stripePromise) return stripePromise;
-  
+
   try {
-    console.log('🔍 Fetching Stripe config from backend...');
+    console.log("🔍 Fetching Stripe config from backend...");
     const config = await simpleSubscriptionAPI.getConfig();
-    
-    console.log('🔍 Backend config response structure:', config);
-    
+
+    console.log("🔍 Backend config response structure:", config);
+
     if (!config.publishableKey) {
-      console.error('❌ No Stripe publishable key received from backend');
-      console.error('   Expected: config.publishableKey');
-      console.error('   Received:', config);
+      console.error("❌ No Stripe publishable key received from backend");
+      console.error("   Expected: config.publishableKey");
+      console.error("   Received:", config);
       return null;
     }
-    
-    console.log('✅ Stripe config received, initializing Stripe...');
+
+    console.log("✅ Stripe config received, initializing Stripe...");
     stripePromise = loadStripe(config.publishableKey);
     return stripePromise;
   } catch (error) {
-    console.error('❌ Failed to fetch Stripe config:', error);
+    console.error("❌ Failed to fetch Stripe config:", error);
     return null;
   }
 };
@@ -65,21 +65,21 @@ function CheckoutForm({ selectedPlan, onBack }: CheckoutFormProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [billingDetails, setBillingDetails] = useState({
-    name: '',
-    email: '',
+    name: "",
+    email: "",
     address: {
-      line1: '',
-      city: '',
-      state: '',
-      postal_code: '',
-      country: 'US'
-    }
+      line1: "",
+      city: "",
+      state: "",
+      postal_code: "",
+      country: "US",
+    },
   });
   const [appliedPromoCode, setAppliedPromoCode] = useState<any>(null);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    
+
     if (!stripe || !elements) {
       return;
     }
@@ -88,23 +88,24 @@ function CheckoutForm({ selectedPlan, onBack }: CheckoutFormProps) {
     setError(null);
 
     const cardElement = elements.getElement(CardElement);
-    
+
     if (!cardElement) {
-      setError('Card element not found');
+      setError("Card element not found");
       setLoading(false);
       return;
     }
 
     try {
       // Create payment method
-      const { error: paymentError, paymentMethod } = await stripe.createPaymentMethod({
-        type: 'card',
-        card: cardElement,
-        billing_details: billingDetails,
-      });
+      const { error: paymentError, paymentMethod } =
+        await stripe.createPaymentMethod({
+          type: "card",
+          card: cardElement,
+          billing_details: billingDetails,
+        });
 
       if (paymentError) {
-        setError(paymentError.message || 'Payment failed');
+        setError(paymentError.message || "Payment failed");
         setLoading(false);
         return;
       }
@@ -114,7 +115,7 @@ function CheckoutForm({ selectedPlan, onBack }: CheckoutFormProps) {
         planId: selectedPlan.id,
         paymentMethodId: paymentMethod.id,
         billingDetails,
-        promotionCode: appliedPromoCode?.promotionCode?.code
+        promotionCode: appliedPromoCode?.promotionCode?.code,
       });
 
       if (response.data?.requiresAction && response.data?.clientSecret) {
@@ -124,18 +125,20 @@ function CheckoutForm({ selectedPlan, onBack }: CheckoutFormProps) {
         );
 
         if (confirmError) {
-          setError(confirmError.message || 'Payment confirmation failed');
+          setError(confirmError.message || "Payment confirmation failed");
           setLoading(false);
           return;
         }
       }
 
-      toast.success('Subscription created successfully!');
-      window.location.href = '/dashboard/profile?tab=settings&success=true';
-
+      toast.success("Subscription created successfully!");
+      window.location.href = "/dashboard/profile?tab=settings&success=true";
     } catch (err: any) {
-      console.error('Checkout error:', err);
-      const errorMessage = err.response?.data?.message || err.message || 'An unexpected error occurred';
+      console.error("Checkout error:", err);
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        "An unexpected error occurred";
       setError(errorMessage);
       setLoading(false);
     }
@@ -144,15 +147,15 @@ function CheckoutForm({ selectedPlan, onBack }: CheckoutFormProps) {
   const cardElementOptions = {
     style: {
       base: {
-        fontSize: '16px',
-        color: '#424770',
-        '::placeholder': {
-          color: '#aab7c4',
+        fontSize: "16px",
+        color: "#424770",
+        "::placeholder": {
+          color: "#aab7c4",
         },
-        fontFamily: 'Inter, system-ui, sans-serif',
+        fontFamily: "Inter, system-ui, sans-serif",
       },
       invalid: {
-        color: '#9e2146',
+        color: "#9e2146",
       },
     },
   };
@@ -169,8 +172,12 @@ function CheckoutForm({ selectedPlan, onBack }: CheckoutFormProps) {
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Complete Your Purchase</h1>
-          <p className="text-gray-600">Secure checkout for {selectedPlan.name} plan</p>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Complete Your Purchase
+          </h1>
+          <p className="text-gray-600">
+            Secure checkout for {selectedPlan.name} plan
+          </p>
         </div>
       </div>
 
@@ -195,27 +202,39 @@ function CheckoutForm({ selectedPlan, onBack }: CheckoutFormProps) {
 
                 {/* Billing Details */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Billing Details</h3>
-                  
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Billing Details
+                  </h3>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="name">Full Name</Label>
                       <Input
                         id="name"
                         value={billingDetails.name}
-                        onChange={(e) => setBillingDetails({ ...billingDetails, name: e.target.value })}
+                        onChange={(e) =>
+                          setBillingDetails({
+                            ...billingDetails,
+                            name: e.target.value,
+                          })
+                        }
                         placeholder="John Doe"
                         required
                       />
                     </div>
-                    
+
                     <div>
                       <Label htmlFor="email">Email Address</Label>
                       <Input
                         id="email"
                         type="email"
                         value={billingDetails.email}
-                        onChange={(e) => setBillingDetails({ ...billingDetails, email: e.target.value })}
+                        onChange={(e) =>
+                          setBillingDetails({
+                            ...billingDetails,
+                            email: e.target.value,
+                          })
+                        }
                         placeholder="john@company.com"
                         required
                       />
@@ -227,10 +246,15 @@ function CheckoutForm({ selectedPlan, onBack }: CheckoutFormProps) {
                     <Input
                       id="address"
                       value={billingDetails.address.line1}
-                      onChange={(e) => setBillingDetails({ 
-                        ...billingDetails, 
-                        address: { ...billingDetails.address, line1: e.target.value }
-                      })}
+                      onChange={(e) =>
+                        setBillingDetails({
+                          ...billingDetails,
+                          address: {
+                            ...billingDetails.address,
+                            line1: e.target.value,
+                          },
+                        })
+                      }
                       placeholder="123 Main Street"
                       required
                     />
@@ -242,38 +266,53 @@ function CheckoutForm({ selectedPlan, onBack }: CheckoutFormProps) {
                       <Input
                         id="city"
                         value={billingDetails.address.city}
-                        onChange={(e) => setBillingDetails({ 
-                          ...billingDetails, 
-                          address: { ...billingDetails.address, city: e.target.value }
-                        })}
+                        onChange={(e) =>
+                          setBillingDetails({
+                            ...billingDetails,
+                            address: {
+                              ...billingDetails.address,
+                              city: e.target.value,
+                            },
+                          })
+                        }
                         placeholder="New York"
                         required
                       />
                     </div>
-                    
+
                     <div>
                       <Label htmlFor="state">State</Label>
                       <Input
                         id="state"
                         value={billingDetails.address.state}
-                        onChange={(e) => setBillingDetails({ 
-                          ...billingDetails, 
-                          address: { ...billingDetails.address, state: e.target.value }
-                        })}
+                        onChange={(e) =>
+                          setBillingDetails({
+                            ...billingDetails,
+                            address: {
+                              ...billingDetails.address,
+                              state: e.target.value,
+                            },
+                          })
+                        }
                         placeholder="NY"
                         required
                       />
                     </div>
-                    
+
                     <div>
                       <Label htmlFor="zip">ZIP Code</Label>
                       <Input
                         id="zip"
                         value={billingDetails.address.postal_code}
-                        onChange={(e) => setBillingDetails({ 
-                          ...billingDetails, 
-                          address: { ...billingDetails.address, postal_code: e.target.value }
-                        })}
+                        onChange={(e) =>
+                          setBillingDetails({
+                            ...billingDetails,
+                            address: {
+                              ...billingDetails.address,
+                              postal_code: e.target.value,
+                            },
+                          })
+                        }
                         placeholder="10001"
                         required
                       />
@@ -296,8 +335,10 @@ function CheckoutForm({ selectedPlan, onBack }: CheckoutFormProps) {
 
                 {/* Card Details */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Card Details</h3>
-                  
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Card Details
+                  </h3>
+
                   <div className="p-4 border border-gray-200 rounded-lg">
                     <CardElement options={cardElementOptions} />
                   </div>
@@ -309,17 +350,16 @@ function CheckoutForm({ selectedPlan, onBack }: CheckoutFormProps) {
                     <Shield className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
                     <div className="text-sm text-blue-800">
                       <p className="font-medium">Your payment is secure</p>
-                      <p>All transactions are encrypted and processed securely through Stripe.</p>
+                      <p>
+                        All transactions are encrypted and processed securely
+                        through Stripe.
+                      </p>
                     </div>
                   </div>
                 </div>
 
                 {/* Submit Button */}
-                <Button
-                  type="submit"
-                  disabled={!stripe || loading}
-                  className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-semibold"
-                >
+                <Button type="submit" disabled={!stripe || loading}>
                   {loading ? (
                     <div className="flex items-center space-x-2">
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
@@ -346,11 +386,18 @@ function CheckoutForm({ selectedPlan, onBack }: CheckoutFormProps) {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-semibold text-gray-900">{selectedPlan.name}</h4>
-                  <p className="text-sm text-gray-600">{selectedPlan.description}</p>
+                  <h4 className="font-semibold text-gray-900">
+                    {selectedPlan.name}
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    {selectedPlan.description}
+                  </p>
                 </div>
-                <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-                  {selectedPlan.popular && 'Popular'}
+                <Badge
+                  variant="secondary"
+                  className="bg-blue-100 text-blue-700"
+                >
+                  {selectedPlan.popular && "Popular"}
                 </Badge>
               </div>
 
@@ -360,12 +407,17 @@ function CheckoutForm({ selectedPlan, onBack }: CheckoutFormProps) {
               <div className="space-y-2">
                 <h5 className="font-medium text-gray-900">Includes:</h5>
                 <ul className="space-y-1">
-                  {selectedPlan.features.map((feature: string, index: number) => (
-                    <li key={index} className="flex items-center space-x-2 text-sm text-gray-600">
-                      <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
+                  {selectedPlan.features.map(
+                    (feature: string, index: number) => (
+                      <li
+                        key={index}
+                        className="flex items-center space-x-2 text-sm text-gray-600"
+                      >
+                        <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                        <span>{feature}</span>
+                      </li>
+                    )
+                  )}
                 </ul>
               </div>
 
@@ -405,9 +457,9 @@ export function CustomCheckout({ planId }: CustomCheckoutProps) {
   const [stripe, setStripe] = useState<any>(null);
   const [stripeLoading, setStripeLoading] = useState(true);
   const [stripeError, setStripeError] = useState<string | null>(null);
-  const selectedPlanId = planId || searchParams.get('plan');
-  
-  const selectedPlan = PLANS.find(plan => plan.id === selectedPlanId);
+  const selectedPlanId = planId || searchParams.get("plan");
+
+  const selectedPlan = PLANS.find((plan) => plan.id === selectedPlanId);
 
   useEffect(() => {
     const loadStripeConfig = async () => {
@@ -416,8 +468,8 @@ export function CustomCheckout({ planId }: CustomCheckoutProps) {
         setStripe(stripeInstance);
         setStripeLoading(false);
       } catch (error) {
-        console.error('Failed to initialize Stripe:', error);
-        setStripeError('Failed to load payment system');
+        console.error("Failed to initialize Stripe:", error);
+        setStripeError("Failed to load payment system");
         setStripeLoading(false);
       }
     };
@@ -432,7 +484,9 @@ export function CustomCheckout({ planId }: CustomCheckoutProps) {
         <Card className="max-w-md mx-auto">
           <CardContent className="text-center p-8">
             <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Loading Payment System</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">
+              Loading Payment System
+            </h2>
             <p className="text-gray-600">Initializing secure checkout...</p>
           </CardContent>
         </Card>
@@ -447,9 +501,14 @@ export function CustomCheckout({ planId }: CustomCheckoutProps) {
         <Card className="max-w-md mx-auto">
           <CardContent className="text-center p-8">
             <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Payment System Unavailable</h2>
-            <p className="text-gray-600 mb-6">{stripeError || 'Unable to load payment system. Please try again later.'}</p>
-            <Button onClick={() => navigate('/dashboard/profile?tab=settings')}>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">
+              Payment System Unavailable
+            </h2>
+            <p className="text-gray-600 mb-6">
+              {stripeError ||
+                "Unable to load payment system. Please try again later."}
+            </p>
+            <Button onClick={() => navigate("/dashboard/profile?tab=settings")}>
               Back to Plans
             </Button>
           </CardContent>
@@ -464,9 +523,13 @@ export function CustomCheckout({ planId }: CustomCheckoutProps) {
         <Card className="max-w-md mx-auto">
           <CardContent className="text-center p-8">
             <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Plan Not Found</h2>
-            <p className="text-gray-600 mb-6">The selected plan could not be found.</p>
-            <Button onClick={() => navigate('/dashboard/profile?tab=settings')}>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">
+              Plan Not Found
+            </h2>
+            <p className="text-gray-600 mb-6">
+              The selected plan could not be found.
+            </p>
+            <Button onClick={() => navigate("/dashboard/profile?tab=settings")}>
               Back to Plans
             </Button>
           </CardContent>
@@ -478,9 +541,9 @@ export function CustomCheckout({ planId }: CustomCheckoutProps) {
   return (
     <div className="min-h-screen bg-blue-50/30">
       <Elements stripe={stripe}>
-        <CheckoutForm 
+        <CheckoutForm
           selectedPlan={selectedPlan}
-          onBack={() => navigate('/dashboard/profile?tab=settings')}
+          onBack={() => navigate("/dashboard/profile?tab=settings")}
         />
       </Elements>
     </div>

@@ -92,9 +92,10 @@ export default function EditStaffDialog({
   const validateForm = (): boolean => {
     const newErrors: any = {};
 
-    if (!formData.firstName.trim()) newErrors.firstName = "First name is required";
+    if (!formData.firstName.trim())
+      newErrors.firstName = "First name is required";
     if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
-    
+
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
@@ -138,7 +139,9 @@ export default function EditStaffDialog({
               <UserCog className="h-6 w-6 text-purple-600" />
             </div>
             <div>
-              <DialogTitle className="text-2xl font-bold">Edit Staff Member</DialogTitle>
+              <DialogTitle className="text-2xl font-bold">
+                Edit Staff Member
+              </DialogTitle>
               <DialogDescription className="text-base text-gray-600">
                 Update staff member information and role
               </DialogDescription>
@@ -157,70 +160,116 @@ export default function EditStaffDialog({
             {/* Name Fields */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="firstName" className="text-base font-medium">First Name *</Label>
+                <Label htmlFor="firstName" className="text-base font-medium">
+                  First Name *
+                </Label>
                 <Input
                   id="firstName"
                   value={formData.firstName}
-                  onChange={(e) => handleInputChange("firstName", e.target.value)}
-                  className={errors.firstName ? "border-red-500 h-11 text-base" : "h-11 text-base"}
+                  onChange={(e) =>
+                    handleInputChange("firstName", e.target.value)
+                  }
+                  className={
+                    errors.firstName
+                      ? "border-red-500 h-11 text-base"
+                      : "h-11 text-base"
+                  }
                   disabled={isUpdating}
                 />
-                {errors.firstName && <p className="text-xs text-red-500">{errors.firstName}</p>}
+                {errors.firstName && (
+                  <p className="text-xs text-red-500">{errors.firstName}</p>
+                )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="lastName" className="text-base font-medium">Last Name *</Label>
+                <Label htmlFor="lastName" className="text-base font-medium">
+                  Last Name *
+                </Label>
                 <Input
                   id="lastName"
                   value={formData.lastName}
-                  onChange={(e) => handleInputChange("lastName", e.target.value)}
-                  className={errors.lastName ? "border-red-500 h-11 text-base" : "h-11 text-base"}
+                  onChange={(e) =>
+                    handleInputChange("lastName", e.target.value)
+                  }
+                  className={
+                    errors.lastName
+                      ? "border-red-500 h-11 text-base"
+                      : "h-11 text-base"
+                  }
                   disabled={isUpdating}
                 />
-                {errors.lastName && <p className="text-xs text-red-500">{errors.lastName}</p>}
+                {errors.lastName && (
+                  <p className="text-xs text-red-500">{errors.lastName}</p>
+                )}
               </div>
             </div>
 
             {/* Email */}
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-base font-medium">Email Address *</Label>
+              <Label htmlFor="email" className="text-base font-medium">
+                Email Address *
+              </Label>
               <Input
                 id="email"
                 type="email"
                 value={formData.email}
                 onChange={(e) => handleInputChange("email", e.target.value)}
-                className={errors.email ? "border-red-500 h-11 text-base" : "h-11 text-base"}
+                className={
+                  errors.email
+                    ? "border-red-500 h-11 text-base"
+                    : "h-11 text-base"
+                }
                 disabled={isUpdating}
               />
-              {errors.email && <p className="text-xs text-red-500">{errors.email}</p>}
+              {errors.email && (
+                <p className="text-xs text-red-500">{errors.email}</p>
+              )}
             </div>
 
             {/* Role Selection */}
             <div className="space-y-2">
-              <Label htmlFor="appRole" className="text-base font-medium">Select Role *</Label>
+              <Label htmlFor="appRole" className="text-base font-medium">
+                Select Role *
+              </Label>
               <Select
                 value={formData.appRole}
                 onValueChange={(value) => handleInputChange("appRole", value)}
                 disabled={isUpdating || isLoadingRoles}
               >
-                <SelectTrigger className={errors.appRole ? "border-red-500 h-11 text-base" : "h-11 text-base"}>
+                <SelectTrigger
+                  className={
+                    errors.appRole
+                      ? "border-red-500 h-11 text-base"
+                      : "h-11 text-base"
+                  }
+                >
                   <SelectValue placeholder="Choose a role..." />
                 </SelectTrigger>
                 <SelectContent>
                   {isLoadingRoles ? (
-                    <SelectItem value="loading" disabled>Loading roles...</SelectItem>
+                    <SelectItem value="loading" disabled>
+                      Loading roles...
+                    </SelectItem>
                   ) : roles.length === 0 ? (
-                    <SelectItem value="none" disabled>No roles found</SelectItem>
+                    <SelectItem value="none" disabled>
+                      No roles found
+                    </SelectItem>
                   ) : (
                     roles.map((role) => (
-                      <SelectItem key={role.id} value={role.id} className="text-base">
+                      <SelectItem
+                        key={role.id}
+                        value={role.id}
+                        className="text-base"
+                      >
                         {role.name}
                       </SelectItem>
                     ))
                   )}
                 </SelectContent>
               </Select>
-              {errors.appRole && <p className="text-xs text-red-500">{errors.appRole}</p>}
+              {errors.appRole && (
+                <p className="text-xs text-red-500">{errors.appRole}</p>
+              )}
             </div>
           </div>
 
@@ -234,11 +283,7 @@ export default function EditStaffDialog({
             >
               Cancel
             </Button>
-            <Button
-              type="submit"
-              disabled={isUpdating}
-              className="h-11 text-base bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-            >
+            <Button type="submit" disabled={isUpdating}>
               {isUpdating ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
@@ -257,4 +302,3 @@ export default function EditStaffDialog({
     </Dialog>
   );
 }
-

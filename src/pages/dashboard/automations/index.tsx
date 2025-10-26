@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -265,40 +266,33 @@ export default function AutomationsDashboard() {
   if (loading) {
     return (
       <div className="min-h-full bg-gray-50">
-        <div className="space-y-2.5 sm:space-y-3">
-          {/* Mobile-Optimized Loading Header */}
-          <div className="bg-white border-b px-2.5 sm:px-4 lg:px-6 py-2.5 sm:py-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
-                <div className="p-1.5 sm:p-2 bg-blue-50 rounded-lg flex-shrink-0">
-                  <Zap className="h-4 w-4 sm:h-4.5 sm:w-4.5 text-blue-600" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h1 className="text-base sm:text-xl font-semibold text-gray-900 truncate">
-                    Automations
-                  </h1>
-                  <p className="text-xs sm:text-sm text-gray-600 truncate">
-                    Loading automations...
-                  </p>
-                </div>
+        {/* Header */}
+        <div className="bg-white border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-md">
+                <Zap className="h-5 w-5 text-white" />
               </div>
+              <h1 className="text-xl font-bold text-gray-900">
+                Automation Center
+              </h1>
             </div>
           </div>
+        </div>
 
-          {/* Mobile-Optimized Loading Cards */}
-          <div className="px-2.5 sm:px-4 lg:px-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="bg-white border rounded-lg p-2.5 sm:p-3 animate-pulse"
-                >
-                  <div className="h-3.5 bg-gray-200 rounded w-3/4 mb-2 sm:mb-2.5"></div>
-                  <div className="h-2.5 bg-gray-200 rounded w-1/2 mb-1.5"></div>
-                  <div className="h-2.5 bg-gray-200 rounded w-2/3"></div>
-                </div>
-              ))}
-            </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+          {/* Loading Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="bg-white border border-gray-200 rounded-md p-4 animate-pulse"
+              >
+                <div className="h-4 bg-gray-200 rounded w-3/4 mb-3"></div>
+                <div className="h-3 bg-gray-200 rounded w-1/2 mb-2"></div>
+                <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -307,367 +301,314 @@ export default function AutomationsDashboard() {
 
   return (
     <div className="min-h-full bg-gray-50">
-      <div className="space-y-2.5 sm:space-y-3">
-        {/* Mobile-First Responsive Header */}
-        <div className="bg-white border-b px-2.5 sm:px-4 lg:px-6 py-2.5 sm:py-3">
-          <Tabs defaultValue="automations" className="w-full">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 mb-3">
-              <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
-                <div className="p-1.5 sm:p-2 bg-blue-50 rounded-lg flex-shrink-0">
-                  <Zap className="h-4 w-4 sm:h-4.5 sm:w-4.5 text-blue-600" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h1 className="text-base sm:text-xl font-bold text-gray-900 truncate">
-                    Automation Center
-                  </h1>
-                  <p className="text-xs sm:text-sm text-gray-600 truncate">
-                    Streamline your recruitment workflow
-                  </p>
-                </div>
-              </div>
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-md">
+              <Zap className="h-5 w-5 text-white" />
             </div>
-
-            <TabsList className="grid w-full grid-cols-2 mb-3 h-8">
-              <TabsTrigger value="automations" className="flex items-center gap-1.5 text-xs">
-                <Zap className="h-3.5 w-3.5" />
-                My Automations
-              </TabsTrigger>
-              <TabsTrigger value="templates" className="flex items-center gap-1.5 text-xs">
-                <Library className="h-3.5 w-3.5" />
-                Template Library
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="automations">
-              <div className="space-y-2.5 sm:space-y-3">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs text-blue-600 font-medium">
-                    {automations.length} automations
-                  </span>
-                  <Button onClick={handleCreateAutomation} variant="secondary" className="h-8 px-2.5 text-xs">
-                    <Plus className="h-3.5 w-3.5 mr-1" />
-                    <span className="hidden sm:inline">Create Automation</span>
-                    <span className="sm:hidden">Create</span>
-                  </Button>
-                </div>
-
-                {/* Mobile-First Filters Section */}
-                <div className="px-2.5 sm:px-4 lg:px-6">
-                  <div className="bg-white rounded-lg p-2.5 sm:p-3 shadow-sm">
-                    {/* Mobile Layout */}
-                    <div className="block lg:hidden space-y-2">
-              {/* Search Bar - Mobile */}
-              <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search automations..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9 pr-3 py-2 w-full border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-xs"
-                />
-              </div>
-
-              {/* Status Filters - Mobile */}
-              <div className="flex items-center gap-0.5 border rounded-lg overflow-hidden">
-                {["all", "active", "inactive"].map((status) => (
-                  <button
-                    key={status}
-                    onClick={() =>
-                      setStatusFilter(status as "all" | "active" | "inactive")
-                    }
-                    className={`flex-1 px-2.5 py-1.5 text-xs font-medium transition-colors ${
-                      statusFilter === status
-                        ? "bg-blue-600 text-white"
-                        : "text-gray-600 hover:bg-gray-50"
-                    }`}
-                  >
-                    {status === "all"
-                      ? "All"
-                      : status.charAt(0).toUpperCase() + status.slice(1)}
-                  </button>
-                ))}
-              </div>
-
-              {/* Stats - Mobile */}
-              <div className="flex items-center justify-center gap-4 text-xs">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-                  <span className="text-green-600 font-medium">
-                    {automations.filter((a) => a.status === "active").length}{" "}
-                    Active
-                  </span>
-                </div>
-                <span className="text-gray-300">•</span>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-1.5 h-1.5 bg-gray-400 rounded-full"></div>
-                  <span className="text-gray-600 font-medium">
-                    {automations.filter((a) => a.status === "inactive").length}{" "}
-                    Paused
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Desktop Layout */}
-            <div className="hidden lg:flex items-center justify-between">
-              <div className="flex items-center gap-3 flex-1">
-                <div className="relative flex-1 max-w-md">
-                  <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Search automations..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-9 pr-3 py-1.5 w-full border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-xs"
-                  />
-                </div>
-
-                <div className="flex items-center gap-0.5 border rounded-lg overflow-hidden">
-                  {["all", "active", "inactive"].map((status) => (
-                    <button
-                      key={status}
-                      onClick={() =>
-                        setStatusFilter(status as "all" | "active" | "inactive")
-                      }
-                      className={`px-3 py-1.5 text-xs font-medium transition-colors ${
-                        statusFilter === status
-                          ? "bg-blue-600 text-white"
-                          : "text-gray-600 hover:bg-gray-50"
-                      }`}
-                    >
-                      {status === "all"
-                        ? "All"
-                        : status.charAt(0).toUpperCase() + status.slice(1)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 text-xs">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-                  <span className="text-green-600 font-medium">
-                    {automations.filter((a) => a.status === "active").length}{" "}
-                    Active
-                  </span>
-                </div>
-                <span className="text-gray-300">•</span>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-1.5 h-1.5 bg-gray-400 rounded-full"></div>
-                  <span className="text-gray-600 font-medium">
-                    {automations.filter((a) => a.status === "inactive").length}{" "}
-                    Paused
-                  </span>
-                </div>
-              </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Mobile-Optimized Automations Grid */}
-                <div className="px-2.5 sm:px-4 lg:px-6 pb-3 sm:pb-4">
-          {filteredAutomations.length === 0 ? (
-            <div className="bg-white rounded-lg p-4 sm:p-8 text-center shadow-sm">
-              <div className="flex flex-col items-center max-w-md mx-auto">
-                <div className="p-2 sm:p-3 bg-gray-100 rounded-full mb-3">
-                  <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-gray-400" />
-                </div>
-                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1.5">
-                  {searchTerm || statusFilter !== "all"
-                    ? "No automations found"
-                    : "No automations yet"}
-                </h3>
-                <p className="text-xs sm:text-sm text-gray-600 mb-4 text-center">
-                  {searchTerm || statusFilter !== "all"
-                    ? "Try adjusting your search or filter criteria"
-                    : "Create your first automation to streamline your recruitment process"}
-                </p>
-                {!searchTerm && statusFilter === "all" && (
-                  <Button onClick={handleCreateAutomation} variant="secondary" className="h-8 px-2.5 text-xs">
-                    <Plus className="h-3.5 w-3.5 mr-1.5" />
-                    <span className="hidden sm:inline">
-                      Create Your First Automation
-                    </span>
-                    <span className="sm:hidden">Create Automation</span>
-                  </Button>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
-              {filteredAutomations.map((automation) => {
-                const triggerInfo = getTriggerInfo(automation.triggerType);
-
-                return (
-                  <div
-                    key={automation.id}
-                    className="bg-white border border-gray-100 rounded-lg hover:border-gray-200 transition-all duration-200 p-2.5 sm:p-3 flex flex-col shadow-sm hover:shadow-md"
-                  >
-                    {/* Mobile-First Header */}
-                    <div className="flex items-start gap-2 mb-2.5">
-                      <div className="p-1.5 sm:p-2 bg-gray-50 rounded-lg flex-shrink-0">
-                        {getTriggerIcon(automation.triggerType)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5 mb-0.5">
-                          <h3 className="text-sm sm:text-base font-semibold text-gray-900 truncate">
-                            {automation.name}
-                          </h3>
-                          <div
-                            className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-                              automation.status === "active"
-                                ? "bg-green-500"
-                                : "bg-gray-400"
-                            }`}
-                          ></div>
-                        </div>
-                        <p className="text-xs text-gray-600 truncate">
-                          {triggerInfo?.label || automation.triggerType}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Mobile-Optimized Stats */}
-                    <div className="flex items-center justify-between mb-2.5 text-xs bg-gray-50 rounded-lg p-2">
-                      <div className="flex items-center gap-1">
-                        <span className="text-gray-500">Conditions:</span>
-                        <span className="font-semibold text-gray-900">
-                          {automation.useConditions
-                            ? automation.conditions.length
-                            : 0}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <span className="text-gray-500">Actions:</span>
-                        <span className="font-semibold text-gray-900">
-                          {automation.actions.length}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Mobile-Friendly Actions Preview */}
-                    <div className="mb-2.5 flex-1">
-                      <div className="flex items-center gap-1.5 mb-1.5">
-                        <Target className="h-3 w-3 text-gray-500" />
-                        <span className="text-xs font-medium text-gray-700">
-                          Actions
-                        </span>
-                      </div>
-                      <div className="flex flex-wrap gap-1">
-                        {automation.actions.slice(0, 2).map((action, index) => (
-                          <div
-                            key={index}
-                            className="flex items-center gap-1 px-1.5 py-0.5 bg-gray-50 rounded text-xs"
-                          >
-                            {getActionTypeIcon(action.type)}
-                            <span className="text-gray-700 truncate">
-                              {getActionTypeLabel(action.type)}
-                            </span>
-                          </div>
-                        ))}
-                        {automation.actions.length > 2 && (
-                          <div className="flex items-center px-1.5 py-0.5 bg-gray-100 rounded text-xs text-gray-500">
-                            +{automation.actions.length - 2}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Mobile-Optimized Status and Actions */}
-                    <div className="space-y-2">
-                      {/* Status Badge */}
-                      <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-                        <Badge
-                          variant={
-                            automation.status === "active"
-                              ? "default"
-                              : "secondary"
-                          }
-                          className={`rounded-full text-xs py-0 px-1.5 ${
-                            automation.status === "active"
-                              ? "bg-green-100 text-green-700 border-green-200"
-                              : "bg-gray-100 text-gray-600 border-gray-200"
-                          }`}
-                        >
-                          {automation.status === "active" ? "Active" : "Paused"}
-                        </Badge>
-                        <span className="text-xs text-gray-500">
-                          {new Date(automation.createdAt).toLocaleDateString(
-                            "en-US",
-                            {
-                              month: "short",
-                              day: "numeric",
-                            }
-                          )}
-                        </span>
-                      </div>
-
-                      {/* Mobile Action Buttons */}
-                      <div className="flex gap-1.5">
-                        <Button
-                          variant="outline"
-                          onClick={() =>
-                            toggleAutomationStatus(
-                              automation.id,
-                              automation.status
-                            )
-                          }
-                          className={`flex-1 rounded-lg text-xs h-7 ${
-                            automation.status === "active"
-                              ? "text-orange-600 border-orange-200 hover:bg-orange-50"
-                              : "text-green-600 border-green-200 hover:bg-green-50"
-                          }`}
-                        >
-                          {automation.status === "active" ? (
-                            <>
-                              <Pause className="h-3 w-3 mr-1" />
-                              <span className="hidden sm:inline">Pause</span>
-                              <span className="sm:hidden">Pause</span>
-                            </>
-                          ) : (
-                            <>
-                              <Play className="h-3 w-3 mr-1" />
-                              <span className="hidden sm:inline">Activate</span>
-                              <span className="sm:hidden">Start</span>
-                            </>
-                          )}
-                        </Button>
-                        <Button
-                          variant="outline"
-                          onClick={() => handleDeleteAutomation(automation.id)}
-                          className="rounded-lg text-red-600 border-red-200 hover:bg-red-50 px-2 h-7"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-                  </div>
-                )}
-                </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="templates">
-              <AutomationTemplateLibrary onTemplateActivated={fetchAutomations} />
-            </TabsContent>
-          </Tabs>
+            <h1 className="text-xl font-bold text-gray-900">
+              Automation Center
+            </h1>
+          </div>
         </div>
       </div>
 
-      {/* Mobile-Responsive Confirmation Dialog */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+        <Tabs defaultValue="automations" className="w-full">
+          {/* Tabs */}
+          <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
+            <TabsTrigger
+              value="automations"
+              className="flex items-center gap-2"
+            >
+              <Zap className="h-4 w-4" />
+              My Automations
+            </TabsTrigger>
+            <TabsTrigger value="templates" className="flex items-center gap-2">
+              <Library className="h-4 w-4" />
+              Templates
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="automations">
+            <div className="space-y-6">
+              {/* Controls Card */}
+              <div className="bg-white rounded-md border border-gray-200 p-4">
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                  {/* Search and Filters */}
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
+                    {/* Search */}
+                    <div className="relative flex-1 max-w-md">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <Input
+                        placeholder="Search automations..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10 h-10"
+                      />
+                    </div>
+
+                    {/* Status Filter */}
+                    <div className="inline-flex bg-gray-100 rounded-md p-1">
+                      {["all", "active", "inactive"].map((status) => (
+                        <button
+                          key={status}
+                          onClick={() =>
+                            setStatusFilter(
+                              status as "all" | "active" | "inactive"
+                            )
+                          }
+                          className={`px-4 py-2 rounded text-sm font-medium transition-all ${
+                            statusFilter === status
+                              ? "bg-white text-gray-900 shadow-sm"
+                              : "text-gray-600 hover:text-gray-900"
+                          }`}
+                        >
+                          {status === "all"
+                            ? "All"
+                            : status.charAt(0).toUpperCase() + status.slice(1)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Stats and Create Button */}
+                  <div className="flex items-center justify-between lg:justify-end gap-4">
+                    {/* Stats */}
+                    <div className="flex items-center gap-3 text-sm">
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span className="text-green-600 font-medium">
+                          {
+                            automations.filter((a) => a.status === "active")
+                              .length
+                          }{" "}
+                          Active
+                        </span>
+                      </div>
+                      <span className="text-gray-300">•</span>
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                        <span className="text-gray-600 font-medium">
+                          {
+                            automations.filter((a) => a.status === "inactive")
+                              .length
+                          }{" "}
+                          Paused
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Create Button */}
+                    <Button onClick={handleCreateAutomation} className="h-10">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Automations Grid */}
+              {filteredAutomations.length === 0 ? (
+                <div className="bg-white rounded-md border border-gray-200 p-12 text-center">
+                  <div className="flex flex-col items-center max-w-md mx-auto">
+                    <div className="p-3 bg-gray-100 rounded-full mb-4">
+                      <Sparkles className="h-6 w-6 text-gray-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      {searchTerm || statusFilter !== "all"
+                        ? "No automations found"
+                        : "No automations yet"}
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-6 text-center">
+                      {searchTerm || statusFilter !== "all"
+                        ? "Try adjusting your search or filter criteria"
+                        : "Create your first automation to streamline your recruitment process"}
+                    </p>
+                    {!searchTerm && statusFilter === "all" && (
+                      <Button onClick={handleCreateAutomation} className="h-10">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create Your First Automation
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filteredAutomations.map((automation) => {
+                    const triggerInfo = getTriggerInfo(automation.triggerType);
+
+                    return (
+                      <div
+                        key={automation.id}
+                        className="bg-white border border-gray-200 rounded-md hover:border-blue-300 transition-all p-4 flex flex-col"
+                      >
+                        {/* Header */}
+                        <div className="flex items-start gap-3 mb-4">
+                          <div className="p-2 bg-gray-50 rounded-md flex-shrink-0">
+                            {getTriggerIcon(automation.triggerType)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className="text-base font-semibold text-gray-900 truncate">
+                                {automation.name}
+                              </h3>
+                              <div
+                                className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                                  automation.status === "active"
+                                    ? "bg-green-500"
+                                    : "bg-gray-400"
+                                }`}
+                              ></div>
+                            </div>
+                            <p className="text-sm text-gray-600 truncate">
+                              {triggerInfo?.label || automation.triggerType}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Stats */}
+                        <div className="flex items-center gap-4 mb-4 text-sm bg-gray-50 rounded-md p-3">
+                          <div className="flex items-center gap-2">
+                            <span className="text-gray-600">Conditions:</span>
+                            <span className="font-semibold text-gray-900">
+                              {automation.useConditions
+                                ? automation.conditions.length
+                                : 0}
+                            </span>
+                          </div>
+                          <span className="text-gray-300">•</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-gray-600">Actions:</span>
+                            <span className="font-semibold text-gray-900">
+                              {automation.actions.length}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Actions Preview */}
+                        <div className="mb-4 flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Target className="h-4 w-4 text-gray-500" />
+                            <span className="text-sm font-medium text-gray-700">
+                              Actions
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {automation.actions
+                              .slice(0, 2)
+                              .map((action, index) => (
+                                <div
+                                  key={index}
+                                  className="flex items-center gap-1.5 px-2.5 py-1.5 bg-gray-50 rounded-md text-sm"
+                                >
+                                  {getActionTypeIcon(action.type)}
+                                  <span className="text-gray-700">
+                                    {getActionTypeLabel(action.type)}
+                                  </span>
+                                </div>
+                              ))}
+                            {automation.actions.length > 2 && (
+                              <div className="flex items-center px-2.5 py-1.5 bg-gray-100 rounded-md text-sm text-gray-500 font-medium">
+                                +{automation.actions.length - 2} more
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="space-y-3 pt-3 border-t border-gray-200">
+                          {/* Status and Date */}
+                          <div className="flex items-center justify-between">
+                            <Badge
+                              variant="outline"
+                              className={`rounded-full ${
+                                automation.status === "active"
+                                  ? "bg-green-50 text-green-700 border-green-200"
+                                  : "bg-gray-100 text-gray-600 border-gray-200"
+                              }`}
+                            >
+                              {automation.status === "active"
+                                ? "Active"
+                                : "Paused"}
+                            </Badge>
+                            <span className="text-sm text-gray-500">
+                              {new Date(
+                                automation.createdAt
+                              ).toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                              })}
+                            </span>
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                toggleAutomationStatus(
+                                  automation.id,
+                                  automation.status
+                                )
+                              }
+                              className={`flex-1 h-9 ${
+                                automation.status === "active"
+                                  ? "text-orange-600 border-orange-200 hover:bg-orange-50"
+                                  : "text-green-600 border-green-200 hover:bg-green-50"
+                              }`}
+                            >
+                              {automation.status === "active" ? (
+                                <>
+                                  <Pause className="h-4 w-4 mr-2" />
+                                  Pause
+                                </>
+                              ) : (
+                                <>
+                                  <Play className="h-4 w-4 mr-2" />
+                                  Activate
+                                </>
+                              )}
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                handleDeleteAutomation(automation.id)
+                              }
+                              className="text-red-600 border-red-200 hover:bg-red-50 h-9 w-9 p-0"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="templates">
+            <AutomationTemplateLibrary onTemplateActivated={fetchAutomations} />
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      {/* Confirmation Dialog */}
       <Dialog
         open={confirmDialog.isOpen}
         onOpenChange={handleCancelStatusChange}
       >
-        <DialogContent className="sm:max-w-md mx-3 sm:mx-auto w-[calc(100vw-24px)] sm:w-full">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-3 text-left">
+            <DialogTitle className="flex items-center gap-3">
               <div
-                className={`p-2 rounded-lg flex-shrink-0 ${
+                className={`p-2 rounded-md flex-shrink-0 ${
                   confirmDialog.action === "delete"
                     ? "bg-red-100"
                     : confirmDialog.action === "pause"
@@ -676,14 +617,14 @@ export default function AutomationsDashboard() {
                 }`}
               >
                 {confirmDialog.action === "delete" ? (
-                  <Trash2 className="h-4 w-4 sm:h-5 sm:w-5 text-red-600" />
+                  <Trash2 className="h-5 w-5 text-red-600" />
                 ) : confirmDialog.action === "pause" ? (
-                  <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-orange-600" />
+                  <AlertTriangle className="h-5 w-5 text-orange-600" />
                 ) : (
-                  <Play className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
+                  <Play className="h-5 w-5 text-green-600" />
                 )}
               </div>
-              <span className="text-lg sm:text-xl font-semibold">
+              <span className="text-xl font-semibold">
                 {confirmDialog.action === "delete"
                   ? "Delete Automation"
                   : confirmDialog.action === "pause"
@@ -694,15 +635,15 @@ export default function AutomationsDashboard() {
           </DialogHeader>
 
           <div className="py-4">
-            <p className="text-sm sm:text-base text-gray-600 mb-4">
+            <p className="text-sm text-gray-600 mb-4">
               Are you sure you want to <strong>{confirmDialog.action}</strong>{" "}
               the automation:
             </p>
-            <div className="bg-gray-50 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
-              <p className="font-medium text-gray-900 text-sm sm:text-base truncate">
+            <div className="bg-gray-50 rounded-md p-4 mb-6">
+              <p className="font-medium text-gray-900 text-base">
                 {confirmDialog.automationName}
               </p>
-              <p className="text-xs sm:text-sm text-gray-500 mt-1">
+              <p className="text-sm text-gray-500 mt-2">
                 {confirmDialog.action === "delete"
                   ? "This action cannot be undone. The automation and all its configurations will be permanently removed."
                   : confirmDialog.action === "pause"
@@ -712,18 +653,18 @@ export default function AutomationsDashboard() {
             </div>
           </div>
 
-          {/* Mobile-First Button Layout */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
+          {/* Buttons */}
+          <div className="flex gap-3 justify-end">
             <Button
               variant="outline"
               onClick={handleCancelStatusChange}
-              className="rounded-lg order-2 sm:order-1 w-full sm:w-auto"
+              className="h-10"
             >
               Cancel
             </Button>
             <Button
               onClick={handleConfirmAction}
-              className={`rounded-lg order-1 sm:order-2 w-full sm:w-auto ${
+              className={`h-10 ${
                 confirmDialog.action === "delete"
                   ? "bg-red-600 hover:bg-red-700"
                   : confirmDialog.action === "pause"
@@ -734,20 +675,17 @@ export default function AutomationsDashboard() {
               {confirmDialog.action === "delete" ? (
                 <>
                   <Trash2 className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">Delete Automation</span>
-                  <span className="sm:hidden">Delete</span>
+                  Delete
                 </>
               ) : confirmDialog.action === "pause" ? (
                 <>
                   <Pause className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">Pause Automation</span>
-                  <span className="sm:hidden">Pause</span>
+                  Pause
                 </>
               ) : (
                 <>
                   <Play className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">Activate Automation</span>
-                  <span className="sm:hidden">Activate</span>
+                  Activate
                 </>
               )}
             </Button>

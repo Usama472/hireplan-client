@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import API from "@/http";
 import type { RoleResponse } from "@/http/role/api";
 import type { CreateStaffPayload, StaffResponse } from "@/http/staff/api";
@@ -12,10 +13,10 @@ import {
   Plus,
   Shield,
   Users,
+  Search,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { SearchBar } from "../jobs/search-bar";
 import AddRoleSheet from "./add-role-sheet";
 import AddStaffSheet from "./add-staff-sheet";
 import EditStaffDialog from "./edit-staff-dialog";
@@ -82,6 +83,7 @@ export default function StaffManagement() {
     } else {
       fetchStaff(staffState.page);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, roleState.page, staffState.page]);
 
   // Also fetch roles when search query changes, with a debounce
@@ -99,6 +101,7 @@ export default function StaffManagement() {
 
       return () => clearTimeout(handler);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery, activeTab]);
 
   // Fetch staff from API
@@ -149,14 +152,6 @@ export default function StaffManagement() {
       toast.error("Failed to load roles. Please try again.");
       setRoleState((prev) => ({ ...prev, isLoading: false }));
     }
-  };
-
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-  };
-
-  const clearSearch = () => {
-    setSearchQuery("");
   };
 
   const handleCreateNew = () => {
@@ -296,508 +291,395 @@ export default function StaffManagement() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="w-full max-w-none">
-        {/* Mobile Header */}
-        <div className="block lg:hidden bg-white border-b border-gray-200 px-4 py-3">
-          <div className="flex flex-col space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-blue-50 rounded-lg">
-                  <Users className="h-5 w-5 text-blue-600" />
-                </div>
-                <div>
-                  <h1 className="text-lg font-semibold text-gray-900">
-                    Staff Management
-                  </h1>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    Manage staff & roles
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Desktop Header */}
-        <div className="hidden lg:block bg-white border-b border-gray-200 px-6 py-4">
-          <div className="flex flex-col">
-            <h1 className="text-xl font-semibold text-gray-900 mb-1">
-              Staff Management
-            </h1>
-            <p className="text-gray-600 text-sm">
-              Manage your staff members and role permissions
-            </p>
-          </div>
-        </div>
-
-        {/* Mobile Navigation */}
-        <div className="block lg:hidden px-4 py-3 bg-white border-b border-gray-100">
-          {/* Tab Pills */}
-          <div className="flex items-center gap-2 mb-3 overflow-x-auto scrollbar-hide">
-            <button
-              className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                activeTab === "staff"
-                  ? "bg-blue-100 text-blue-700 border border-blue-200"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
-              onClick={() => setActiveTab("staff")}
-            >
-              <span className="flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                Staff
-              </span>
-            </button>
-            <button
-              className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                activeTab === "roles"
-                  ? "bg-blue-100 text-blue-700 border border-blue-200"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
-              onClick={() => setActiveTab("roles")}
-            >
-              <span className="flex items-center gap-2">
-                <Shield className="h-4 w-4" />
-                Roles
-              </span>
-            </button>
-          </div>
-
-          {/* Mobile Actions */}
-          <div className="flex flex-col space-y-3">
-            {/* Search Bar */}
-            <div className="w-full">
-              <SearchBar
-                searchQuery={searchQuery}
-                onSearch={handleSearch}
-                placeholder={`Search ${activeTab}...`}
-                onClear={clearSearch}
-              />
-            </div>
-
-            {/* View Mode & Add Button */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setViewMode("grid")}
-                  className={`${
-                    viewMode === "grid"
-                      ? "bg-blue-50 border-blue-200 text-blue-700"
-                      : ""
-                  }`}
-                >
-                  <Grid3X3 className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setViewMode("list")}
-                  className={`${
-                    viewMode === "list"
-                      ? "bg-blue-50 border-blue-200 text-blue-700"
-                      : ""
-                  }`}
-                >
-                  <List className="h-4 w-4" />
-                </Button>
-              </div>
-
-              <Button
-                onClick={handleCreateNew}
-                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl px-4 py-2 font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+    <div className="min-h-full bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+        {/* Tabs and Controls */}
+        <div className="bg-white rounded-md border border-gray-200 p-4">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            {/* Tabs */}
+            <div className="flex items-center gap-2">
+              <button
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                  activeTab === "staff"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+                onClick={() => setActiveTab("staff")}
               >
+                <span className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Staff
+                </span>
+              </button>
+              <button
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                  activeTab === "roles"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+                onClick={() => setActiveTab("roles")}
+              >
+                <span className="flex items-center gap-2">
+                  <Shield className="h-4 w-4" />
+                  Roles
+                </span>
+              </button>
+            </div>
+
+            {/* Search and Actions */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              {/* Search */}
+              <div className="relative flex-1 sm:w-64">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder={`Search ${activeTab}...`}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 h-10"
+                />
+              </div>
+
+              {/* View Mode Toggle */}
+              <div className="inline-flex bg-gray-100 rounded-md p-1">
+                <button
+                  onClick={() => setViewMode("grid")}
+                  className={`inline-flex items-center justify-center px-3 py-2 rounded text-sm font-medium transition-all ${
+                    viewMode === "grid"
+                      ? "bg-white text-gray-900 shadow-sm"
+                      : "text-gray-600 hover:text-gray-900"
+                  }`}
+                >
+                  <Grid3X3 className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode("list")}
+                  className={`inline-flex items-center justify-center px-3 py-2 rounded text-sm font-medium transition-all ${
+                    viewMode === "list"
+                      ? "bg-white text-gray-900 shadow-sm"
+                      : "text-gray-600 hover:text-gray-900"
+                  }`}
+                >
+                  <List className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Add Button */}
+              <Button onClick={handleCreateNew} className="h-10">
                 <Plus className="h-4 w-4 mr-2" />
                 Add {activeTab === "staff" ? "Staff" : "Role"}
               </Button>
             </div>
           </div>
         </div>
+        {/* Content Section */}
+        <div className="space-y-4">
+          {activeTab === "staff" ? (
+            <div className="space-y-6">
+              {viewMode === "grid" ? (
+                <StaffGrid
+                  staffMembers={staffState.staff}
+                  isLoading={staffState.isLoading}
+                  searchQuery={searchQuery}
+                  onEdit={(staff: StaffMember) => {
+                    setEditingStaff(staff);
+                    setIsEditStaffDialogOpen(true);
+                  }}
+                  onDelete={async (staffId: string) => {
+                    try {
+                      await API.staff.deleteStaff(staffId);
+                      toast.success("Staff member deleted successfully");
+                      fetchStaff(staffState.page);
+                    } catch (error) {
+                      console.error("Failed to delete staff:", error);
+                      toast.error("Failed to delete staff member");
+                    }
+                  }}
+                  onResendInvite={async (
+                    staffId: string,
+                    staffName: string
+                  ) => {
+                    try {
+                      // Generate new password
+                      const newPassword =
+                        Math.random().toString(36).slice(-12) + "Aa1!";
+                      await API.staff.resendInvite(staffId, newPassword);
+                      toast.success(`Invitation email resent to ${staffName}`);
+                    } catch (error) {
+                      console.error("Failed to resend invite:", error);
+                      toast.error("Failed to resend invitation");
+                    }
+                  }}
+                />
+              ) : (
+                <StaffList
+                  staffMembers={staffState.staff}
+                  isLoading={staffState.isLoading}
+                  searchQuery={searchQuery}
+                  onEdit={(staff: StaffMember) => {
+                    setEditingStaff(staff);
+                    setIsEditStaffDialogOpen(true);
+                  }}
+                  onDelete={async (staffId: string) => {
+                    try {
+                      await API.staff.deleteStaff(staffId);
+                      toast.success("Staff member deleted successfully");
+                      fetchStaff(staffState.page);
+                    } catch (error) {
+                      console.error("Failed to delete staff:", error);
+                      toast.error("Failed to delete staff member");
+                    }
+                  }}
+                  onResendInvite={async (
+                    staffId: string,
+                    staffName: string
+                  ) => {
+                    try {
+                      // Generate new password
+                      const newPassword =
+                        Math.random().toString(36).slice(-12) + "Aa1!";
+                      await API.staff.resendInvite(staffId, newPassword);
+                      toast.success(`Invitation email resent to ${staffName}`);
+                    } catch (error) {
+                      console.error("Failed to resend invite:", error);
+                      toast.error("Failed to resend invitation");
+                    }
+                  }}
+                />
+              )}
 
-        {/* Desktop Navigation */}
-        <div className="hidden lg:block px-6 py-4 bg-gray-50">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-8">
-              <div className="border-b border-gray-200 flex space-x-8">
-                <button
-                  className={`pb-3 transition-colors ${
-                    activeTab === "staff"
-                      ? "border-b-2 border-blue-600 text-blue-600 font-medium"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
-                  onClick={() => setActiveTab("staff")}
-                >
-                  <span className="flex items-center gap-2">
-                    <Users className="h-4 w-4" />
-                    <span className="text-base">Staff</span>
-                  </span>
-                </button>
-                <button
-                  className={`pb-3 transition-colors ${
-                    activeTab === "roles"
-                      ? "border-b-2 border-blue-600 text-blue-600 font-medium"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
-                  onClick={() => setActiveTab("roles")}
-                >
-                  <span className="flex items-center gap-2">
-                    <Shield className="h-4 w-4" />
-                    <span className="text-base">Roles</span>
-                  </span>
-                </button>
-              </div>
-            </div>
+              {/* Mobile Pagination */}
+              {staffState.totalPages > 1 && (
+                <div className="mt-6">
+                  {/* Mobile: Full width pagination */}
+                  <div className="block sm:hidden">
+                    <div className="flex items-center justify-between mb-3">
+                      <Button
+                        variant="outline"
+                        onClick={() =>
+                          handleStaffPageChange(
+                            Math.max(1, staffState.page - 1)
+                          )
+                        }
+                        disabled={staffState.page === 1 || staffState.isLoading}
+                        className="flex-1 mr-2 bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                      >
+                        <ChevronLeft className="h-4 w-4 mr-1" />
+                        Previous
+                      </Button>
 
-            <div className="flex items-center space-x-3">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setViewMode("grid")}
-                className={viewMode === "grid" ? "bg-gray-100" : ""}
-              >
-                <Grid3X3 className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setViewMode("list")}
-                className={viewMode === "list" ? "bg-gray-100" : ""}
-              >
-                <List className="h-4 w-4" />
-              </Button>
-              <SearchBar
-                searchQuery={searchQuery}
-                onSearch={handleSearch}
-                placeholder={`Search ${activeTab}...`}
-                onClear={clearSearch}
-              />
-              <Button
-                onClick={handleCreateNew}
-                className="bg-blue-600 hover:bg-blue-700 text-white gap-2 shadow-lg hover:shadow-xl hover:shadow-blue-600/25 transition-all duration-300"
-              >
-                <Plus className="h-4 w-4" />
-                <span>Add {activeTab === "staff" ? "Staff" : "Role"}</span>
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        <div className="px-4 lg:px-6 py-4 lg:py-6">
-          {/* Content Section */}
-          <div className="space-y-4">
-            {activeTab === "staff" ? (
-              <div className="space-y-6">
-                {viewMode === "grid" ? (
-                  <StaffGrid
-                    staffMembers={staffState.staff}
-                    isLoading={staffState.isLoading}
-                    searchQuery={searchQuery}
-                    onEdit={(staff: StaffMember) => {
-                      setEditingStaff(staff);
-                      setIsEditStaffDialogOpen(true);
-                    }}
-                    onDelete={async (staffId: string) => {
-                      try {
-                        await API.staff.deleteStaff(staffId);
-                        toast.success('Staff member deleted successfully');
-                        fetchStaff(staffState.page);
-                      } catch (error) {
-                        console.error('Failed to delete staff:', error);
-                        toast.error('Failed to delete staff member');
-                      }
-                    }}
-                    onResendInvite={async (staffId: string, staffName: string) => {
-                      try {
-                        // Generate new password
-                        const newPassword = Math.random().toString(36).slice(-12) + 'Aa1!';
-                        await API.staff.resendInvite(staffId, newPassword);
-                        toast.success(`Invitation email resent to ${staffName}`);
-                      } catch (error) {
-                        console.error('Failed to resend invite:', error);
-                        toast.error('Failed to resend invitation');
-                      }
-                    }}
-                  />
-                ) : (
-                  <StaffList
-                    staffMembers={staffState.staff}
-                    isLoading={staffState.isLoading}
-                    searchQuery={searchQuery}
-                    onEdit={(staff: StaffMember) => {
-                      setEditingStaff(staff);
-                      setIsEditStaffDialogOpen(true);
-                    }}
-                    onDelete={async (staffId: string) => {
-                      try {
-                        await API.staff.deleteStaff(staffId);
-                        toast.success('Staff member deleted successfully');
-                        fetchStaff(staffState.page);
-                      } catch (error) {
-                        console.error('Failed to delete staff:', error);
-                        toast.error('Failed to delete staff member');
-                      }
-                    }}
-                    onResendInvite={async (staffId: string, staffName: string) => {
-                      try {
-                        // Generate new password
-                        const newPassword = Math.random().toString(36).slice(-12) + 'Aa1!';
-                        await API.staff.resendInvite(staffId, newPassword);
-                        toast.success(`Invitation email resent to ${staffName}`);
-                      } catch (error) {
-                        console.error('Failed to resend invite:', error);
-                        toast.error('Failed to resend invitation');
-                      }
-                    }}
-                  />
-                )}
-
-                {/* Mobile Pagination */}
-                {staffState.totalPages > 1 && (
-                  <div className="mt-6">
-                    {/* Mobile: Full width pagination */}
-                    <div className="block sm:hidden">
-                      <div className="flex items-center justify-between mb-3">
-                        <Button
-                          variant="outline"
-                          onClick={() =>
-                            handleStaffPageChange(
-                              Math.max(1, staffState.page - 1)
-                            )
-                          }
-                          disabled={
-                            staffState.page === 1 || staffState.isLoading
-                          }
-                          className="flex-1 mr-2 bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
-                        >
-                          <ChevronLeft className="h-4 w-4 mr-1" />
-                          Previous
-                        </Button>
-
-                        <div className="px-3 py-2 bg-gray-100 rounded-lg text-sm font-medium text-gray-700">
-                          {staffState.page} of {staffState.totalPages}
-                        </div>
-
-                        <Button
-                          variant="outline"
-                          onClick={() =>
-                            handleStaffPageChange(
-                              Math.min(
-                                staffState.totalPages,
-                                staffState.page + 1
-                              )
-                            )
-                          }
-                          disabled={
-                            staffState.page === staffState.totalPages ||
-                            staffState.isLoading
-                          }
-                          className="flex-1 ml-2 bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
-                        >
-                          Next
-                          <ChevronRight className="h-4 w-4 ml-1" />
-                        </Button>
+                      <div className="px-3 py-2 bg-gray-100 rounded-lg text-sm font-medium text-gray-700">
+                        {staffState.page} of {staffState.totalPages}
                       </div>
-                    </div>
 
-                    {/* Desktop: Traditional pagination */}
-                    <div className="hidden sm:flex justify-center">
-                      <div className="flex items-center space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            handleStaffPageChange(
-                              Math.max(1, staffState.page - 1)
-                            )
-                          }
-                          disabled={
-                            staffState.page === 1 || staffState.isLoading
-                          }
-                          className="flex items-center gap-1"
-                        >
-                          <ChevronLeft className="h-4 w-4" />
-                          Previous
-                        </Button>
-
-                        <div className="flex items-center space-x-1">
-                          {Array.from(
-                            { length: staffState.totalPages },
-                            (_, i) => i + 1
-                          ).map((pageNum) => (
-                            <Button
-                              key={pageNum}
-                              variant={
-                                pageNum === staffState.page
-                                  ? "default"
-                                  : "outline"
-                              }
-                              size="sm"
-                              onClick={() => handleStaffPageChange(pageNum)}
-                              disabled={staffState.isLoading}
-                              className={
-                                pageNum === staffState.page
-                                  ? "bg-primary text-white"
-                                  : ""
-                              }
-                            >
-                              {pageNum}
-                            </Button>
-                          ))}
-                        </div>
-
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            handleStaffPageChange(
-                              Math.min(
-                                staffState.totalPages,
-                                staffState.page + 1
-                              )
-                            )
-                          }
-                          disabled={
-                            staffState.page === staffState.totalPages ||
-                            staffState.isLoading
-                          }
-                          className="flex items-center gap-1"
-                        >
-                          Next
-                          <ChevronRight className="h-4 w-4" />
-                        </Button>
-                      </div>
+                      <Button
+                        variant="outline"
+                        onClick={() =>
+                          handleStaffPageChange(
+                            Math.min(staffState.totalPages, staffState.page + 1)
+                          )
+                        }
+                        disabled={
+                          staffState.page === staffState.totalPages ||
+                          staffState.isLoading
+                        }
+                        className="flex-1 ml-2 bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                      >
+                        Next
+                        <ChevronRight className="h-4 w-4 ml-1" />
+                      </Button>
                     </div>
                   </div>
-                )}
-              </div>
-            ) : (
-              <div className="space-y-6">
-                {viewMode === "grid" ? (
-                  <RolesGrid
-                    roles={roleState.roles}
-                    onEdit={handleEditRole}
-                    onDelete={handleDeleteRole}
-                    isLoading={roleState.isLoading}
-                    searchQuery={searchQuery}
-                  />
-                ) : (
-                  <RolesList
-                    roles={roleState.roles}
-                    onEdit={handleEditRole}
-                    onDelete={handleDeleteRole}
-                    isLoading={roleState.isLoading}
-                    searchQuery={searchQuery}
-                  />
-                )}
 
-                {/* Mobile Pagination */}
-                {roleState.totalPages > 1 && (
-                  <div className="mt-6">
-                    {/* Mobile: Full width pagination */}
-                    <div className="block sm:hidden">
-                      <div className="flex items-center justify-between mb-3">
-                        <Button
-                          variant="outline"
-                          onClick={() =>
-                            handlePageChange(Math.max(1, roleState.page - 1))
-                          }
-                          disabled={roleState.page === 1 || roleState.isLoading}
-                          className="flex-1 mr-2 bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
-                        >
-                          <ChevronLeft className="h-4 w-4 mr-1" />
-                          Previous
-                        </Button>
+                  {/* Desktop: Traditional pagination */}
+                  <div className="hidden sm:flex justify-center">
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          handleStaffPageChange(
+                            Math.max(1, staffState.page - 1)
+                          )
+                        }
+                        disabled={staffState.page === 1 || staffState.isLoading}
+                        className="flex items-center gap-1"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                        Previous
+                      </Button>
 
-                        <div className="px-3 py-2 bg-gray-100 rounded-lg text-sm font-medium text-gray-700">
-                          {roleState.page} of {roleState.totalPages}
-                        </div>
-
-                        <Button
-                          variant="outline"
-                          onClick={() =>
-                            handlePageChange(
-                              Math.min(roleState.totalPages, roleState.page + 1)
-                            )
-                          }
-                          disabled={
-                            roleState.page === roleState.totalPages ||
-                            roleState.isLoading
-                          }
-                          className="flex-1 ml-2 bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
-                        >
-                          Next
-                          <ChevronRight className="h-4 w-4 ml-1" />
-                        </Button>
+                      <div className="flex items-center space-x-1">
+                        {Array.from(
+                          { length: staffState.totalPages },
+                          (_, i) => i + 1
+                        ).map((pageNum) => (
+                          <Button
+                            key={pageNum}
+                            variant={
+                              pageNum === staffState.page
+                                ? "default"
+                                : "outline"
+                            }
+                            size="sm"
+                            onClick={() => handleStaffPageChange(pageNum)}
+                            disabled={staffState.isLoading}
+                            className={
+                              pageNum === staffState.page
+                                ? "bg-primary text-white"
+                                : ""
+                            }
+                          >
+                            {pageNum}
+                          </Button>
+                        ))}
                       </div>
-                    </div>
 
-                    {/* Desktop: Traditional pagination */}
-                    <div className="hidden sm:flex justify-center">
-                      <div className="flex items-center space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            handlePageChange(Math.max(1, roleState.page - 1))
-                          }
-                          disabled={roleState.page === 1 || roleState.isLoading}
-                          className="flex items-center gap-1"
-                        >
-                          <ChevronLeft className="h-4 w-4" />
-                          Previous
-                        </Button>
-
-                        <div className="flex items-center space-x-1">
-                          {Array.from(
-                            { length: roleState.totalPages },
-                            (_, i) => i + 1
-                          ).map((pageNum) => (
-                            <Button
-                              key={pageNum}
-                              variant={
-                                pageNum === roleState.page
-                                  ? "default"
-                                  : "outline"
-                              }
-                              size="sm"
-                              onClick={() => handlePageChange(pageNum)}
-                              disabled={roleState.isLoading}
-                              className={
-                                pageNum === roleState.page
-                                  ? "bg-primary text-white"
-                                  : ""
-                              }
-                            >
-                              {pageNum}
-                            </Button>
-                          ))}
-                        </div>
-
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            handlePageChange(
-                              Math.min(roleState.totalPages, roleState.page + 1)
-                            )
-                          }
-                          disabled={
-                            roleState.page === roleState.totalPages ||
-                            roleState.isLoading
-                          }
-                          className="flex items-center gap-1"
-                        >
-                          Next
-                          <ChevronRight className="h-4 w-4" />
-                        </Button>
-                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          handleStaffPageChange(
+                            Math.min(staffState.totalPages, staffState.page + 1)
+                          )
+                        }
+                        disabled={
+                          staffState.page === staffState.totalPages ||
+                          staffState.isLoading
+                        }
+                        className="flex items-center gap-1"
+                      >
+                        Next
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
-                )}
-              </div>
-            )}
-          </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {viewMode === "grid" ? (
+                <RolesGrid
+                  roles={roleState.roles}
+                  onEdit={handleEditRole}
+                  onDelete={handleDeleteRole}
+                  isLoading={roleState.isLoading}
+                  searchQuery={searchQuery}
+                />
+              ) : (
+                <RolesList
+                  roles={roleState.roles}
+                  onEdit={handleEditRole}
+                  onDelete={handleDeleteRole}
+                  isLoading={roleState.isLoading}
+                  searchQuery={searchQuery}
+                />
+              )}
+
+              {/* Mobile Pagination */}
+              {roleState.totalPages > 1 && (
+                <div className="mt-6">
+                  {/* Mobile: Full width pagination */}
+                  <div className="block sm:hidden">
+                    <div className="flex items-center justify-between mb-3">
+                      <Button
+                        variant="outline"
+                        onClick={() =>
+                          handlePageChange(Math.max(1, roleState.page - 1))
+                        }
+                        disabled={roleState.page === 1 || roleState.isLoading}
+                        className="flex-1 mr-2 bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                      >
+                        <ChevronLeft className="h-4 w-4 mr-1" />
+                        Previous
+                      </Button>
+
+                      <div className="px-3 py-2 bg-gray-100 rounded-lg text-sm font-medium text-gray-700">
+                        {roleState.page} of {roleState.totalPages}
+                      </div>
+
+                      <Button
+                        variant="outline"
+                        onClick={() =>
+                          handlePageChange(
+                            Math.min(roleState.totalPages, roleState.page + 1)
+                          )
+                        }
+                        disabled={
+                          roleState.page === roleState.totalPages ||
+                          roleState.isLoading
+                        }
+                        className="flex-1 ml-2 bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                      >
+                        Next
+                        <ChevronRight className="h-4 w-4 ml-1" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Desktop: Traditional pagination */}
+                  <div className="hidden sm:flex justify-center">
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          handlePageChange(Math.max(1, roleState.page - 1))
+                        }
+                        disabled={roleState.page === 1 || roleState.isLoading}
+                        className="flex items-center gap-1"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                        Previous
+                      </Button>
+
+                      <div className="flex items-center space-x-1">
+                        {Array.from(
+                          { length: roleState.totalPages },
+                          (_, i) => i + 1
+                        ).map((pageNum) => (
+                          <Button
+                            key={pageNum}
+                            variant={
+                              pageNum === roleState.page ? "default" : "outline"
+                            }
+                            size="sm"
+                            onClick={() => handlePageChange(pageNum)}
+                            disabled={roleState.isLoading}
+                            className={
+                              pageNum === roleState.page
+                                ? "bg-primary text-white"
+                                : ""
+                            }
+                          >
+                            {pageNum}
+                          </Button>
+                        ))}
+                      </div>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          handlePageChange(
+                            Math.min(roleState.totalPages, roleState.page + 1)
+                          )
+                        }
+                        disabled={
+                          roleState.page === roleState.totalPages ||
+                          roleState.isLoading
+                        }
+                        className="flex items-center gap-1"
+                      >
+                        Next
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -808,7 +690,7 @@ export default function StaffManagement() {
         onSubmit={isEditingRole ? handleUpdateRole : handleAddRole}
         isCreatingRole={isCreatingRole}
         initialData={
-          editingRole
+          editingRole && editingRole.name && editingRole.permissions
             ? {
                 name: editingRole.name,
                 permissions: editingRole.permissions,
@@ -832,7 +714,7 @@ export default function StaffManagement() {
         onOpenChange={setIsEditStaffDialogOpen}
         staff={editingStaff}
         onSuccess={() => {
-          toast.success('Staff member updated successfully');
+          toast.success("Staff member updated successfully");
           fetchStaff(staffState.page);
         }}
       />

@@ -1,6 +1,12 @@
 import { AlertCircle, Mail, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface OrganizationAccessMessageProps {
@@ -21,9 +27,13 @@ export function OrganizationAccessMessage({
       onContactAdmin();
     } else {
       // Default action: open email client
-      const subject = encodeURIComponent("Request Access to Organization - Team Envelope");
+      const subject = encodeURIComponent(
+        "Request Access to Organization - Team Envelope"
+      );
       const body = encodeURIComponent(
-        `Hello,\n\nI need access to my organization in Team Envelope.\n\nMy email address: ${userEmail || 'Not provided'}\nMy name: ${userName}\n\nPlease add me to the appropriate organization or let me know the next steps.\n\nThank you!`
+        `Hello,\n\nI need access to my organization in Team Envelope.\n\nMy email address: ${
+          userEmail || "Not provided"
+        }\nMy name: ${userName}\n\nPlease add me to the appropriate organization or let me know the next steps.\n\nThank you!`
       );
       window.location.href = `mailto:${supportEmail}?subject=${subject}&body=${body}`;
     }
@@ -39,7 +49,8 @@ export function OrganizationAccessMessage({
           </h1>
           {userEmail && (
             <p className="text-sm text-gray-600">
-              You're signed in as <span className="font-medium">{userName}</span>
+              You're signed in as{" "}
+              <span className="font-medium">{userName}</span>
             </p>
           )}
         </div>
@@ -54,16 +65,18 @@ export function OrganizationAccessMessage({
               No Organization Access
             </CardTitle>
             <CardDescription className="text-gray-600">
-              You don't have access to any organizations yet. Contact your administrator to get invited to your team's shared workspace.
+              You don't have access to any organizations yet. Contact your
+              administrator to get invited to your team's shared workspace.
             </CardDescription>
           </CardHeader>
-          
+
           <CardContent className="space-y-4">
             {/* Alert */}
             <Alert className="border-blue-200 bg-blue-50">
               <AlertCircle className="h-4 w-4 text-blue-600" />
               <AlertDescription className="text-blue-800">
-                Your administrator needs to invite you to your organization to access Team Envelope features.
+                Your administrator needs to invite you to your organization to
+                access Team Envelope features.
               </AlertDescription>
             </Alert>
 
@@ -76,17 +89,16 @@ export function OrganizationAccessMessage({
                     Contact Your Administrator
                   </h3>
                   <p className="text-sm text-gray-600 mt-1">
-                    Ask your team administrator to invite you to your organization. They can add your email address to provide access to your team's shared inbox and features.
+                    Ask your team administrator to invite you to your
+                    organization. They can add your email address to provide
+                    access to your team's shared inbox and features.
                   </p>
                 </div>
               </div>
             </div>
 
             {/* Action Button */}
-            <Button 
-              onClick={handleContactAdmin}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-            >
+            <Button onClick={handleContactAdmin}>
               <Mail className="w-4 h-4 mr-2" />
               Contact Administrator
             </Button>
@@ -94,7 +106,7 @@ export function OrganizationAccessMessage({
             {/* Help Text */}
             <p className="text-xs text-gray-500 text-center">
               Need help? Contact support at{" "}
-              <a 
+              <a
                 href={`mailto:${supportEmail}`}
                 className="text-blue-600 hover:text-blue-700 underline"
               >
@@ -107,7 +119,9 @@ export function OrganizationAccessMessage({
         {/* Additional Info */}
         <div className="text-center">
           <p className="text-xs text-gray-500">
-            Once your administrator adds you to an organization, you'll have access to all Team Envelope features including shared inboxes, team collaboration, and more.
+            Once your administrator adds you to an organization, you'll have
+            access to all Team Envelope features including shared inboxes, team
+            collaboration, and more.
           </p>
         </div>
       </div>

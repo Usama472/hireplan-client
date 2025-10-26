@@ -1,11 +1,4 @@
-import {
-  BarChart3,
-  Brain,
-  Clock,
-  Shield,
-  Target,
-  Users,
-} from "lucide-react";
+import { BarChart3, Brain, Clock, Shield, Target, Users } from "lucide-react";
 import { motion } from "framer-motion";
 
 export function FeaturesSection() {
@@ -36,7 +29,8 @@ export function FeaturesSection() {
     {
       icon: Brain,
       title: "AI-Powered Matching",
-      description: "Advanced algorithms find perfect matches with 95% accuracy.",
+      description:
+        "Advanced algorithms find perfect matches with 95% accuracy.",
       color: "blue",
     },
     {
@@ -84,7 +78,7 @@ export function FeaturesSection() {
 
   return (
     <section className="py-12 sm:py-16 bg-white">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           variants={containerVariants}
           initial="hidden"

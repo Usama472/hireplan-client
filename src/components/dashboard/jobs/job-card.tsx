@@ -157,35 +157,48 @@ export function JobCard({
 
   return (
     <>
-      <Card className="group bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all duration-300">
-        <CardContent className="p-4 space-y-3">
+      <Card className="group bg-white rounded-md border border-gray-200 hover:border-blue-300 transition-all duration-200">
+        <CardContent className="p-6 space-y-5">
           {/* Header */}
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex items-center gap-2">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-2 flex-wrap">
               <Badge
                 variant="outline"
                 className={cn(
-                  "px-2 py-0.5 rounded text-xs font-medium",
+                  "px-2.5 py-1 rounded-md text-xs font-medium",
                   statusConfig.bg,
                   statusConfig.text,
                   statusConfig.border
                 )}
               >
-                <span className={cn("w-1.5 h-1.5 rounded-full mr-1.5 animate-pulse", statusConfig.dot)}></span>
+                <span
+                  className={cn(
+                    "w-1.5 h-1.5 rounded-full mr-1.5 animate-pulse",
+                    statusConfig.dot
+                  )}
+                ></span>
                 <span className="capitalize">{job.status}</span>
               </Badge>
 
               {daysLeft !== null && daysLeft <= 14 && (
                 <div
                   className={cn(
-                    "flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border",
-                    daysLeft <= 7 && daysLeft > 0 && "bg-amber-50 text-amber-700 border-amber-200",
+                    "flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border",
+                    daysLeft <= 7 &&
+                      daysLeft > 0 &&
+                      "bg-amber-50 text-amber-700 border-amber-200",
                     daysLeft <= 0 && "bg-red-50 text-red-700 border-red-200",
                     daysLeft > 7 && "bg-blue-50 text-blue-700 border-blue-200"
                   )}
                 >
-                  <Clock className="w-3 h-3" />
-                  <span>{daysLeft > 0 ? `${daysLeft}d` : daysLeft === 0 ? "Today" : "Closed"}</span>
+                  <Clock className="w-3.5 h-3.5" />
+                  <span>
+                    {daysLeft > 0
+                      ? `${daysLeft}d`
+                      : daysLeft === 0
+                      ? "Today"
+                      : "Closed"}
+                  </span>
                 </div>
               )}
             </div>
@@ -197,10 +210,10 @@ export function JobCard({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-6 w-6 p-0 hover:bg-gray-100"
+                    className="h-7 w-7 p-0 hover:bg-gray-100 rounded-md"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <MoreVertical className="h-3.5 w-3.5 text-gray-500" />
+                    <MoreVertical className="h-4 w-4 text-gray-500" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-40">
@@ -218,70 +231,86 @@ export function JobCard({
           </div>
 
           {/* Job Title */}
-          <div className="space-y-1.5">
-            <h3 className="font-semibold text-base text-gray-900 group-hover:text-primary transition-colors duration-200 line-clamp-2 leading-tight">
+          <div className="space-y-3">
+            <h3 className="font-semibold text-lg text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2 leading-relaxed">
               {job.jobTitle || job.jobBoardTitle}
             </h3>
 
             {/* Location & Type */}
-            <div className="flex items-center flex-wrap gap-2 text-xs text-gray-600">
-              <div className="flex items-center gap-1">
-                <MapPin className="w-3 h-3 text-gray-400" />
+            <div className="flex items-center flex-wrap gap-3 text-sm text-gray-600">
+              <div className="flex items-center gap-1.5">
+                <MapPin className="w-4 h-4 text-gray-400" />
                 <span className="font-medium">{location}</span>
               </div>
-              <div className="w-0.5 h-0.5 rounded-full bg-gray-300"></div>
-              <span className="font-medium text-primary">
+              <div className="w-1 h-1 rounded-full bg-gray-300"></div>
+              <span className="font-medium text-blue-600">
                 {formatText(job.workplaceType, "Remote")}
               </span>
               {job.employmentType && (
                 <>
-                  <div className="w-0.5 h-0.5 rounded-full bg-gray-300"></div>
+                  <div className="w-1 h-1 rounded-full bg-gray-300"></div>
                   <span className="text-gray-600">
-                    {job.employmentType.replace("-", " ").replace(/\b\w/g, (l) => l.toUpperCase())}
+                    {job.employmentType
+                      .replace("-", " ")
+                      .replace(/\b\w/g, (l) => l.toUpperCase())}
                   </span>
                 </>
               )}
             </div>
           </div>
 
-          {/* Salary - Compact */}
-          <div className="flex items-center gap-1.5 py-1.5 px-2.5 bg-emerald-50 rounded border border-emerald-100">
-            <DollarSign className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
-            <span className="text-sm font-bold text-gray-900">{salary}</span>
-            <span className="text-xs text-gray-600">{salaryPeriod}</span>
+          {/* Salary */}
+          <div className="flex items-center gap-2.5 py-2.5 px-4 bg-emerald-50 rounded-md border border-emerald-100">
+            <DollarSign className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+            <span className="text-base font-bold text-gray-900">{salary}</span>
+            <span className="text-sm text-gray-600 font-medium">
+              {salaryPeriod}
+            </span>
           </div>
 
-          {/* Compact Stats */}
-          <div className="grid grid-cols-3 gap-2">
-            <div className="text-center p-2 bg-gray-50 rounded-md group-hover:bg-yellow-50 transition-colors duration-200">
-              <div className="flex justify-center mb-1">
-                <Clock className="w-3.5 h-3.5 text-yellow-600" />
+          {/* Stats */}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="text-center p-4 bg-gray-50 rounded-md border border-gray-100">
+              <div className="flex justify-center mb-2">
+                <Clock className="w-4 h-4 text-yellow-600" />
               </div>
-              <p className="text-xs text-gray-500 mb-0.5">Pending</p>
-              <p className="text-base font-bold text-gray-900">{Math.floor((job.applicantsCount || 0) * 0.4)}</p>
+              <p className="text-xs text-gray-500 mb-1.5 font-medium">
+                Pending
+              </p>
+              <p className="text-lg font-bold text-gray-900">
+                {Math.floor((job.applicantsCount || 0) * 0.4)}
+              </p>
             </div>
 
-            <div className="text-center p-2 bg-gray-50 rounded-md group-hover:bg-green-50 transition-colors duration-200">
-              <div className="flex justify-center mb-1">
-                <Users className="w-3.5 h-3.5 text-green-600" />
+            <div className="text-center p-4 bg-gray-50 rounded-md border border-gray-100">
+              <div className="flex justify-center mb-2">
+                <Users className="w-4 h-4 text-green-600" />
               </div>
-              <p className="text-xs text-gray-500 mb-0.5">Shortlist</p>
-              <p className="text-base font-bold text-gray-900">{Math.floor((job.applicantsCount || 0) * 0.3)}</p>
+              <p className="text-xs text-gray-500 mb-1.5 font-medium">
+                Shortlist
+              </p>
+              <p className="text-lg font-bold text-gray-900">
+                {Math.floor((job.applicantsCount || 0) * 0.3)}
+              </p>
             </div>
 
-            <div className="text-center p-2 bg-gray-50 rounded-md group-hover:bg-red-50 transition-colors duration-200">
-              <div className="flex justify-center mb-1">
-                <Briefcase className="w-3.5 h-3.5 text-red-600" />
+            <div className="text-center p-4 bg-gray-50 rounded-md border border-gray-100">
+              <div className="flex justify-center mb-2">
+                <Briefcase className="w-4 h-4 text-red-600" />
               </div>
-              <p className="text-xs text-gray-500 mb-0.5">Rejected</p>
-              <p className="text-base font-bold text-gray-900">{Math.floor((job.applicantsCount || 0) * 0.3)}</p>
+              <p className="text-xs text-gray-500 mb-1.5 font-medium">
+                Rejected
+              </p>
+              <p className="text-lg font-bold text-gray-900">
+                {Math.floor((job.applicantsCount || 0) * 0.3)}
+              </p>
             </div>
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-between text-xs text-gray-500 pt-2 border-t border-gray-100">
-            <div className="flex items-center gap-1">
-              <Calendar className="w-3 h-3" />
+          <div className="flex items-center justify-between text-xs text-gray-500 pt-3 border-t border-gray-200">
+            <div className="flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5" />
               <span>
                 {job.createdAt
                   ? new Date(job.createdAt).toLocaleDateString("en-US", {
@@ -291,9 +320,9 @@ export function JobCard({
                   : "N/A"}
               </span>
             </div>
-            <div className="flex items-center gap-1">
-              <Briefcase className="w-3 h-3" />
-              <span className="font-medium text-gray-700 text-xs">
+            <div className="flex items-center gap-1.5">
+              <Briefcase className="w-3.5 h-3.5" />
+              <span className="font-medium text-gray-700">
                 {job.employmentType
                   ?.replace("-", " ")
                   .replace(/\b\w/g, (l) => l.toUpperCase())}
@@ -301,24 +330,20 @@ export function JobCard({
             </div>
           </div>
 
-          {/* Compact Actions */}
-          <div className="flex gap-2 pt-1">
+          {/* Actions */}
+          <div className="flex gap-2 pt-2">
             <Button
               variant="outline"
               size="sm"
-              className="flex-1 border-gray-300 hover:border-gray-400 hover:bg-gray-50 gap-1.5 text-xs h-8"
+              className="flex-1 border-gray-300 hover:border-gray-400 hover:bg-gray-50 gap-2 text-sm h-9"
               onClick={() => onEdit?.(job)}
             >
-              <Edit3 className="w-3.5 h-3.5" />
+              <Edit3 className="w-4 h-4" />
               Edit
             </Button>
-            <Button
-              size="sm"
-              onClick={() => onViewDetails?.(job)}
-              className="flex-1 bg-primary hover:bg-primary/90 gap-1.5 text-xs h-8"
-            >
+            <Button className="flex-1" onClick={() => onViewDetails?.(job)}>
               View
-              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform duration-200" />
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Button>
           </div>
         </CardContent>

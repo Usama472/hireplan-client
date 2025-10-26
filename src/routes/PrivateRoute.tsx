@@ -38,9 +38,7 @@ export const PrivateRoute = ({ children }: DefaultLayoutProps) => {
       <DashboardSidebar />
       <SidebarInset className="min-h-screen max-h-screen bg-blue-50/30 flex flex-col">
         <DashboardHeader />
-        <div className="flex-1 overflow-y-auto w-full px-2 sm:px-4 lg:px-6 py-4">
-          {children}
-        </div>
+        <div className="flex-1 overflow-y-auto w-full">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   );

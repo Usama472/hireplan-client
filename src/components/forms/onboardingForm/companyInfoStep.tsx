@@ -1,71 +1,40 @@
-import { InputField } from '@/components/common/InputField'
-import { COMPANY_SIZES, INDUSTRIES } from '@/constants/form-constants'
-import { INPUT_TYPES } from '@/interfaces'
+import { InputField } from "@/components/common/InputField";
+import { COMPANY_SIZES, INDUSTRIES } from "@/constants/form-constants";
+import { INPUT_TYPES } from "@/interfaces";
 
 export function CompanyInfoStep() {
   return (
-    <div className='space-y-2'>
-      <div className='grid grid-cols-1 md:grid-cols-2 md:gap-6'>
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <InputField name="companyName" placeholder="Company Name *" />
         <InputField
-          name='companyName'
-          label='Company Name'
-          placeholder='Enter your company name'
-          showIsRequired
-        />
-        <InputField
-          name='websiteDomain'
-          label='Website Domain'
-          placeholder='https://yourcompany.com'
-          showIsRequired
+          name="websiteDomain"
+          placeholder="Website (e.g., yourcompany.com) *"
         />
       </div>
 
-      <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <InputField
-          name='industry'
+          name="industry"
           type={INPUT_TYPES.SELECT}
-          label='Industry'
-          placeholder='Select your industry'
+          placeholder="Industry *"
           selectOptions={INDUSTRIES}
-          showIsRequired
         />
         <InputField
-          name='companySize'
+          name="companySize"
           type={INPUT_TYPES.SELECT}
-          label='Company Size'
-          placeholder='Select company size'
+          placeholder="Company Size *"
           selectOptions={COMPANY_SIZES}
-          showIsRequired
         />
       </div>
 
-      <InputField
-        name='address'
-        label='Address'
-        placeholder='Enter your company address'
-        showIsRequired
-      />
+      <InputField name="address" placeholder="Company Address *" />
 
-      <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
-        <InputField
-          name='city'
-          label='City'
-          placeholder='Enter city'
-          showIsRequired
-        />
-        <InputField
-          name='state'
-          label='State'
-          placeholder='Enter state'
-          showIsRequired
-        />
-        <InputField
-          name='zipCode'
-          label='ZIP Code'
-          placeholder='Enter ZIP code'
-          showIsRequired
-        />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <InputField name="city" placeholder="City *" />
+        <InputField name="state" placeholder="State *" />
+        <InputField name="zipCode" placeholder="ZIP Code *" />
       </div>
     </div>
-  )
+  );
 }

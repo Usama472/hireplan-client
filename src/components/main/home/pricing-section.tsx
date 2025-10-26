@@ -41,38 +41,40 @@ export function PricingSection() {
   return (
     <section
       id="pricing"
-      className="py-8 sm:py-12 bg-[#ececec]/70 relative"
+      className="py-24 bg-gradient-to-b from-white via-gray-50 to-white relative"
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <motion.div
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.1 }}
-          className="text-center mb-6"
+          className="text-center mb-16"
         >
           {/* Trust Badge */}
           <motion.div
             variants={itemVariants}
-            className="inline-flex items-center space-x-2 bg-blue-50 text-blue-600 px-4 py-2 rounded-full text-sm font-medium mb-6 border border-blue-200"
+            className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-50 to-purple-50 text-blue-600 px-5 py-2.5 rounded-full text-sm font-semibold mb-6 border border-blue-100 shadow-sm"
           >
-            <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+            <Sparkles className="w-4 h-4" />
             <span>Simple & Transparent Pricing</span>
           </motion.div>
 
           {/* Main Headline */}
           <motion.h2
             variants={itemVariants}
-            className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4"
+            className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4"
           >
-            Plans that grow{" "}
-            <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">with your business</span>
+            <span className="text-gray-900">Plans that grow </span>
+            <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+              with your business
+            </span>
           </motion.h2>
 
           {/* Subheadline */}
           <motion.p
             variants={itemVariants}
-            className="text-sm sm:text-base text-gray-600 max-w-xl mx-auto px-2"
+            className="text-lg text-gray-600 max-w-2xl mx-auto"
           >
             Choose the perfect plan for your needs. All plans include our core
             AI matching technology and 24/7 support.
@@ -84,7 +86,7 @@ export function PricingSection() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.1 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl mx-auto mb-6"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto mb-16"
         >
           {PLANS.map((plan) => (
             <motion.div
@@ -93,45 +95,52 @@ export function PricingSection() {
               className="h-full"
             >
               <Card
-                className={`relative transition-all duration-300 group h-full flex flex-col ${
+                className={`relative transition-all duration-300 group h-full flex flex-col shadow-none ${
                   plan.popular
-                    ? "border-2 border-secondary bg-white shadow-lg"
-                    : "border border-gray-200 bg-white"
+                    ? "border-2 border-blue-200 bg-gradient-to-br from-blue-50/50 to-purple-50/50 scale-105"
+                    : "border border-gray-200 bg-white hover:border-gray-300"
                 }`}
               >
                 {/* Popular Badge */}
                 {plan.popular && (
-                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
-                    <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white px-4 py-1.5 rounded-full text-xs font-semibold">
-                      <Star className="inline h-3 w-3 mr-1 fill-current" />
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
+                    <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white px-6 py-2 rounded-full text-sm font-bold">
+                      <Star className="inline h-4 w-4 mr-1 fill-current" />
                       Most Popular
                     </span>
                   </div>
                 )}
 
-                <CardHeader className="text-center pb-3 pt-6">
-                  <CardTitle className="text-base font-bold mb-1 text-gray-900">
+                <CardHeader className="text-center pb-6 pt-8">
+                  <CardTitle className="text-xl font-bold mb-4 text-gray-900">
                     {plan.name}
                   </CardTitle>
-                  <div className="flex items-baseline justify-center mb-2">
-                    <span className="text-xl font-bold text-gray-900">
+                  <div className="flex items-baseline justify-center mb-4">
+                    <span className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
                       {plan.price}
                     </span>
-                    <span className="text-gray-500 ml-1 text-xs">
+                    <span className="text-gray-500 ml-2 text-sm">
                       {plan.period}
                     </span>
                   </div>
-                  <CardDescription className="text-xs text-gray-600">
+                  <CardDescription className="text-sm text-gray-600 leading-relaxed">
                     {plan.description}
                   </CardDescription>
                 </CardHeader>
 
-                <CardContent className="pt-0 flex-1 flex flex-col">
-                  <ul className="space-y-1.5 mb-4 flex-1">
+                <CardContent className="pt-0 flex-1 flex flex-col px-6 pb-8">
+                  <ul className="space-y-3 mb-6 flex-1">
                     {plan.features.map((feature, idx) => (
                       <li key={idx} className="flex items-start">
-                        <Check className="h-3 w-3 text-purple-500 mr-2 mt-0.5 flex-shrink-0" />
-                        <span className="text-xs text-gray-700">{feature}</span>
+                        <div className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center mr-3 mt-0.5">
+                          <Check
+                            className="h-3 w-3 text-white"
+                            strokeWidth={3}
+                          />
+                        </div>
+                        <span className="text-sm text-gray-700 leading-relaxed">
+                          {feature}
+                        </span>
                       </li>
                     ))}
                   </ul>
@@ -139,10 +148,10 @@ export function PricingSection() {
                   <div className="mt-auto">
                     <Button
                       variant="secondary"
-                      className={`w-full py-2 text-xs font-semibold rounded-lg h-8 ${
+                      className={`w-full py-3 text-sm font-semibold transition-all duration-300 ${
                         plan.popular
-                          ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700"
-                          : "bg-gray-900 hover:bg-gray-800 text-white"
+                          ? "bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white"
+                          : "bg-blue-500 hover:bg-blue-600 text-white"
                       }`}
                       onClick={() =>
                         navigate("/signup", {
@@ -153,7 +162,7 @@ export function PricingSection() {
                       {plan.id === "enterprise"
                         ? "Contact Sales"
                         : "Get Started"}
-                      <ArrowRight className="ml-1 h-3 w-3" />
+                      <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </div>
                 </CardContent>
@@ -162,7 +171,7 @@ export function PricingSection() {
           ))}
         </motion.div>
 
-        {/* Bottom CTA Section - Ultra Compact */}
+        {/* Bottom CTA Section */}
         <motion.div
           variants={itemVariants}
           initial="hidden"
@@ -170,44 +179,38 @@ export function PricingSection() {
           viewport={{ once: true, amount: 0.1 }}
           className="text-center"
         >
-          <div className="bg-white rounded-lg p-4">
-            <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-primary/10 to-secondary/10 text-secondary px-4 py-2 rounded-full text-sm font-medium mb-6">
-              <div className="w-2 h-2 bg-secondary rounded-full"></div>
+          <div className="bg-gradient-to-br from-gray-50 to-blue-50/30 rounded-2xl p-12 border border-gray-200">
+            <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-50 to-purple-50 text-blue-600 px-5 py-2.5 rounded-full text-sm font-semibold mb-6 border border-blue-100">
+              <Zap className="w-4 h-4" />
               <span>Enterprise Solutions</span>
             </div>
 
-            <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
-              Need a{" "}
-              <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+            <h3 className="text-3xl sm:text-4xl font-bold mb-4">
+              <span className="text-gray-900">Need a </span>
+              <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
                 custom solution
               </span>
-              ?
+              <span className="text-gray-900">?</span>
             </h3>
 
-            <p className="text-gray-600 mb-4 max-w-lg mx-auto">
-              We offer enterprise packages with dedicated support and custom
-              integrations for large organizations.
+            <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
+              We offer enterprise packages with dedicated support, custom
+              integrations, and advanced features for large organizations.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-2 justify-center items-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Button
                 variant="outline"
-                size="sm"
-                className="border-2 border-gray-300 hover:border-gray-400 text-gray-700 hover:text-gray-900 bg-white px-4 py-1.5 h-8 rounded-lg text-xs font-semibold"
+                className="border-2 border-gray-300 hover:border-gray-900 text-gray-700 hover:text-gray-900 bg-white"
                 onClick={() => navigate("/demo")}
               >
                 Schedule a Demo
-                <ArrowRight className="ml-1 h-3 w-3" />
+                <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
 
-              <Button
-                variant="secondary"
-                size="sm"
-                className="px-4 py-1.5 h-8 rounded-lg text-xs font-semibold"
-                onClick={() => navigate("/contact")}
-              >
+              <Button onClick={() => navigate("/contact")}>
                 Contact Sales
-                <ArrowRight className="ml-1 h-3 w-3" />
+                <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </div>
           </div>

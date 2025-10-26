@@ -21,11 +21,11 @@ export function StepIndicator({ currentStep }: StepIndicatorProps) {
   return (
     <div className="mb-8">
       {/* Step indicator */}
-      <div className="flex items-center space-x-2 mb-4">
+      {/* <div className="flex items-center space-x-2 mb-4">
         <span className="text-xs font-medium text-primary bg-primary/10 px-3 py-1.5 rounded-full">
           Step {currentStep} of {FORM_STEPS.length}
         </span>
-      </div>
+      </div> */}
 
       {/* Main heading */}
       <h2 className="text-2xl font-bold text-foreground mb-3">

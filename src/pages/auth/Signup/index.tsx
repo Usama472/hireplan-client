@@ -9,18 +9,20 @@ const Register: FC = () => {
   const progressPercentage = ((currentStep - 1) / (totalSteps - 1)) * 100;
 
   return (
-    <AuthLayout
-      title="Create your account"
-      footerText="Already have an account?"
-      footerLinkText="Sign in"
-      footerLinkHref="/login"
-      showSocial={false}
-      currentStep={currentStep}
-      totalSteps={totalSteps}
-      progressPercentage={progressPercentage}
-    >
-      <SignupComponent onStepChange={setCurrentStep} />
-    </AuthLayout>
+    <div className="w-full">
+      <AuthLayout
+        title="Create your account"
+        footerText="Already have an account?"
+        footerLinkText="Sign in"
+        footerLinkHref="/login"
+        showSocial={false}
+        currentStep={currentStep}
+        totalSteps={totalSteps}
+        progressPercentage={progressPercentage}
+      >
+        <SignupComponent onStepChange={setCurrentStep} />
+      </AuthLayout>
+    </div>
   );
 };
 

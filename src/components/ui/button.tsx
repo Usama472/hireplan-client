@@ -10,7 +10,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
+          "bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white shadow-xs hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 transition-all duration-300", // PRIMARY now is the gradient
         destructive:
           "bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         secondary:
@@ -19,7 +19,7 @@ const buttonVariants = cva(
         "outline-primary":
           "bg-transparent text-primary border border-primary hover:bg-primary hover:text-white dark:hover:bg-primary/10",
         "outline-secondary":
-          "bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white border border-transparent hover:opacity-90 transition-all duration-300",
+          "bg-transparent text-gray-700 border border-gray-300 hover:border-gray-400 hover:bg-gray-50",
         "outline-destructive":
           "bg-transparent text-destructive border border-destructive/30 hover:bg-destructive/5 dark:hover:bg-destructive/10",
         ghost: "hover:bg-accent/10 hover:text-primary dark:hover:bg-accent/20 ",
@@ -50,7 +50,7 @@ const buttonVariants = cva(
         variant: "outline",
         outline: "secondary",
         className:
-          "bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white border border-transparent hover:opacity-90 transition-all duration-300",
+          "bg-transparent text-gray-700 border border-gray-300 hover:border-gray-400 hover:bg-gray-50",
       },
       {
         variant: "outline",

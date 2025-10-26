@@ -178,17 +178,7 @@ export function SaveChangesBar({
                     Discard Changes
                   </Button>
 
-                  <Button
-                    type="button"
-                    onClick={onSubmit}
-                    disabled={isLoading}
-                    className={cn(
-                      "min-w-[140px] font-medium shadow-lg transition-all duration-200",
-                      isLoading
-                        ? "bg-blue-500"
-                        : "bg-blue-600 hover:bg-blue-700 hover:shadow-xl"
-                    )}
-                  >
+                  <Button type="button" onClick={onSubmit} disabled={isLoading}>
                     {isLoading ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
