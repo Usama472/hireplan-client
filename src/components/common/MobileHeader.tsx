@@ -16,14 +16,14 @@ export const MobileHeader = () => {
   }
 
   return (
-    <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between md:hidden">
+    <header className="bg-white border-b border-gray-200 px-4 py-4 flex items-center justify-between md:hidden">
       {/* Left: Logo and App Name */}
       <Link
         to="/"
-        className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+        className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
       >
-        <img src={LogoImage} alt="Logo" className="h-8 w-8 object-contain" />
-        <span className="font-extrabold text-xl leading-tight tracking-tight bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+        <img src={LogoImage} alt="Logo" className="h-9 w-9 object-contain" />
+        <span className="font-extrabold text-2xl leading-tight tracking-tight bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
           {APP_NAME}
         </span>
       </Link>
@@ -33,9 +33,9 @@ export const MobileHeader = () => {
         variant="ghost"
         size="icon"
         onClick={toggleSidebar}
-        className="h-8 w-8"
+        className="h-10 w-10"
       >
-        <Menu className="h-5 w-5" />
+        <Menu className="h-6 w-6" />
         <span className="sr-only">Toggle Menu</span>
       </Button>
     </header>

@@ -14,7 +14,8 @@ import {
   LogOut,
   Menu,
   X,
-  Shield
+  Shield,
+  UserCog
 } from 'lucide-react';
 
 interface OwnerLayoutProps {
@@ -39,6 +40,7 @@ const OwnerLayout: React.FC<OwnerLayoutProps> = ({ children }) => {
     { icon: Activity, label: 'Dashboard', active: location.pathname === '/owner/dashboard', path: '/owner/dashboard' },
     { icon: Building2, label: 'Companies', active: location.pathname === '/owner/companies', path: '/owner/companies' },
     { icon: Users, label: 'Users', active: location.pathname === '/owner/users', path: '/owner/users' },
+    { icon: UserCog, label: 'Owner Accounts', active: location.pathname === '/owner/accounts', path: '/owner/accounts' },
     { icon: CreditCard, label: 'Subscriptions', active: location.pathname === '/owner/subscriptions', path: '/owner/subscriptions' },
     { icon: AlertTriangle, label: 'Support Tickets', active: location.pathname === '/owner/support', path: '/owner/support' },
     { icon: TrendingUp, label: 'Analytics', active: location.pathname === '/owner/analytics', path: '/owner/analytics' },

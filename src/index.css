@@ -622,76 +622,76 @@ select {
 @layer utilities {
   /* Reduce large spacing utilities to be more compact - but exclude hero/landing sections */
   section .space-y-8 > * + * {
-    margin-top: 1rem !important; /* was 2rem */
+    margin-top: 1.5rem !important; /* was 2rem, now 25% smaller */
   }
   
   section .space-y-6 > * + * {
-    margin-top: 0.75rem !important; /* was 1.5rem */
+    margin-top: 1.125rem !important; /* was 1.5rem, now 25% smaller */
   }
   
   section .gap-8 {
-    gap: 1rem !important; /* was 2rem */
+    gap: 1.5rem !important; /* was 2rem, now 25% smaller */
   }
   
   section .gap-6 {
-    gap: 0.75rem !important; /* was 1.5rem */
+    gap: 1.125rem !important; /* was 1.5rem, now 25% smaller */
   }
   
   /* Only apply to sections that are NOT hero/landing page sections */
   section:not([class*="hero"]):not([class*="Hero"]) .p-8 {
-    padding: 1rem !important; /* was 2rem */
+    padding: 1.5rem !important; /* was 2rem, now 25% smaller */
   }
   
   section:not([class*="hero"]):not([class*="Hero"]) .p-6 {
-    padding: 0.75rem !important; /* was 1.5rem */
+    padding: 1.125rem !important; /* was 1.5rem, now 25% smaller */
   }
   
   section:not([class*="hero"]):not([class*="Hero"]) .px-8 {
-    padding-left: 1rem !important; /* was 2rem */
-    padding-right: 1rem !important;
+    padding-left: 1.5rem !important; /* was 2rem, now 25% smaller */
+    padding-right: 1.5rem !important;
   }
   
   section:not([class*="hero"]):not([class*="Hero"]) .px-6 {
-    padding-left: 0.75rem !important; /* was 1.5rem */
-    padding-right: 0.75rem !important;
+    padding-left: 1.125rem !important; /* was 1.5rem, now 25% smaller */
+    padding-right: 1.125rem !important;
   }
   
   /* Don't override py-* (vertical padding) on sections to preserve hero heights */
   
   section .mb-8 {
-    margin-bottom: 1rem !important; /* was 2rem */
+    margin-bottom: 1.5rem !important; /* was 2rem, now 25% smaller */
   }
   
   section .mb-6 {
-    margin-bottom: 0.75rem !important; /* was 1.5rem */
+    margin-bottom: 1.125rem !important; /* was 1.5rem, now 25% smaller */
   }
   
   section .mt-8 {
-    margin-top: 1rem !important; /* was 2rem */
+    margin-top: 1.5rem !important; /* was 2rem, now 25% smaller */
   }
   
   section .mt-6 {
-    margin-top: 0.75rem !important; /* was 1.5rem */
+    margin-top: 1.125rem !important; /* was 1.5rem, now 25% smaller */
   }
   
   /* Allow forms and cards to be more compact */
   form .space-y-8 > * + *,
   [class*="card"] .space-y-8 > * + * {
-    margin-top: 1rem !important;
+    margin-top: 1.5rem !important; /* was 2rem, now 25% smaller */
   }
   
   form .space-y-6 > * + *,
   [class*="card"] .space-y-6 > * + * {
-    margin-top: 0.75rem !important;
+    margin-top: 1.125rem !important; /* was 1.5rem, now 25% smaller */
   }
   
   form .gap-8,
   [class*="card"] .gap-8 {
-    gap: 1rem !important;
+    gap: 1.5rem !important; /* was 2rem, now 25% smaller */
   }
   
   form .gap-6,
   [class*="card"] .gap-6 {
-    gap: 0.75rem !important;
+    gap: 1.125rem !important; /* was 1.5rem, now 25% smaller */
   }
 }

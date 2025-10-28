@@ -16,22 +16,22 @@ export const LoginLayout = ({ children }: LoginLayoutProps) => {
       <div className="relative z-10 flex items-start justify-center min-h-[calc(100vh-64px)] px-4 py-8">
         <div className="w-full max-w-md">
           {/* Login Card - More Compact */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
             {/* Header - Compact */}
-            <div className="text-center mb-6">
-              <h1 className="text-xl font-bold text-gray-900 mb-1">
+            <div className="text-center mb-8">
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">
                 Welcome back
               </h1>
-              <p className="text-gray-600 text-sm">
+              <p className="text-gray-600 text-base">
                 Sign in to your account to continue
               </p>
             </div>
 
             {/* Form Content */}
-            <div className="space-y-4">{children}</div>
+            <div className="space-y-5">{children}</div>
             
             {/* Footer */}
-            <div className="mt-6 text-center">
+            <div className="mt-8 text-center">
               <p className="text-sm text-gray-600">
                 Don't have an account?{" "}
                 <Button
@@ -46,14 +46,14 @@ export const LoginLayout = ({ children }: LoginLayoutProps) => {
           </div>
 
           {/* Bottom Features - Compact */}
-          <div className="mt-4 text-center">
-            <div className="flex items-center justify-center space-x-5 text-xs text-gray-500">
-              <div className="flex items-center space-x-1">
-                <Users className="h-3 w-3" />
+          <div className="mt-6 text-center">
+            <div className="flex items-center justify-center space-x-6 text-sm text-gray-500">
+              <div className="flex items-center space-x-1.5">
+                <Users className="h-4 w-4" />
                 <span>Secure</span>
               </div>
-              <div className="flex items-center space-x-1">
-                <Zap className="h-3 w-3" />
+              <div className="flex items-center space-x-1.5">
+                <Zap className="h-4 w-4" />
                 <span>Fast</span>
               </div>
             </div>

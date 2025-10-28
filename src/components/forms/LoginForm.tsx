@@ -100,7 +100,7 @@ export const LoginForm = () => {
         )}
 
         {/* Email Field */}
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           <label
             htmlFor="email"
             className="block text-sm font-semibold text-gray-700"
@@ -111,12 +111,12 @@ export const LoginForm = () => {
             name="email"
             type={INPUT_TYPES.EMAIL}
             placeholder="you@example.com"
-            className="h-8 md:h-9 bg-white focus:bg-white focus:ring-2 focus:ring-blue-500/20 border-gray-300 focus:border-blue-500 transition-all duration-200 rounded-xl text-xs md:text-sm"
+            className="h-11 bg-white focus:bg-white focus:ring-2 focus:ring-blue-500/20 border-gray-300 focus:border-blue-500 transition-all duration-200 rounded-xl text-sm"
           />
         </div>
 
         {/* Password Field */}
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           <label
             htmlFor="password"
             className="block text-sm font-semibold text-gray-700"
@@ -127,7 +127,7 @@ export const LoginForm = () => {
             name="password"
             type={INPUT_TYPES.PASSWORD}
             placeholder="••••••••"
-            className="h-8 md:h-9 bg-white focus:bg-white focus:ring-2 focus:ring-blue-500/20 border-gray-300 focus:border-blue-500 transition-all duration-200 rounded-xl text-xs md:text-sm"
+            className="h-11 bg-white focus:bg-white focus:ring-2 focus:ring-blue-500/20 border-gray-300 focus:border-blue-500 transition-all duration-200 rounded-xl text-sm"
           />
         </div>
 
@@ -164,8 +164,8 @@ export const LoginForm = () => {
         </Button>
 
         {/* Security Badge */}
-        <div className="pt-2">
-          <div className="flex items-center justify-center space-x-2 text-xs text-gray-500">
+        <div className="pt-3">
+          <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">
             <Shield className="h-4 w-4" />
             <span>Secure login protected by encryption</span>
           </div>

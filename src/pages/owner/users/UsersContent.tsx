@@ -40,9 +40,11 @@ import {
   Calendar,
   Shield,
   Activity,
-  X
+  X,
+  UserPlus
 } from 'lucide-react';
 import { ownerManagementService, type User } from '@/http/owner';
+import CreateUserDialog from './CreateUserDialog';
 
 const UsersContent: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -55,6 +57,7 @@ const UsersContent: React.FC = () => {
   const [showActivateDialog, setShowActivateDialog] = useState(false);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [showCreateUserDialog, setShowCreateUserDialog] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -173,29 +176,36 @@ const UsersContent: React.FC = () => {
             <h1 className="text-3xl font-bold text-gray-900 mb-2">User Management</h1>
             <p className="text-gray-600">Manage and monitor all platform users</p>
           </div>
-          {selectedUsers.length > 0 && (
-            <div className="flex space-x-2">
-              <Badge variant="secondary" className="px-3 py-1">
-                {selectedUsers.length} selected
-              </Badge>
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-red-600"
-                onClick={handleBulkSuspend}
-              >
-                Suspend Selected
+          <div className="flex items-center gap-3">
+            {selectedUsers.length > 0 ? (
+              <div className="flex space-x-2">
+                <Badge variant="secondary" className="px-3 py-1">
+                  {selectedUsers.length} selected
+                </Badge>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-red-600"
+                  onClick={handleBulkSuspend}
+                >
+                  Suspend Selected
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-green-600"
+                  onClick={handleBulkActivate}
+                >
+                  Activate Selected
+                </Button>
+              </div>
+            ) : (
+              <Button onClick={() => setShowCreateUserDialog(true)} size="lg">
+                <UserPlus className="h-4 w-4 mr-2" />
+                Create User
               </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-green-600"
-                onClick={handleBulkActivate}
-              >
-                Activate Selected
-              </Button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 

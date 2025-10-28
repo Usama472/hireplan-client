@@ -64,6 +64,7 @@ import OwnerLogin from "@/pages/owner/login";
 import OwnerDashboard from "@/pages/owner/dashboard/index"; 
 import OwnerCompanies from "@/pages/owner/companies/index";
 import OwnerUsers from "@/pages/owner/users/index";
+import OwnerAccounts from "@/pages/owner/accounts/index";
 import OwnerSubscriptions from "@/pages/owner/subscriptions/index";
 import OwnerSupport from "@/pages/owner/support/index";
 import OwnerAnalytics from "@/pages/owner/analytics/index";
@@ -383,6 +384,13 @@ export const appRoutes: AppRoutesType[] = [
     id: "owner-support",
     url: "/owner/support",
     element: <OwnerSupport />,
+    isPrivate: false,
+    isOwner: true,
+  },
+  {
+    id: "owner-accounts",
+    url: "/owner/accounts",
+    element: <OwnerAccounts />,
     isPrivate: false,
     isOwner: true,
   },

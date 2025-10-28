@@ -36,11 +36,13 @@ import {
   XCircle,
   Eye,
   Settings,
-  Users
+  Users,
+  Plus
 } from 'lucide-react';
 import { ownerManagementService } from '@/http/owner';
 import type { Company } from '@/http/owner';
 import CompanyDetails from './CompanyDetails';
+import CreateCompanyDialog from './CreateCompanyDialog';
 
 const CompaniesContent: React.FC = () => {
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -49,9 +51,8 @@ const CompaniesContent: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
-  const [showSuspendDialog, setShowSuspendDialog] = useState(false);
-  const [showActivateDialog, setShowActivateDialog] = useState(false);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   useEffect(() => {
     fetchCompanies();
@@ -99,27 +100,6 @@ const CompaniesContent: React.FC = () => {
     }
   };
 
-  const handleSuspendCompany = async (company: Company) => {
-    try {
-      await ownerManagementService.suspendCompany(company.id, 'Suspended by owner');
-      await fetchCompanies();
-      setShowSuspendDialog(false);
-      setSelectedCompany(null);
-    } catch (error) {
-      console.error('Error suspending company:', error);
-    }
-  };
-
-  const handleActivateCompany = async (company: Company) => {
-    try {
-      await ownerManagementService.activateCompany(company.id);
-      await fetchCompanies();
-      setShowActivateDialog(false);
-      setSelectedCompany(null);
-    } catch (error) {
-      console.error('Error activating company:', error);
-    }
-  };
 
   if (isLoading) {
     return (
@@ -131,9 +111,15 @@ const CompaniesContent: React.FC = () => {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-slate-900 mb-2">Companies</h1>
-        <p className="text-slate-600">Manage and monitor all companies</p>
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900 mb-2">Companies</h1>
+          <p className="text-slate-600">Manage and monitor all companies</p>
+        </div>
+        <Button onClick={() => setShowCreateDialog(true)} size="lg">
+          <Plus className="h-4 w-4 mr-2" />
+          Create Company
+        </Button>
       </div>
 
       {/* Stats Cards */}
@@ -260,8 +246,8 @@ const CompaniesContent: React.FC = () => {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end space-x-2">
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         size="sm"
                         onClick={() => {
                           setSelectedCompany(company);
@@ -271,33 +257,6 @@ const CompaniesContent: React.FC = () => {
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
-                      {company.status === 'active' ? (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                          onClick={() => {
-                            setSelectedCompany(company);
-                            setShowSuspendDialog(true);
-                          }}
-                          title="Suspend Company"
-                        >
-                          <AlertTriangle className="w-4 h-4" />
-                        </Button>
-                      ) : (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                          onClick={() => {
-                            setSelectedCompany(company);
-                            setShowActivateDialog(true);
-                          }}
-                          title="Activate Company"
-                        >
-                          <CheckCircle className="w-4 h-4" />
-                        </Button>
-                      )}
                     </div>
                   </TableCell>
                 </TableRow>
@@ -306,93 +265,6 @@ const CompaniesContent: React.FC = () => {
           </Table>
         </CardContent>
       </Card>
-
-      {/* Suspend Confirmation Dialog */}
-      <Dialog open={showSuspendDialog} onOpenChange={setShowSuspendDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center text-red-700">
-              <AlertTriangle className="w-5 h-5 mr-2" />
-              Suspend Company
-            </DialogTitle>
-            <DialogDescription>
-              Are you sure you want to suspend {selectedCompany?.companyName}?
-            </DialogDescription>
-          </DialogHeader>
-          <Alert className="border-red-200 bg-red-50">
-            <AlertTriangle className="h-4 w-4 text-red-600" />
-            <AlertDescription className="text-red-800">
-              <strong>Warning:</strong> Suspending this company will:
-              <ul className="list-disc ml-4 mt-2 space-y-1 text-sm">
-                <li>Prevent all users from accessing the platform</li>
-                <li>Pause all active jobs</li>
-                <li>Disable all automated processes</li>
-              </ul>
-            </AlertDescription>
-          </Alert>
-          <DialogFooter className="flex space-x-2 sm:space-x-2">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowSuspendDialog(false);
-                setSelectedCompany(null);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              className="bg-red-600 hover:bg-red-700 text-white"
-              onClick={() => selectedCompany && handleSuspendCompany(selectedCompany)}
-            >
-              <AlertTriangle className="w-4 h-4 mr-2" />
-              Suspend Company
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Activate Confirmation Dialog */}
-      <Dialog open={showActivateDialog} onOpenChange={setShowActivateDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center text-green-700">
-              <CheckCircle className="w-5 h-5 mr-2" />
-              Activate Company
-            </DialogTitle>
-            <DialogDescription>
-              Reactivate {selectedCompany?.companyName}?
-            </DialogDescription>
-          </DialogHeader>
-          <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-            <p className="text-green-800 text-sm">
-              <strong>This will:</strong>
-              <ul className="list-disc ml-4 mt-2 space-y-1">
-                <li>Restore access for all users</li>
-                <li>Reactivate all jobs</li>
-                <li>Resume automated processes</li>
-              </ul>
-            </p>
-          </div>
-          <DialogFooter className="flex space-x-2 sm:space-x-2">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowActivateDialog(false);
-                setSelectedCompany(null);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              className="bg-green-600 hover:bg-green-700 text-white"
-              onClick={() => selectedCompany && handleActivateCompany(selectedCompany)}
-            >
-              <CheckCircle className="w-4 h-4 mr-2" />
-              Activate Company
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Company Details Dialog */}
       {showDetailsDialog && selectedCompany && (
@@ -404,6 +276,16 @@ const CompaniesContent: React.FC = () => {
           }}
         />
       )}
+
+      {/* Create Company Dialog */}
+      <CreateCompanyDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+        onSuccess={() => {
+          fetchCompanies();
+          fetchUsers();
+        }}
+      />
     </>
   );
 };

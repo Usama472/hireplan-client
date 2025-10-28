@@ -19,13 +19,15 @@ import {
   Loader2,
   Shield,
   Save,
-  Edit
+  Edit,
+  UserPlus
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import axios from 'axios';
 import type { Company, User } from '@/http/owner';
 import { ownerManagementService } from '@/http/owner';
+import CreateUserDialog from '../users/CreateUserDialog';
 
 interface CompanyDetailsProps {
   company: Company;
@@ -38,6 +40,7 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = ({ company, onClose }) => 
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const [isLoadingJobs, setIsLoadingJobs] = useState(false);
   const [activeTab, setActiveTab] = useState<'info' | 'users' | 'jobs'>('info');
+  const [showCreateUserDialog, setShowCreateUserDialog] = useState(false);
   
   // Max Job Postings state
   const [maxJobPostings, setMaxJobPostings] = useState<string>(
@@ -313,6 +316,13 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = ({ company, onClose }) => 
           {/* Users Tab */}
           {activeTab === 'users' && (
             <div>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Company Users</h3>
+                <Button onClick={() => setShowCreateUserDialog(true)} size="sm">
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Add User
+                </Button>
+              </div>
               {isLoadingUsers ? (
                 <div className="flex items-center justify-center h-64">
                   <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
@@ -320,7 +330,11 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = ({ company, onClose }) => 
               ) : users.length === 0 ? (
                 <div className="text-center py-12 text-gray-500">
                   <Users className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                  <p>No users found for this company</p>
+                  <p className="mb-4">No users found for this company</p>
+                  <Button onClick={() => setShowCreateUserDialog(true)} size="sm">
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Add First User
+                  </Button>
                 </div>
               ) : (
                 <Table>
@@ -446,6 +460,17 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = ({ company, onClose }) => 
           </div>
         </div>
       </Card>
+
+      {/* Create User Dialog */}
+      <CreateUserDialog
+        open={showCreateUserDialog}
+        onOpenChange={setShowCreateUserDialog}
+        preSelectedCompanyId={company.id}
+        onSuccess={() => {
+          fetchCompanyUsers();
+          toast.success('User created successfully!');
+        }}
+      />
     </div>
   );
 };

@@ -49,23 +49,23 @@ export function Header() {
   return (
     <header className="w-full bg-background/80 backdrop-blur-md border-b border-border z-50 sticky top-0">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-20">
           <div className="flex items-center min-w-0">
             <Link
               to={isAuthenticated ? ROUTES.DASHBOARD.MAIN : "/"}
-              className="flex items-center space-x-2 min-w-0 hover:opacity-80 transition-opacity"
+              className="flex items-center space-x-2.5 min-w-0 hover:opacity-80 transition-opacity"
             >
               <img
                 src="../../../../../public/logo.png"
-                className="w-8 h-8 flex-shrink-0"
+                className="w-10 h-10 flex-shrink-0"
               />
-              <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent truncate">
+              <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent truncate">
                 {APP_NAME}
               </span>
             </Link>
           </div>
 
-          <nav className="hidden md:flex items-center space-x-1">
+          <nav className="hidden md:flex items-center space-x-2">
             {navigation.map((item) => {
               // For anchor links, keep as buttons since they need scroll behavior
               if (item.href.startsWith("#")) {
@@ -73,7 +73,7 @@ export function Header() {
                   <button
                     key={item.name}
                     onClick={() => handleNavigation(item.href)}
-                    className="text-muted-foreground hover:text-foreground px-3 lg:px-4 py-2 text-sm font-medium transition-colors rounded-lg hover:bg-muted cursor-pointer whitespace-nowrap"
+                    className="text-muted-foreground hover:text-foreground px-4 lg:px-5 py-2.5 text-base font-medium transition-colors rounded-lg hover:bg-muted cursor-pointer whitespace-nowrap"
                   >
                     {item.name}
                   </button>
@@ -84,7 +84,7 @@ export function Header() {
                 <Link
                   key={item.name}
                   to={item.href}
-                  className="text-muted-foreground hover:text-foreground px-3 lg:px-4 py-2 text-sm font-medium transition-colors rounded-lg hover:bg-muted cursor-pointer whitespace-nowrap"
+                  className="text-muted-foreground hover:text-foreground px-4 lg:px-5 py-2.5 text-base font-medium transition-colors rounded-lg hover:bg-muted cursor-pointer whitespace-nowrap"
                 >
                   {item.name}
                 </Link>
@@ -92,10 +92,10 @@ export function Header() {
             })}
           </nav>
 
-          <div className="hidden md:flex items-center space-x-2 lg:space-x-3">
+          <div className="hidden md:flex items-center space-x-3 lg:space-x-4">
             {isAuthenticated ? (
               <>
-                <Button variant="secondary" asChild>
+                <Button variant="secondary" size="default" asChild>
                   <Link to={ROUTES.DASHBOARD.MAIN}>Dashboard</Link>
                 </Button>
               </>
@@ -103,12 +103,13 @@ export function Header() {
               <>
                 <Button
                   variant="outline"
+                  size="default"
                   asChild
-                  className="text-sm px-3 lg:px-4"
+                  className="text-base px-5 lg:px-6"
                 >
                   <Link to="/login">Sign In</Link>
                 </Button>
-                <Button asChild>
+                <Button size="default" asChild>
                   <Link to={ROUTES.CONTACT}>Get Started</Link>
                 </Button>
               </>
@@ -118,15 +119,15 @@ export function Header() {
           <div className="md:hidden flex items-center">
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label="Toggle menu"
-              className="p-2 h-10 w-10"
+              className="h-10 w-10"
             >
               {isMenuOpen ? (
-                <X className="h-5 w-5" />
+                <X className="h-6 w-6" />
               ) : (
-                <Menu className="h-5 w-5" />
+                <Menu className="h-6 w-6" />
               )}
             </Button>
           </div>

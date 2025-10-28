@@ -47,6 +47,46 @@ class OwnerManagementService {
     }
   }
 
+  async createCompany(data: {
+    companyName: string;
+    websiteUrl?: string;
+    industry?: string;
+    companySize?: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    zipCode?: string;
+    country?: string;
+    adminEmail: string;
+    adminFirstName: string;
+    adminLastName: string;
+  }): Promise<{
+    company: {
+      id: string;
+      companyName: string;
+      organizationId: number;
+      slug: string;
+    };
+    admin: {
+      id: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+    };
+    credentials: {
+      email: string;
+      tempPassword: string;
+      loginLink: string;
+    };
+  }> {
+    try {
+      const response = await ownerPost('/owner/management/companies', data);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || 'Failed to create company');
+    }
+  }
+
   async suspendCompany(companyId: string, reason?: string): Promise<Company> {
     try {
       const response = await ownerPost(`/owner/management/companies/${companyId}/suspend`, { reason });
@@ -72,6 +112,38 @@ class OwnerManagementService {
       return response.data;
     } catch (error) {
       throw new Error('Failed to fetch users');
+    }
+  }
+
+  async createUserForCompany(data: {
+    companyId: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    role?: string;
+  }): Promise<{
+    user: {
+      id: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      role: string;
+    };
+    company: {
+      id: string;
+      companyName: string;
+    };
+    credentials: {
+      email: string;
+      tempPassword: string;
+      loginLink: string;
+    };
+  }> {
+    try {
+      const response = await ownerPost('/owner/management/users', data);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || 'Failed to create user');
     }
   }
 

@@ -83,27 +83,27 @@ export const DashboardHeader = () => {
   };
 
   return (
-    <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-10">
+    <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-10">
       {/* Left: Logo and Menu Button */}
-      <div className="flex items-center gap-3 flex-1">
+      <div className="flex items-center gap-4 flex-1">
         {isMobile && (
           <>
             <Button
               variant="ghost"
               size="icon"
               onClick={toggleSidebar}
-              className="h-8 w-8"
+              className="h-10 w-10"
             >
-              <Menu className="h-5 w-5" />
+              <Menu className="h-6 w-6" />
               <span className="sr-only">Toggle Menu</span>
             </Button>
             
             <Link
               to={ROUTES.DASHBOARD.MAIN}
-              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+              className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
             >
-              <img src={LogoImage} alt="Logo" className="h-8 w-8 object-contain" />
-              <span className="font-extrabold text-xl leading-tight tracking-tight bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+              <img src={LogoImage} alt="Logo" className="h-9 w-9 object-contain" />
+              <span className="font-extrabold text-2xl leading-tight tracking-tight bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
                 {APP_NAME}
               </span>
             </Link>
@@ -111,27 +111,27 @@ export const DashboardHeader = () => {
         )}
         
         {!isMobile && (
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-100">
-              <Building2 className="h-4 w-4 text-blue-600" />
-              <span className="text-sm font-semibold text-gray-800">{companyName}</span>
+          <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2.5 px-4 py-2 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-100">
+              <Building2 className="h-5 w-5 text-blue-600" />
+              <span className="text-base font-semibold text-gray-800">{companyName}</span>
             </div>
           </div>
         )}
       </div>
 
       {/* Right: Notification Bell */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
               size="icon"
-              className="relative h-9 w-9 rounded-full hover:bg-gray-100"
+              className="relative h-10 w-10 rounded-full hover:bg-gray-100"
             >
-              <Bell className="h-5 w-5 text-gray-600" />
+              <Bell className="h-6 w-6 text-gray-600" />
               {totalCount > 0 && (
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-red-500 text-white text-[10px] border-2 border-white">
+                <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-red-500 text-white text-xs border-2 border-white">
                   {totalCount}
                 </Badge>
               )}
