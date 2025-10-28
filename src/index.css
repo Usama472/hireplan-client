@@ -183,7 +183,7 @@ button:not([class*="size-"]) {
 
 /* Fix responsive layout issues */
 @media (max-width: 768px) {
-  button {
+  button:not([type="button"]):not([class*="icon"]) {
     min-height: 48px; /* Larger touch targets on mobile */
     font-size: 16px; /* Prevent zoom on iOS */
   }
@@ -615,5 +615,83 @@ select {
   div[class*="min-h-screen"] {
     overflow-x: hidden;
     position: relative;
+  }
+}
+
+/* Compact spacing overrides for entire application */
+@layer utilities {
+  /* Reduce large spacing utilities to be more compact - but exclude hero/landing sections */
+  section .space-y-8 > * + * {
+    margin-top: 1rem !important; /* was 2rem */
+  }
+  
+  section .space-y-6 > * + * {
+    margin-top: 0.75rem !important; /* was 1.5rem */
+  }
+  
+  section .gap-8 {
+    gap: 1rem !important; /* was 2rem */
+  }
+  
+  section .gap-6 {
+    gap: 0.75rem !important; /* was 1.5rem */
+  }
+  
+  /* Only apply to sections that are NOT hero/landing page sections */
+  section:not([class*="hero"]):not([class*="Hero"]) .p-8 {
+    padding: 1rem !important; /* was 2rem */
+  }
+  
+  section:not([class*="hero"]):not([class*="Hero"]) .p-6 {
+    padding: 0.75rem !important; /* was 1.5rem */
+  }
+  
+  section:not([class*="hero"]):not([class*="Hero"]) .px-8 {
+    padding-left: 1rem !important; /* was 2rem */
+    padding-right: 1rem !important;
+  }
+  
+  section:not([class*="hero"]):not([class*="Hero"]) .px-6 {
+    padding-left: 0.75rem !important; /* was 1.5rem */
+    padding-right: 0.75rem !important;
+  }
+  
+  /* Don't override py-* (vertical padding) on sections to preserve hero heights */
+  
+  section .mb-8 {
+    margin-bottom: 1rem !important; /* was 2rem */
+  }
+  
+  section .mb-6 {
+    margin-bottom: 0.75rem !important; /* was 1.5rem */
+  }
+  
+  section .mt-8 {
+    margin-top: 1rem !important; /* was 2rem */
+  }
+  
+  section .mt-6 {
+    margin-top: 0.75rem !important; /* was 1.5rem */
+  }
+  
+  /* Allow forms and cards to be more compact */
+  form .space-y-8 > * + *,
+  [class*="card"] .space-y-8 > * + * {
+    margin-top: 1rem !important;
+  }
+  
+  form .space-y-6 > * + *,
+  [class*="card"] .space-y-6 > * + * {
+    margin-top: 0.75rem !important;
+  }
+  
+  form .gap-8,
+  [class*="card"] .gap-8 {
+    gap: 1rem !important;
+  }
+  
+  form .gap-6,
+  [class*="card"] .gap-6 {
+    gap: 0.75rem !important;
   }
 }

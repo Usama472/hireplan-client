@@ -118,7 +118,7 @@ export function HeroSection() {
 
           {/* CTA Button */}
           <motion.div variants={itemVariants} className="mb-6 sm:mb-8 px-2">
-            <Button onClick={() => navigate(ROUTES.SIGNUP)}>
+            <Button onClick={() => navigate(ROUTES.CONTACT)} className="px-8 py-3 text-base">
               <Rocket className="h-4 w-4 mr-2" />
               Get Started
               <ArrowRight className="h-4 w-4 ml-2" />
@@ -130,17 +130,17 @@ export function HeroSection() {
             variants={itemVariants}
             className="flex flex-wrap justify-center items-center gap-2 sm:gap-4 text-sm text-white/80 px-2"
           >
-            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-2 sm:px-3 py-1 rounded-full border border-white/10">
+            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 sm:px-4 py-1.5 rounded-full border border-white/10">
               <div className="w-2 h-2 bg-secondary rounded-full"></div>
-              <span className="font-medium text-xs">Secure & Private</span>
+              <span className="font-medium text-sm">Secure & Private</span>
             </div>
-            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-2 sm:px-3 py-1 rounded-full border border-white/10">
+            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 sm:px-4 py-1.5 rounded-full border border-white/10">
               <div className="w-2 h-2 bg-secondary rounded-full"></div>
-              <span className="font-medium text-xs">AI-Powered</span>
+              <span className="font-medium text-sm">AI-Powered</span>
             </div>
-            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-2 sm:px-3 py-1 rounded-full border border-white/10">
+            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 sm:px-4 py-1.5 rounded-full border border-white/10">
               <div className="w-2 h-2 bg-secondary rounded-full"></div>
-              <span className="font-medium text-xs">Fast & Easy</span>
+              <span className="font-medium text-sm">Fast & Easy</span>
             </div>
           </motion.div>
         </div>

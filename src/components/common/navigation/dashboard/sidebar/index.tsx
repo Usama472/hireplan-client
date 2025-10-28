@@ -4,9 +4,7 @@ import {
   FileText,
   Filter,
   LifeBuoy,
-  Mail,
   MessageCircle,
-  Phone,
   PlusCircle,
   Send,
   Settings,
@@ -94,10 +92,12 @@ export const DashboardSidebar = ({
       url: ROUTES.DASHBOARD.CHATS,
       icon: MessageCircle,
     });
+  }
+  if (userPermissions.includes(PERMISSIONS.EMAIL_TEMPLATE_CREATE)) {
     staticData.projects.push({
-      name: "SMS",
-      url: ROUTES.DASHBOARD.SMS,
-      icon: Phone,
+      name: "Templates",
+      url: ROUTES.DASHBOARD.TEMPLATES,
+      icon: FileText,
     });
   }
   if (userPermissions.includes(PERMISSIONS.STAFF_CREATE)) {
@@ -141,7 +141,7 @@ export const DashboardSidebar = ({
   }
 
   // Filter navigation items based on subscription
-  const filteredProjects = staticData.projects.filter((project) => {
+  const filteredProjects = staticData.projects.filter((project: any) => {
     // Scheduler requires Professional+ plan
     if (project.name === "Scheduler") {
       return (

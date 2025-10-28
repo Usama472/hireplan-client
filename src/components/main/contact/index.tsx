@@ -240,7 +240,8 @@ export default function ContactPage() {
                       <Input
                         id="firstName"
                         {...register("firstName")}
-                        className={`h-12 border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-base ${
+                        size="md"
+                        className={`border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
                           errors.firstName
                             ? "border-red-500 focus:border-red-500 focus:ring-red-100"
                             : ""
@@ -258,7 +259,8 @@ export default function ContactPage() {
                       <Input
                         id="lastName"
                         {...register("lastName")}
-                        className={`h-12 border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-base ${
+                        size="md"
+                        className={`border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
                           errors.lastName
                             ? "border-red-500 focus:border-red-500 focus:ring-red-100"
                             : ""
@@ -279,7 +281,8 @@ export default function ContactPage() {
                       id="email"
                       type="email"
                       {...register("email")}
-                      className={`h-12 border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-base ${
+                      size="md"
+                      className={`border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
                         errors.email
                           ? "border-red-500 focus:border-red-500 focus:ring-red-100"
                           : ""
@@ -299,7 +302,8 @@ export default function ContactPage() {
                       <Input
                         id="company"
                         {...register("company")}
-                        className={`h-12 border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-base ${
+                        size="md"
+                        className={`border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
                           errors.company
                             ? "border-red-500 focus:border-red-500 focus:ring-red-100"
                             : ""
@@ -317,7 +321,8 @@ export default function ContactPage() {
                       <Input
                         id="jobTitle"
                         {...register("jobTitle")}
-                        className={`h-12 border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-base ${
+                        size="md"
+                        className={`border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
                           errors.jobTitle
                             ? "border-red-500 focus:border-red-500 focus:ring-red-100"
                             : ""
@@ -339,7 +344,7 @@ export default function ContactPage() {
                       onValueChange={(value) => setValue("inquiryType", value)}
                     >
                       <SelectTrigger
-                        className={`h-12 border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-base ${
+                        className={`h-9 border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-sm ${
                           errors.inquiryType
                             ? "border-red-500 focus:border-red-500 focus:ring-red-100"
                             : ""
@@ -387,7 +392,7 @@ export default function ContactPage() {
                     <Button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-8 py-3 h-12 transition-all duration-200 group text-base"
+                      className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground font-medium transition-all duration-200 group"
                     >
                       {isSubmitting ? (
                         <>

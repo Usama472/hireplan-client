@@ -150,8 +150,16 @@ const ConversationPage: React.FC = () => {
   }, [conversationId]);
 
   useEffect(() => {
-    scrollToBottom();
-  }, [conversation?.messages]);
+    // Only scroll when conversation loads, not on every message change
+    if (conversation?.messages && conversation.messages.length > 0) {
+      // Use a small delay to prevent scroll on initial load
+      const timer = setTimeout(() => {
+        scrollToBottom();
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [conversation?.messages, conversationId]); // Add conversationId to dependency array
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

@@ -73,7 +73,14 @@ export function EmailChatWidget({
   }, [applicantId]);
 
   useEffect(() => {
-    scrollToBottom();
+    // Only scroll when messages change, not on conversation selection
+    if (activeConversation?.messages && activeConversation.messages.length > 0) {
+      const timer = setTimeout(() => {
+        scrollToBottom();
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
   }, [activeConversation?.messages]);
 
   const loadConversations = async () => {
@@ -327,7 +334,7 @@ export function EmailChatWidget({
             
             <Dialog open={showNewMessage} onOpenChange={setShowNewMessage}>
               <DialogTrigger asChild>
-                <Button size="sm" className="h-9 px-4 bg-blue-600 hover:bg-blue-700 text-white gap-2 rounded-xl font-medium shadow-sm hover:shadow-md transition-all duration-200">
+                <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white gap-2 rounded-xl font-medium shadow-sm hover:shadow-md transition-all duration-200">
                   <Send className="w-4 h-4" />
                   Send Email
                 </Button>
@@ -372,14 +379,14 @@ export function EmailChatWidget({
                   <Button 
                     variant="outline" 
                     onClick={() => setShowNewMessage(false)}
-                    className="bg-white border-gray-200 hover:bg-gray-50 rounded-xl h-11 px-6 font-medium shadow-sm hover:shadow-md transition-all duration-200"
+                    className="bg-white border-gray-200 hover:bg-gray-50 rounded-xl px-6 font-medium shadow-sm hover:shadow-md transition-all duration-200"
                   >
                     Cancel
                   </Button>
                   <Button 
                     onClick={createNewConversation} 
                     disabled={isSending || !newMessageSubject.trim() || !newMessageContent.trim()}
-                    className="bg-blue-600 hover:bg-blue-700 text-white gap-2 rounded-xl h-11 px-6 font-medium shadow-sm hover:shadow-md transition-all duration-200"
+                    className="bg-blue-600 hover:bg-blue-700 text-white gap-2 rounded-xl px-6 font-medium shadow-sm hover:shadow-md transition-all duration-200"
                   >
                     {isSending ? (
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
@@ -405,7 +412,7 @@ export function EmailChatWidget({
             <p className="text-gray-600 mb-4 max-w-sm mx-auto">
               Start a conversation with {applicantName} to discuss their application
             </p>
-            <Button onClick={() => setShowNewMessage(true)} className="bg-blue-600 hover:bg-blue-700 text-white gap-2 rounded-xl h-11 px-6 font-medium shadow-sm hover:shadow-md transition-all duration-200">
+            <Button onClick={() => setShowNewMessage(true)} size="lg" className="bg-blue-600 hover:bg-blue-700 text-white gap-2 rounded-xl font-medium shadow-sm hover:shadow-md transition-all duration-200">
               <Send className="w-4 h-4" />
               Send Email
             </Button>
@@ -481,7 +488,7 @@ export function EmailChatWidget({
                   </h4>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm" className="h-8 w-8 p-0 bg-white border-gray-200 hover:bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition-all duration-200">
+                      <Button variant="outline" size="icon" className="bg-white border-gray-200 hover:bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition-all duration-200">
                         <MoreHorizontal className="w-4 h-4" />
                       </Button>
                     </DropdownMenuTrigger>

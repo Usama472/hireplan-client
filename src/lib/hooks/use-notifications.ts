@@ -62,10 +62,14 @@ export function useNotifications(): UseNotificationsReturn {
         API.notification.getExpiredJobNotifications()
       ]);
       
-      setMessageNotifications(messages.data.notifications);
-      setExpiredJobNotifications(jobs.data.notifications);
+      // Handle potential undefined responses
+      setMessageNotifications(messages?.data?.notifications || []);
+      setExpiredJobNotifications(jobs?.data?.notifications || []);
     } catch (error) {
       console.error('Failed to fetch notifications:', error);
+      // Set empty arrays on error to prevent undefined state
+      setMessageNotifications([]);
+      setExpiredJobNotifications([]);
     } finally {
       setLoading(false);
     }

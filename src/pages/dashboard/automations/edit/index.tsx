@@ -165,7 +165,7 @@ export default function EditAutomationPage() {
             <h1 className="text-base sm:text-lg font-bold text-gray-900">Edit Automation</h1>
           </div>
           <div>
-            <Button variant="ghost" onClick={handleCancel} className="mr-1.5 h-8 px-2.5 text-xs">
+            <Button variant="ghost" onClick={handleCancel} size="sm" className="mr-1.5">
               Cancel
             </Button>
           </div>

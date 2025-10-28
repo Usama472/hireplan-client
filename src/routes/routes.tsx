@@ -34,9 +34,8 @@ import AutomationsDashboard from "@/pages/dashboard/automations";
 import CreateAutomationPage from "@/pages/dashboard/automations/create";
 import EditAutomationPage from "@/pages/dashboard/automations/edit";
 import TriggersPage from "@/pages/dashboard/automations/triggers";
-import ChatsPage from "@/pages/dashboard/chats";
-import ConversationPage from "@/pages/dashboard/chats/conversation";
 import SimpleUnifiedChat from "@/pages/dashboard/chats/simple-unified-chat";
+import UnifiedTemplatesPage from "@/pages/dashboard/templates";
 import EmailTemplatesPage from "@/pages/dashboard/email-template";
 import SMSPage from "@/pages/dashboard/sms";
 import CreateSMSTemplatePage from "@/pages/dashboard/sms/create";
@@ -216,6 +215,12 @@ export const appRoutes: AppRoutesType[] = [
     id: "edit-job",
     url: ROUTES.DASHBOARD.EDIT_JOB_ID,
     element: <EditJobPage />,
+    isPrivate: true,
+  },
+  {
+    id: "templates",
+    url: ROUTES.DASHBOARD.TEMPLATES,
+    element: <UnifiedTemplatesPage />,
     isPrivate: true,
   },
   {

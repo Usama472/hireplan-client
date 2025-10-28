@@ -154,7 +154,7 @@ export function PricingSection() {
                           : "bg-blue-500 hover:bg-blue-600 text-white"
                       }`}
                       onClick={() =>
-                        navigate("/signup", {
+                        navigate("/contact", {
                           state: { planId: plan.id },
                         })
                       }

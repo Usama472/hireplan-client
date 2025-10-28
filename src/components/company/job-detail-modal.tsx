@@ -232,12 +232,13 @@ export default function JobDetailModal({
 
             {/* Apply Button at Bottom of Scroll */}
             <div className="pt-6 sticky bottom-0 bg-white">
-              <Button
-                onClick={handleApplyClick}
-                className="w-full h-16 text-2xl font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
-              >
-                Apply Now →
-              </Button>
+                  <Button
+                    onClick={handleApplyClick}
+                    size="xl"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
+                  >
+                    Apply Now →
+                  </Button>
             </div>
           </div>
         </div>

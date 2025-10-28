@@ -185,8 +185,15 @@ export default function UnifiedApplicantChat({ jobId, onConversationCreated }: C
   }, []);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    // Only scroll to bottom if we have messages and a selected conversation
+    if (messages.length > 0 && selectedConversation) {
+      const timer = setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [messages, selectedConversation]);
 
   return (
     <div className="flex h-[calc(100vh-200px)] bg-gray-50 rounded-lg overflow-hidden">

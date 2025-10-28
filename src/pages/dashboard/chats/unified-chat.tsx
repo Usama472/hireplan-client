@@ -435,8 +435,16 @@ const UnifiedChatPage: React.FC = () => {
   }, [statusFilter, channelFilter]);
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    // Only scroll to bottom if we have messages and are actively in a conversation
+    if (messages.length > 0 && selectedConversation) {
+      // Use a small delay to prevent scroll on initial selection
+      const timer = setTimeout(() => {
+        scrollToBottom();
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [messages, selectedConversation]);
 
   // Get channel icon
   const getChannelIcon = (channel: string) => {

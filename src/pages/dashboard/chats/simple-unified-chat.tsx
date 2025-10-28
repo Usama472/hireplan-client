@@ -358,8 +358,17 @@ const SimpleUnifiedChatInner: React.FC = () => {
   }, [refreshTrigger]);
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    // Only scroll to bottom if we have messages and are actively in a conversation
+    // This prevents unwanted scrolling when selecting a conversation
+    if (messages.length > 0 && selectedConversation) {
+      // Use a small delay to prevent scroll on initial selection
+      const timer = setTimeout(() => {
+        scrollToBottom();
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [messages, selectedConversation]);
 
   return (
     <div className="flex flex-col lg:flex-row gap-4 p-4 min-h-screen bg-gray-50">

@@ -402,7 +402,7 @@ export default function AutomationsDashboard() {
                     </div>
 
                     {/* Create Button */}
-                    <Button onClick={handleCreateAutomation} className="h-10">
+                    <Button onClick={handleCreateAutomation} size="lg">
                       <Plus className="h-4 w-4 mr-2" />
                       Create
                     </Button>
@@ -428,7 +428,7 @@ export default function AutomationsDashboard() {
                         : "Create your first automation to streamline your recruitment process"}
                     </p>
                     {!searchTerm && statusFilter === "all" && (
-                      <Button onClick={handleCreateAutomation} className="h-10">
+                      <Button onClick={handleCreateAutomation} size="lg">
                         <Plus className="h-4 w-4 mr-2" />
                         Create Your First Automation
                       </Button>

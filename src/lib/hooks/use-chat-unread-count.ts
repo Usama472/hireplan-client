@@ -10,9 +10,8 @@ export function useChatUnreadCount() {
       setLoading(true);
       const response = await API.chat.getUnreadCount();
       
-      if (response.status && response.data) {
-        setUnreadCount(response.data.count || 0);
-      }
+      // Handle potential undefined responses with optional chaining
+      setUnreadCount(response?.data?.count || 0);
     } catch (error) {
       console.error('Error fetching unread count:', error);
       setUnreadCount(0);

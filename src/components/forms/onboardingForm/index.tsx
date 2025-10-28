@@ -15,7 +15,6 @@ import { fullFormSchema } from "@/lib/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -31,8 +30,6 @@ export default function RecruiterOnboardingForm({
   const [currentStep, setCurrentStep] = useState(1);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const navigate = useNavigate();
 
   // Notify parent component when step changes
   useEffect(() => {
@@ -131,15 +128,39 @@ export default function RecruiterOnboardingForm({
     setIsSubmitting(true);
 
     try {
+      // Provide a default website URL if none provided or empty
+      const websiteUrl = formData.websiteDomain && formData.websiteDomain.trim() !== ''
+        ? formData.websiteDomain 
+        : `https://www.${formData.companyName.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '')}.com`;
+      
+      console.log('📝 Submitting registration with data:', {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        companyRole: formData.jobTitle,
+        jobCategory: formData.jobCategory,
+        companyName: formData.companyName,
+        websiteUrl: websiteUrl,
+        industry: formData.industry,
+        companySize: formData.companySize,
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        zipCode: formData.zipCode,
+        country: "US",
+        privacyPolicyAccepted: formData.privacyPolicyAccepted,
+        termsOfServiceAccepted: formData.termsOfServiceAccepted,
+      });
+      
       const response = await API.auth.signup({
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
         password: formData.password,
         companyRole: formData.jobTitle,
-        jobCategory: formData.jobCategory,
+        jobCategory: formData.jobCategory || '',
         companyName: formData.companyName,
-        websiteUrl: formData.websiteDomain,
+        websiteUrl: websiteUrl,
         industry: formData.industry,
         companySize: formData.companySize,
         address: formData.address,
@@ -151,11 +172,21 @@ export default function RecruiterOnboardingForm({
         termsOfServiceAccepted: formData.termsOfServiceAccepted,
       });
 
+      console.log('✅ Signup successful, response:', {
+        user: response.user?.email,
+        hasToken: !!response.tokens?.accessToken?.token
+      });
+
+      // Clear any old cached profile before setting new session
+      localStorage.removeItem('cachedUserProfile');
+      
       const token = response.tokens.accessToken.token;
-      mutateSession({ shouldBroadcast: true, accessToken: token });
+      await mutateSession({ shouldBroadcast: true, accessToken: token });
 
       toast.success("Account created successfully");
-      navigate(ROUTES.DASHBOARD.MAIN);
+      
+      // Use window.location.href for a hard redirect to ensure fresh state
+      window.location.href = ROUTES.DASHBOARD.MAIN;
     } catch (error) {
       const errorMessage = errorResolver(error);
       toast.error(errorMessage);

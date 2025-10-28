@@ -333,7 +333,7 @@ export default function ApplicantsPage() {
               >
                 {totalResults} Total
               </Badge>
-              <Button variant="outline" size="sm" className="h-10">
+              <Button variant="outline" size="default">
                 <Download className="w-4 h-4 mr-2" />
                 Export CSV
               </Button>

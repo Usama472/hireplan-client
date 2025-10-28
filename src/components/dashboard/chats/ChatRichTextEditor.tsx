@@ -551,8 +551,8 @@ export function ChatRichTextEditor({
           <Button
             onClick={handleSend}
             disabled={sending || disabled || (!(value || '').trim() && attachedFiles.length === 0)}
-            size="sm"
-            className="h-10 w-10 p-0 rounded-xl bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg transition-all duration-200"
+            size="icon"
+            className="rounded-xl bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg transition-all duration-200"
           >
             {sending ? (
               <Loader2 className="h-4 w-4 animate-spin" />

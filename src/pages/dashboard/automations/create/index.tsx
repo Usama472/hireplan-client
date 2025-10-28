@@ -36,7 +36,7 @@ export default function CreateAutomationPage() {
             </h1>
           </div>
           <div>
-            <Button variant="ghost" onClick={handleCancel} className="mr-1.5 h-8 px-2.5 text-xs">
+            <Button variant="ghost" onClick={handleCancel} size="sm" className="mr-1.5">
               Cancel
             </Button>
           </div>

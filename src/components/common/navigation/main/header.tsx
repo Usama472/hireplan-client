@@ -109,7 +109,7 @@ export function Header() {
                   <Link to="/login">Sign In</Link>
                 </Button>
                 <Button asChild>
-                  <Link to={ROUTES.SIGNUP}>Get Started</Link>
+                  <Link to={ROUTES.CONTACT}>Get Started</Link>
                 </Button>
               </>
             )}
@@ -183,7 +183,7 @@ export function Header() {
                     </Button>
                     <Button variant="default">
                       <Link
-                        to={ROUTES.SIGNUP}
+                        to={ROUTES.CONTACT}
                         onClick={() => setIsMenuOpen(false)}
                       >
                         Get Started

@@ -66,8 +66,15 @@ export default function ChatInterface({ jobId, onConversationCreated }: ChatInte
   }, [selectedConversation]);
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    // Only scroll to bottom if we have messages and a selected conversation
+    if (messages.length > 0 && selectedConversation) {
+      const timer = setTimeout(() => {
+        scrollToBottom();
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [messages, selectedConversation]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

@@ -100,7 +100,7 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
     defaultValue,
     disabled,
     className: cn(
-      "h-12 bg-white border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 transition-all text-gray-900 placeholder:text-gray-400",
+      "bg-white border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 transition-all text-gray-900 placeholder:text-gray-400",
       fieldError && "border-red-500 focus:border-red-500 focus:ring-red-500/20"
     ),
   };
@@ -333,9 +333,8 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
                     {type === INPUT_TYPES.PASSWORD && (
                       <Button
                         type="button"
-                        variant="icon"
-                        size="sm"
-                        className="absolute right-0 top-1 h-10 w-10 px-3 py-2"
+                        size="icon-sm"
+                        className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6"
                         onClick={() => setShowPassword(!showPassword)}
                         aria-label={
                           showPassword ? "Hide password" : "Show password"

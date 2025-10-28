@@ -85,7 +85,7 @@ export function StaffGrid({ staffMembers, onEdit, onDelete, onResendInvite }: St
 
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      <Button variant="ghost" size="icon-sm" className="p-0">
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>

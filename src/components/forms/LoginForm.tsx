@@ -44,10 +44,21 @@ export const LoginForm = () => {
       const response = await API.auth.signin(data.email, data.password);
       const user = response.user;
       const token = response.tokens.accessToken.token;
+      
+      console.log('✅ Login successful:', {
+        user: user.email,
+        status: user.status,
+        hasToken: !!token
+      });
+      
       if (user.status === "active") {
-        mutateSession({ shouldBroadcast: true, accessToken: token });
-        // Navigate to dashboard after successful login
-        navigate("/dashboard/jobs");
+        // Clear any old cached profile before setting new session
+        localStorage.removeItem('cachedUserProfile');
+        
+        await mutateSession({ shouldBroadcast: true, accessToken: token });
+        
+        // Use window.location.href for a hard redirect to ensure fresh state
+        window.location.href = "/dashboard/jobs";
       }
     } catch (err: any) {
       const errMessage = errorResolver(err);
@@ -100,7 +111,7 @@ export const LoginForm = () => {
             name="email"
             type={INPUT_TYPES.EMAIL}
             placeholder="you@example.com"
-            className="h-12 bg-white focus:bg-white focus:ring-2 focus:ring-blue-500/20 border-gray-300 focus:border-blue-500 transition-all duration-200 rounded-xl text-base"
+            className="h-8 md:h-9 bg-white focus:bg-white focus:ring-2 focus:ring-blue-500/20 border-gray-300 focus:border-blue-500 transition-all duration-200 rounded-xl text-xs md:text-sm"
           />
         </div>
 
@@ -116,7 +127,7 @@ export const LoginForm = () => {
             name="password"
             type={INPUT_TYPES.PASSWORD}
             placeholder="••••••••"
-            className="h-12 bg-white focus:bg-white focus:ring-2 focus:ring-blue-500/20 border-gray-300 focus:border-blue-500 transition-all duration-200 rounded-xl text-base"
+            className="h-8 md:h-9 bg-white focus:bg-white focus:ring-2 focus:ring-blue-500/20 border-gray-300 focus:border-blue-500 transition-all duration-200 rounded-xl text-xs md:text-sm"
           />
         </div>
 

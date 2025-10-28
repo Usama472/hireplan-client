@@ -97,7 +97,7 @@ export function SMSOptIn() {
                     value={phoneNumber}
                     onChange={handlePhoneChange}
                     placeholder="(555) 123-4567"
-                    className="pl-10 sm:pl-12 h-12 sm:h-14 text-sm sm:text-base bg-white border-2 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-gray-900 transition-all duration-200 placeholder:text-gray-500 shadow-sm"
+                    className="pl-10 sm:pl-12 h-10 text-sm bg-white border-2 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-gray-900 transition-all duration-200 placeholder:text-gray-500 shadow-sm"
                     maxLength={14}
                     required
                   />
@@ -107,7 +107,7 @@ export function SMSOptIn() {
                 type="submit"
                 disabled={!phoneNumber || !agreed || isSubmitting}
                 variant="secondary"
-                className="h-12 sm:h-14 px-6 sm:px-8 font-bold text-white transition-all duration-200 group z-10 shadow-lg hover:shadow-xl text-sm sm:text-base"
+                className="h-10 px-6 font-bold text-white transition-all duration-200 group z-10 shadow-lg hover:shadow-xl text-sm"
               >
                 {isSubmitting ? "Joining..." : "Join Now"}
                 <ArrowRight className="ml-2 h-4 sm:h-5 w-4 sm:w-5 group-hover:translate-x-1 transition-transform duration-200" />

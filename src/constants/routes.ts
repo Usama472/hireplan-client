@@ -13,6 +13,7 @@ export const DASHBOARD_ROUTES = {
   SCHEDULER: `/dashboard/scheduler`,
   CHATS: `/dashboard/chats`,
   CHAT_CONVERSATION: `/dashboard/chats/:conversationId`,
+  TEMPLATES: `/dashboard/templates`, // Unified templates page
   SMS: `/dashboard/sms`,
   CREATE_SMS_TEMPLATE: `/dashboard/sms/create`,
   EDIT_SMS_TEMPLATE: `/dashboard/sms/edit`,

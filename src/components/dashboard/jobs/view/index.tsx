@@ -317,17 +317,17 @@ export default function JobDetails() {
               <div className="flex items-center gap-2 w-full">
                 <Button
                   onClick={handleEdit}
-                  size="sm"
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white gap-2 py-2.5 font-medium transition-all duration-200 text-sm shadow-sm"
+                  size="default"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white gap-2 font-medium transition-all duration-200 shadow-sm"
                 >
                   <Edit className="w-4 h-4" />
                   <span>Edit Job</span>
                 </Button>
                 <Button
                   variant="outline"
-                  size="sm"
+                  size="default"
                   onClick={() => setShowDeleteModal(true)}
-                  className="bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 hover:border-red-300 gap-2 px-4 py-2.5 font-medium transition-all duration-200 text-sm"
+                  className="bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 hover:border-red-300 gap-2 px-4 font-medium transition-all duration-200"
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>

@@ -29,8 +29,14 @@ export function NavUser({
     avatar: string;
   };
 }) {
-  const sidebarContext = useSidebar();
-  const isMobile = sidebarContext?.isMobile ?? false;
+  let isMobile = false;
+  try {
+    const sidebarContext = useSidebar();
+    isMobile = sidebarContext?.isMobile ?? false;
+  } catch (error) {
+    // If not within SidebarProvider, default to false
+    isMobile = false;
+  }
   const navigate = useNavigate();
   const { data } = useAuthSessionContext();
 
@@ -118,12 +124,14 @@ export function NavUser({
 
               <DropdownMenuItem
                 className="px-3 py-3 rounded-md hover:bg-red-500/20 focus:bg-red-500/20 transition-all duration-200 cursor-pointer group border border-transparent hover:border-red-400/30"
-                onClick={() => {
+                onClick={async () => {
                   const authToken = data?.accessToken;
                   if (authToken) {
                     API.auth.logout(authToken);
                   }
-                  mutateSession({ shouldBroadcast: true, accessToken: "" });
+                  await mutateSession({ shouldBroadcast: true, accessToken: "" });
+                  // Immediately redirect to landing page
+                  window.location.href = '/';
                 }}
               >
                 <div className="flex items-center gap-3 w-full">
