@@ -1,3 +1,4 @@
+import * as aiApi from "./ai/api";
 import * as applicantApi from "./applicant/api";
 import * as applicantAuthApi from "./applicant-auth/api";
 import * as attachmentApi from "./attachment/api";
@@ -27,6 +28,7 @@ import * as userApi from "./user/api";
 import * as zoomApi from "./zoom/api";
 
 const API = {
+  ai: aiApi,
   auth: authApi,
   user: userApi,
   job: jobApi,

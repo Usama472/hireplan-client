@@ -193,9 +193,15 @@ export function TiptapEditor({
           editor={editor} 
           enableAI={enableAI}
           aiContext={aiContext}
-          onAIEnhance={(enhancedContent: string) => {
+          onAIEnhance={(enhancedContent: string, suggestedQualifications?: string[]) => {
             editor?.commands.setContent(enhancedContent);
             setValue(name, enhancedContent);
+            
+            // Store AI suggested qualifications for later use
+            if (suggestedQualifications && suggestedQualifications.length > 0) {
+              console.log('📋 Storing AI qualification suggestions:', suggestedQualifications);
+              setValue('aiSuggestedQualifications', suggestedQualifications);
+            }
           }}
         />
         <div className="tiptap-editor-content">

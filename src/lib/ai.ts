@@ -11,17 +11,21 @@ export interface EnhanceJobDescriptionResponse {
   status: boolean
   data: {
     enhancedDescription: string
+    suggestedQualifications: string[]
   }
 }
 
 export const enhanceJobDescription = async (
   data: EnhanceJobDescriptionRequest
-): Promise<string> => {
+): Promise<{ enhancedDescription: string; suggestedQualifications: string[] }> => {
   const response = await post('/ai/enhance-job-description', data) as EnhanceJobDescriptionResponse
   
   if (!response.status) {
     throw new Error('Failed to enhance job description')
   }
   
-  return response.data.enhancedDescription
+  return {
+    enhancedDescription: response.data.enhancedDescription,
+    suggestedQualifications: response.data.suggestedQualifications || []
+  }
 }

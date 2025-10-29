@@ -14,15 +14,19 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 
-import { Plus, X, CheckCircle, Star, Info } from "lucide-react";
-import { useState } from "react";
+import { Plus, X, CheckCircle, Star, Info, Sparkles, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import useAuthSessionContext from "@/lib/context/AuthSessionContext";
+import API from "@/http";
+import { toast } from "sonner";
 
 export function JobQualificationsStep() {
   const { watch, setValue } = useFormContext();
   const { subscription } = useAuthSessionContext();
   const [newQualification, setNewQualification] = useState("");
+  const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
 
   // Check if user has AI features (Professional/Enterprise)
   const hasAIFeatures =
@@ -36,6 +40,15 @@ export function JobQualificationsStep() {
 
   // Unified qualifications list
   const allQualifications = watch("qualifications") || [];
+  const storedAiSuggestions = watch("aiSuggestedQualifications") || [];
+
+  // Load AI suggestions from form (generated during job description enhancement)
+  useEffect(() => {
+    if (storedAiSuggestions && storedAiSuggestions.length > 0) {
+      console.log('✅ Found AI-suggested qualifications from enhancement:', storedAiSuggestions);
+      setAiSuggestions(storedAiSuggestions);
+    }
+  }, [storedAiSuggestions]);
 
   const addQualification = () => {
     if (newQualification.trim()) {
@@ -84,19 +97,6 @@ export function JobQualificationsStep() {
     );
     setValue("qualifications", updated);
   };
-
-  const qualificationTemplates = [
-    "Driver's License",
-    "Working with Children Certification",
-    "RBT Certification",
-    "CPR/First Aid Certification",
-    "Bachelor's Degree",
-    "Master's Degree",
-    "2+ years experience",
-    "Bilingual (English/Spanish)",
-    "Security Clearance",
-    "Professional License",
-  ];
 
   const addFromTemplate = (template: string) => {
     const newQual = {
@@ -163,26 +163,42 @@ export function JobQualificationsStep() {
             </div>
           </div>
 
-          {/* Template Options */}
-          <div className="space-y-1.5 sm:space-y-2">
-            <Label className="text-xs sm:text-sm text-gray-600">
-              Quick Add Templates
-            </Label>
-            <div className="flex flex-wrap gap-1">
-              {qualificationTemplates.map((template) => (
-                <Button
-                  key={template}
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="text-xs h-7 px-2 text-gray-600 hover:text-blue-600"
-                  onClick={() => addFromTemplate(template)}
-                >
-                  + {template}
-                </Button>
-              ))}
+          {/* AI Suggested Qualifications */}
+          {hasAIFeatures && aiSuggestions.length > 0 && (
+            <div className="space-y-1.5 sm:space-y-2">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-purple-500" />
+                <Label className="text-xs sm:text-sm font-semibold text-purple-600">
+                  AI Suggested Qualifications
+                </Label>
+              </div>
+              <div className="bg-purple-50/50 border border-purple-200 rounded-lg p-3">
+                <div className="flex flex-wrap gap-1.5">
+                  {aiSuggestions.map((suggestion, idx) => (
+                    <Button
+                      key={`ai-${idx}`}
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs h-7 px-2.5 bg-white text-purple-700 hover:bg-purple-100 hover:text-purple-800 border border-purple-200"
+                      onClick={() => addFromTemplate(suggestion)}
+                    >
+                      <Plus className="w-3 h-3 mr-1" />
+                      {suggestion}
+                    </Button>
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* Loading State */}
+          {isLoadingSuggestions && (
+            <div className="flex items-center gap-2 text-sm text-gray-500 bg-purple-50/50 border border-purple-200 rounded-lg p-3">
+              <Loader2 className="w-4 h-4 animate-spin text-purple-500" />
+              <span>AI is analyzing your job posting to suggest relevant qualifications...</span>
+            </div>
+          )}
 
           {/* Qualifications List */}
           {allQualifications.length > 0 && (

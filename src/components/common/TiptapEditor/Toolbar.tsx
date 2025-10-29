@@ -26,7 +26,7 @@ interface ToolbarProps {
     company?: string;
     requirements?: string[];
   };
-  onAIEnhance?: (enhancedContent: string) => void;
+  onAIEnhance?: (enhancedContent: string, suggestedQualifications?: string[]) => void;
 }
 
 export function Toolbar({ editor, enableAI, aiContext, onAIEnhance }: ToolbarProps) {
@@ -63,13 +63,14 @@ export function Toolbar({ editor, enableAI, aiContext, onAIEnhance }: ToolbarPro
 
     setIsEnhancing(true);
     try {
-      const enhancedContent = await enhanceJobDescription({
+      const result = await enhanceJobDescription({
         jobTitle: aiContext.jobTitle,
         jobDescription: currentContent,
         company: aiContext.company,
         requirements: aiContext.requirements,
       });
-      onAIEnhance(enhancedContent);
+      console.log('✨ AI Enhancement complete:', result);
+      onAIEnhance(result.enhancedDescription, result.suggestedQualifications);
     } catch (error) {
       console.error('AI enhancement failed:', error);
       alert('Failed to enhance content. Please try again.');

@@ -56,6 +56,7 @@ export const JOB_FORM_DEFAULT_VALUES: JobFormSchema = {
   preferredQualifications: [],
   jobRequirements: [], // Legacy field, keeping empty
   customQuestions: [],
+  aiSuggestedQualifications: [], // AI-generated qualification suggestions from job description enhancement
 
   // AI Analysis fields - Resume Analysis
   resumeAnalysisMode: "simple",

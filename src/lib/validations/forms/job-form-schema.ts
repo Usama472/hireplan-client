@@ -306,6 +306,7 @@ export const jobFormSchema = z
     preferredQualifications: z.array(qualificationSchema).default([]),
     jobRequirements: z.array(z.string()).default([]),
     customQuestions: z.array(customQuestionSchema).default([]),
+    aiSuggestedQualifications: z.array(z.string()).default([]).optional(), // AI-generated suggestions
 
     // AI Analysis fields - Resume Analysis
     resumeAnalysisMode: z.enum(["simple", "detailed"]).default("simple"),
