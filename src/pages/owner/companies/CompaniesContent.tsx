@@ -21,13 +21,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
   Building2,
   Search,
   Filter,
@@ -37,12 +30,23 @@ import {
   Eye,
   Settings,
   Users,
-  Plus
+  Plus,
+  Brain,
+  Briefcase
 } from 'lucide-react';
 import { ownerManagementService } from '@/http/owner';
 import type { Company } from '@/http/owner';
 import CompanyDetails from './CompanyDetails';
 import CreateCompanyDialog from './CreateCompanyDialog';
+import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const CompaniesContent: React.FC = () => {
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -53,6 +57,11 @@ const CompaniesContent: React.FC = () => {
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<'starter' | 'professional' | 'enterprise'>('professional');
+  const [customPrice, setCustomPrice] = useState<number | null>(null);
+  const [maxActiveJobs, setMaxActiveJobs] = useState<number | null>(null);
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
 
   useEffect(() => {
     fetchCompanies();
@@ -77,6 +86,28 @@ const CompaniesContent: React.FC = () => {
       setTotalUsers(usersData.length);
     } catch (error) {
       console.error('Error fetching users:', error);
+    }
+  };
+
+  const handleSaveSettings = async () => {
+    if (!selectedCompany) return;
+
+    setIsSavingSettings(true);
+    try {
+      await ownerManagementService.updateCompanySettings(selectedCompany.id, {
+        planId: selectedPlan,
+        customMonthlyPrice: customPrice,
+        maxJobPostings: maxActiveJobs,
+      });
+      
+      toast.success('Company settings updated successfully!');
+      setShowSettingsDialog(false);
+      await fetchCompanies();
+    } catch (error: any) {
+      console.error('Failed to update settings:', error);
+      toast.error('Failed to update settings');
+    } finally {
+      setIsSavingSettings(false);
     }
   };
 
@@ -257,6 +288,20 @@ const CompaniesContent: React.FC = () => {
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedCompany(company);
+                          setSelectedPlan((company as any).planId || 'professional');
+                          setCustomPrice((company as any).customMonthlyPrice || null);
+                          setMaxActiveJobs((company as any).maxJobPostings || null);
+                          setShowSettingsDialog(true);
+                        }}
+                        title="Manage Settings"
+                      >
+                        <Settings className="w-4 h-4" />
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -286,6 +331,132 @@ const CompaniesContent: React.FC = () => {
           fetchUsers();
         }}
       />
+
+      {/* Company Settings Dialog */}
+      <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Company Settings</DialogTitle>
+            <DialogDescription>
+              Manage AI features and custom pricing for {selectedCompany?.companyName}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6 py-4">
+            {/* Plan Selection */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Brain className="w-4 h-4 text-purple-600" />
+                <Label className="text-base font-semibold">Subscription Plan</Label>
+              </div>
+              <Select value={selectedPlan} onValueChange={(value: any) => setSelectedPlan(value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="starter">
+                    <div className="flex flex-col items-start py-1">
+                      <span className="font-semibold">Starter</span>
+                      <span className="text-xs text-gray-500">Basic features only</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="professional">
+                    <div className="flex flex-col items-start py-1">
+                      <span className="font-semibold">Professional</span>
+                      <span className="text-xs text-gray-500">Includes AI features</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="enterprise">
+                    <div className="flex flex-col items-start py-1">
+                      <span className="font-semibold">Enterprise</span>
+                      <span className="text-xs text-gray-500">Full platform access</span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-gray-500">
+                Plan determines feature access (set custom price below)
+              </p>
+            </div>
+
+            {/* Monthly Billing Rate */}
+            <div className="space-y-2">
+              <Label htmlFor="custom-price" className="text-base font-semibold">
+                Monthly Billing Rate (Stripe)
+              </Label>
+              <div className="flex items-center gap-2">
+                <span className="text-gray-500 font-semibold">$</span>
+                <Input
+                  id="custom-price"
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={customPrice || ''}
+                  onChange={(e) => setCustomPrice(e.target.value ? parseFloat(e.target.value) : null)}
+                  placeholder="149"
+                  className="flex-1"
+                />
+                <span className="text-gray-500">/month</span>
+              </div>
+              <p className="text-xs text-gray-500">
+                User will be auto-billed this amount monthly via Stripe (0 = no billing)
+              </p>
+            </div>
+
+            {/* Max Active Jobs */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Briefcase className="w-4 h-4 text-blue-600" />
+                <Label htmlFor="max-jobs" className="text-base font-semibold">Max Active Jobs</Label>
+              </div>
+              <Input
+                id="max-jobs"
+                type="number"
+                min="0"
+                step="1"
+                value={maxActiveJobs || ''}
+                onChange={(e) => setMaxActiveJobs(e.target.value ? parseInt(e.target.value) : null)}
+                placeholder="Unlimited"
+              />
+              <p className="text-xs text-gray-500">
+                Maximum active job postings allowed (0 or blank = unlimited)
+              </p>
+            </div>
+
+            {/* Info Box */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <div className="flex gap-2">
+                <AlertTriangle className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                <div className="text-xs text-blue-800">
+                  <p className="font-semibold mb-1">How It Works</p>
+                  <ul className="space-y-1">
+                    <li>• Plan determines feature access (Starter/Professional/Enterprise)</li>
+                    <li>• Set custom monthly rate for this company</li>
+                    <li>• User adds payment method in their profile</li>
+                    <li>• Stripe auto-bills monthly at your custom rate</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowSettingsDialog(false)}
+              disabled={isSavingSettings}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSaveSettings}
+              disabled={isSavingSettings}
+            >
+              {isSavingSettings ? 'Saving...' : 'Save Settings'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

@@ -7,10 +7,12 @@ import {
   MessageSquare,
   Briefcase,
   FileText,
+  Brain,
 } from "lucide-react";
 import { EmailTemplatesList } from "@/components/dashboard/email-templates";
 import SMSTemplateList from "@/components/dashboard/sms/SMSTemplateList";
 import { JobTemplatesList } from "@/components/dashboard/job-templates/JobTemplatesList";
+import { AITemplatesList } from "@/components/dashboard/ai-templates/AITemplatesList";
 
 export default function UnifiedTemplatesPage() {
   const [activeTab, setActiveTab] = useState("email");
@@ -41,21 +43,22 @@ export default function UnifiedTemplatesPage() {
         <Card className="border-0 shadow-sm">
           <CardContent className="p-6">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:inline-grid mb-6">
+              <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid mb-6">
                 <TabsTrigger value="email" className="flex items-center gap-2">
                   <Mail className="h-4 w-4" />
                   <span className="hidden sm:inline">Email</span>
-                  <span className="sm:hidden">Email</span>
                 </TabsTrigger>
                 <TabsTrigger value="sms" className="flex items-center gap-2">
                   <MessageSquare className="h-4 w-4" />
                   <span className="hidden sm:inline">SMS</span>
-                  <span className="sm:hidden">SMS</span>
                 </TabsTrigger>
                 <TabsTrigger value="job" className="flex items-center gap-2">
                   <Briefcase className="h-4 w-4" />
                   <span className="hidden sm:inline">Job</span>
-                  <span className="sm:hidden">Job</span>
+                </TabsTrigger>
+                <TabsTrigger value="ai" className="flex items-center gap-2">
+                  <Brain className="h-4 w-4" />
+                  <span className="hidden sm:inline">AI Questions</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -90,6 +93,17 @@ export default function UnifiedTemplatesPage() {
                   </Badge>
                 </div>
                 <JobTemplatesList />
+              </TabsContent>
+
+              <TabsContent value="ai" className="mt-0 space-y-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <Brain className="h-5 w-5 text-purple-600" />
+                  <h2 className="text-lg font-semibold text-gray-900">AI Question Templates</h2>
+                  <Badge variant="secondary" className="ml-2 bg-purple-100 text-purple-700">
+                    Follow-up Automation
+                  </Badge>
+                </div>
+                <AITemplatesList />
               </TabsContent>
             </Tabs>
           </CardContent>

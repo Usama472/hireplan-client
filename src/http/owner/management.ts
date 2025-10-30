@@ -105,6 +105,16 @@ class OwnerManagementService {
     }
   }
 
+  async updateCompanySettings(companyId: string, settings: { planId?: string; customMonthlyPrice?: number | null; maxJobPostings?: number | null }): Promise<Company> {
+    try {
+      const { ownerPut } = await import('./apiHelper');
+      const response = await ownerPut(`/owner/management/companies/${companyId}/settings`, settings);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || 'Failed to update company settings');
+    }
+  }
+
   async getAllUsers(companyId?: string): Promise<User[]> {
     try {
       const params = companyId ? `?companyId=${companyId}` : '';

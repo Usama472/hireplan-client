@@ -78,7 +78,7 @@ const AccountsContent: React.FC = () => {
       setAccounts(data);
     } catch (error) {
       console.error('Failed to load accounts:', error);
-      toast.error('Failed to load owner accounts');
+      toast.error('Failed to load admin accounts');
     } finally {
       setIsLoading(false);
     }
@@ -179,7 +179,7 @@ const AccountsContent: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Owner Accounts</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Admin Accounts</h1>
           <p className="text-gray-600 mt-1">Manage owner and tech support accounts</p>
         </div>
         <Button onClick={() => setShowCreateDialog(true)} size="lg">

@@ -17,7 +17,7 @@ export const router = createBrowserRouter(
   createRoutesFromElements(
     <Fragment>
       {appRoutes?.map(({ element, isPrivate, url, id, isOwner }) => {
-        // For owner portal routes, use OwnerRoute wrapper
+        // For admin portal routes, use OwnerRoute wrapper
         if (isOwner && url.startsWith("/owner/") && url !== "/owner/login") {
           return (
             <Route

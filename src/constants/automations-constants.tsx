@@ -85,6 +85,15 @@ export const allTriggers = [
     iconBg: "bg-green-100",
   },
   {
+    type: "ai_followup_response_received",
+    label: "AI Follow-up Response",
+    description: "When applicant completes AI follow-up - chain actions by score",
+    icon: <Brain className="h-5 w-5" />,
+    category: "application",
+    color: "bg-purple-500",
+    iconBg: "bg-purple-100",
+  },
+  {
     type: "job_created",
     label: "Job Created",
     description: "When a new job is created in the system",

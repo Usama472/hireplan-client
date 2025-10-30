@@ -83,7 +83,7 @@ export default function OwnerDashboard() {
               <Users className="h-6 w-6 text-blue-600" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Owner Dashboard</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
               <p className="text-gray-600">
                 Manage users, subscriptions, and monitor platform performance
               </p>

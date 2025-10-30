@@ -185,7 +185,7 @@ export function ApplicantDetailModal({
   const [showChatInviteModal, setShowChatInviteModal] = useState(false);
   const { toast } = useToast();
   
-  // Check subscription for AI features
+  // Check subscription for AI features (plan-based with custom pricing)
   const hasProfessionalFeatures = subscription?.planId === 'professional' || subscription?.planId === 'enterprise';
   const [animateHeader, setAnimateHeader] = useState(false);
 

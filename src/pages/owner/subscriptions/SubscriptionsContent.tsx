@@ -27,9 +27,22 @@ import {
   AlertCircle,
   CheckCircle,
   Eye,
-  Settings
+  Settings,
+  Plus,
+  Building2
 } from 'lucide-react';
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
 import { ownerSubscriptionService, type OwnerSubscription, type SubscriptionAnalytics, type RevenueData } from '@/http/owner';
+import { ownerManagementService } from '@/http/owner';
+import { toast } from 'sonner';
 
 const SubscriptionsContent: React.FC = () => {
   const [subscriptions, setSubscriptions] = useState<OwnerSubscription[]>([]);
@@ -39,10 +52,63 @@ const SubscriptionsContent: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [planFilter, setPlanFilter] = useState<string>('all');
+  
+  // Create subscription dialog state
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [companies, setCompanies] = useState<any[]>([]);
+  const [selectedCompanyId, setSelectedCompanyId] = useState('');
+  const [selectedPlan, setSelectedPlan] = useState<'starter' | 'professional' | 'enterprise'>('professional');
+  const [trialDays, setTrialDays] = useState(0);
+  const [isCreating, setIsCreating] = useState(false);
+  
+  // Manage subscription dialog state
+  const [showManageDialog, setShowManageDialog] = useState(false);
+  const [selectedSubscription, setSelectedSubscription] = useState<OwnerSubscription | null>(null);
+  const [showViewDialog, setShowViewDialog] = useState(false);
 
   useEffect(() => {
     fetchData();
+    fetchCompanies();
   }, []);
+
+  const fetchCompanies = async () => {
+    try {
+      const companiesData = await ownerManagementService.getAllCompanies();
+      setCompanies(companiesData);
+    } catch (error) {
+      console.error('Failed to fetch companies:', error);
+    }
+  };
+
+  const handleCreateSubscription = async () => {
+    if (!selectedCompanyId || !selectedPlan) {
+      toast.error('Please select a company and plan');
+      return;
+    }
+
+    setIsCreating(true);
+    try {
+      await ownerSubscriptionService.createManualSubscription({
+        companyId: selectedCompanyId,
+        planId: selectedPlan,
+        trialDays: trialDays || undefined,
+      });
+
+      toast.success('Subscription created successfully!');
+      setShowCreateDialog(false);
+      setSelectedCompanyId('');
+      setSelectedPlan('professional');
+      setTrialDays(0);
+      
+      // Reload subscriptions
+      await fetchData();
+    } catch (error: any) {
+      console.error('Failed to create subscription:', error);
+      toast.error(error.message || 'Failed to create subscription');
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -260,10 +326,21 @@ const SubscriptionsContent: React.FC = () => {
       {/* Subscriptions Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Subscriptions</CardTitle>
-          <CardDescription>
-            {filteredSubscriptions.length} of {subscriptions.length} subscriptions
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Subscriptions</CardTitle>
+              <CardDescription>
+                {filteredSubscriptions.length} of {subscriptions.length} subscriptions
+              </CardDescription>
+            </div>
+            <Button 
+              onClick={() => setShowCreateDialog(true)}
+              className="flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Create Subscription
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {filteredSubscriptions.length === 0 ? (
@@ -297,30 +374,60 @@ const SubscriptionsContent: React.FC = () => {
                         <div className="text-sm text-gray-500">{subscription.userId.email}</div>
                       </div>
                     </TableCell>
-                    <TableCell>{getPlanBadge(subscription.planName)}</TableCell>
+                    <TableCell>
+                      {subscription.planId === 'custom' ? (
+                        <Badge className="bg-purple-100 text-purple-700 border-purple-200">
+                          Custom Pricing
+                        </Badge>
+                      ) : (
+                        getPlanBadge(subscription.planName)
+                      )}
+                    </TableCell>
                     <TableCell>{getStatusBadge(subscription.status)}</TableCell>
                     <TableCell>
                       <div className="font-medium">
-                        ${subscription.metadata?.amount || '0'}/month
+                        ${subscription.metadata?.customPrice || subscription.metadata?.amount || (subscription.company as any)?.customMonthlyPrice || '0'}/month
                       </div>
+                      {subscription.planId === 'custom' && (
+                        <div className="text-xs text-gray-500">Custom rate</div>
+                      )}
                     </TableCell>
                     <TableCell>{subscription.quantity || 1}</TableCell>
                     <TableCell>
                       <div className="text-sm">
-                        {new Date(subscription.currentPeriodStart).toLocaleDateString()}
+                        {new Date(subscription.currentPeriodStart).toLocaleDateString()} - {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="text-sm">
+                      <div className="text-sm font-medium">
                         {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {Math.ceil((new Date(subscription.currentPeriodEnd).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} days
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end space-x-2">
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            setSelectedSubscription(subscription);
+                            setShowViewDialog(true);
+                          }}
+                          title="View Details"
+                        >
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            setSelectedSubscription(subscription);
+                            setShowManageDialog(true);
+                          }}
+                          title="Manage Subscription"
+                        >
                           <Settings className="w-4 h-4" />
                         </Button>
                         {subscription.status === 'past_due' && (
@@ -361,6 +468,294 @@ const SubscriptionsContent: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Create Subscription Dialog */}
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Building2 className="w-5 h-5 text-blue-600" />
+              Create Subscription for Company
+            </DialogTitle>
+            <DialogDescription>
+              Manually create a subscription for a company. Payment will be collected via Stripe.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            {/* Select Company */}
+            <div className="space-y-2">
+              <Label htmlFor="company">Select Company *</Label>
+              <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a company..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {companies.map((company) => (
+                    <SelectItem key={company.id} value={company.id}>
+                      <div className="flex items-center gap-2">
+                        <Building2 className="w-4 h-4 text-gray-500" />
+                        <span>{company.companyName}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {companies.length === 0 && (
+                <p className="text-xs text-gray-500">No companies available</p>
+              )}
+            </div>
+
+            {/* Select Plan */}
+            <div className="space-y-2">
+              <Label htmlFor="plan">Subscription Plan *</Label>
+              <Select value={selectedPlan} onValueChange={(value: any) => setSelectedPlan(value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="starter">
+                    <div className="flex flex-col items-start">
+                      <span className="font-semibold">Starter - $49/month</span>
+                      <span className="text-xs text-gray-500">Basic features</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="professional">
+                    <div className="flex flex-col items-start">
+                      <span className="font-semibold">Professional - $149/month</span>
+                      <span className="text-xs text-gray-500">Advanced AI features</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="enterprise">
+                    <div className="flex flex-col items-start">
+                      <span className="font-semibold">Enterprise - $299/month</span>
+                      <span className="text-xs text-gray-500">Full platform access</span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Trial Days */}
+            <div className="space-y-2">
+              <Label htmlFor="trial">Trial Period (Optional)</Label>
+              <Input
+                id="trial"
+                type="number"
+                min="0"
+                max="90"
+                value={trialDays}
+                onChange={(e) => setTrialDays(parseInt(e.target.value) || 0)}
+                placeholder="0"
+              />
+              <p className="text-xs text-gray-500">
+                Number of days for free trial (0 for no trial)
+              </p>
+            </div>
+
+            {/* Info Box */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <div className="flex gap-2">
+                <AlertCircle className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                <div className="text-xs text-blue-800">
+                  <p className="font-semibold mb-1">Payment Info</p>
+                  <ul className="space-y-1">
+                    <li>• Subscription will be created in Stripe</li>
+                    <li>• Company needs to add payment method to activate</li>
+                    <li>• They'll receive an email with payment link if no card on file</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowCreateDialog(false)}
+              disabled={isCreating}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleCreateSubscription}
+              disabled={isCreating || !selectedCompanyId}
+            >
+              {isCreating ? 'Creating...' : 'Create Subscription'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Subscription Details Dialog */}
+      <Dialog open={showViewDialog} onOpenChange={setShowViewDialog}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Subscription Details</DialogTitle>
+          </DialogHeader>
+          {selectedSubscription && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-gray-500 text-xs">Company</Label>
+                  <p className="font-medium">
+                    {selectedSubscription.company?.companyName || 'N/A'}
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-gray-500 text-xs">Plan Type</Label>
+                  {selectedSubscription.planId === 'custom' ? (
+                    <Badge className="bg-purple-100 text-purple-700 border-purple-200">
+                      Custom Pricing
+                    </Badge>
+                  ) : (
+                    <p className="font-medium">{selectedSubscription.planName}</p>
+                  )}
+                </div>
+                <div>
+                  <Label className="text-gray-500 text-xs">Status</Label>
+                  <div>{getStatusBadge(selectedSubscription.status)}</div>
+                </div>
+                <div>
+                  <Label className="text-gray-500 text-xs">Monthly Amount</Label>
+                  <p className="font-medium text-lg">
+                    ${selectedSubscription.metadata?.customPrice || selectedSubscription.metadata?.amount || '0'}
+                    <span className="text-sm text-gray-500">/month</span>
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-gray-500 text-xs">Current Period</Label>
+                  <p className="text-sm">
+                    {new Date(selectedSubscription.currentPeriodStart).toLocaleDateString()} 
+                  </p>
+                  <p className="text-xs text-gray-500">Started</p>
+                </div>
+                <div>
+                  <Label className="text-gray-500 text-xs">Next Billing</Label>
+                  <p className="text-sm font-medium">
+                    {new Date(selectedSubscription.currentPeriodEnd).toLocaleDateString()}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {selectedSubscription.cancelAtPeriodEnd ? 'Cancels' : 'Renews'}
+                  </p>
+                </div>
+                <div className="col-span-2">
+                  <Label className="text-gray-500 text-xs">Stripe Subscription ID</Label>
+                  <p className="text-xs font-mono text-gray-600 bg-gray-50 p-2 rounded border">
+                    {selectedSubscription.stripeSubscriptionId}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button onClick={() => setShowViewDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Manage Subscription Dialog */}
+      <Dialog open={showManageDialog} onOpenChange={setShowManageDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Manage Subscription</DialogTitle>
+            <DialogDescription>
+              {selectedSubscription?.company?.companyName} - {selectedSubscription?.planName}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedSubscription && (
+            <div className="space-y-4">
+              <div className="flex flex-col gap-3">
+                {selectedSubscription.status === 'active' && (
+                  <>
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start"
+                      onClick={async () => {
+                        try {
+                          await ownerSubscriptionService.suspendSubscription(selectedSubscription.id);
+                          toast.success('Subscription suspended');
+                          setShowManageDialog(false);
+                          fetchData();
+                        } catch (error) {
+                          toast.error('Failed to suspend subscription');
+                        }
+                      }}
+                    >
+                      Suspend Subscription
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start text-red-600 hover:text-red-700"
+                      onClick={async () => {
+                        if (confirm('Cancel this subscription?')) {
+                          try {
+                            await ownerSubscriptionService.cancelSubscription(selectedSubscription.id);
+                            toast.success('Subscription canceled');
+                            setShowManageDialog(false);
+                            fetchData();
+                          } catch (error) {
+                            toast.error('Failed to cancel subscription');
+                          }
+                        }
+                      }}
+                    >
+                      Cancel Subscription
+                    </Button>
+                  </>
+                )}
+                
+                {selectedSubscription.status === 'canceled' && (
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start"
+                    onClick={async () => {
+                      try {
+                        await ownerSubscriptionService.reactivateSubscription(selectedSubscription.id);
+                        toast.success('Subscription reactivated');
+                        setShowManageDialog(false);
+                        fetchData();
+                      } catch (error) {
+                        toast.error('Failed to reactivate subscription');
+                      }
+                    }}
+                  >
+                    Reactivate Subscription
+                  </Button>
+                )}
+
+                {selectedSubscription.status === 'past_due' && (
+                  <Button 
+                    className="w-full"
+                    onClick={async () => {
+                      try {
+                        await ownerSubscriptionService.retryPayment(selectedSubscription.id);
+                        toast.success('Payment retry initiated');
+                        setShowManageDialog(false);
+                        fetchData();
+                      } catch (error) {
+                        toast.error('Failed to retry payment');
+                      }
+                    }}
+                  >
+                    Retry Payment
+                  </Button>
+                )}
+              </div>
+
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-xs text-gray-600">
+                <p><strong>Stripe Customer ID:</strong> {selectedSubscription.stripeCustomerId}</p>
+                <p><strong>Subscription ID:</strong> {selectedSubscription.stripeSubscriptionId}</p>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowManageDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

@@ -334,6 +334,17 @@ export const jobFormSchema = z
     // Step 7: AI Ranking & Automation
     automation: automationSchema,
     automations: z.array(z.string()).default([]),
+    aiFollowupTemplate: z.object({
+      enabled: z.boolean().default(false),
+      questions: z.array(z.object({
+        question: z.string(),
+        category: z.string().optional(),
+        scoringCriteria: z.string().optional(),
+      })).default([]),
+      emailSubject: z.string().optional(),
+      responseDeadlineHours: z.number().optional(),
+      templateId: z.string().optional(),
+    }).optional(),
 
     // Step 8: Email Templates
     emailTemplates: z

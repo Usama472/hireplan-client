@@ -103,6 +103,13 @@ export const JOB_FORM_DEFAULT_VALUES: JobFormSchema = {
     templateId: "",
   },
   automations: [],
+  aiFollowupTemplate: {
+    enabled: false,
+    questions: [],
+    emailSubject: "",
+    responseDeadlineHours: 72,
+    templateId: "",
+  },
 
   // Step 8: Booking Page Selection - Updated field name
   availabilityId: "",
@@ -311,6 +318,13 @@ export const JOB_FORM_TEST_DATA: JobFormSchema = {
     templateId: "technical-role",
   },
   automations: [],
+  aiFollowupTemplate: {
+    enabled: false,
+    questions: [],
+    emailSubject: "",
+    responseDeadlineHours: 72,
+    templateId: "",
+  },
 
   // Step 8: Booking Page Selection - Updated field name with test data
   availabilityId: "template-12345",

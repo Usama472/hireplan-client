@@ -40,7 +40,7 @@ const OwnerLayout: React.FC<OwnerLayoutProps> = ({ children }) => {
     { icon: Activity, label: 'Dashboard', active: location.pathname === '/owner/dashboard', path: '/owner/dashboard' },
     { icon: Building2, label: 'Companies', active: location.pathname === '/owner/companies', path: '/owner/companies' },
     { icon: Users, label: 'Users', active: location.pathname === '/owner/users', path: '/owner/users' },
-    { icon: UserCog, label: 'Owner Accounts', active: location.pathname === '/owner/accounts', path: '/owner/accounts' },
+    { icon: UserCog, label: 'Admin Accounts', active: location.pathname === '/owner/accounts', path: '/owner/accounts' },
     { icon: CreditCard, label: 'Subscriptions', active: location.pathname === '/owner/subscriptions', path: '/owner/subscriptions' },
     { icon: AlertTriangle, label: 'Support Tickets', active: location.pathname === '/owner/support', path: '/owner/support' },
     { icon: TrendingUp, label: 'Analytics', active: location.pathname === '/owner/analytics', path: '/owner/analytics' },
@@ -71,7 +71,7 @@ const OwnerLayout: React.FC<OwnerLayoutProps> = ({ children }) => {
             <Shield className="w-6 h-6 text-white" />
           </div>
           <div>
-            <span className="text-lg font-bold text-white">Owner Portal</span>
+            <span className="text-lg font-bold text-white">Admin Portal</span>
             <p className="text-xs text-slate-400">HirePlan Admin</p>
           </div>
           <Button

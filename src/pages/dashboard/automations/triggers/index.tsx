@@ -5,6 +5,7 @@ import JobExpiredTrigger from "@/components/dashboard/automations/triggers/job-e
 import JobPublishedTrigger from "@/components/dashboard/automations/triggers/job-published";
 import ResumeScoreUpdatedTrigger from "@/components/dashboard/automations/triggers/resume-score-updated";
 import ScheduledTimeTrigger from "@/components/dashboard/automations/triggers/scheduled-time";
+import AIFollowupTrigger from "@/components/dashboard/automations/triggers/ai-followup-trigger";
 import { allTriggers } from "@/constants/automations-constants";
 import { useParams } from "react-router";
 
@@ -25,6 +26,8 @@ function TriggersPage() {
         return <ApplicationStatusChangeTrigger />;
       case "resume_score_updated":
         return <ResumeScoreUpdatedTrigger />;
+      case "ai_followup_response_received":
+        return <AIFollowupTrigger />;
       case "job_created":
         return <JobCreatedTrigger />;
       case "job_published":

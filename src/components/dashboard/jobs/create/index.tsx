@@ -1,6 +1,7 @@
 "use client";
 
 import { AIAnalysisStep } from "@/components/dashboard/jobs/common/ai-analysis-step";
+import { AIFollowupTemplateStep } from "@/components/dashboard/jobs/common/ai-followup-template-step";
 import { BookingPageStep } from "@/components/dashboard/jobs/common/booking-page-step";
 import { CompanyPositionDetailsStep } from "@/components/dashboard/jobs/common/company-position-details-step";
 import { ComplianceDepartmentStep } from "@/components/dashboard/jobs/common/compliance-department-step";
@@ -69,6 +70,7 @@ export default function CreateJob() {
   const { data: authSession, subscription } = useAuthSessionContext();
   const userId = authSession?.user?.id || "anonymous";
 
+  // Check if user has Professional/Enterprise plan (custom pricing)
   const hasProfessionalFeatures =
     subscription?.planId === "professional" ||
     subscription?.planId === "enterprise";
@@ -680,13 +682,16 @@ export default function CreateJob() {
       case 6:
         if (hasProfessionalFeatures) {
           return (
-            <CustomAutomationStep
-              isSelectable={true}
-              automations={(watch("automations") as string[]) || []}
-              onSelectionChange={(selectedIds) => {
-                setValue("automations", selectedIds);
-              }}
-            />
+            <div className="space-y-8">
+              <CustomAutomationStep
+                isSelectable={true}
+                automations={(watch("automations") as string[]) || []}
+                onSelectionChange={(selectedIds) => {
+                  setValue("automations", selectedIds);
+                }}
+              />
+              <AIFollowupTemplateStep automations={(watch("automations") as string[]) || []} />
+            </div>
           );
         } else {
           // For non-Professional users, step 6 is the Automation step

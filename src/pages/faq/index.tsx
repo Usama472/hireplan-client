@@ -159,16 +159,16 @@ const faqs = [
     color: "bg-green-600",
     questions: [
       {
-        question: "What are the pricing plans?",
-        answer: "Starter ($149/month): Up to 50 candidates, basic AI, 5 job postings. Professional ($249/month): Unlimited candidates, advanced AI, unlimited jobs, SMS, custom workflows. Enterprise (custom): Everything in Professional plus API access, white-label, dedicated support, and custom integrations."
+        question: "How does pricing work?",
+        answer: "HirePlan uses custom pricing tailored to your organization's specific needs, size, and requirements. Contact us for a personalized quote. Pricing includes flexible monthly billing, optional AI features, and no long-term contracts. Cancel anytime."
       },
       {
         question: "What payment methods are accepted?",
         answer: "We accept all major credit cards (Visa, MasterCard, American Express, Discover) and ACH bank transfers for annual plans. Enterprise customers can also arrange custom billing terms and invoicing."
       },
       {
-        question: "Can I change plans anytime?",
-        answer: "Yes, you can upgrade or downgrade your plan at any time. Upgrades take effect immediately, and downgrades take effect at the next billing cycle. You'll be prorated for any changes made mid-cycle."
+        question: "Can I change my subscription?",
+        answer: "Yes, you can update your payment method or cancel your subscription at any time. Changes to features or pricing can be discussed with your account administrator. Cancellations take effect at the end of your billing period, so you retain access until then."
       },
     ]
   },

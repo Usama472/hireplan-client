@@ -18,8 +18,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { CheckCircle, Copy, Shield } from 'lucide-react';
+import { CheckCircle, Copy, Shield, Brain, DollarSign, CreditCard, Briefcase } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Separator } from '@/components/ui/separator';
 import { ownerManagementService } from '@/http/owner';
+import { ownerSubscriptionService } from '@/http/owner';
 import { toast } from 'sonner';
 
 interface CreateCompanyDialogProps {
@@ -55,6 +58,11 @@ const CreateCompanyDialog: React.FC<CreateCompanyDialogProps> = ({
     adminEmail: '',
     adminFirstName: '',
     adminLastName: '',
+    // Account provisioning options
+    planId: 'professional' as 'starter' | 'professional' | 'enterprise',
+    customMonthlyPrice: null as number | null,
+    trialDays: 0,
+    maxActiveJobs: null as number | null, // null = unlimited
   });
 
   const handleSubmit = async () => {
@@ -99,6 +107,10 @@ const CreateCompanyDialog: React.FC<CreateCompanyDialogProps> = ({
       adminEmail: '',
       adminFirstName: '',
       adminLastName: '',
+      planId: 'professional',
+      customMonthlyPrice: null,
+      trialDays: 0,
+      maxActiveJobs: null,
     });
     setShowCredentials(false);
     setCredentials(null);
@@ -346,6 +358,132 @@ const CreateCompanyDialog: React.FC<CreateCompanyDialogProps> = ({
                   onChange={(e) => setFormData({ ...formData, adminEmail: e.target.value })}
                   placeholder="john@example.com"
                 />
+              </div>
+            </div>
+          </div>
+
+          {/* Account Provisioning Section */}
+          <Separator className="my-6" />
+          
+          <div className="space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Shield className="w-5 h-5 text-blue-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-base">Account Provisioning</h3>
+                <p className="text-sm text-gray-500">Configure features and Stripe billing</p>
+              </div>
+            </div>
+
+            {/* Plan Selection */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Brain className="w-4 h-4 text-purple-600" />
+                <Label className="font-semibold">Subscription Plan</Label>
+              </div>
+              <Select value={formData.planId} onValueChange={(value: any) => setFormData({ ...formData, planId: value })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="starter">
+                    <div className="flex flex-col items-start py-1">
+                      <span className="font-semibold">Starter</span>
+                      <span className="text-xs text-gray-500">Basic features only</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="professional">
+                    <div className="flex flex-col items-start py-1">
+                      <span className="font-semibold">Professional</span>
+                      <span className="text-xs text-gray-500">Includes AI features</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="enterprise">
+                    <div className="flex flex-col items-start py-1">
+                      <span className="font-semibold">Enterprise</span>
+                      <span className="text-xs text-gray-500">Full platform access</span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-gray-500">
+                Plan determines feature access (set price below)
+              </p>
+            </div>
+
+            {/* Monthly Billing via Stripe */}
+            <div className="space-y-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+              <div className="flex items-center gap-2">
+                <CreditCard className="w-5 h-5 text-green-600" />
+                <h4 className="font-semibold">Monthly Billing (Stripe)</h4>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="customPrice">Monthly Rate</Label>
+                <div className="flex items-center gap-2">
+                  <span className="text-gray-500 font-semibold">$</span>
+                  <Input
+                    id="customPrice"
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={formData.customMonthlyPrice || ''}
+                    onChange={(e) => setFormData({ ...formData, customMonthlyPrice: e.target.value ? parseFloat(e.target.value) : null })}
+                    placeholder="149"
+                    className="flex-1"
+                  />
+                  <span className="text-gray-500">/month</span>
+                </div>
+                <p className="text-xs text-gray-500">
+                  User will add payment method and be auto-billed monthly via Stripe
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Briefcase className="w-4 h-4 text-blue-600" />
+                  <Label htmlFor="maxJobs">Max Active Jobs</Label>
+                </div>
+                <Input
+                  id="maxJobs"
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={formData.maxActiveJobs || ''}
+                  onChange={(e) => setFormData({ ...formData, maxActiveJobs: e.target.value ? parseInt(e.target.value) : null })}
+                  placeholder="Unlimited"
+                />
+                <p className="text-xs text-gray-500">
+                  Maximum active job postings (leave blank for unlimited)
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="trialDays">Trial Period (Optional)</Label>
+                <Input
+                  id="trialDays"
+                  type="number"
+                  min="0"
+                  max="90"
+                  value={formData.trialDays}
+                  onChange={(e) => setFormData({ ...formData, trialDays: parseInt(e.target.value) || 0 })}
+                  placeholder="0"
+                />
+                <p className="text-xs text-gray-500">
+                  Days before first charge (0 = charge immediately when they add payment)
+                </p>
+              </div>
+
+              <div className="bg-white border border-green-300 rounded p-3 text-xs text-gray-700">
+                <p className="font-semibold text-green-800 mb-1">💳 How it works:</p>
+                <ul className="space-y-1 ml-4 list-disc">
+                  <li>User receives invitation email</li>
+                  <li>Logs in and goes to Profile → Settings</li>
+                  <li>Adds payment method (Stripe secure form)</li>
+                  <li>Stripe auto-bills ${formData.customMonthlyPrice || '___'}/month</li>
+                  {formData.trialDays > 0 && <li>First charge in {formData.trialDays} days</li>}
+                </ul>
               </div>
             </div>
           </div>

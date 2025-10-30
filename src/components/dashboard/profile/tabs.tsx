@@ -23,7 +23,7 @@ const defaultTabs: Tab[] = [
   },
   {
     id: "settings",
-    label: "Subscription & Billing",
+    label: "Settings",
     icon: Settings,
   },
 ];

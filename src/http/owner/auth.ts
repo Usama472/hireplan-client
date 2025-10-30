@@ -200,6 +200,23 @@ class OwnerAuthService {
   getAuthHeaders(): Record<string, string> {
     return this.accessToken ? { Authorization: `Bearer ${this.accessToken}` } : {};
   }
+
+  // Update password (for account setup)
+  async updatePassword(data: { currentPassword: string; newPassword: string }): Promise<any> {
+    if (!this.accessToken) {
+      throw new Error('Not authenticated');
+    }
+    
+    try {
+      const response = await ownerPost('/owner/auth/update-password', data, {
+        headers: { Authorization: `Bearer ${this.accessToken}` }
+      });
+      return response;
+    } catch (error: any) {
+      console.error('❌ Failed to update password:', error);
+      throw error;
+    }
+  }
 }
 
 export const ownerAuthService = new OwnerAuthService();

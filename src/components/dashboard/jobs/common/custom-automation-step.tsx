@@ -1,24 +1,32 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card } from "@/components/ui/card";
 import { allTriggers } from "@/constants/automations-constants";
 import API from "@/http";
+import { useAITemplates } from "@/hooks/useAITemplates";
 import {
   AlertCircle,
+  Brain,
   Briefcase,
   Calendar,
   CheckCircle2,
   FileCheck,
   Mail,
+  Plus,
   Search,
   Target,
+  Trash2,
   TrendingUp,
   UserCheck,
   X,
   Zap,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
+import { useFormContext } from "react-hook-form";
 
 interface Automation {
   id: string;
@@ -53,6 +61,23 @@ interface CustomAutomationStepProps {
   isSelectable?: boolean;
 }
 
+// Helper function to check if automation has AI follow-up actions
+const hasAIFollowupAction = (automation: Automation): boolean => {
+  // Check regular actions
+  const hasInActions = automation.actions?.some((action: any) => 
+    action.type === 'ai_follow_up' || action.type === 'send_another_followup'
+  );
+
+  // Check score rules
+  const hasInScoreRules = (automation as any).scoreRules?.some((rule: any) =>
+    rule.actions?.some((action: any) => 
+      action.type === 'ai_follow_up' || action.type === 'send_another_followup'
+    )
+  );
+
+  return hasInActions || hasInScoreRules;
+};
+
 export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
   title = "Custom Automation",
   description = "Configure automated workflows and rules to streamline your hiring process. Set up triggers, actions, and conditions to automatically handle applications.",
@@ -70,6 +95,16 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLabel, setSelectedLabel] = useState<string>("");
   const [availableLabels, setAvailableLabels] = useState<string[]>([]);
+  const { templates: aiTemplates } = useAITemplates();
+  const { watch, setValue } = useFormContext();
+
+  const aiFollowupTemplate = watch("aiFollowupTemplate") || {
+    enabled: false,
+    questions: [],
+    emailSubject: "",
+    responseDeadlineHours: 72,
+    templateId: "",
+  };
 
   const fetchAutomations = async () => {
     try {
@@ -537,6 +572,85 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
                       {automation.status === "active" ? "Active" : "Paused"}
                     </Badge>
                   </div>
+
+                  {/* AI Follow-up Template Configuration - Only show if selected and has AI follow-up */}
+                  {isSelectable && selectedIds.includes(automation.id) && hasAIFollowupAction(automation) && (
+                    <div className="mt-4 pt-4 border-t border-blue-200" onClick={(e) => e.stopPropagation()}>
+                      <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-4 rounded-lg border border-purple-200">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Brain className="h-5 w-5 text-purple-600" />
+                          <h4 className="text-sm font-semibold text-purple-900">
+                            Configure AI Follow-up Questions
+                          </h4>
+                        </div>
+                        
+                        {/* Template Selector */}
+                        <div className="space-y-3">
+                          <div>
+                            <Label className="text-xs text-gray-700">Question Template</Label>
+                            <Select
+                              value={aiFollowupTemplate.templateId || 'custom'}
+                              onValueChange={(value) => {
+                                if (value === 'custom') {
+                                  setValue("aiFollowupTemplate", {
+                                    enabled: true,
+                                    templateId: "",
+                                    questions: [
+                                      { question: "", category: "custom", scoringCriteria: "" },
+                                      { question: "", category: "custom", scoringCriteria: "" },
+                                      { question: "", category: "custom", scoringCriteria: "" },
+                                    ],
+                                    emailSubject: "",
+                                    responseDeadlineHours: 72,
+                                  });
+                                } else {
+                                  const template = aiTemplates.find(t => t.id === value);
+                                  if (template) {
+                                    setValue("aiFollowupTemplate", {
+                                      enabled: true,
+                                      templateId: value,
+                                      questions: template.questions.map((q: any) => ({
+                                        question: q.text || q.question || "",
+                                        category: "custom",
+                                        scoringCriteria: q.scoringCriteria || "",
+                                      })),
+                                      emailSubject: `Follow-up: ${template.name}`,
+                                      responseDeadlineHours: 72,
+                                    });
+                                  }
+                                }
+                              }}
+                            >
+                              <SelectTrigger className="bg-white text-xs h-8">
+                                <SelectValue placeholder="Select template" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="custom">Custom Questions</SelectItem>
+                                {aiTemplates.map((template) => (
+                                  <SelectItem key={template.id} value={template.id}>
+                                    {template.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          {aiFollowupTemplate.enabled && aiFollowupTemplate.questions.length > 0 && (
+                            <div className="text-xs text-purple-700 bg-purple-100/50 p-2 rounded">
+                              ✓ {aiFollowupTemplate.questions.length} questions configured
+                            </div>
+                          )}
+
+                          {!aiFollowupTemplate.enabled && (
+                            <div className="text-xs text-amber-700 bg-amber-50 p-2 rounded flex items-center gap-2">
+                              <AlertCircle className="h-3 w-3" />
+                              Please select a template to configure questions
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })}

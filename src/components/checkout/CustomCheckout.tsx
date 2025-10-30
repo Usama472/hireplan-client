@@ -57,9 +57,11 @@ const initializeStripe = async () => {
 interface CheckoutFormProps {
   selectedPlan: any;
   onBack: () => void;
+  isCustomPricing?: boolean;
+  isUpdateMode?: boolean;
 }
 
-function CheckoutForm({ selectedPlan, onBack }: CheckoutFormProps) {
+function CheckoutForm({ selectedPlan, onBack, isCustomPricing = false, isUpdateMode = false }: CheckoutFormProps) {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
@@ -110,13 +112,22 @@ function CheckoutForm({ selectedPlan, onBack }: CheckoutFormProps) {
         return;
       }
 
-      // Create subscription on your backend
-      const response = await simpleSubscriptionAPI.createSubscription({
-        planId: selectedPlan.id,
-        paymentMethodId: paymentMethod.id,
-        billingDetails,
-        promotionCode: appliedPromoCode?.promotionCode?.code,
-      });
+      // Create subscription - use custom pricing API if in custom mode
+      let response;
+      if (isCustomPricing) {
+        console.log('💳 Creating custom pricing subscription...');
+        response = await simpleSubscriptionAPI.createCustomSubscription(
+          paymentMethod.id,
+          isUpdateMode // If update mode, just update payment method
+        );
+      } else {
+        console.log('💳 Creating plan-based subscription...');
+        response = await simpleSubscriptionAPI.createSubscription({
+          planId: selectedPlan?.id || 'professional',
+          paymentMethodId: paymentMethod.id,
+          billingDetails,
+        });
+      }
 
       if (response.data?.requiresAction && response.data?.clientSecret) {
         // Handle 3D Secure authentication
@@ -131,7 +142,11 @@ function CheckoutForm({ selectedPlan, onBack }: CheckoutFormProps) {
         }
       }
 
-      toast.success("Subscription created successfully!");
+      if (isUpdateMode) {
+        toast.success("Payment method updated successfully!");
+      } else {
+        toast.success("Subscription activated successfully!");
+      }
       window.location.href = "/dashboard/profile?tab=settings&success=true";
     } catch (err: any) {
       console.error("Checkout error:", err);
@@ -173,10 +188,15 @@ function CheckoutForm({ selectedPlan, onBack }: CheckoutFormProps) {
         </Button>
         <div>
           <h1 className="text-2xl font-bold text-gray-900">
-            Complete Your Purchase
+            {isUpdateMode ? 'Update Payment Method' : isCustomPricing ? 'Setup Billing' : 'Complete Your Purchase'}
           </h1>
           <p className="text-gray-600">
-            Secure checkout for {selectedPlan.name} plan
+            {isUpdateMode 
+              ? `Update payment for $${selectedPlan?.price}/month subscription` 
+              : isCustomPricing 
+              ? `Activate billing at $${selectedPlan?.price}/month`
+              : `Secure checkout for ${selectedPlan?.name || 'subscription'}`
+            }
           </p>
         </div>
       </div>
@@ -368,7 +388,7 @@ function CheckoutForm({ selectedPlan, onBack }: CheckoutFormProps) {
                   ) : (
                     <div className="flex items-center space-x-2">
                       <Lock className="h-4 w-4" />
-                      <span>Complete Purchase - {selectedPlan.price}</span>
+                      <span>Complete Purchase - {selectedPlan?.price}</span>
                     </div>
                   )}
                 </Button>
@@ -387,10 +407,10 @@ function CheckoutForm({ selectedPlan, onBack }: CheckoutFormProps) {
               <div className="flex items-center justify-between">
                 <div>
                   <h4 className="font-semibold text-gray-900">
-                    {selectedPlan.name}
+                    {selectedPlan?.name}
                   </h4>
                   <p className="text-sm text-gray-600">
-                    {selectedPlan.description}
+                    {selectedPlan?.description}
                   </p>
                 </div>
                 <Badge
@@ -407,7 +427,7 @@ function CheckoutForm({ selectedPlan, onBack }: CheckoutFormProps) {
               <div className="space-y-2">
                 <h5 className="font-medium text-gray-900">Includes:</h5>
                 <ul className="space-y-1">
-                  {selectedPlan.features.map(
+                  {selectedPlan?.features.map(
                     (feature: string, index: number) => (
                       <li
                         key={index}
@@ -427,7 +447,7 @@ function CheckoutForm({ selectedPlan, onBack }: CheckoutFormProps) {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-gray-600">Subtotal</span>
-                  <span className="font-semibold">{selectedPlan.price}</span>
+                  <span className="font-semibold">{selectedPlan?.price}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm text-gray-500">
                   <span>Billing cycle</span>
@@ -436,7 +456,7 @@ function CheckoutForm({ selectedPlan, onBack }: CheckoutFormProps) {
                 <Separator />
                 <div className="flex items-center justify-between text-lg font-bold">
                   <span>Total</span>
-                  <span>{selectedPlan.price}</span>
+                  <span>{selectedPlan?.price}</span>
                 </div>
               </div>
             </CardContent>
@@ -449,17 +469,51 @@ function CheckoutForm({ selectedPlan, onBack }: CheckoutFormProps) {
 
 interface CustomCheckoutProps {
   planId?: string;
+  mode?: string; // 'custom' or 'update'
+  customAmount?: number;
 }
 
-export function CustomCheckout({ planId }: CustomCheckoutProps) {
+export function CustomCheckout({ planId, mode, customAmount }: CustomCheckoutProps) {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [stripe, setStripe] = useState<any>(null);
   const [stripeLoading, setStripeLoading] = useState(true);
   const [stripeError, setStripeError] = useState<string | null>(null);
+  
+  // Check if custom pricing mode
+  const isCustomPricing = mode === 'custom' || mode === 'update';
+  const isUpdateMode = mode === 'update';
+  
   const selectedPlanId = planId || searchParams.get("plan");
-
   const selectedPlan = PLANS.find((plan) => plan.id === selectedPlanId);
+  
+  // For custom pricing, create a billing object (no "plan" concept)
+  const customBilling = isCustomPricing && customAmount ? {
+    id: 'custom',
+    name: `$${customAmount}/month`,
+    price: customAmount,
+    interval: 'month',
+    description: isUpdateMode ? 'Update your payment information' : 'Monthly recurring billing',
+    features: [
+      'Recurring monthly billing',
+      'Managed by your organization',
+      'Cancel anytime',
+      'Full feature access'
+    ],
+  } : null;
+  
+  const billing = customBilling || selectedPlan;
+  
+  console.log('🔍 Checkout Debug:', {
+    mode,
+    customAmount,
+    isCustomPricing,
+    isUpdateMode,
+    hasCustomBilling: !!customBilling,
+    hasSelectedPlan: !!selectedPlan,
+    hasBilling: !!billing,
+    billingName: billing?.name
+  });
 
   useEffect(() => {
     const loadStripeConfig = async () => {
@@ -517,20 +571,24 @@ export function CustomCheckout({ planId }: CustomCheckoutProps) {
     );
   }
 
-  if (!selectedPlan) {
+  // Only show error if no plan and not custom pricing
+  if (!billing) {
     return (
       <div className="min-h-screen bg-blue-50/30 flex items-center justify-center">
         <Card className="max-w-md mx-auto">
           <CardContent className="text-center p-8">
             <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              Plan Not Found
+              {isCustomPricing ? 'Billing Setup Error' : 'Plan Not Found'}
             </h2>
             <p className="text-gray-600 mb-6">
-              The selected plan could not be found.
+              {isCustomPricing 
+                ? 'No custom pricing amount provided. Please contact support.'
+                : 'The selected plan could not be found.'
+              }
             </p>
             <Button onClick={() => navigate("/dashboard/profile?tab=settings")}>
-              Back to Plans
+              Back to Settings
             </Button>
           </CardContent>
         </Card>
@@ -542,8 +600,10 @@ export function CustomCheckout({ planId }: CustomCheckoutProps) {
     <div className="min-h-screen bg-blue-50/30">
       <Elements stripe={stripe}>
         <CheckoutForm
-          selectedPlan={selectedPlan}
+          selectedPlan={billing!}
           onBack={() => navigate("/dashboard/profile?tab=settings")}
+          isCustomPricing={isCustomPricing}
+          isUpdateMode={isUpdateMode}
         />
       </Elements>
     </div>

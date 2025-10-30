@@ -61,6 +61,7 @@ import ApplicantsPage from "@/pages/dashboard/applicants";
 
 // Owner Pages
 import OwnerLogin from "@/pages/owner/login";
+import OwnerSetupAccount from "@/pages/owner/setup-account";
 import OwnerDashboard from "@/pages/owner/dashboard/index"; 
 import OwnerCompanies from "@/pages/owner/companies/index";
 import OwnerUsers from "@/pages/owner/users/index";
@@ -347,9 +348,15 @@ export const appRoutes: AppRoutesType[] = [
   },
   // Owner routes - Note: These will use OwnerRoute wrapper in index.tsx
   {
-    id: "owner-login",
+    id: "admin-login",
     url: "/owner/login",
     element: <OwnerLogin />,
+    isPrivate: false,
+  },
+  {
+    id: "owner-setup-account",
+    url: "/owner/setup-account",
+    element: <OwnerSetupAccount />,
     isPrivate: false,
   },
   {

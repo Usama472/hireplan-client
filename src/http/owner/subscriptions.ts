@@ -79,8 +79,9 @@ class OwnerSubscriptionService {
     try {
       const response = await ownerPost(`/owner/subscriptions/${subscriptionId}/suspend`, {});
       return response.data;
-    } catch (error) {
-      throw new Error('Failed to suspend subscription');
+    } catch (error: any) {
+      console.error('Suspend error:', error);
+      throw new Error(error.response?.data?.message || 'Failed to suspend subscription');
     }
   }
 
@@ -140,6 +141,35 @@ class OwnerSubscriptionService {
       return response.data;
     } catch (error) {
       throw new Error('Failed to fetch revenue data');
+    }
+  }
+
+  /**
+   * Create manual subscription for a company
+   */
+  async createManualSubscription(data: {
+    companyId: string;
+    planId: 'starter' | 'professional' | 'enterprise';
+    paymentMethodId?: string;
+    trialDays?: number;
+  }) {
+    try {
+      const response = await ownerPost('/owner/subscriptions/create-manual', data);
+      return response.data;
+    } catch (error) {
+      throw new Error('Failed to create subscription');
+    }
+  }
+
+  /**
+   * Create Stripe Setup Intent for adding payment method
+   */
+  async createSetupIntent(companyId: string): Promise<{ clientSecret: string; customerId: string }> {
+    try {
+      const response = await ownerPost('/owner/subscriptions/setup-intent', { companyId });
+      return response.data;
+    } catch (error) {
+      throw new Error('Failed to create setup intent');
     }
   }
 }

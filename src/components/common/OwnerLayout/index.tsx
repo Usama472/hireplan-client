@@ -6,7 +6,7 @@ interface OwnerLayoutProps {
 }
 
 /**
- * Owner Portal Layout
+ * Admin Portal Layout
  * This layout removes the main app navigation and provides a clean owner-only interface
  */
 const OwnerLayout: React.FC<OwnerLayoutProps> = ({ children }) => {
@@ -20,13 +20,13 @@ const OwnerLayout: React.FC<OwnerLayoutProps> = ({ children }) => {
           padding: 0;
         }
         
-        /* Ensure owner portal takes full viewport */
+        /* Ensure admin portal takes full viewport */
         #root {
           min-height: 100vh;
         }
       `}</style>
       
-      {/* Render owner portal content */}
+      {/* Render admin portal content */}
       <div className="owner-portal-wrapper">
         {children || <Outlet />}
       </div>

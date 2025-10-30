@@ -28,6 +28,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useGlobalEmailTemplates } from "../../global-setting/hooks/useGlobalEmailTemplates";
 import { useGlobalSMSTemplates } from "../../sms/hooks/useSMSTemplates";
+import useAuthSessionContext from "@/lib/context/AuthSessionContext";
 
 interface Condition {
   id: string;
@@ -66,6 +67,7 @@ export default function ApplicationCreatedTrigger() {
   const { availableTemplates } = useGlobalEmailTemplates();
   const { templates: smsTemplates } = useGlobalSMSTemplates();
   const navigate = useNavigate();
+  const { subscription } = useAuthSessionContext();
   const [conditions, setConditions] = useState<Condition[]>([
     { id: "1", field: "totalScore", operator: "equals", value: "" },
   ]);
@@ -79,13 +81,6 @@ export default function ApplicationCreatedTrigger() {
       config: { 
         templateId: "", 
         delay: { value: 0, unit: "minutes" },
-        aiFollowupQuestions: [
-          { question: "", category: "custom" },
-          { question: "", category: "custom" },
-          { question: "", category: "custom" }
-        ],
-        emailSubject: "",
-        responseDeadlineHours: 72
       },
     },
   ]);
@@ -122,8 +117,10 @@ export default function ApplicationCreatedTrigger() {
     ];
   };
 
-  // Available action types
-  const actionTypes = [
+  // Available action types (filter AI actions based on company settings)
+  const hasAI = subscription?.planId === 'professional' || subscription?.planId === 'enterprise';
+  
+  const allActionTypes = [
     {
       value: "send_email_applicant",
       label: "Send Email to Applicant",
@@ -153,8 +150,13 @@ export default function ApplicationCreatedTrigger() {
       value: "ai_follow_up",
       label: "AI Follow-up Questions",
       icon: <Brain className="h-4 w-4 text-purple-500" />,
+      requiresAI: true, // Only show if AI is enabled
+      description: "Questions configured at job level",
     },
   ];
+  
+  // Filter out AI actions if company doesn't have AI enabled
+  const actionTypes = allActionTypes.filter(action => !action.requiresAI || hasAI);
 
   const addCondition = () => {
     const newCondition: Condition = {
@@ -197,13 +199,6 @@ export default function ApplicationCreatedTrigger() {
       config: { 
         templateId: "", 
         delay: { value: 0, unit: "minutes" },
-        aiFollowupQuestions: [
-          { question: "", category: "custom" },
-          { question: "", category: "custom" },
-          { question: "", category: "custom" }
-        ],
-        emailSubject: "",
-        responseDeadlineHours: 72
       },
     };
     setActions([...actions, newAction]);
@@ -320,27 +315,7 @@ export default function ApplicationCreatedTrigger() {
         }
       }
 
-      if (action.type === "ai_follow_up") {
-        if (!action.config.aiFollowupQuestions || action.config.aiFollowupQuestions.length < 3) {
-          setIsValid(false);
-          setValidationMessage(
-            "AI follow-up requires at least 3 questions"
-          );
-          return false;
-        }
-        
-        const hasEmptyQuestions = action.config.aiFollowupQuestions.some(
-          (q: AIFollowupQuestion) => !q.question || q.question.trim() === ""
-        );
-        
-        if (hasEmptyQuestions) {
-          setIsValid(false);
-          setValidationMessage(
-            "All AI follow-up questions must be filled out"
-          );
-          return false;
-        }
-      }
+      // AI follow-up questions are now configured at the job level, not in automation
     }
 
     setIsValid(true);
@@ -1108,148 +1083,23 @@ export default function ApplicationCreatedTrigger() {
                   )}
 
                   {action.type === "ai_follow_up" && (
-                    <div className="bg-purple-50/30 p-4 rounded-lg border border-purple-100">
-                      <div className="flex items-center gap-2 mb-4">
-                        <Brain className="h-4 w-4 text-purple-500" />
-                        <h3 className="text-sm font-medium text-gray-700">
-                          AI Follow-up Configuration
-                        </h3>
-                      </div>
-                      
-                      <div className="space-y-4">
-                        <div>
-                          <label className="text-sm font-medium text-gray-700 mb-1 block">
-                            Email Subject
-                          </label>
-                          <Input
-                            placeholder="Follow-up questions for {{job_title}} position"
-                            value={action.config.emailSubject || ""}
-                            onChange={(e) =>
-                              updateAction(action.id, "config.emailSubject", e.target.value)
-                            }
-                            className="bg-white"
-                          />
+                    <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-200">
+                      <div className="flex items-start gap-3">
+                        <div className="bg-blue-100 p-2 rounded-lg">
+                          <Brain className="h-5 w-5 text-blue-600" />
                         </div>
-
-                        <div>
-                          <label className="text-sm font-medium text-gray-700 mb-1 block">
-                            Response Deadline (hours)
-                          </label>
-                          <Input
-                            type="number"
-                            min="1"
-                            max="168"
-                            placeholder="72"
-                            value={action.config.responseDeadlineHours || 72}
-                            onChange={(e) =>
-                              updateAction(action.id, "config.responseDeadlineHours", parseInt(e.target.value))
-                            }
-                            className="bg-white"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="text-sm font-medium text-gray-700 mb-2 block">
-                            Follow-up Questions <span className="text-red-500">*</span>
-                            <span className="text-xs text-gray-500 ml-1">(3-5 questions)</span>
-                          </label>
-                          <div className="space-y-3">
-                            {(action.config.aiFollowupQuestions || []).map((question: AIFollowupQuestion, qIndex: number) => (
-                              <div key={qIndex} className="p-3 bg-white rounded-lg border border-gray-200">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <MessageSquare className="h-4 w-4 text-purple-400" />
-                                  <span className="text-xs font-medium text-gray-600">
-                                    Question {qIndex + 1}
-                                  </span>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => {
-                                      const newQuestions = [...(action.config.aiFollowupQuestions || [])];
-                                      newQuestions.splice(qIndex, 1);
-                                      updateAction(action.id, "config.aiFollowupQuestions", newQuestions);
-                                    }}
-                                    disabled={(action.config.aiFollowupQuestions?.length || 0) <= 3}
-                                    className={`ml-auto h-6 w-6 p-0 ${
-                                      (action.config.aiFollowupQuestions?.length || 0) <= 3
-                                        ? "text-gray-300 cursor-not-allowed"
-                                        : "text-red-500 hover:text-red-700 hover:bg-red-50"
-                                    }`}
-                                    title={(action.config.aiFollowupQuestions?.length || 0) <= 3 
-                                      ? "Minimum 3 questions required" 
-                                      : "Delete question"}
-                                  >
-                                    <Trash2 className="h-3 w-3" />
-                                  </Button>
-                                </div>
-                                
-                                <div className="space-y-2">
-                                  <Input
-                                    placeholder="Enter your question here..."
-                                    value={question.question}
-                                    onChange={(e) => {
-                                      const newQuestions = [...(action.config.aiFollowupQuestions || [])];
-                                      newQuestions[qIndex] = { ...question, question: e.target.value };
-                                      updateAction(action.id, "config.aiFollowupQuestions", newQuestions);
-                                    }}
-                                    className={`text-sm ${
-                                      formTouched && (!question.question || question.question.trim() === "")
-                                        ? "border-red-300"
-                                        : ""
-                                    }`}
-                                  />
-                                  
-                                  <div>
-                                    <Select
-                                      value={question.category || "custom"}
-                                      onValueChange={(value) => {
-                                        const newQuestions = [...(action.config.aiFollowupQuestions || [])];
-                                        newQuestions[qIndex] = { ...question, category: value };
-                                        updateAction(action.id, "config.aiFollowupQuestions", newQuestions);
-                                      }}
-                                    >
-                                      <SelectTrigger className="h-8 text-xs">
-                                        <SelectValue placeholder="Category" />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        <SelectItem value="technical">Technical</SelectItem>
-                                        <SelectItem value="experience">Experience</SelectItem>
-                                        <SelectItem value="cultural">Cultural</SelectItem>
-                                        <SelectItem value="behavioral">Behavioral</SelectItem>
-                                        <SelectItem value="custom">Custom</SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                  </div>
-                                  
-                                  <Input
-                                    placeholder="Scoring criteria (what makes a good answer?)"
-                                    value={question.scoringCriteria || ""}
-                                    onChange={(e) => {
-                                      const newQuestions = [...(action.config.aiFollowupQuestions || [])];
-                                      newQuestions[qIndex] = { ...question, scoringCriteria: e.target.value };
-                                      updateAction(action.id, "config.aiFollowupQuestions", newQuestions);
-                                    }}
-                                    className="text-xs"
-                                  />
-                                </div>
-                              </div>
-                            ))}
-                            
-                            {(action.config.aiFollowupQuestions?.length || 0) < 5 && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  const newQuestions = [...(action.config.aiFollowupQuestions || [])];
-                                  newQuestions.push({ question: "", category: "custom" });
-                                  updateAction(action.id, "config.aiFollowupQuestions", newQuestions);
-                                }}
-                                className="w-full border-dashed border-purple-200 text-purple-600 hover:bg-purple-50"
-                              >
-                                <Plus className="h-4 w-4 mr-1" />
-                                Add Question
-                              </Button>
-                            )}
+                        <div className="flex-1">
+                          <h3 className="text-sm font-semibold text-blue-900 mb-1">
+                            AI Follow-up Questions
+                          </h3>
+                          <p className="text-sm text-blue-800">
+                            Follow-up questions are configured at the <strong>job level</strong>. 
+                            When you assign this automation to a job, you'll be prompted to select 
+                            or create a question template in the job settings.
+                          </p>
+                          <div className="mt-3 text-xs text-blue-700 bg-blue-100/50 p-2 rounded">
+                            <strong>💡 Tip:</strong> This allows you to use different questions for different jobs 
+                            with the same automation.
                           </div>
                         </div>
                       </div>

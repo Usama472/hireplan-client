@@ -1,6 +1,7 @@
 "use client";
 
 import { AIAnalysisStep } from "@/components/dashboard/jobs/common/ai-analysis-step";
+import { AIFollowupTemplateStep } from "@/components/dashboard/jobs/common/ai-followup-template-step";
 import { BookingPageStep } from "@/components/dashboard/jobs/common/booking-page-step";
 import { CustomAutomationStep } from "@/components/dashboard/jobs/common/custom-automation-step";
 import { JobAdStep } from "@/components/dashboard/jobs/common/job-ad-step";
@@ -178,7 +179,7 @@ export default function EditJob() {
   const navigate = useNavigate();
   const { subscription } = useAuthSessionContext();
 
-  // Check if user has Professional/Enterprise features
+  // Check if user has Professional/Enterprise plan (custom pricing)
   const hasProfessionalFeatures =
     subscription?.planId === "professional" ||
     subscription?.planId === "enterprise";

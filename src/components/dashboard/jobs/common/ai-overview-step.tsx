@@ -55,7 +55,7 @@ export function AIOverviewStep() {
     };
   }, []);
 
-  // Check subscription for AI features
+  // Check subscription for AI features (plan-based with custom pricing)
   const hasAIFeatures =
     subscription?.planId === "professional" ||
     subscription?.planId === "enterprise";

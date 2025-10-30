@@ -27,10 +27,17 @@ interface SubscriptionStatusAlertProps {
   onRefresh: () => void;
 }
 
+// COMMENTED OUT - Custom pricing model (no plan-based upsells)
+// Users see AI features based on company.aiEnabled toggle in admin portal
 const SubscriptionStatusAlert: React.FC<SubscriptionStatusAlertProps> = ({
   subscription,
   onRefresh,
 }) => {
+  // Hide subscription alerts with custom pricing model
+  return null;
+  
+  /* ORIGINAL CODE - Plan-based subscription alerts
+  */
   const [isLoading, setIsLoading] = React.useState(false);
 
   // Don't show alert for active subscriptions

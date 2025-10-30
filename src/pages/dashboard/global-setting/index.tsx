@@ -9,6 +9,7 @@ import { JobTemplatesList } from "@/components/dashboard/job-templates/JobTempla
 import { PersonalInfoForm } from "@/components/dashboard/profile/personal-info-form";
 import { CompanyInfoForm } from "@/components/dashboard/profile/company-info-form";
 import { AccountSettingsForm } from "@/components/dashboard/profile/account-settings-form";
+import { NotificationPreferences } from "@/components/dashboard/profile/notification-preferences";
 import { SaveChangesBar } from "@/components/dashboard/profile/save-changes-bar";
 import { ProfileTabs } from "@/components/dashboard/profile/tabs";
 import { FormProvider, useForm } from "react-hook-form";
@@ -613,21 +614,7 @@ const GlobalSettingPage = () => {
             {activeTab === "notifications" && (
               <div className="space-y-4 sm:space-y-6">
                 <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 sm:p-6">
-                  <div className="mb-4 sm:mb-6">
-                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1">
-                      Notification Preferences
-                    </h3>
-                    <p className="text-gray-600 text-sm">
-                      Configure how and when you receive notifications
-                    </p>
-                  </div>
-
-                  <div className="text-center py-8 sm:py-12 text-gray-500">
-                    <Bell className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-3 sm:mb-4 text-gray-400" />
-                    <p className="text-sm sm:text-base">
-                      Notification settings coming soon
-                    </p>
-                  </div>
+                  <NotificationPreferences />
                 </div>
               </div>
             )}

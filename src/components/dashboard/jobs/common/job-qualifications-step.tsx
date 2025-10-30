@@ -28,7 +28,7 @@ export function JobQualificationsStep() {
   const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
 
-  // Check if user has AI features (Professional/Enterprise)
+  // Check if user has AI features (plan-based with custom pricing)
   const hasAIFeatures =
     subscription?.planId === "professional" ||
     subscription?.planId === "enterprise";

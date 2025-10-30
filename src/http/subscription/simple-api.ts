@@ -94,7 +94,21 @@ export const simpleSubscriptionAPI = {
       code
     });
     return response;
-  }
+  },
+
+  // Custom pricing endpoints
+  createCustomSetupIntent: async (): Promise<{ clientSecret: string; customerId: string; amount: number }> => {
+    const response = await apiHelper.post(`${BASE_URL}/custom/setup-intent`, {});
+    return response.data;
+  },
+
+  createCustomSubscription: async (paymentMethodId: string, updateOnly: boolean = false) => {
+    const response = await apiHelper.post(`${BASE_URL}/custom/create-subscription`, {
+      paymentMethodId,
+      updateOnly
+    });
+    return response.data;
+  },
 };
 
 export default simpleSubscriptionAPI;
