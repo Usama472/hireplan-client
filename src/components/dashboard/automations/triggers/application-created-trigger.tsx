@@ -24,6 +24,7 @@ import {
   UserCheck,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { TagManager } from "../common/tag-manager";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useGlobalEmailTemplates } from "../../global-setting/hooks/useGlobalEmailTemplates";
@@ -64,6 +65,7 @@ interface Action {
 
 export default function ApplicationCreatedTrigger() {
   const [useConditions, setUseConditions] = useState<boolean>(false);
+  const [labels, setLabels] = useState<string[]>([]);
   const { availableTemplates } = useGlobalEmailTemplates();
   const { templates: smsTemplates } = useGlobalSMSTemplates();
   const navigate = useNavigate();
@@ -350,6 +352,7 @@ export default function ApplicationCreatedTrigger() {
           useConditions: useConditions,
           conditions: useConditions ? conditions : [],
           actions: actions,
+          labels: labels,
         });
         navigate("/dashboard/automations");
       } catch (error: any) {
@@ -518,6 +521,11 @@ export default function ApplicationCreatedTrigger() {
                   : "This automation is currently disabled"}
               </p>
             </div>
+          </div>
+
+          {/* Tags Section */}
+          <div className="pt-6 border-t border-gray-100">
+            <TagManager tags={labels} onChange={setLabels} />
           </div>
         </div>
       </div>

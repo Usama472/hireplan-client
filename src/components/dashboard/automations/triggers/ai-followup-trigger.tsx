@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useGlobalEmailTemplates } from "../../global-setting/hooks/useGlobalEmailTemplates";
 import useAuthSessionContext from "@/lib/context/AuthSessionContext";
-import { useAITemplates } from "@/hooks/useAITemplates";
+import { TagManager } from "../common/tag-manager";
 
 interface ScoreRule {
   id: string;
@@ -30,11 +30,11 @@ export default function AIFollowupTrigger() {
   const navigate = useNavigate();
   const { availableTemplates } = useGlobalEmailTemplates();
   const { subscription } = useAuthSessionContext();
-  const { templates: aiTemplates } = useAITemplates();
   
   const [automationName, setAutomationName] = useState("");
   const [automationStatus, setAutomationStatus] = useState(true);
   const [scoreRules, setScoreRules] = useState<ScoreRule[]>([]);
+  const [labels, setLabels] = useState<string[]>([]);
 
   const hasAI = subscription?.planId === 'professional' || subscription?.planId === 'enterprise';
 
@@ -132,11 +132,13 @@ export default function AIFollowupTrigger() {
     }
 
     try {
-      await API.automation.create({
+      await API.automation.createAutomation({
         name: automationName,
-        trigger: "ai_followup_response_received",
-        active: automationStatus,
+        triggerType: "ai_followup_response_received",
+        status: automationStatus ? "active" : "inactive",
         scoreRules: scoreRules.filter(r => r.actions.length > 0),
+        labels: labels,
+        actions: [], // Empty array since we're using scoreRules
       });
       toast.success("Workflow created!");
       navigate("/dashboard/automations");
@@ -166,22 +168,29 @@ export default function AIFollowupTrigger() {
       </div>
 
       {/* Name & Status */}
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium mb-2">Workflow Name *</label>
-          <Input value={automationName} onChange={(e) => setAutomationName(e.target.value)} placeholder="High-score follow-up flow" />
+      <div className="bg-white border border-gray-100 rounded-lg p-6">
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <div>
+            <label className="block text-sm font-medium mb-2">Workflow Name *</label>
+            <Input value={automationName} onChange={(e) => setAutomationName(e.target.value)} placeholder="High-score follow-up flow" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">Status</label>
+            <Select value={automationStatus ? "active" : "inactive"} onValueChange={(v) => setAutomationStatus(v === "active")}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="inactive">Inactive</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-        <div>
-          <label className="block text-sm font-medium mb-2">Status</label>
-          <Select value={automationStatus ? "active" : "inactive"} onValueChange={(v) => setAutomationStatus(v === "active")}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
-            </SelectContent>
-          </Select>
+
+        {/* Tags Section */}
+        <div className="pt-6 border-t border-gray-100">
+          <TagManager tags={labels} onChange={setLabels} />
         </div>
       </div>
 

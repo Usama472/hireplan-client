@@ -68,6 +68,19 @@ const CompaniesContent: React.FC = () => {
     fetchUsers();
   }, []);
 
+  // Pre-populate settings dialog when company is selected
+  useEffect(() => {
+    if (selectedCompany && showSettingsDialog) {
+      setSelectedPlan(selectedCompany.planId || 'professional');
+      setCustomPrice(selectedCompany.customMonthlyPrice !== null && selectedCompany.customMonthlyPrice !== undefined 
+        ? selectedCompany.customMonthlyPrice 
+        : null);
+      setMaxActiveJobs(selectedCompany.maxJobPostings !== null && selectedCompany.maxJobPostings !== undefined
+        ? selectedCompany.maxJobPostings
+        : null);
+    }
+  }, [selectedCompany, showSettingsDialog]);
+
   const fetchCompanies = async () => {
     try {
       setIsLoading(true);
@@ -342,6 +355,29 @@ const CompaniesContent: React.FC = () => {
             </DialogDescription>
           </DialogHeader>
 
+          {/* Current Settings Display */}
+          {selectedCompany && (
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4">
+              <p className="text-xs font-semibold text-gray-700 mb-3">Current Settings:</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-white rounded-md p-3">
+                  <p className="text-xs text-gray-500 mb-1">Plan</p>
+                  <p className="font-semibold text-sm text-purple-600 capitalize">
+                    {selectedCompany.planId || 'Starter'}
+                  </p>
+                </div>
+                <div className="bg-white rounded-md p-3">
+                  <p className="text-xs text-gray-500 mb-1">Monthly Price</p>
+                  <p className="font-semibold text-sm text-green-600">
+                    {selectedCompany.customMonthlyPrice !== null && selectedCompany.customMonthlyPrice !== undefined
+                      ? `$${selectedCompany.customMonthlyPrice}/mo`
+                      : 'Free'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="space-y-6 py-4">
             {/* Plan Selection */}
             <div className="space-y-2">
@@ -434,6 +470,11 @@ const CompaniesContent: React.FC = () => {
                     <li>• Set custom monthly rate for this company</li>
                     <li>• User adds payment method in their profile</li>
                     <li>• Stripe auto-bills monthly at your custom rate</li>
+                    {selectedCompany && selectedCompany.customMonthlyPrice && selectedCompany.customMonthlyPrice > 0 && (
+                      <li className="font-semibold text-blue-900 mt-2">
+                        💳 Currently: {selectedCompany.companyName} will be billed ${selectedCompany.customMonthlyPrice}/month
+                      </li>
+                    )}
                   </ul>
                 </div>
               </div>
@@ -443,7 +484,19 @@ const CompaniesContent: React.FC = () => {
           <DialogFooter>
             <Button 
               variant="outline" 
-              onClick={() => setShowSettingsDialog(false)}
+              onClick={() => {
+                setShowSettingsDialog(false);
+                // Reset to current values on cancel
+                if (selectedCompany) {
+                  setSelectedPlan(selectedCompany.planId || 'professional');
+                  setCustomPrice(selectedCompany.customMonthlyPrice !== null && selectedCompany.customMonthlyPrice !== undefined 
+                    ? selectedCompany.customMonthlyPrice 
+                    : null);
+                  setMaxActiveJobs(selectedCompany.maxJobPostings !== null && selectedCompany.maxJobPostings !== undefined
+                    ? selectedCompany.maxJobPostings
+                    : null);
+                }
+              }}
               disabled={isSavingSettings}
             >
               Cancel

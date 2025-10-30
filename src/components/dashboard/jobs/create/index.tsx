@@ -1,7 +1,6 @@
 "use client";
 
 import { AIAnalysisStep } from "@/components/dashboard/jobs/common/ai-analysis-step";
-import { AIFollowupTemplateStep } from "@/components/dashboard/jobs/common/ai-followup-template-step";
 import { BookingPageStep } from "@/components/dashboard/jobs/common/booking-page-step";
 import { CompanyPositionDetailsStep } from "@/components/dashboard/jobs/common/company-position-details-step";
 import { ComplianceDepartmentStep } from "@/components/dashboard/jobs/common/compliance-department-step";
@@ -682,16 +681,13 @@ export default function CreateJob() {
       case 6:
         if (hasProfessionalFeatures) {
           return (
-            <div className="space-y-8">
-              <CustomAutomationStep
-                isSelectable={true}
-                automations={(watch("automations") as string[]) || []}
-                onSelectionChange={(selectedIds) => {
-                  setValue("automations", selectedIds);
-                }}
-              />
-              <AIFollowupTemplateStep automations={(watch("automations") as string[]) || []} />
-            </div>
+            <CustomAutomationStep
+              isSelectable={true}
+              automations={(watch("automations") as string[]) || []}
+              onSelectionChange={(selectedIds) => {
+                setValue("automations", selectedIds);
+              }}
+            />
           );
         } else {
           // For non-Professional users, step 6 is the Automation step

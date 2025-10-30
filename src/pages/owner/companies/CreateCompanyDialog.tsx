@@ -62,7 +62,7 @@ const CreateCompanyDialog: React.FC<CreateCompanyDialogProps> = ({
     planId: 'professional' as 'starter' | 'professional' | 'enterprise',
     customMonthlyPrice: null as number | null,
     trialDays: 0,
-    maxActiveJobs: null as number | null, // null = unlimited
+    maxJobPostings: null as number | null, // null = unlimited
   });
 
   const handleSubmit = async () => {
@@ -110,7 +110,7 @@ const CreateCompanyDialog: React.FC<CreateCompanyDialogProps> = ({
       planId: 'professional',
       customMonthlyPrice: null,
       trialDays: 0,
-      maxActiveJobs: null,
+      maxJobPostings: null,
     });
     setShowCredentials(false);
     setCredentials(null);
@@ -450,8 +450,8 @@ const CreateCompanyDialog: React.FC<CreateCompanyDialogProps> = ({
                   type="number"
                   min="0"
                   step="1"
-                  value={formData.maxActiveJobs || ''}
-                  onChange={(e) => setFormData({ ...formData, maxActiveJobs: e.target.value ? parseInt(e.target.value) : null })}
+                  value={formData.maxJobPostings || ''}
+                  onChange={(e) => setFormData({ ...formData, maxJobPostings: e.target.value ? parseInt(e.target.value) : null })}
                   placeholder="Unlimited"
                 />
                 <p className="text-xs text-gray-500">

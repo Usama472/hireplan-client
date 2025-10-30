@@ -8,6 +8,8 @@ export interface Company {
   companySize: string;
   status: 'active' | 'suspended' | 'inactive';
   maxJobPostings?: number | null; // null or undefined = unlimited
+  planId?: 'starter' | 'professional' | 'enterprise';
+  customMonthlyPrice?: number | null;
   createdAt: string;
 }
 
@@ -60,12 +62,19 @@ class OwnerManagementService {
     adminEmail: string;
     adminFirstName: string;
     adminLastName: string;
+    planId?: 'starter' | 'professional' | 'enterprise';
+    customMonthlyPrice?: number | null;
+    maxJobPostings?: number | null;
+    trialDays?: number;
   }): Promise<{
     company: {
       id: string;
       companyName: string;
       organizationId: number;
       slug: string;
+      planId?: string;
+      customMonthlyPrice?: number | null;
+      maxJobPostings?: number | null;
     };
     admin: {
       id: string;
@@ -78,6 +87,11 @@ class OwnerManagementService {
       tempPassword: string;
       loginLink: string;
     };
+    billing?: {
+      monthlyPrice: number;
+      trialDays: number;
+      billingNote: string;
+    } | null;
   }> {
     try {
       const response = await ownerPost('/owner/management/companies', data);

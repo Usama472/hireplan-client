@@ -20,7 +20,9 @@ import {
   Shield,
   Save,
   Edit,
-  UserPlus
+  UserPlus,
+  CreditCard,
+  Award
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
@@ -50,6 +52,16 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = ({ company, onClose }) => 
   );
   const [isEditingMaxJobs, setIsEditingMaxJobs] = useState(false);
   const [isSavingMaxJobs, setIsSavingMaxJobs] = useState(false);
+
+  // Plan & Pricing state
+  const [planId, setPlanId] = useState<string>(company.planId || 'starter');
+  const [customMonthlyPrice, setCustomMonthlyPrice] = useState<string>(
+    company.customMonthlyPrice !== null && company.customMonthlyPrice !== undefined
+      ? company.customMonthlyPrice.toString()
+      : ''
+  );
+  const [isEditingPlan, setIsEditingPlan] = useState(false);
+  const [isSavingPlan, setIsSavingPlan] = useState(false);
 
   useEffect(() => {
     if (activeTab === 'users') {
@@ -208,6 +220,158 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = ({ company, onClose }) => 
                     <Badge className="bg-gray-100 text-gray-800 text-sm px-3 py-1">Inactive</Badge>
                   )}
                 </div>
+              </div>
+
+              {/* Plan & Pricing Section */}
+              <div className="mt-8 p-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-200">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center">
+                    <Award className="w-5 h-5 mr-3 text-purple-600" />
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">Plan & Pricing</h3>
+                      <p className="text-sm text-gray-600">Subscription tier and custom billing configuration</p>
+                    </div>
+                  </div>
+                  {!isEditingPlan && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsEditingPlan(true)}
+                      className="flex items-center"
+                    >
+                      <Edit className="w-4 h-4 mr-2" />
+                      Edit Plan
+                    </Button>
+                  )}
+                </div>
+
+                {isEditingPlan ? (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 block mb-2">Plan Tier</label>
+                      <select
+                        value={planId}
+                        onChange={(e) => setPlanId(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      >
+                        <option value="starter">Starter</option>
+                        <option value="professional">Professional</option>
+                        <option value="enterprise">Enterprise</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 block mb-2">Custom Monthly Price ($)</label>
+                      <Input
+                        type="number"
+                        min="0"
+                        placeholder="Leave empty for no billing"
+                        value={customMonthlyPrice}
+                        onChange={(e) => setCustomMonthlyPrice(e.target.value)}
+                        className="h-10"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Set custom monthly billing amount or leave empty for free access
+                      </p>
+                    </div>
+                    <div className="flex space-x-3">
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={async () => {
+                          try {
+                            setIsSavingPlan(true);
+                            const priceValue = customMonthlyPrice === '' ? null : parseFloat(customMonthlyPrice);
+                            
+                            if (priceValue !== null && (isNaN(priceValue) || priceValue < 0)) {
+                              toast.error('Please enter a valid price (0 or greater)');
+                              return;
+                            }
+
+                            await ownerManagementService.updateCompanySettings(company.id, {
+                              planId: planId as any,
+                              customMonthlyPrice: priceValue,
+                            });
+
+                            toast.success('Plan and pricing updated successfully');
+                            setIsEditingPlan(false);
+                            
+                            // Update local company data
+                            (company as any).planId = planId;
+                            (company as any).customMonthlyPrice = priceValue;
+                          } catch (error: any) {
+                            console.error('Error updating plan:', error);
+                            toast.error(error?.response?.data?.message || 'Failed to update plan');
+                          } finally {
+                            setIsSavingPlan(false);
+                          }
+                        }}
+                        disabled={isSavingPlan}
+                        className="bg-purple-600 hover:bg-purple-700"
+                      >
+                        {isSavingPlan ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Saving...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="w-4 h-4 mr-2" />
+                            Save
+                          </>
+                        )}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setIsEditingPlan(false);
+                          setPlanId(company.planId || 'starter');
+                          setCustomMonthlyPrice(
+                            company.customMonthlyPrice !== null && company.customMonthlyPrice !== undefined
+                              ? company.customMonthlyPrice.toString()
+                              : ''
+                          );
+                        }}
+                        disabled={isSavingPlan}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="p-4 bg-white rounded-lg border border-purple-200">
+                      <div className="flex items-center mb-2">
+                        <Award className="w-4 h-4 mr-2 text-purple-600" />
+                        <p className="text-sm font-medium text-gray-700">Plan Tier</p>
+                      </div>
+                      <p className="text-2xl font-bold text-purple-600 capitalize">
+                        {company.planId || 'Starter'}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {company.planId === 'enterprise' && 'Full feature access'}
+                        {company.planId === 'professional' && 'AI features enabled'}
+                        {(!company.planId || company.planId === 'starter') && 'Basic features'}
+                      </p>
+                    </div>
+                    <div className="p-4 bg-white rounded-lg border border-purple-200">
+                      <div className="flex items-center mb-2">
+                        <CreditCard className="w-4 h-4 mr-2 text-purple-600" />
+                        <p className="text-sm font-medium text-gray-700">Monthly Billing</p>
+                      </div>
+                      <p className="text-2xl font-bold text-purple-600">
+                        {company.customMonthlyPrice !== null && company.customMonthlyPrice !== undefined
+                          ? `$${company.customMonthlyPrice}`
+                          : 'Free'}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {company.customMonthlyPrice && company.customMonthlyPrice > 0
+                          ? 'Billed monthly via Stripe'
+                          : 'No billing configured'}
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Max Job Postings Section */}

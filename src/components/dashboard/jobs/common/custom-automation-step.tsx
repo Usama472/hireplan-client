@@ -2,9 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card } from "@/components/ui/card";
 import { allTriggers } from "@/constants/automations-constants";
 import API from "@/http";
 import { useAITemplates } from "@/hooks/useAITemplates";
@@ -16,10 +14,8 @@ import {
   CheckCircle2,
   FileCheck,
   Mail,
-  Plus,
   Search,
   Target,
-  Trash2,
   TrendingUp,
   UserCheck,
   X,
@@ -27,6 +23,7 @@ import {
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
+import { toast } from "sonner";
 
 interface Automation {
   id: string;
@@ -95,6 +92,8 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLabel, setSelectedLabel] = useState<string>("");
   const [availableLabels, setAvailableLabels] = useState<string[]>([]);
+  const [editingTags, setEditingTags] = useState<string | null>(null);
+  const [newTag, setNewTag] = useState("");
   const { templates: aiTemplates } = useAITemplates();
   const { watch, setValue } = useFormContext();
 
@@ -128,6 +127,71 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
     }
   };
 
+  const addTagToAutomation = async (automationId: string, tag: string) => {
+    try {
+      const automation = automations.find(a => a.id === automationId);
+      if (!automation) return;
+
+      // Check if tag already exists
+      if (automation.labels?.includes(tag)) {
+        toast.info("Tag already exists on this automation");
+        return;
+      }
+
+      const updatedLabels = [...new Set([...(automation.labels || []), tag])];
+      
+      await API.automation.updateAutomation(automationId, {
+        labels: updatedLabels,
+      });
+
+      // Update local state
+      const updatedAutomations = automations.map(a =>
+        a.id === automationId ? { ...a, labels: updatedLabels } : a
+      );
+      setAutomations(updatedAutomations);
+      
+      // Update available labels
+      const allLabels = updatedAutomations.flatMap(a => a.labels || []);
+      const uniqueLabels = [...new Set(allLabels)].sort();
+      setAvailableLabels(uniqueLabels);
+      
+      setNewTag("");
+      toast.success(`Tag "${tag}" added successfully`);
+    } catch (error) {
+      console.error("Error adding tag:", error);
+      toast.error("Failed to add tag");
+    }
+  };
+
+  const removeTagFromAutomation = async (automationId: string, tag: string) => {
+    try {
+      const automation = automations.find(a => a.id === automationId);
+      if (!automation) return;
+
+      const updatedLabels = (automation.labels || []).filter(l => l !== tag);
+      
+      await API.automation.updateAutomation(automationId, {
+        labels: updatedLabels,
+      });
+
+      // Update local state
+      const updatedAutomations = automations.map(a =>
+        a.id === automationId ? { ...a, labels: updatedLabels } : a
+      );
+      setAutomations(updatedAutomations);
+      
+      // Update available labels
+      const allLabels = updatedAutomations.flatMap(a => a.labels || []);
+      const uniqueLabels = [...new Set(allLabels)].sort();
+      setAvailableLabels(uniqueLabels);
+      
+      toast.success(`Tag "${tag}" removed successfully`);
+    } catch (error) {
+      console.error("Error removing tag:", error);
+      toast.error("Failed to remove tag");
+    }
+  };
+
   useEffect(() => {
     fetchAutomations();
   }, []);
@@ -146,14 +210,14 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
       const searchLower = searchTerm.toLowerCase();
       filtered = filtered.filter(automation => 
         automation.name.toLowerCase().includes(searchLower) ||
-        automation.labels.some(label => label.toLowerCase().includes(searchLower))
+        (automation.labels || []).some(label => label.toLowerCase().includes(searchLower))
       );
     }
 
     // Filter by selected label
     if (selectedLabel) {
       filtered = filtered.filter(automation => 
-        automation.labels.includes(selectedLabel)
+        (automation.labels || []).includes(selectedLabel)
       );
     }
 
@@ -276,15 +340,15 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
               </div>
             </div>
 
-            {/* Label Filter */}
+            {/* Tag Filter Dropdown */}
             {availableLabels.length > 0 && (
               <div className="sm:w-64">
                 <Select value={selectedLabel} onValueChange={setSelectedLabel}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Filter by label" />
+                    <SelectValue placeholder="Filter by tag" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All labels</SelectItem>
+                    <SelectItem value="">All tags</SelectItem>
                     {availableLabels.map((label) => (
                       <SelectItem key={label} value={label}>
                         {label}
@@ -295,6 +359,32 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
               </div>
             )}
           </div>
+
+          {/* Quick Tag Filters */}
+          {availableLabels.length > 0 && (
+            <div>
+              <span className="text-xs font-medium text-gray-500 mb-2 block">Quick Filters:</span>
+              <div className="flex flex-wrap gap-2">
+                {availableLabels.map((label) => (
+                  <Badge
+                    key={label}
+                    variant={selectedLabel === label ? "default" : "outline"}
+                    className={`cursor-pointer transition-all ${
+                      selectedLabel === label
+                        ? "bg-blue-600 text-white border-blue-600"
+                        : "bg-white text-blue-700 border-blue-200 hover:bg-blue-50"
+                    }`}
+                    onClick={() => setSelectedLabel(selectedLabel === label ? "" : label)}
+                  >
+                    {label}
+                    {selectedLabel === label && (
+                      <X className="h-3 w-3 ml-1" />
+                    )}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Active Filters Display */}
           {(searchTerm || selectedLabel) && (
@@ -313,7 +403,7 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
               )}
               {selectedLabel && (
                 <Badge variant="secondary" className="flex items-center gap-1">
-                  Label: {selectedLabel}
+                  Tag: {selectedLabel}
                   <button
                     onClick={() => setSelectedLabel("")}
                     className="ml-1 hover:text-gray-700"
@@ -335,11 +425,6 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
               </Button>
             </div>
           )}
-
-          {/* Results count */}
-          <div className="text-sm text-gray-500">
-            Showing {filteredAutomations.length} of {automations.length} automations
-          </div>
         </div>
       )}
 
@@ -509,25 +594,72 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
                     </div>
                   </div>
 
-                  {/* Labels */}
-                  {automation.labels && automation.labels.length > 0 && (
-                    <div className="mb-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-xs font-medium text-gray-500">Labels:</span>
-                      </div>
-                      <div className="flex flex-wrap gap-1">
-                        {automation.labels.map((label, index) => (
+                  {/* Tags/Labels */}
+                  <div className="mb-4" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-xs font-medium text-gray-500">Tags:</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setEditingTags(editingTags === automation.id ? null : automation.id)}
+                        className="h-5 px-2 text-xs text-blue-600 hover:text-blue-700"
+                      >
+                        {editingTags === automation.id ? "Done" : "+ Add Tag"}
+                      </Button>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {automation.labels && automation.labels.length > 0 ? (
+                        automation.labels.map((label, index) => (
                           <Badge
                             key={index}
                             variant="outline"
-                            className="text-xs bg-blue-50 text-blue-700 border-blue-200"
+                            className="text-xs bg-blue-50 text-blue-700 border-blue-200 flex items-center gap-1"
                           >
                             {label}
+                            {editingTags === automation.id && (
+                              <button
+                                onClick={() => removeTagFromAutomation(automation.id, label)}
+                                className="ml-1 hover:text-red-600"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            )}
                           </Badge>
-                        ))}
-                      </div>
+                        ))
+                      ) : (
+                        <span className="text-xs text-gray-400 italic">No tags</span>
+                      )}
                     </div>
-                  )}
+                    
+                    {/* Add tag input */}
+                    {editingTags === automation.id && (
+                      <div className="mt-2 flex gap-2">
+                        <Input
+                          placeholder="New tag name..."
+                          value={newTag}
+                          onChange={(e) => setNewTag(e.target.value)}
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter' && newTag.trim()) {
+                              addTagToAutomation(automation.id, newTag.trim());
+                            }
+                          }}
+                          className="h-7 text-xs"
+                        />
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            if (newTag.trim()) {
+                              addTagToAutomation(automation.id, newTag.trim());
+                            }
+                          }}
+                          disabled={!newTag.trim()}
+                          className="h-7 px-3 text-xs"
+                        >
+                          Add
+                        </Button>
+                      </div>
+                    )}
+                  </div>
 
                   {/* Actions Preview */}
                   <div className="mb-4 flex-1">
