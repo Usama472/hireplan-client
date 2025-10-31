@@ -273,6 +273,14 @@ const SimpleUnifiedChatInner: React.FC = () => {
           await emailChatAPI.markMessageAsRead(conversation.conversationId, message.messageId);
         }
         
+        // Dismiss conversation notifications
+        try {
+          await API.notification.dismissConversationNotifications(conversation.conversationId);
+          console.log(`✅ Dismissed notifications for conversation ${conversation.conversationId}`);
+        } catch (error) {
+          console.error('Error dismissing conversation notifications:', error);
+        }
+        
         // Use setTimeout to defer the refresh trigger after state updates settle
         setTimeout(() => {
           conversationUpdated(conversation.conversationId);
