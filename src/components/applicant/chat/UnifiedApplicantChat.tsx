@@ -366,7 +366,7 @@ export default function UnifiedApplicantChat({ jobId, onConversationCreated }: C
                       <Avatar className="h-8 w-8 flex-shrink-0">
                         <AvatarImage src={undefined} />
                         <AvatarFallback className={`text-xs ${
-                          message.direction === 'inbound' 
+                          message.direction === 'outbound' 
                             ? 'bg-blue-500 text-white' 
                             : 'bg-gray-300 text-gray-600'
                         }`}>
