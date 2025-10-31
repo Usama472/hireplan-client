@@ -67,6 +67,9 @@ export function EmailChatWidget({
   const [replyContent, setReplyContent] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  
+  // Debug props
+  console.log('🔍 EmailChatWidget props:', { applicantId, jobId, applicantName });
 
   useEffect(() => {
     loadConversations();
@@ -127,6 +130,12 @@ export function EmailChatWidget({
 
     try {
       setIsSending(true);
+      console.log('📤 Creating conversation with:', { applicantId, jobId, to: applicantEmail });
+      
+      if (!applicantId || !jobId) {
+        throw new Error(`Missing required fields: applicantId=${applicantId}, jobId=${jobId}`);
+      }
+      
       const response = await API.emailChat.createConversation({
         to: applicantEmail,
         subject: newMessageSubject,

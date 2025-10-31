@@ -1,8 +1,8 @@
 import React from 'react';
-import AccountsContent from './AccountsContent';
+import AccountsContentNew from './AccountsContentNew';
 
 const OwnerAccounts: React.FC = () => {
-  return <AccountsContent />;
+  return <AccountsContentNew />;
 };
 
 export default OwnerAccounts;

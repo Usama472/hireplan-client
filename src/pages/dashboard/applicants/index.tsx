@@ -78,6 +78,7 @@ interface Applicant {
   createdAt: string;
   aiEvaluation?: AIEvaluation;
   status: "pending" | "reviewed" | "shortlisted" | "rejected" | "draft";
+  jobId?: string; // Backend returns this
   job?: Job;
   interviewScheduled?: boolean;
   invitationSent?: boolean;
@@ -247,7 +248,7 @@ export default function ApplicantsPage() {
       return (
         <div className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs text-gray-400 bg-gray-50 border border-gray-200 md:px-4 md:py-2">
           <span className="w-2 h-2 rounded-full bg-gray-300 md:w-3 md:h-3"></span>
-          <span className="md:text-sm">No AI Score</span>
+          <span className="md:text-sm">Not Scored</span>
         </div>
       );
 

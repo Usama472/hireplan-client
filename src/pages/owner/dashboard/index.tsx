@@ -1,8 +1,8 @@
 import React from 'react';
-import DashboardContent from './DashboardContent';
+import DashboardContentNew from './DashboardContentNew';
 
 const OwnerDashboard: React.FC = () => {
-  return <DashboardContent />;
+  return <DashboardContentNew />;
 };
 
 export default OwnerDashboard;

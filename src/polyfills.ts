@@ -29,14 +29,16 @@ if (!window.ResizeObserver) {
 // Polyfill for IntersectionObserver (Safari < 12.1)
 if (!window.IntersectionObserver) {
   console.log('🔧 Adding IntersectionObserver polyfill');
+  // @ts-ignore - Simple polyfill
   window.IntersectionObserver = class IntersectionObserver {
     constructor(callback: IntersectionObserverCallback) {
       // Basic implementation
-      setTimeout(() => callback([], this), 0);
+      setTimeout(() => callback([], this as any), 0);
     }
     observe() {}
     unobserve() {}
     disconnect() {}
+    takeRecords() { return []; }
     readonly root = null;
     readonly rootMargin = '';
     readonly thresholds = [];

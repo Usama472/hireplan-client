@@ -15,7 +15,6 @@ import { useNotifications } from "@/lib/hooks/use-notifications";
 import useAuthSessionContext from "@/lib/context/AuthSessionContext";
 import API from "@/http";
 import { toast } from "sonner";
-import LogoImage from "../../../public/logo.png";
 
 export const DashboardHeader = () => {
   const isMobile = useIsMobile();
@@ -102,7 +101,7 @@ export const DashboardHeader = () => {
               to={ROUTES.DASHBOARD.MAIN}
               className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
             >
-              <img src={LogoImage} alt="Logo" className="h-9 w-9 object-contain" />
+              <img src="/logo.png" alt="Logo" className="h-9 w-9 object-contain" />
               <span className="font-extrabold text-2xl leading-tight tracking-tight bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
                 {APP_NAME}
               </span>
@@ -199,6 +198,65 @@ export const DashboardHeader = () => {
                                 className="h-7 text-xs"
                               >
                                 View Message
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  } else if (notification.type === 'NEW_APPLICATION') {
+                    // NEW_APPLICATION notification
+                    return (
+                      <div key={notification._id} className="px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-0">
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 bg-green-100 rounded-lg flex-shrink-0">
+                            <Bell className="h-4 w-4 text-green-600" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-gray-900 line-clamp-1">
+                                  {notification.title}
+                                </p>
+                                <p className="text-xs text-gray-600 mt-0.5 line-clamp-2">
+                                  {notification.message}
+                                </p>
+                              </div>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDismissJob(notification._id);
+                                }}
+                                className="text-gray-400 hover:text-gray-600 p-1"
+                              >
+                                <X className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                            <div className="flex gap-2 mt-2">
+                              <Button
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (notification.relatedApplicantId) {
+                                    navigate(`${ROUTES.DASHBOARD.APPLICANTS}?applicantId=${notification.relatedApplicantId}`);
+                                  }
+                                }}
+                                className="h-7 text-xs bg-green-600 hover:bg-green-700"
+                              >
+                                View Applicant
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (notification.relatedJobId) {
+                                    navigate(`${ROUTES.DASHBOARD.VIEW_JOB}/${notification.relatedJobId}`);
+                                  }
+                                }}
+                                className="h-7 text-xs"
+                              >
+                                View Job
                               </Button>
                             </div>
                           </div>

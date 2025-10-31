@@ -88,6 +88,9 @@ interface Applicant {
   interviewScheduled?: boolean;
   invitationSent?: boolean;
   invitationSentAt?: string;
+  jobId?: string | { id: string; jobTitle: string; };
+  jobTitle?: string;
+  job?: { id: string; jobTitle: string; companyName?: string; company?: any };
   interview?: {
     id: string;
     applicant: string;
@@ -702,9 +705,11 @@ export function ApplicantDetailModal({
                 >
                   <div className="h-full">
                     <EmailChatWidget
-                      applicantId={applicant.id}
+                      applicantId={applicant._id || applicant.id}
                       applicantName={`${applicant.firstName} ${applicant.lastName}`}
                       applicantEmail={applicant.email}
+                      jobId={applicant.jobId || applicant.job?.id}
+                      jobTitle={applicant.job?.jobTitle || applicant.jobTitle}
                       className="h-full"
                     />
                   </div>

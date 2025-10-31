@@ -118,7 +118,7 @@ const ChatsPage: React.FC = () => {
 
   const getUnreadCount = (conversation: ChatConversation) => {
     return conversation.messages.filter(
-      (msg) => msg.direction === "inbound" && !msg.readReceipt && !msg.readAt
+      (msg) => msg.direction === "inbound" && !msg.readReceipt && !(msg as any).readAt
     ).length;
   };
 

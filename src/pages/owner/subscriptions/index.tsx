@@ -1,8 +1,8 @@
 import React from 'react';
-import SubscriptionsContent from './SubscriptionsContent';
+import SubscriptionsContentNew from './SubscriptionsContentNew';
 
 const OwnerSubscriptions: React.FC = () => {
-  return <SubscriptionsContent />;
+  return <SubscriptionsContentNew />;
 };
 
 export default OwnerSubscriptions;

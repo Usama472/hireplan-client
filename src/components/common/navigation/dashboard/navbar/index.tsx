@@ -9,8 +9,8 @@ import {
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ROUTES } from "@/constants";
 import API from "@/http";
-import { useExpiredJobs } from "@/lib/hooks/use-expired-jobs";
-import { AlertCircle, Bell, Briefcase, ChevronRight, X } from "lucide-react";
+import { useNotifications, type Notification } from "@/lib/hooks/use-notifications";
+import { AlertCircle, Bell, ChevronRight, X, UserCheck, MessageSquare } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -27,32 +27,41 @@ export const Navbar = () => {
     { label: "dashboard", href: "#" },
   ];
 
-  const { expiredJobs, count, refetch } = useExpiredJobs();
+  const { allNotifications, refetch } = useNotifications();
   const navigate = useNavigate();
-  const [dismissedJobs, setDismissedJobs] = useState<Set<string>>(new Set());
+  const [dismissedNotifs, setDismissedNotifs] = useState<Set<string>>(new Set());
 
-  const visibleExpiredJobs = expiredJobs.filter(
-    (job) => !dismissedJobs.has(job.id)
+  const visibleNotifications = allNotifications.filter(
+    (n) => !dismissedNotifs.has(n._id)
   );
-  const visibleCount = visibleExpiredJobs.length;
+  const visibleCount = visibleNotifications.length;
 
-  const handleCloseJob = async (jobId: string) => {
+  const handleCloseJob = async (notificationId: string, jobId: string | undefined) => {
     try {
-      const job = expiredJobs.find((j) => j.id === jobId);
-      if (!job) return;
-
-      await API.job.updateJob(jobId, { ...job, status: "closed" } as any);
+      if (!jobId) {
+        toast.error("Invalid job ID");
+        return;
+      }
+      const jobIdStr = typeof jobId === 'object' ? (jobId as any)?._id || (jobId as any)?.toString() : jobId;
+      await API.job.updateJob(jobIdStr, { status: "closed" } as any);
+      await API.notification.dismissNotification(notificationId);
       toast.success("Job closed successfully");
-      setDismissedJobs((prev) => new Set(prev).add(jobId));
+      setDismissedNotifs((prev) => new Set(prev).add(notificationId));
       refetch();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error closing job:", error);
-      toast.error("Failed to close job");
+      toast.error(error?.response?.data?.message || "Failed to close job");
     }
   };
 
-  const handleDismiss = (jobId: string) => {
-    setDismissedJobs((prev) => new Set(prev).add(jobId));
+  const handleDismissNotification = async (notificationId: string) => {
+    try {
+      await API.notification.dismissNotification(notificationId);
+      setDismissedNotifs((prev) => new Set(prev).add(notificationId));
+      refetch();
+    } catch (error) {
+      console.error("Error dismissing notification:", error);
+    }
   };
 
   return (
@@ -103,7 +112,7 @@ export const Navbar = () => {
               </h3>
               {visibleCount > 0 && (
                 <p className="text-xs text-gray-500 mt-0.5">
-                  {visibleCount} expired job{visibleCount !== 1 ? "s" : ""}
+                  {visibleCount} notification{visibleCount !== 1 ? "s" : ""}
                 </p>
               )}
             </div>
@@ -115,68 +124,179 @@ export const Navbar = () => {
               </div>
             ) : (
               <div className="py-2">
-                {visibleExpiredJobs.map((job) => (
-                  <div
-                    key={job.id}
-                    className="px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-0"
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="p-2 bg-amber-100 rounded-lg flex-shrink-0">
-                        <AlertCircle className="h-4 w-4 text-amber-600" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900 line-clamp-1">
-                              {job.jobTitle || job.jobBoardTitle}
-                            </p>
-                            <p className="text-xs text-gray-600 mt-0.5">
-                              Expired on{" "}
-                              {new Date(job.endDate!).toLocaleDateString(
-                                "en-US",
-                                { month: "short", day: "numeric" }
-                              )}
-                            </p>
+                {visibleNotifications.map((notification: Notification) => {
+                  // NEW_APPLICATION notification
+                  if (notification.type === 'NEW_APPLICATION') {
+                    return (
+                      <div
+                        key={notification._id}
+                        className="px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-0"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 bg-green-100 rounded-lg flex-shrink-0">
+                            <UserCheck className="h-4 w-4 text-green-600" />
                           </div>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDismiss(job.id);
-                            }}
-                            className="text-gray-400 hover:text-gray-600 p-1"
-                          >
-                            <X className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-                        <div className="flex gap-2 mt-2">
-                          <Button
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleCloseJob(job.id);
-                            }}
-                            className="h-7 text-xs bg-amber-600 hover:bg-amber-700"
-                          >
-                            Close Job
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigate(
-                                `${ROUTES.DASHBOARD.VIEW_JOB}/${job.id}`
-                              );
-                            }}
-                            className="h-7 text-xs"
-                          >
-                            View
-                          </Button>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-gray-900 line-clamp-1">
+                                  {notification.title}
+                                </p>
+                                <p className="text-xs text-gray-600 mt-0.5 line-clamp-2">
+                                  {notification.message}
+                                </p>
+                              </div>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDismissNotification(notification._id);
+                                }}
+                                className="text-gray-400 hover:text-gray-600 p-1"
+                              >
+                                <X className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                            <div className="flex gap-2 mt-2">
+                              <Button
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const jobId = typeof notification.relatedJobId === 'object' 
+                                    ? (notification.relatedJobId as any)?._id || (notification.relatedJobId as any)?.toString()
+                                    : notification.relatedJobId;
+                                  navigate(`${ROUTES.DASHBOARD.APPLICANTS}?job=${jobId || ''}`);
+                                  handleDismissNotification(notification._id);
+                                }}
+                                className="h-7 text-xs"
+                              >
+                                View Applicant
+                              </Button>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                ))}
+                    );
+                  }
+                  
+                  // NEW_MESSAGE notification
+                  if (notification.type === 'NEW_MESSAGE') {
+                    return (
+                      <div
+                        key={notification._id}
+                        className="px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-0"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
+                            <MessageSquare className="h-4 w-4 text-blue-600" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-gray-900 line-clamp-1">
+                                  {notification.title}
+                                </p>
+                                <p className="text-xs text-gray-600 mt-0.5 line-clamp-2">
+                                  {notification.message}
+                                </p>
+                              </div>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDismissNotification(notification._id);
+                                }}
+                                className="text-gray-400 hover:text-gray-600 p-1"
+                              >
+                                <X className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                            <div className="flex gap-2 mt-2">
+                              <Button
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`${ROUTES.DASHBOARD.CHATS}?conversation=${notification.relatedConversationId || ''}`);
+                                  handleDismissNotification(notification._id);
+                                }}
+                                className="h-7 text-xs"
+                              >
+                                View Message
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }
+                  
+                  // JOB_EXPIRED notification
+                  if (notification.type === 'JOB_EXPIRED') {
+                    return (
+                      <div
+                        key={notification._id}
+                        className="px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-0"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 bg-amber-100 rounded-lg flex-shrink-0">
+                            <AlertCircle className="h-4 w-4 text-amber-600" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-gray-900 line-clamp-1">
+                                  {notification.metadata?.jobTitle || notification.title}
+                                </p>
+                                <p className="text-xs text-gray-600 mt-0.5">
+                                  {notification.metadata?.endDate && `Expired on ${new Date(notification.metadata.endDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`}
+                                </p>
+                              </div>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDismissNotification(notification._id);
+                                }}
+                                className="text-gray-400 hover:text-gray-600 p-1"
+                              >
+                                <X className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                            <div className="flex gap-2 mt-2">
+                              <Button
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const jobId = typeof notification.relatedJobId === 'object' 
+                                    ? (notification.relatedJobId as any)?._id || (notification.relatedJobId as any)?.toString()
+                                    : notification.relatedJobId;
+                                  handleCloseJob(notification._id, jobId);
+                                }}
+                                className="h-7 text-xs bg-amber-600 hover:bg-amber-700"
+                              >
+                                Close Job
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const jobId = typeof notification.relatedJobId === 'object' 
+                                    ? (notification.relatedJobId as any)?._id || (notification.relatedJobId as any)?.toString()
+                                    : notification.relatedJobId;
+                                  navigate(`${ROUTES.DASHBOARD.VIEW_JOB}/${jobId || ''}`);
+                                }}
+                                className="h-7 text-xs"
+                              >
+                                View
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }
+                  
+                  // Default for other notification types
+                  return null;
+                })}
               </div>
             )}
 
@@ -187,11 +307,14 @@ export const Navbar = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => navigate(ROUTES.DASHBOARD.JOBS)}
+                    onClick={() => {
+                      // Mark all as read
+                      API.notification.markAllAsRead();
+                      refetch();
+                    }}
                     className="w-full text-xs text-primary hover:text-primary/80"
                   >
-                    <Briefcase className="h-3.5 w-3.5 mr-2" />
-                    View All Jobs
+                    Mark All as Read
                   </Button>
                 </div>
               </>

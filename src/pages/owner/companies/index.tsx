@@ -1,8 +1,8 @@
 import React from 'react';
-import CompaniesContent from './CompaniesContent';
+import CompaniesContentNew from './CompaniesContentNew';
 
 const OwnerCompanies: React.FC = () => {
-  return <CompaniesContent />;
+  return <CompaniesContentNew />;
 };
 
 export default OwnerCompanies;

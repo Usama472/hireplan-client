@@ -3,7 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/logo.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
+    
+    <!-- Cache Control - Force Fresh Content -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     
     <!-- Primary Meta Tags -->
     <title>HirePlan - AI-Powered Recruitment Platform | Hire 10x Faster</title>
@@ -90,7 +95,63 @@
     </script>
   </head>
   <body>
+    <noscript>
+      <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #f5f5f5; font-family: system-ui; text-align: center; padding: 2rem;">
+        <div>
+          <h1 style="color: #e74c3c; margin-bottom: 1rem;">JavaScript Required</h1>
+          <p>Please enable JavaScript to use HirePlan.</p>
+        </div>
+      </div>
+    </noscript>
     <div id="root"></div>
+    <script src="/service-worker-unregister.js"></script>
+    <script src="/clear-cache.js"></script>
+    <script>
+      // App version for cache busting
+      const APP_VERSION = '2.0.0'; // Increment this to force reload
+      
+      // Force cache clear and reload for iPhone users with old version
+      const storedVersion = localStorage.getItem('app_version');
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      
+      console.log('Version check:', { current: APP_VERSION, stored: storedVersion, isIOS });
+      
+      if (isIOS && storedVersion && storedVersion !== APP_VERSION) {
+        console.log('🔄 Version mismatch detected! Forcing cache clear and reload...');
+        
+        // Clear all caches
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // Clear Service Worker cache if exists
+        if ('serviceWorker' in navigator && 'caches' in window) {
+          caches.keys().then(function(names) {
+            for (let name of names) caches.delete(name);
+          });
+          navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            for (let registration of registrations) registration.unregister();
+          });
+        }
+        
+        // Store new version
+        localStorage.setItem('app_version', APP_VERSION);
+        
+        // Force reload without cache
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
+      } else {
+        // Store current version
+        localStorage.setItem('app_version', APP_VERSION);
+      }
+      
+      // Inline script to catch early errors on iOS
+      window.onerror = function(msg, url, lineNo, columnNo, error) {
+        console.error('Early error caught:', msg, url, lineNo, columnNo, error);
+        return false;
+      };
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

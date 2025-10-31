@@ -11,10 +11,27 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react(), tailwindcss()],
     build: {
-      target: ["es2015", "safari11"],
+      target: ["es2015", "safari11", "ios11"],
       polyfillModulePreload: true,
+      cssCodeSplit: true,
+      minify: 'terser',
+      terserOptions: {
+        safari10: true,
+        compress: {
+          passes: 2,
+          pure_getters: true,
+          unsafe: false,
+        },
+        mangle: {
+          safari10: true,
+        },
+      },
       rollupOptions: {
         output: {
+          // Add timestamp to filenames for cache busting
+          entryFileNames: `assets/[name].[hash].${Date.now()}.js`,
+          chunkFileNames: `assets/[name].[hash].${Date.now()}.js`,
+          assetFileNames: `assets/[name].[hash].${Date.now()}.[ext]`,
           manualChunks: {
             vendor: ['react', 'react-dom'],
             motion: ['framer-motion']

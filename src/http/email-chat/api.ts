@@ -16,7 +16,10 @@ export const getConversations = (params?: {
   limit?: number;
   status?: string;
   applicantId?: string;
-}) => get('/email-chat/conversations', { params });
+}) => {
+  console.log('📞 API call: getConversations with params:', params);
+  return get('/email-chat/conversations', { params });  // ✅ FIX: Wrap in { params }
+};
 
 export const getConversation = (conversationId: string) =>
   get(`/email-chat/conversations/${conversationId}`);

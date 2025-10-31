@@ -22,7 +22,6 @@ const ZoomAuthPage = () => {
       toast({
         title: "Connection Failed",
         description: "Zoom connection was cancelled",
-        variant: "destructive"
       });
       return;
     }
@@ -33,7 +32,6 @@ const ZoomAuthPage = () => {
       toast({
         title: "Connection Failed",
         description: "Invalid authorization response from Zoom",
-        variant: "destructive"
       });
       return;
     }
@@ -60,7 +58,6 @@ const ZoomAuthPage = () => {
         toast({
           title: "Connection Failed",
           description: "Failed to connect Zoom",
-          variant: "destructive"
         });
       });
   }, [searchParams, navigate, toast]);

@@ -3,9 +3,33 @@ import App from './App.tsx'
 import './index.css'
 import './polyfills'
 
-// Safari loading timeout fallback
+// Enhanced iOS/Safari detection
 const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
-const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+console.log('🚀 HirePlan initializing...', {
+  isSafari,
+  isIOS,
+  userAgent: navigator.userAgent,
+  platform: navigator.platform,
+  viewport: { width: window.innerWidth, height: window.innerHeight }
+});
+
+// Global error handler for uncaught errors
+window.addEventListener('error', (event) => {
+  console.error('🚨 Global error caught:', {
+    message: event.message,
+    filename: event.filename,
+    lineno: event.lineno,
+    colno: event.colno,
+    error: event.error
+  });
+});
+
+// Global promise rejection handler
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('🚨 Unhandled promise rejection:', event.reason);
+});
 
 if (isSafari || isIOS) {
   console.log('🍎 Safari/iOS detected - adding loading timeout protection');
@@ -51,22 +75,33 @@ if (isSafari || isIOS) {
 try {
   const root = document.getElementById('root');
   if (!root) {
+    console.error('🚨 Root element #root not found in DOM');
     throw new Error('Root element not found');
   }
   
-  createRoot(root).render(<App />);
+  console.log('✅ Root element found, creating React root...');
+  const reactRoot = createRoot(root);
+  
+  console.log('✅ React root created, rendering app...');
+  reactRoot.render(<App />);
+  
+  console.log('✅ React render called');
   
   // Clear timeout on successful render
   if (isSafari || isIOS) {
     setTimeout(() => {
-      if (document.querySelector('[data-reactroot], [data-react-root]') || 
-          document.querySelector('#root').children.length > 0) {
+      const rootElement = document.querySelector('#root');
+      if (rootElement && rootElement.children.length > 0) {
         console.log('✅ React app loaded successfully on Safari/iOS');
+        console.log('   Root children count:', rootElement.children.length);
+      } else {
+        console.error('🚨 React failed to render - root has no children');
       }
     }, 1000);
   }
 } catch (error) {
   console.error('🚨 Failed to initialize React app:', error);
+  console.error('Error stack:', (error as Error).stack);
   
   // Show fallback UI
   document.body.innerHTML = `

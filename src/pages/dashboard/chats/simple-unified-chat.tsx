@@ -101,31 +101,57 @@ const SimpleUnifiedChatInner: React.FC = () => {
 
       const conversations = response.data?.conversations || [];
       console.log('📋 Found conversations:', conversations.length);
+      if (conversations.length > 0) {
+        console.log('📋 Sample conversation:', conversations[0]);
+      }
 
       // Group ALL messages by applicant into unified conversations
       const applicantMap = new Map<string, Applicant>();
       
+      let skippedCount = 0;
       conversations.forEach((conv: any) => {
-        if (!conv.applicantId) return;
+        // Safety check
+        if (!conv) {
+          skippedCount++;
+          return;
+        }
+
+        // Handle conversations without applicantId (should be fixed now, but log for debugging)
+        if (!conv.applicantId) {
+          console.error('⚠️ CRITICAL: Conversation STILL without applicantId:', {
+            conversationId: conv.conversationId,
+            subject: conv.subject,
+            hasParticipants: !!conv.participants,
+            participants: conv.participants
+          });
+          skippedCount++;
+          return;
+        }
         
-        const applicantId = conv.applicantId.id;
+        const applicantId = conv.applicantId?.id || conv.applicantId?._id || conv.applicantId;
+        if (!applicantId) {
+          console.warn('⚠️ Could not extract applicantId:', conv.conversationId);
+          skippedCount++;
+          return;
+        }
+        
         const applicantData = conv.applicantId;
         
         if (!applicantMap.has(applicantId)) {
           applicantMap.set(applicantId, {
             id: applicantId,
-            firstName: applicantData.firstName,
-            lastName: applicantData.lastName,
-            email: applicantData.email,
-            phone: applicantData.phone,
-            city: applicantData.city,
-            state: applicantData.state,
-            jobTitle: applicantData.jobId?.jobTitle,
-            status: applicantData.status || 'pending',
-            aiEvaluation: applicantData.aiEvaluation,
+            firstName: applicantData?.firstName || 'Unknown',
+            lastName: applicantData?.lastName || 'Applicant',
+            email: applicantData?.email || conv.participants?.find((p: any) => p.role === 'applicant')?.email || 'unknown@email.com',
+            phone: applicantData?.phone,
+            city: applicantData?.city,
+            state: applicantData?.state,
+            jobTitle: applicantData?.jobId?.jobTitle,
+            status: applicantData?.status || 'pending',
+            aiEvaluation: applicantData?.aiEvaluation,
             conversations: [], // This will hold separate conversations
             totalUnread: 0,
-            lastActivityAt: new Date(conv.lastMessageAt),
+            lastActivityAt: new Date(conv.lastMessageAt || Date.now()),
           });
         }
         
@@ -165,6 +191,12 @@ const SimpleUnifiedChatInner: React.FC = () => {
 
       setApplicants(applicantsList);
       console.log('👥 Applicants loaded:', applicantsList.length);
+      console.log('⚠️ Skipped conversations:', skippedCount);
+      console.log('📊 Stats:', {
+        totalConversations: conversations.length,
+        applicants: applicantsList.length,
+        skipped: skippedCount
+      });
 
       // Auto-select if conversationId in URL
       if (conversationId && applicantsList.length > 0) {

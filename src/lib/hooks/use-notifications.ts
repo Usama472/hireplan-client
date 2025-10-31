@@ -36,7 +36,24 @@ export interface ExpiredJobNotification {
   createdAt: string;
 }
 
-export type Notification = MessageNotification | ExpiredJobNotification;
+export interface NewApplicationNotification {
+  _id: string;
+  type: 'NEW_APPLICATION';
+  userId: string;
+  companyId: string;
+  title: string;
+  message: string;
+  isRead: boolean;
+  relatedJobId?: string;
+  relatedApplicantId?: string;
+  metadata?: {
+    applicantEmail?: string;
+    jobTitle?: string;
+  };
+  createdAt: string;
+}
+
+export type Notification = MessageNotification | ExpiredJobNotification | NewApplicationNotification;
 
 interface UseNotificationsReturn {
   messageNotifications: MessageNotification[];
@@ -57,14 +74,39 @@ export function useNotifications(): UseNotificationsReturn {
   const fetchNotifications = useCallback(async () => {
     try {
       setLoading(true);
-      const [messages, jobs] = await Promise.all([
+      const [messages, jobs, general] = await Promise.all([
         API.notification.getMessageNotifications(),
-        API.notification.getExpiredJobNotifications()
+        API.notification.getExpiredJobNotifications(),
+        API.notification.getNotifications({ status: 'unread', limit: 100 })
       ]);
       
       // Handle potential undefined responses
-      setMessageNotifications(messages?.data?.notifications || []);
-      setExpiredJobNotifications(jobs?.data?.notifications || []);
+      const messagesData = messages?.data?.notifications || [];
+      const jobsData = jobs?.data?.notifications || [];
+      const generalData = general?.results || general?.data?.results || [];
+      
+      console.log('📬 Notifications fetched:', {
+        messages: messagesData.length,
+        jobs: jobsData.length,
+        general: generalData.length
+      });
+      
+      setMessageNotifications(messagesData);
+      setExpiredJobNotifications(jobsData);
+      
+      // Merge all notifications, avoiding duplicates
+      const allIds = new Set([
+        ...messagesData.map((n: any) => n._id),
+        ...jobsData.map((n: any) => n._id)
+      ]);
+      
+      const uniqueGeneralNotifications = generalData.filter((n: any) => !allIds.has(n._id));
+      
+      // Store general notifications in message notifications array for now
+      // (they'll be displayed together)
+      if (uniqueGeneralNotifications.length > 0) {
+        setMessageNotifications([...messagesData, ...uniqueGeneralNotifications]);
+      }
     } catch (error) {
       console.error('Failed to fetch notifications:', error);
       // Set empty arrays on error to prevent undefined state

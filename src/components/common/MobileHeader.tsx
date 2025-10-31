@@ -4,7 +4,6 @@ import { useIsMobile } from "@/lib/hooks/use-mobile";
 import { Link } from "react-router-dom";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import LogoImage from "../../../public/logo.png";
 
 export const MobileHeader = () => {
   const isMobile = useIsMobile();
@@ -22,7 +21,7 @@ export const MobileHeader = () => {
         to="/"
         className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
       >
-        <img src={LogoImage} alt="Logo" className="h-9 w-9 object-contain" />
+        <img src="/logo.png" alt="Logo" className="h-9 w-9 object-contain" />
         <span className="font-extrabold text-2xl leading-tight tracking-tight bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
           {APP_NAME}
         </span>

@@ -26,7 +26,6 @@ import { APP_NAME, ROUTES } from "@/constants";
 import { PERMISSIONS } from "@/constants/permissions";
 import useAuthSessionContext from "@/lib/context/AuthSessionContext";
 import { useLocation, Link } from "react-router-dom";
-import LogoImage from "../../../../../../public/logo.png";
 import { NavProjects } from "./nav-projects";
 import { NavUser } from "./nav-user";
 
@@ -169,7 +168,7 @@ export const DashboardSidebar = ({
               >
                 <div className="flex items-center gap-4">
                   <img
-                    src={LogoImage}
+                    src="/logo.png"
                     alt="Logo"
                     className="h-9 w-9 object-contain"
                   />

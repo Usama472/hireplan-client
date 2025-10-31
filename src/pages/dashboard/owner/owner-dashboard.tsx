@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -19,7 +19,9 @@ import {
   UserCheck,
   UserX,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  Plus,
+  Download
 } from 'lucide-react';
 import { UserManagement } from './user-management';
 import { SubscriptionOverview } from './subscription-overview';
@@ -237,6 +239,7 @@ export default function OwnerDashboard() {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }

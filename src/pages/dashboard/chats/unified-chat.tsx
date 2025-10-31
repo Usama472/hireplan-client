@@ -530,7 +530,8 @@ const UnifiedChatPage: React.FC = () => {
                 <p className="text-gray-500 text-xs">No applicants found</p>
               </div>
             ) : (
-              filteredApplicants.map((applicant) => (
+              filteredApplicants.map((applicant) => {
+                return (
                 <div
                   key={applicant.applicantId}
                   onClick={() => handleApplicantSelect(applicant)}
@@ -618,10 +619,12 @@ const UnifiedChatPage: React.FC = () => {
                           )}
                         </div>
                       )}
-                          </div>
-                        </div>
-                      </div>
-              ))}
+                    </div>
+                  </div>
+                </div>
+                );
+              })
+            )}
             </div>
           </ScrollArea>
         </div>

@@ -22,7 +22,6 @@ const OutlookAuthPage = () => {
       toast({
         title: "Connection Failed",
         description: "Outlook Calendar connection was cancelled",
-        variant: "destructive"
       });
       return;
     }
@@ -33,7 +32,6 @@ const OutlookAuthPage = () => {
       toast({
         title: "Connection Failed",
         description: "Invalid authorization response from Microsoft",
-        variant: "destructive"
       });
       return;
     }
@@ -60,7 +58,6 @@ const OutlookAuthPage = () => {
         toast({
           title: "Connection Failed",
           description: "Failed to connect Outlook Calendar",
-          variant: "destructive"
         });
       });
   }, [searchParams, navigate, toast]);

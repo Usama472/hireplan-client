@@ -56,7 +56,8 @@ export function Header() {
               className="flex items-center space-x-2.5 min-w-0 hover:opacity-80 transition-opacity"
             >
               <img
-                src="../../../../../public/logo.png"
+                src="/logo.png"
+                alt="HirePlan Logo"
                 className="w-10 h-10 flex-shrink-0"
               />
               <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent truncate">
