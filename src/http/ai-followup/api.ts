@@ -75,7 +75,7 @@ export const getFollowupById = (followupId: string) => {
 
 // Send follow-up questions via email
 export const sendFollowupQuestions = (followupId: string) => {
-  return post(`${BASE_URL}/${followupId}/send`);
+  return post(`${BASE_URL}/${followupId}/send`, {});
 };
 
 // Process follow-up response
@@ -85,7 +85,7 @@ export const processFollowupResponse = (data: ProcessFollowupResponseRequest) =>
 
 // Generate final AI suggestion
 export const generateFinalSuggestion = (followupId: string) => {
-  return post(`${BASE_URL}/${followupId}/generate-suggestion`);
+  return post(`${BASE_URL}/${followupId}/generate-suggestion`, {});
 };
 
 // Get AI follow-ups with pagination

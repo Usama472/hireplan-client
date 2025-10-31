@@ -24,6 +24,10 @@ interface ChatMessage {
   from: string;
   to: string[];
   source?: 'email' | 'portal';
+  metadata?: {
+    source?: 'email' | 'portal' | 'sms';
+    [key: string]: any;
+  };
 }
 
 interface ChatConversation {

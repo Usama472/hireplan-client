@@ -19,6 +19,7 @@ interface HolidayPickerProps {
   selectedHolidays: string[];
   onHolidaysChange: (holidays: string[]) => void;
   className?: string;
+  filterType?: string;
 }
 
 export function HolidayPicker({ selectedHolidays, onHolidaysChange, className }: HolidayPickerProps) {

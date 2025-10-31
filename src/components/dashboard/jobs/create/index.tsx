@@ -246,7 +246,7 @@ export default function CreateJob() {
           ...formData,
           schedule: formData.schedule || [],
           benefits: formData.benefits || [],
-        });
+        } as JobFormSchema);
       }
     }
   }, [currentStep]);
@@ -264,7 +264,7 @@ export default function CreateJob() {
               formData.jobTitle ||
               `Untitled Job - ${new Date().toLocaleDateString()}`,
             formData,
-            completedSections: getCompletedSections(formData),
+            completedSections: getCompletedSections(formData as JobFormSchema),
             timestamp: Date.now(),
           })
         );
@@ -286,7 +286,7 @@ export default function CreateJob() {
           ...draftData.formData,
           schedule: draftData.formData.schedule || [],
           benefits: draftData.formData.benefits || [],
-        });
+        } as JobFormSchema);
         localStorage.removeItem("temp_job_draft");
       } catch (error) {
         console.error("Failed to process temp draft:", error);
@@ -421,12 +421,54 @@ export default function CreateJob() {
     toast.success("Test data loaded successfully!");
   };
 
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  };
+  // Auto-scroll to top whenever step changes
+  useEffect(() => {
+    const scrollToTop = () => {
+      // Find the scrollable container (the div with overflow-y-auto from PrivateRoute)
+      // Try multiple methods to find it reliably
+      let scrollableContainer: HTMLElement | null = null;
+      
+      // Method 1: Find by class selector
+      scrollableContainer = document.querySelector('.overflow-y-auto') as HTMLElement;
+      
+      // Method 2: If not found, traverse up from main element
+      if (!scrollableContainer) {
+        const mainElement = document.querySelector('main');
+        if (mainElement) {
+          let parent = mainElement.parentElement;
+          while (parent) {
+            const style = window.getComputedStyle(parent);
+            if (style.overflowY === 'auto' || style.overflowY === 'scroll') {
+              scrollableContainer = parent;
+              break;
+            }
+            parent = parent.parentElement;
+          }
+        }
+      }
+      
+      // Scroll the container if found
+      if (scrollableContainer) {
+        scrollableContainer.scrollTo({ top: 0, behavior: 'smooth' });
+        scrollableContainer.scrollTop = 0;
+      }
+      
+      // Also scroll window and document as fallback
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
+
+    // Immediate scroll
+    scrollToTop();
+    
+    // Also try after a small delay to ensure DOM has updated
+    const timeoutId = setTimeout(() => {
+      scrollToTop();
+    }, 150);
+    
+    return () => clearTimeout(timeoutId);
+  }, [currentStep]);
 
   const handleNext = async () => {
     clearErrors();
@@ -436,21 +478,18 @@ export default function CreateJob() {
     if (currentStep === 4 && hasProfessionalFeatures) {
       // AI Analysis step (merged Resume Analysis + AI Overview) - skip validation for Professional+ users
       setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
-      scrollToTop();
       return;
     }
 
     if (currentStep === 4 && !hasProfessionalFeatures) {
       // For non-Professional users, skip AI step and go directly to Booking Page (step 5)
       setCurrentStep(5); // This will be the Booking Page for non-Professional users
-      scrollToTop();
       return;
     }
 
     if (currentStep === 6 && hasProfessionalFeatures) {
       // Automation step - skip validation for Professional+ users
       setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
-      scrollToTop();
       return;
     }
 
@@ -460,7 +499,6 @@ export default function CreateJob() {
     ) {
       // Review step - skip validation
       setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
-      scrollToTop();
       return;
     }
 
@@ -518,7 +556,6 @@ export default function CreateJob() {
         }
 
         setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
-        scrollToTop();
       }
       return;
     }
@@ -531,7 +568,6 @@ export default function CreateJob() {
     if (isStepValid) {
       setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
       clearErrors();
-      scrollToTop();
     }
   };
 
@@ -564,8 +600,7 @@ export default function CreateJob() {
       setCurrentStep((prev) => Math.max(prev - 1, 1));
     }
 
-    // Scroll to top when going to previous step
-    scrollToTop();
+    // Scroll will happen automatically via useEffect when currentStep changes
   };
 
   // Add debugging for the submission condition

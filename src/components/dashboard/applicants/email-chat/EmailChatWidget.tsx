@@ -141,9 +141,11 @@ export function EmailChatWidget({
         subject: newMessageSubject,
         htmlContent: `<p>${newMessageContent.replace(/\n/g, '<br>')}</p>`,
         textContent: newMessageContent,
-        jobId,
-        applicantId,
+        jobId: typeof jobId === 'string' ? jobId : (jobId as any)?.id || jobId,
+        applicantId: typeof applicantId === 'string' ? applicantId : (applicantId as any)?.id || applicantId,
       });
+
+      console.log('📥 Conversation creation response:', response);
 
       if (response.status) {
         const newConv = response.data;
@@ -157,12 +159,23 @@ export function EmailChatWidget({
           title: 'Success',
           description: 'Message sent successfully!',
         });
+      } else {
+        console.error('❌ Conversation creation failed:', response);
+        toast({
+          title: 'Error',
+          description: response.message || 'Failed to send message',
+        });
       }
-    } catch (error) {
-      console.error('Error creating conversation:', error);
+    } catch (error: any) {
+      console.error('❌ Error creating conversation:', error);
+      console.error('Error details:', {
+        message: error?.message,
+        response: error?.response?.data,
+        status: error?.response?.status,
+      });
       toast({
         title: 'Error',
-        description: 'Failed to send message',
+        description: error?.response?.data?.message || error?.message || 'Failed to send message',
       });
     } finally {
       setIsSending(false);

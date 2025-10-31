@@ -200,7 +200,6 @@ export function ApplicantDetailModal({
       toast({
         title: "Upgrade Required",
         description: "AI assessment requires Professional or Enterprise plan",
-        variant: "destructive",
       });
       return;
     }
@@ -227,7 +226,6 @@ export function ApplicantDetailModal({
       toast({
         title: "Assessment Failed",
         description: error.message || "Failed to complete AI assessment. Please try again.",
-        variant: "destructive",
       });
     } finally {
       setIsRequestingAI(false);
@@ -237,12 +235,12 @@ export function ApplicantDetailModal({
   const handleStatusUpdate = async (status: string) => {
     try {
       // We need the jobId to update status - let me get it from the applicant
-      const jobId = applicant.jobId || applicant.job?.id;
+      const jobId = typeof applicant.jobId === 'string' ? applicant.jobId : (applicant.job?.id || applicant.jobId?.id || '');
       if (!jobId) {
         throw new Error("Job ID not found");
       }
 
-      const response = await API.applicant.updateApplicantStatus(jobId, applicant.id, status);
+      const response = await API.applicant.updateApplicantStatus(jobId as string, applicant.id, status);
       if (response.success) {
         toast({
           title: "Status Updated",
@@ -262,7 +260,6 @@ export function ApplicantDetailModal({
       toast({
         title: "Update Failed",
         description: error.message || "Failed to update candidate status. Please try again.",
-        variant: "destructive",
       });
     }
   };
@@ -708,7 +705,7 @@ export function ApplicantDetailModal({
                       applicantId={applicant._id || applicant.id}
                       applicantName={`${applicant.firstName} ${applicant.lastName}`}
                       applicantEmail={applicant.email}
-                      jobId={applicant.jobId || applicant.job?.id}
+                      jobId={typeof applicant.jobId === 'string' ? applicant.jobId : (applicant.job?.id || applicant.jobId?.id || '')}
                       jobTitle={applicant.job?.jobTitle || applicant.jobTitle}
                       className="h-full"
                     />
@@ -1115,7 +1112,7 @@ export function ApplicantDetailModal({
             status: applicant.status || 'pending',
           }}
           job={{
-            _id: applicant.jobId || applicant.job?.id || '',
+            _id: typeof applicant.jobId === 'string' ? applicant.jobId : (applicant.job?.id || applicant.jobId?.id || ''),
             jobTitle: applicant.jobTitle || applicant.job?.jobTitle || '',
             company: applicant.job?.company || { name: applicant.job?.companyName || '' },
             companyName: applicant.job?.companyName,

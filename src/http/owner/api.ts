@@ -1,4 +1,4 @@
-import { get, post, patch, del } from '../apiHelper';
+import { apiHelper } from '../apiHelper';
 
 export interface OwnerStats {
   totalUsers: number;
@@ -68,7 +68,7 @@ export interface OwnerBillingStats {
 export const ownerApi = {
   // Get dashboard statistics
   getStats: async (): Promise<OwnerStats> => {
-    const response = await get('/owner/stats');
+    const response = await apiHelper.get('/owner/stats');
     return response;
   },
 
@@ -98,7 +98,7 @@ export const ownerApi = {
 
   // Delete user
   deleteUser: async (userId: string): Promise<void> => {
-    await apiHelper.delete(`/owner/users/${userId}`);
+    await apiHelper.del(`/owner/users/${userId}`);
   },
 
   // Get all subscriptions
@@ -132,7 +132,7 @@ export const ownerApi = {
 
   // Reactivate subscription
   reactivateSubscription: async (subscriptionId: string): Promise<OwnerSubscription> => {
-    const response = await apiHelper.post(`/owner/subscriptions/${subscriptionId}/reactivate`);
+    const response = await apiHelper.post(`/owner/subscriptions/${subscriptionId}/reactivate`, {});
     return response.data;
   },
 

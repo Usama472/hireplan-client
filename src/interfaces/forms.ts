@@ -18,6 +18,8 @@ export type InputFieldProps<TFieldValues extends FieldValues> = {
   editorRef?: ForwardedRef<MDXEditorMethods> | null;
   maxTags?: number;
   tagLength?: number;
+  step?: string | number;
+  min?: number;
 };
 
 export interface SelectOptions {

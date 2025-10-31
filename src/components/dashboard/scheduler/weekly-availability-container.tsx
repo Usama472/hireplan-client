@@ -66,8 +66,8 @@ export function WeeklyAvailabilityContainer() {
           daysAvailability: updatedDaysAvailability,
         }
 
-        setAvailabilityData(transformedData)
-        validateData(transformedData)
+        setAvailabilityData(transformedData as any)
+        validateData(transformedData as any)
       } else {
         setAvailabilityData({ ...defaultAvailabilitySettings })
         validateData(defaultAvailabilitySettings)
@@ -178,7 +178,7 @@ export function WeeklyAvailabilityContainer() {
           })),
         }))
 
-      const response = await API.availability.saveAvailability(backendFormat)
+      const response = await API.availability.saveAvailability('', backendFormat)
 
       if (response.availability) {
         const weekDayItems = response.availability.availabilities.filter(

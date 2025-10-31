@@ -95,6 +95,27 @@ interface AIFollowupStats {
   }>;
 }
 
+// Helper function for recommendation badge (used in multiple components)
+const getRecommendationBadge = (type: string, confidence: number) => {
+  const typeConfig = {
+    recommend: { color: "bg-green-100 text-green-800 border-green-200", label: "Recommend" },
+    interview: { color: "bg-blue-100 text-blue-800 border-blue-200", label: "Interview" },
+    reject: { color: "bg-red-100 text-red-800 border-red-200", label: "Reject" },
+    request_more_info: { color: "bg-yellow-100 text-yellow-800 border-yellow-200", label: "More Info" },
+  };
+
+  const config = typeConfig[type as keyof typeof typeConfig] || typeConfig.interview;
+
+  return (
+    <div className="flex items-center gap-2">
+      <Badge className={`${config.color} border`}>
+        {config.label}
+      </Badge>
+      <span className="text-xs text-gray-500">{confidence}% confidence</span>
+    </div>
+  );
+};
+
 export default function AIFollowupDashboard() {
   const [followups, setFollowups] = useState<AIFollowup[]>([]);
   const [stats, setStats] = useState<AIFollowupStats | null>(null);
@@ -111,8 +132,8 @@ export default function AIFollowupDashboard() {
 
   const fetchFollowups = async () => {
     try {
-      const response = await API.get('/api/v1/ai-followup');
-      setFollowups(response.data.results || []);
+      const response = await API.aiFollowup.getFollowups();
+      setFollowups(response.data?.results || response.results || []);
     } catch (error) {
       console.error('Error fetching followups:', error);
     } finally {
@@ -122,8 +143,8 @@ export default function AIFollowupDashboard() {
 
   const fetchStats = async () => {
     try {
-      const response = await API.get('/api/v1/ai-followup/analytics');
-      setStats(response.data.data);
+      const response = await API.aiFollowup.getFollowupAnalytics();
+      setStats(response.data || response);
     } catch (error) {
       console.error('Error fetching stats:', error);
     }
@@ -149,25 +170,6 @@ export default function AIFollowupDashboard() {
     );
   };
 
-  const getRecommendationBadge = (type: string, confidence: number) => {
-    const typeConfig = {
-      recommend: { color: "bg-green-100 text-green-800 border-green-200", label: "Recommend" },
-      interview: { color: "bg-blue-100 text-blue-800 border-blue-200", label: "Interview" },
-      reject: { color: "bg-red-100 text-red-800 border-red-200", label: "Reject" },
-      request_more_info: { color: "bg-yellow-100 text-yellow-800 border-yellow-200", label: "More Info" },
-    };
-
-    const config = typeConfig[type as keyof typeof typeConfig] || typeConfig.interview;
-
-    return (
-      <div className="flex items-center gap-2">
-        <Badge className={`${config.color} border`}>
-          {config.label}
-        </Badge>
-        <span className="text-xs text-gray-500">{confidence}% confidence</span>
-      </div>
-    );
-  };
 
   const filteredFollowups = followups.filter(followup => {
     const matchesSearch = 

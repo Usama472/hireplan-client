@@ -61,6 +61,7 @@ export class AvailabilityTransformer {
               id: crypto.randomUUID(),
               startTime: slot.from,
               endTime: slot.to,
+              eventTypeId: '',
             })),
           }
         }

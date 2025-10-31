@@ -292,9 +292,10 @@ export default function AIFollowupTrigger() {
                             <SelectValue placeholder="Email template..." />
                           </SelectTrigger>
                           <SelectContent>
-                            {availableTemplates.map(t => (
-                              <SelectItem key={t._id} value={t._id}>{t.name}</SelectItem>
-                            ))}
+                            {availableTemplates.map(t => {
+                              const templateId = (t as any).id || (t as any)._id || '';
+                              return <SelectItem key={templateId} value={templateId}>{t.name}</SelectItem>;
+                            })}
                           </SelectContent>
                         </Select>
                       )}

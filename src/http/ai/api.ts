@@ -6,11 +6,7 @@ export const suggestQualifications = async (data: {
   jobDescription: string;
   company?: string;
 }) => {
-  return apiHelper<{ qualifications: string[] }>({
-    method: "post",
-    url: "/ai/suggest-qualifications",
-    data,
-  });
+  return apiHelper.post("/ai/suggest-qualifications", data) as Promise<{ qualifications: string[] }>;
 };
 
 // Enhance job description
@@ -20,13 +16,9 @@ export const enhanceJobDescription = async (data: {
   company?: string;
   requirements?: string[];
 }) => {
-  return apiHelper<{ 
+  return apiHelper.post("/ai/enhance-job-description", data) as Promise<{ 
     enhancedDescription: string;
     suggestedQualifications: string[];
-  }>({
-    method: "post",
-    url: "/ai/enhance-job-description",
-    data,
-  });
+  }>;
 };
 

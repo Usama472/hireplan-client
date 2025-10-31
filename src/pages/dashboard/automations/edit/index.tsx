@@ -55,6 +55,7 @@ export default function EditAutomationPage() {
         nextRunAt: "2023-10-25T14:30:00Z",
         createdAt: "2023-10-15T14:30:00Z",
         updatedAt: "2023-10-15T14:30:00Z",
+        labels: [],
       },
       {
         id: "2",
@@ -90,13 +91,14 @@ export default function EditAutomationPage() {
         nextRunAt: "2023-10-19T09:45:00Z",
         createdAt: "2023-10-10T11:20:00Z",
         updatedAt: "2023-10-10T11:20:00Z",
+        labels: [],
       },
     ];
 
     setTimeout(() => {
       const found = mockAutomations.find((a) => a.id === id);
       if (found) {
-        setAutomation(found);
+        setAutomation(found as AutomationType);
       } else {
         toast({
           title: "Automation not found",

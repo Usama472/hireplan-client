@@ -6,11 +6,15 @@ interface ChatContextType {
   refreshTrigger: number;
 }
 
-const ChatContext = createContext<ChatContextType | undefined>(undefined);
+const ChatContext = createContext<ChatContextType>({
+  refreshConversations: () => {},
+  conversationUpdated: () => {},
+  refreshTrigger: 0,
+});
 
 export function ChatProvider({ children }: { children: React.ReactNode }) {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const refreshTimeoutRef = useRef<NodeJS.Timeout>();
+  const refreshTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   const refreshConversations = useCallback(() => {
     // Debounce rapid refresh calls to prevent flicker

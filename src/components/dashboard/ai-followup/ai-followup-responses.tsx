@@ -76,8 +76,8 @@ export default function AIFollowupResponses({ applicantId, className = "" }: AIF
 
   const fetchFollowups = async () => {
     try {
-      const response = await API.get(`/api/v1/ai-followup/applicant/${applicantId}`);
-      setFollowups(response.data.data || []);
+      const response = await API.aiFollowup.getFollowupsByApplicant(applicantId);
+      setFollowups(response.data?.data || response.data || []);
     } catch (error) {
       console.error('Error fetching AI follow-ups:', error);
     } finally {

@@ -37,6 +37,7 @@ export interface EmailChatMessage {
     espMessageId?: string;
     references?: string[];
     inReplyTo?: string;
+    source?: 'email' | 'portal' | 'sms';
   };
 }
 

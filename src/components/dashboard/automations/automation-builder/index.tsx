@@ -1,6 +1,13 @@
 import TriggerSection from "./trigger-section";
 
-export default function AutomationBuilder() {
+interface AutomationBuilderProps {
+  mode?: string;
+  onSave?: (automation: any) => void;
+  automation?: any;
+  isPageLayout?: boolean;
+}
+
+export default function AutomationBuilder(props?: AutomationBuilderProps) {
   return (
     <div className="rounded-lg p-2.5 sm:p-3 min-h-[400px]">
       {/* Always show trigger selection at the top */}

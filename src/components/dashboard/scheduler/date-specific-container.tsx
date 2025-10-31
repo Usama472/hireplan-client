@@ -72,7 +72,7 @@ export function DateSpecificContainer() {
           })),
         }))
 
-      const response = await API.availability.saveAvailability(backendFormat)
+      const response = await API.availability.saveAvailability('', backendFormat)
 
       if (response.availability) {
         const dateItems = response.availability.availabilities.filter(

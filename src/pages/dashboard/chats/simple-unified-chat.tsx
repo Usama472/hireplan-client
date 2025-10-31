@@ -15,6 +15,13 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { ChatRichTextEditor } from "@/components/dashboard/chats/ChatRichTextEditor";
 import { AIFollowupMessage } from "@/components/dashboard/chats/AIFollowupMessage";
 import {
@@ -33,6 +40,7 @@ import {
   MoreVertical,
   FileText,
   Zap,
+  Plus,
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -73,6 +81,10 @@ const SimpleUnifiedChatInner: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [allApplicants, setAllApplicants] = useState<any[]>([]);
+  const [loadingApplicants, setLoadingApplicants] = useState(false);
+  const [applicantSearchTerm, setApplicantSearchTerm] = useState("");
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -312,25 +324,82 @@ const SimpleUnifiedChatInner: React.FC = () => {
   };
 
   // Start new conversation
-  const startNewConversation = async (applicant: Applicant) => {
+  const startNewConversation = async (applicant: Applicant | any) => {
     try {
+      // Get jobId from applicant - it might be an object or string
+      const jobId = typeof applicant.jobId === 'object' 
+        ? applicant.jobId?.id || applicant.jobId?._id || applicant.jobId
+        : applicant.jobId;
+      
+      if (!jobId) {
+        toast.error('Job ID not found for this applicant');
+        return;
+      }
+
       const response = await emailChatAPI.createConversation({
         to: applicant.email,
-        subject: `Chat: ${applicant.jobTitle || 'Job Application'}`,
+        subject: `Chat: ${applicant.jobTitle || applicant.jobId?.jobTitle || 'Job Application'}`,
         htmlContent: `Hi ${applicant.firstName}, I'd like to discuss your application.`,
         textContent: `Hi ${applicant.firstName}, I'd like to discuss your application.`,
-        applicantId: applicant.id,
+        applicantId: applicant.id || applicant._id,
+        jobId: jobId,
       });
       
       if (response.status) {
         toast.success('Conversation started!');
+        setShowCreateDialog(false);
+        setApplicantSearchTerm("");
         await loadData(); // Refresh data
+        
+        // Select the newly created conversation
+        if (response.data?.conversation) {
+          const newConv = response.data.conversation;
+          // Wait a bit for the data to refresh, then select
+          setTimeout(async () => {
+            await loadData();
+            const updatedApplicant = applicants.find(a => a.id === (applicant.id || applicant._id));
+            if (updatedApplicant) {
+              selectApplicant(updatedApplicant);
+            }
+          }, 500);
+        }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error starting conversation:', error);
-      toast.error('Failed to start conversation');
+      toast.error(error?.response?.data?.message || 'Failed to start conversation');
     }
   };
+
+  // Load all applicants for create dialog
+  const loadAllApplicants = async () => {
+    try {
+      setLoadingApplicants(true);
+      const response = await API.applicant.getAllApplicants();
+      setAllApplicants(response.results || response.data || []);
+    } catch (error) {
+      console.error('Error loading applicants:', error);
+      toast.error('Failed to load applicants');
+    } finally {
+      setLoadingApplicants(false);
+    }
+  };
+
+  // Open create dialog and load applicants
+  const handleOpenCreateDialog = () => {
+    setShowCreateDialog(true);
+    loadAllApplicants();
+  };
+
+  // Filter applicants for dialog
+  const filteredDialogApplicants = allApplicants.filter(applicant => {
+    if (!applicantSearchTerm) return true;
+    const search = applicantSearchTerm.toLowerCase();
+    const firstName = applicant.firstName?.toLowerCase() || '';
+    const lastName = applicant.lastName?.toLowerCase() || '';
+    const email = applicant.email?.toLowerCase() || '';
+    const jobTitle = applicant.jobId?.jobTitle?.toLowerCase() || '';
+    return firstName.includes(search) || lastName.includes(search) || email.includes(search) || jobTitle.includes(search);
+  });
 
   // Update applicant status
   const updateApplicantStatus = async (status: 'shortlisted' | 'rejected' | 'maybe') => {
@@ -410,9 +479,19 @@ const SimpleUnifiedChatInner: React.FC = () => {
         <div className="p-4 border-b border-gray-200 flex-shrink-0">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-gray-900">Chat</h2>
-            <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-              {filteredApplicants.length}
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                {filteredApplicants.length}
+              </Badge>
+              <Button
+                size="sm"
+                onClick={handleOpenCreateDialog}
+                className="h-8 px-3"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                New
+              </Button>
+            </div>
           </div>
           
           {/* Search */}
@@ -715,7 +794,7 @@ const SimpleUnifiedChatInner: React.FC = () => {
                             <Avatar className="h-8 w-8 flex-shrink-0">
                               <AvatarImage src={undefined} />
                               <AvatarFallback className={`text-xs ${
-                                message.direction === 'inbound'
+                                message.direction === 'outbound'
                                   ? 'bg-blue-500 text-white'
                                   : 'bg-gray-300 text-gray-600'
                               }`}>
@@ -729,8 +808,8 @@ const SimpleUnifiedChatInner: React.FC = () => {
                             <div className={`flex flex-col ${message.direction === 'outbound' ? 'items-end' : 'items-start'}`}>
                               <div className={`px-4 py-3 rounded-2xl shadow-sm max-w-full ${
                                 message.direction === 'outbound'
-                                  ? 'bg-gray-100 text-gray-900 border border-gray-200 rounded-br-md'
-                                  : 'bg-blue-500 text-white rounded-bl-md'
+                                  ? 'bg-blue-500 text-white rounded-br-md'
+                                  : 'bg-gray-100 text-gray-900 border border-gray-200 rounded-bl-md'
                               }`}>
                                 <div className="text-sm leading-relaxed whitespace-pre-wrap break-words">
                                   {(() => {
@@ -835,6 +914,93 @@ const SimpleUnifiedChatInner: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Create New Chat Dialog */}
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Start New Chat</DialogTitle>
+            <DialogDescription>
+              Select an applicant to start a new conversation
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="flex-1 flex flex-col min-h-0">
+            {/* Search */}
+            <div className="relative mb-4">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search applicants by name, email, or job..."
+                value={applicantSearchTerm}
+                onChange={(e) => setApplicantSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+
+            {/* Applicants List */}
+            <ScrollArea className="flex-1">
+              <div className="space-y-2">
+                {loadingApplicants ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <div key={i} className="p-3 rounded-lg animate-pulse">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 bg-gray-200 rounded-full"></div>
+                        <div className="flex-1 space-y-2">
+                          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                          <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : filteredDialogApplicants.length === 0 ? (
+                  <div className="p-8 text-center">
+                    <Users className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                    <p className="text-gray-500 text-sm">
+                      {applicantSearchTerm ? 'No applicants found matching your search' : 'No applicants available'}
+                    </p>
+                  </div>
+                ) : (
+                  filteredDialogApplicants.map((applicant) => {
+                    const applicantId = applicant.id || applicant._id;
+                    const applicantName = `${applicant.firstName || ''} ${applicant.lastName || ''}`.trim() || applicant.email;
+                    const jobTitle = applicant.jobId?.jobTitle || applicant.jobTitle || 'No job';
+                    
+                    return (
+                      <div
+                        key={applicantId}
+                        onClick={() => startNewConversation(applicant)}
+                        className="p-3 rounded-lg cursor-pointer hover:bg-gray-50 border border-gray-200 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-10 w-10">
+                            <AvatarFallback className="bg-blue-100 text-blue-700">
+                              {applicantName.substring(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-medium text-gray-900 truncate">
+                              {applicantName}
+                            </h3>
+                            <p className="text-sm text-gray-600 truncate">
+                              {jobTitle}
+                            </p>
+                            <p className="text-xs text-gray-500 truncate mt-1">
+                              {applicant.email}
+                            </p>
+                          </div>
+                          <Button size="sm" variant="outline" className="shrink-0">
+                            Start Chat
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </ScrollArea>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

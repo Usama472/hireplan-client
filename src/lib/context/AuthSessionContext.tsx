@@ -14,6 +14,7 @@ interface SubscriptionStatus {
   currentPeriodEnd?: string
   cancelAtPeriodEnd?: boolean
   stripeSubscriptionId?: string
+  customMonthlyPrice?: number | null
 }
 
 interface AuthSessionContext {

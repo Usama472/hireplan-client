@@ -49,7 +49,7 @@ export function SettingsNotificationsStep() {
     (sum: number, value: any) => sum + (Number(value) || 0),
     0
   );
-  const isValidTotal = totalPercentage <= 100;
+  const isValidTotal = (totalPercentage as number) <= 100;
 
   const addCustomField = () => {
     if (newCustomField.trim()) {
@@ -316,7 +316,7 @@ export function SettingsNotificationsStep() {
                         isValidTotal ? "text-green-600" : "text-red-600"
                       }`}
                     >
-                      {totalPercentage}%
+                      {totalPercentage as number}%
                     </span>
                     <Button
                       type="button"
@@ -329,7 +329,7 @@ export function SettingsNotificationsStep() {
                   </div>
                 </div>
 
-                <Progress value={Math.min(totalPercentage, 100)} className="h-2" />
+                <Progress value={Math.min(totalPercentage as number, 100)} className="h-2" />
 
                 {!isValidTotal && (
                   <Alert variant="destructive" className="py-2">

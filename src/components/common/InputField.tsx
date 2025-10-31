@@ -52,6 +52,8 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
   minHeight,
   enableAI,
   aiContext,
+  step,
+  min,
 }: InputFieldProps<TFieldValues> & {
   validation?: { status: string; message: string };
   minHeight?: number;
@@ -98,6 +100,8 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
           : "password"
         : type,
     defaultValue,
+    step,
+    min,
     disabled,
     className: cn(
       "bg-white border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 transition-all text-gray-900 placeholder:text-gray-400",

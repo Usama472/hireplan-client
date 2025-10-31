@@ -685,7 +685,6 @@ export function CustomQuestionsBuilder({
                             <Switch
                               checked={questionForm.autoReject || false}
                               onCheckedChange={(checked) => setQuestionForm({...questionForm, autoReject: checked})}
-                              size="sm"
                             />
                           </div>
                         </>
@@ -1057,14 +1056,14 @@ export function CustomQuestionsBuilder({
                             className="bg-white"
                           />
                         )}
-                        {question.type === "time" && (
+                        {(question.type as string) === "time" && (
                           <Input
                             type="time"
                             disabled
                             className="bg-white"
                           />
                         )}
-                        {question.type === "file" && (
+                        {(question.type as string) === "file" && (
                           <Input
                             type="file"
                             disabled

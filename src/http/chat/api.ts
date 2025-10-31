@@ -111,7 +111,7 @@ export const getConversationsByApplicant = (applicantId: string, params?: {
 
 // Migration and utilities
 export const migrateFromEmailChat = () =>
-  post('/chat/migrate-from-email-chat');
+  post('/chat/migrate-from-email-chat', {});
 
 export const validateConversationAccess = (conversationId: string) =>
   get(`/chat/conversations/${conversationId}/access`);

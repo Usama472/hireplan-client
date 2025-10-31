@@ -108,7 +108,7 @@ export const EditEmailTemplate = () => {
   }, [searchParams]);
 
   const form = useForm<EditEmailTemplateFormValues>({
-    resolver: zodResolver(emailTemplateSchema),
+    resolver: zodResolver(emailTemplateSchema) as any,
     defaultValues: {
       name: "",
       category: "",
@@ -346,7 +346,7 @@ export const EditEmailTemplate = () => {
 
         <FormProvider {...form}>
           <form
-            onSubmit={form.handleSubmit(onSubmit)}
+            onSubmit={form.handleSubmit(onSubmit as any)}
             onChange={handleFormChange}
           >
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">

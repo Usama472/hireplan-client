@@ -155,8 +155,10 @@ export const CreateSMSTemplate = () => {
           error?.message ||
           "Failed to create SMS template. Please try again.";
 
-        toast.error("Error creating template", {
+        toast({
+          title: "Error creating template",
           description: errorMessage,
+          type: "error",
           duration: 5000,
         });
       } finally {

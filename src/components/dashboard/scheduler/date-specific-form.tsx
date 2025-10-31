@@ -108,7 +108,7 @@ export function DateSpecificForm({
     setValue,
     formState: { isDirty },
   } = useForm<DateSpecificFormData>({
-    resolver: zodResolver(dateSpecificFormSchema),
+    resolver: zodResolver(dateSpecificFormSchema) as any,
     defaultValues: initialData,
   });
 
@@ -293,7 +293,7 @@ export function DateSpecificForm({
   const { toast } = useToast();
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-4">
       <div className="flex items-center justify-between">
         <div></div>
         <div className="flex gap-2"></div>

@@ -18,7 +18,7 @@ export default function AIFollowupWorkflowsPage() {
   const fetchWorkflows = async () => {
     try {
       setIsLoading(true);
-      const response = await API.automation.getAll();
+      const response = await API.automation.getAutomations();
       // Filter for AI follow-up workflows
       const aiWorkflows = response.data.filter((auto: any) => 
         auto.trigger === 'ai_followup_response_received'
@@ -33,7 +33,7 @@ export default function AIFollowupWorkflowsPage() {
 
   const handleToggle = async (workflowId: string, currentStatus: boolean) => {
     try {
-      await API.automation.update(workflowId, { active: !currentStatus });
+      await API.automation.updateAutomation(workflowId, { active: !currentStatus });
       toast.success(`Workflow ${!currentStatus ? 'activated' : 'deactivated'}`);
       fetchWorkflows();
     } catch (error) {
@@ -45,7 +45,7 @@ export default function AIFollowupWorkflowsPage() {
     if (!confirm('Delete this AI follow-up workflow?')) return;
     
     try {
-      await API.automation.delete(workflowId);
+      await API.automation.deleteAutomation(workflowId);
       toast.success('Workflow deleted');
       fetchWorkflows();
     } catch (error) {

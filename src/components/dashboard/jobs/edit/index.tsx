@@ -439,7 +439,7 @@ export default function EditJob() {
         },
         automations: data.automations,
       };
-      const response = await API.job.updateJob(job.id, newData);
+      const response = await API.job.updateJob(job.id, newData as any);
       console.log("response", response);
       toast.success("Job updated successfully!");
       navigate(`${ROUTES.DASHBOARD.MAIN}`);

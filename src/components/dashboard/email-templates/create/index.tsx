@@ -56,7 +56,7 @@ export const CreateEmailTemplate = () => {
   const { toast } = useToast();
 
   const form = useForm<EmailTemplateFormValues>({
-    resolver: zodResolver(emailTemplateSchema),
+    resolver: zodResolver(emailTemplateSchema) as any,
     defaultValues: {
       name: "",
       category: "",
@@ -293,7 +293,7 @@ export const CreateEmailTemplate = () => {
 
         <FormProvider {...form}>
           <form
-            onSubmit={form.handleSubmit(onSubmit)}
+            onSubmit={form.handleSubmit(onSubmit as any)}
             onChange={handleFormChange}
           >
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">

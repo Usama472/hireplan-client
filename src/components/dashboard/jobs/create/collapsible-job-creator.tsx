@@ -68,7 +68,7 @@ export default function CollapsibleJobCreator({ draftId, onSave, onCancel }: Col
   const [isDraft, setIsDraft] = useState(false);
 
   const form = useForm<JobFormSchema>({
-    resolver: zodResolver(jobFormSchema),
+    resolver: zodResolver(jobFormSchema) as any,
     defaultValues: JOB_FORM_DEFAULT_VALUES,
     mode: "onChange",
   });
@@ -112,11 +112,11 @@ export default function CollapsibleJobCreator({ draftId, onSave, onCancel }: Col
       case "position":
         return !!(formData.department && formData.payRate && formData.positionsToHire);
       case "qualifications":
-        return formData.qualifications && formData.qualifications.length > 0;
+        return !!(formData.requiredQualifications && formData.requiredQualifications.length > 0);
       case "schedule":
         return !!(formData.startDate && formData.endDate);
       case "posting":
-        return !!(formData.applicationDeadline);
+        return !!(formData.startDate);
       case "ai-overview":
         return true; // AI overview is optional
       case "automations":
@@ -139,9 +139,9 @@ export default function CollapsibleJobCreator({ draftId, onSave, onCancel }: Col
       };
 
       if (draftId) {
-        await API.put(`/api/v1/job-drafts/${draftId}`, draftData);
+        await API.jobDraft.updateJobDraft(draftId, draftData);
       } else {
-        const response = await API.post('/api/v1/job-drafts', draftData);
+        const response = await API.jobDraft.createJobDraft(draftData);
         // Update URL or handle new draft ID
       }
       
@@ -154,8 +154,8 @@ export default function CollapsibleJobCreator({ draftId, onSave, onCancel }: Col
 
   const loadDraft = async (id: string) => {
     try {
-      const response = await API.get(`/api/v1/job-drafts/${id}`);
-      const draft = response.data.draft;
+      const response = await API.jobDraft.getJobDraft(id);
+      const draft = response.data?.draft || response.draft;
       
       // Set form values
       Object.keys(draft.formData).forEach((key) => {
@@ -181,11 +181,11 @@ export default function CollapsibleJobCreator({ draftId, onSave, onCancel }: Col
         return;
       }
 
-      const response = await API.post('/api/v1/jobs', formData);
+      const response = await API.job.createJob(formData);
       
       // Delete draft if it exists
       if (draftId) {
-        await API.delete(`/api/v1/job-drafts/${draftId}`);
+        await API.jobDraft.deleteJobDraft(draftId);
       }
       
       toast.success("Job published successfully!");

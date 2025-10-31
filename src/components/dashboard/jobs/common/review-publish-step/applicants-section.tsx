@@ -671,7 +671,7 @@ export function ApplicantsSection({
             // Handle status update
             setApplicants((prev) =>
               prev.map((app) =>
-                app.id === applicantId ? { ...app, status } : app
+                app.id === applicantId ? { ...app, status: status as Applicant['status'] } : app
               )
             );
             // Refresh data

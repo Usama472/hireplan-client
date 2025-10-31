@@ -285,7 +285,6 @@ export function BillingSetup() {
   console.log('🔍 BillingSetup - customPrice:', customPrice);
   console.log('🔍 BillingSetup - hasPrice:', hasPrice);
   console.log('🔍 BillingSetup - clientSecret:', clientSecret);
-  console.log('🔍 BillingSetup - hasPaymentMethod:', hasPaymentMethod);
 
   return (
     <Card className="border border-yellow-200 bg-yellow-50/50">

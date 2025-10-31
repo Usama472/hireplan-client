@@ -435,6 +435,7 @@ export interface AvailabilityTemplate {
   createdAt: string;
   updatedAt: string;
   id: string;
+  eventTypes?: EventType[];
 }
 
 export interface GetAvailabilityTemplatesResponse {

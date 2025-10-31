@@ -165,7 +165,7 @@ class OwnerAuthService {
     }
 
     try {
-      const response = await get('/owner/auth/me', {
+      const response = await ownerGet('/owner/auth/me', {
         headers: { Authorization: `Bearer ${this.accessToken}` }
       });
       return response;
@@ -174,7 +174,7 @@ class OwnerAuthService {
       const newToken = await this.refreshAccessToken();
       if (newToken) {
         try {
-          const response = await get('/owner/auth/me', {
+          const response = await ownerGet('/owner/auth/me', {
             headers: { Authorization: `Bearer ${newToken}` }
           });
           return response;

@@ -18,7 +18,7 @@ interface AIAnalysisReviewProps {
 
 export function AIAnalysisReview({ formData }: AIAnalysisReviewProps) {
   // Get data from all sections (same as ai-overview-step)
-  const qualifications = formData.qualifications || [];
+  const qualifications = [...(formData.requiredQualifications || []), ...(formData.preferredQualifications || [])];
   const customQuestions = formData.customQuestions || [];
   const resumeAnalysisMode = formData.resumeAnalysisMode || "simple";
   const resumeCriteria = formData.resumeCriteria || [];
