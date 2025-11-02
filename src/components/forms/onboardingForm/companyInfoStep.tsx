@@ -33,7 +33,7 @@ export function CompanyInfoStep() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <InputField name="city" placeholder="City *" />
         <InputField name="state" placeholder="State *" />
-        <InputField name="zipCode" placeholder="ZIP Code *" />
+        <InputField name="zipCode" placeholder="ZIP Code" />
       </div>
     </div>
   );

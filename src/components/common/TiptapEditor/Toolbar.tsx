@@ -17,6 +17,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+import { toast } from "sonner";
 
 interface ToolbarProps {
   editor: Editor | null;
@@ -25,11 +26,37 @@ interface ToolbarProps {
     jobTitle?: string;
     company?: string;
     requirements?: string[];
+    compensation?: {
+      type?: string;
+      payRate?: {
+        type?: string;
+        min?: number;
+        max?: number;
+        period?: string;
+        amount?: number;
+      };
+    };
+    location?: {
+      city?: string;
+      state?: string;
+      country?: string;
+      workType?: string;
+    };
+    language?: string;
+    employmentType?: string;
   };
-  onAIEnhance?: (enhancedContent: string, suggestedQualifications?: string[]) => void;
+  onAIEnhance?: (
+    enhancedContent: string,
+    suggestedQualifications?: string[]
+  ) => void;
 }
 
-export function Toolbar({ editor, enableAI, aiContext, onAIEnhance }: ToolbarProps) {
+export function Toolbar({
+  editor,
+  enableAI,
+  aiContext,
+  onAIEnhance,
+}: ToolbarProps) {
   const [url, setUrl] = useState("");
   const [showLinkInput, setShowLinkInput] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
@@ -53,27 +80,134 @@ export function Toolbar({ editor, enableAI, aiContext, onAIEnhance }: ToolbarPro
   if (!editor) return null;
 
   const handleAIEnhance = async () => {
-    if (!enableAI || !aiContext?.jobTitle || !onAIEnhance) return;
-    
+    if (!enableAI || !aiContext?.jobTitle || !onAIEnhance) {
+      toast.error(
+        "AI enhancement is not available. Please ensure job title is provided."
+      );
+      return;
+    }
+
     const currentContent = editor.getHTML();
-    if (!currentContent || currentContent.trim() === '<p></p>') {
-      alert('Please add some content to enhance');
+    if (!currentContent || currentContent.trim() === "<p></p>") {
+      toast.error("Please add some content to enhance", {
+        description:
+          "The job description field is empty. Add some content before using AI enhancement.",
+      });
       return;
     }
 
     setIsEnhancing(true);
     try {
+      // Build compensation string
+      let compensationStr = "";
+      if (aiContext.compensation) {
+        const { type, payRate } = aiContext.compensation;
+        if (payRate) {
+          if (payRate.type === "range" && payRate.min && payRate.max) {
+            compensationStr = `${
+              type || "Salary"
+            }: ${payRate.min.toLocaleString()}-${payRate.max.toLocaleString()} ${
+              payRate.period || "per year"
+            }`;
+          } else if (payRate.type === "exact" && payRate.amount) {
+            compensationStr = `${
+              type || "Salary"
+            }: ${payRate.amount.toLocaleString()} ${
+              payRate.period || "per year"
+            }`;
+          }
+        }
+      }
+
+      // Build location string
+      let locationStr = "";
+      if (aiContext.location) {
+        const parts = [];
+        if (aiContext.location.city) parts.push(aiContext.location.city);
+        if (aiContext.location.state) parts.push(aiContext.location.state);
+        if (aiContext.location.country) parts.push(aiContext.location.country);
+        if (parts.length > 0) {
+          locationStr = parts.join(", ");
+        }
+        if (aiContext.location.workType) {
+          locationStr += ` (${aiContext.location.workType})`;
+        }
+      }
+
+      // Build comprehensive instructions for AI
+      const instructionsParts = [];
+      instructionsParts.push(
+        `CRITICAL: Mention the job title "${aiContext.jobTitle}" at least 5 times naturally throughout the enhanced description.`
+      );
+      instructionsParts.push(
+        "Integrate the following details seamlessly into the job description:"
+      );
+
+      if (aiContext.company) {
+        instructionsParts.push(`- Company: ${aiContext.company}`);
+      }
+      if (locationStr) {
+        instructionsParts.push(`- Location: ${locationStr}`);
+      }
+      if (compensationStr) {
+        instructionsParts.push(`- Compensation: ${compensationStr}`);
+      }
+      if (aiContext.employmentType) {
+        instructionsParts.push(
+          `- Employment Type: ${aiContext.employmentType}`
+        );
+      }
+      if (aiContext.language) {
+        instructionsParts.push(`- Language: ${aiContext.language}`);
+      }
+
+      instructionsParts.push(
+        "- Make sure all these details are naturally woven into the content, not just listed."
+      );
+      instructionsParts.push(
+        "- The enhanced description should be comprehensive, engaging, and professional."
+      );
+      instructionsParts.push(
+        "- Maintain the original structure and flow while adding these contextual details."
+      );
+
       const result = await enhanceJobDescription({
         jobTitle: aiContext.jobTitle,
         jobDescription: currentContent,
         company: aiContext.company,
         requirements: aiContext.requirements,
+        compensation: compensationStr || undefined,
+        location: locationStr || undefined,
+        language: aiContext.language,
+        employmentType: aiContext.employmentType,
+        instructions: instructionsParts.join("\n"),
       });
-      console.log('✨ AI Enhancement complete:', result);
-      onAIEnhance(result.enhancedDescription, result.suggestedQualifications);
+      console.log("✨ AI Enhancement complete:", result);
+
+      // Remove markdown code block formatting if present
+      let cleanedDescription = result.enhancedDescription;
+      if (cleanedDescription) {
+        // Remove ```html at the start
+        cleanedDescription = cleanedDescription.replace(/^```html\s*/i, "");
+        // Remove ``` at the end
+        cleanedDescription = cleanedDescription.replace(/\s*```$/g, "");
+        // Also handle cases with just ``` at start/end
+        cleanedDescription = cleanedDescription.replace(/^```\s*/g, "");
+        // Trim any extra whitespace
+        cleanedDescription = cleanedDescription.trim();
+      }
+
+      onAIEnhance(cleanedDescription, result.suggestedQualifications);
+      toast.success("Job description enhanced successfully!", {
+        description:
+          "The AI has improved your job description with additional context.",
+      });
     } catch (error) {
-      console.error('AI enhancement failed:', error);
-      alert('Failed to enhance content. Please try again.');
+      console.error("AI enhancement failed:", error);
+      toast.error("Failed to enhance content", {
+        description:
+          "Please check your connection and try again. If the problem persists, contact support.",
+      });
     } finally {
       setIsEnhancing(false);
     }
@@ -300,7 +434,9 @@ export function Toolbar({ editor, enableAI, aiContext, onAIEnhance }: ToolbarPro
             aria-label="Enhance with AI"
             title="Enhance with AI"
           >
-            <Sparkles className={cn("w-4 h-4", isEnhancing && "animate-spin")} />
+            <Sparkles
+              className={cn("w-4 h-4", isEnhancing && "animate-spin")}
+            />
             <span className="whitespace-nowrap">
               {isEnhancing ? "Enhancing..." : "Enhance with AI"}
             </span>

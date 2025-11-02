@@ -52,6 +52,7 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
   minHeight,
   enableAI,
   aiContext,
+  editorRef,
   step,
   min,
 }: InputFieldProps<TFieldValues> & {
@@ -63,6 +64,7 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
     company?: string;
     requirements?: string[];
   };
+  editorRef?: (editor: any) => void;
 }) => {
   const { control, formState } = useFormContext();
   const [showPassword, setShowPassword] = useState(false);
@@ -239,6 +241,7 @@ export const InputField = <TFieldValues extends FieldValues = FieldValues>({
                       minHeight={minHeight}
                       enableAI={enableAI}
                       aiContext={aiContext}
+                      onEditorReady={editorRef}
                     />
                   </div>
                 </FormControl>

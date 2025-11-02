@@ -1,14 +1,15 @@
-import { Copy, Search } from "lucide-react";
+import { Copy, Search, X } from "lucide-react";
 import { useState, useMemo } from "react";
 
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   JOB_VARIABLES,
   VARIABLE_CATEGORY_ORDER,
@@ -16,10 +17,15 @@ import {
 
 interface VariableSectionProps {
   onInsertVariable: (variable: string) => void;
+  variant?: "vertical" | "horizontal";
 }
 
-export const VariableSection = ({ onInsertVariable }: VariableSectionProps) => {
+export const VariableSection = ({
+  onInsertVariable,
+  variant = "horizontal",
+}: VariableSectionProps) => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedValue, setSelectedValue] = useState<string>("");
 
   // Filter variables based on search query
   const filteredVariables = useMemo(() => {
@@ -51,26 +57,99 @@ export const VariableSection = ({ onInsertVariable }: VariableSectionProps) => {
       groupedVariables[category] && groupedVariables[category].length > 0
   );
 
+  // Horizontal variant - Select dropdown view
+  if (variant === "horizontal") {
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <Copy className="h-4 w-4 text-blue-600" />
+          <Label className="text-sm font-medium text-gray-700">
+            Template Variables
+          </Label>
+          <span className="text-xs text-gray-500">
+            ({filteredVariables.length} available)
+          </span>
+        </div>
+
+        <Select
+          value={selectedValue}
+          onValueChange={(value) => {
+            if (value && value !== "") {
+              setSelectedValue(value);
+              onInsertVariable(value);
+              // Reset select after insertion to allow selecting again
+              setTimeout(() => {
+                setSelectedValue("");
+              }, 100);
+            }
+          }}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select a variable to insert..." />
+          </SelectTrigger>
+          <SelectContent className="max-h-[300px]">
+            {activeCategories.length === 0 ? (
+              <div className="p-4 text-center text-sm text-gray-500">
+                <p>No variables found</p>
+              </div>
+            ) : (
+              activeCategories.map((category) => {
+                const variables = groupedVariables[category];
+                if (!variables || variables.length === 0) return null;
+
+                return (
+                  <div key={category}>
+                    <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-gray-100 bg-gray-50">
+                      {category}
+                    </div>
+                    {variables.map((variable) => (
+                      <SelectItem
+                        key={variable.key}
+                        value={variable.key}
+                        className="cursor-pointer"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <Badge
+                              variant="secondary"
+                              className="font-mono text-xs bg-muted/80 text-black border-0 rounded px-1.5 py-0.5"
+                            >
+                              {variable.key}
+                            </Badge>
+                            <span className="text-xs text-gray-600">
+                              {variable.title}
+                            </span>
+                          </div>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </div>
+                );
+              })
+            )}
+          </SelectContent>
+        </Select>
+      </div>
+    );
+  }
+
+  // Vertical variant (original sidebar style) - kept for backward compatibility
   return (
-    <Card className="bg-white border border-gray-200 shadow-sm rounded-lg overflow-hidden">
-      <CardHeader className="pb-4 bg-white border-b border-gray-200">
-        <div className="flex items-center gap-3">
+    <div className="bg-white border border-gray-200 shadow-sm rounded-lg overflow-hidden">
+      <div className="p-4 border-b border-gray-200">
+        <div className="flex items-center gap-3 mb-4">
           <div className="p-2 rounded-lg bg-blue-50">
             <Copy className="h-4 w-4 text-blue-600" />
           </div>
           <div>
-            <CardTitle className="text-base font-semibold">
-              Job Template Variables
-            </CardTitle>
-            <CardDescription className="text-xs">
-              Click any variable to copy to clipboard
-            </CardDescription>
+            <h3 className="text-base font-semibold">Job Template Variables</h3>
+            <p className="text-xs text-gray-500">
+              Click any variable to insert into email body
+            </p>
           </div>
         </div>
-      </CardHeader>
 
-      {/* Search Bar */}
-      <div className="px-4 pt-4 pb-2">
+        {/* Search Bar */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <input
@@ -85,26 +164,14 @@ export const VariableSection = ({ onInsertVariable }: VariableSectionProps) => {
               onClick={() => setSearchQuery("")}
               className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground hover:text-foreground transition-colors"
             >
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
+              <X className="h-4 w-4" />
             </button>
           )}
         </div>
       </div>
 
       <div className="max-h-96 overflow-y-auto">
-        <CardContent className="p-4 space-y-4">
+        <div className="p-4 space-y-4">
           {activeCategories.length === 0 ? (
             <div className="text-center py-8">
               <Search className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
@@ -175,8 +242,8 @@ export const VariableSection = ({ onInsertVariable }: VariableSectionProps) => {
               );
             })
           )}
-        </CardContent>
+        </div>
       </div>
-    </Card>
+    </div>
   );
 };

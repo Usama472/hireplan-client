@@ -4,7 +4,13 @@ import { InputField } from "@/components/common/InputField";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { INPUT_TYPES } from "@/interfaces";
 import {
   Calendar,
@@ -15,6 +21,7 @@ import {
   AlertCircle,
   Info,
 } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 
 export function PostingScheduleBudgetStep() {
@@ -27,6 +34,57 @@ export function PostingScheduleBudgetStep() {
   const monthlyBudget = watch("monthlyBudget") || 0;
   const indeedBudget = watch("indeedBudget") || 0;
   const zipRecruiterBudget = watch("zipRecruiterBudget") || 0;
+
+  // Determine initial budget type based on existing values
+  const initialBudgetType =
+    dailyBudget > 0 ? "daily" : monthlyBudget > 0 ? "monthly" : "daily";
+  const [budgetType, setBudgetType] = useState<"daily" | "monthly">(
+    initialBudgetType
+  );
+
+  // Sync budget type when form values change externally
+  useEffect(() => {
+    if (dailyBudget > 0) {
+      setBudgetType("daily");
+    } else if (monthlyBudget > 0) {
+      setBudgetType("monthly");
+    }
+    // Only sync if both are 0 and we're not already on a default
+    // This prevents overriding user's dropdown selection unnecessarily
+  }, [dailyBudget, monthlyBudget]);
+
+  // Handle budget type change
+  const handleBudgetTypeChange = (value: "daily" | "monthly") => {
+    setBudgetType(value);
+
+    // When switching types, clear the other type's value
+    if (value === "daily") {
+      // Switch to daily - clear monthly if it has a value
+      if (monthlyBudget > 0) {
+        setValue("monthlyBudget", 0);
+      }
+    } else {
+      // Switch to monthly - clear daily if it has a value
+      if (dailyBudget > 0) {
+        setValue("dailyBudget", 0);
+      }
+    }
+  };
+
+  // Watch for changes to the current budget field and sync with the other
+  useEffect(() => {
+    if (budgetType === "daily" && dailyBudget > 0 && monthlyBudget > 0) {
+      // If daily is selected and has value, clear monthly
+      setValue("monthlyBudget", 0);
+    } else if (
+      budgetType === "monthly" &&
+      monthlyBudget > 0 &&
+      dailyBudget > 0
+    ) {
+      // If monthly is selected and has value, clear daily
+      setValue("dailyBudget", 0);
+    }
+  }, [budgetType, dailyBudget, monthlyBudget, setValue]);
 
   const totalBudget =
     dailyBudget + monthlyBudget + indeedBudget + zipRecruiterBudget;
@@ -159,40 +217,47 @@ export function PostingScheduleBudgetStep() {
             </p>
           </CardHeader>
           <CardContent className="space-y-3 sm:space-y-4 pt-0">
-            {/* General Budgets */}
+            {/* General Budget */}
             <div className="space-y-3 sm:space-y-4">
               <div className="space-y-1.5 sm:space-y-2">
                 <Label className="text-xs sm:text-sm font-medium">
-                  Daily Budget
+                  Budget Type
                 </Label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">
-                    $
-                  </span>
-                  <InputField
-                    name="dailyBudget"
-                    type={INPUT_TYPES.NUMBER}
-                    placeholder="0.00"
-                    step="0.01"
-                    min={0}
-                    className="pl-8"
-                  />
-                </div>
+                <Select
+                  value={budgetType}
+                  onValueChange={(value: "daily" | "monthly") =>
+                    handleBudgetTypeChange(value)
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="daily">Daily Budget</SelectItem>
+                    <SelectItem value="monthly">Monthly Budget</SelectItem>
+                  </SelectContent>
+                </Select>
                 <p className="text-xs text-gray-500">
-                  Maximum amount to spend per day across all platforms
+                  {budgetType === "daily"
+                    ? "Maximum amount to spend per day across all platforms"
+                    : "Total monthly advertising budget limit"}
                 </p>
               </div>
 
               <div className="space-y-1.5 sm:space-y-2">
                 <Label className="text-xs sm:text-sm font-medium">
-                  Monthly Budget
+                  {budgetType === "daily"
+                    ? "Daily Budget Amount"
+                    : "Monthly Budget Amount"}
                 </Label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm z-10">
                     $
                   </span>
                   <InputField
-                    name="monthlyBudget"
+                    name={
+                      budgetType === "daily" ? "dailyBudget" : "monthlyBudget"
+                    }
                     type={INPUT_TYPES.NUMBER}
                     placeholder="0.00"
                     step="0.01"
@@ -201,7 +266,9 @@ export function PostingScheduleBudgetStep() {
                   />
                 </div>
                 <p className="text-xs text-gray-500">
-                  Total monthly advertising budget limit
+                  {budgetType === "daily"
+                    ? "Set a daily spending limit for your job posting"
+                    : "Set a monthly spending limit for your job posting"}
                 </p>
               </div>
             </div>

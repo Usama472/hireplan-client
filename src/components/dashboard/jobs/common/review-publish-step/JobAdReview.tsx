@@ -88,7 +88,7 @@ export function JobAdReview({ formData }: JobAdReviewProps) {
             <div className="flex justify-end mt-3 sm:mt-4">
               <Button
                 type="button"
-                size="sm"
+                variant="outline"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();

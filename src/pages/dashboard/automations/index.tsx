@@ -7,8 +7,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { allTriggers } from "@/constants/automations-constants";
+import {
+  allTriggers,
+  triggerCategories,
+} from "@/constants/automations-constants";
 import { AutomationTemplateLibrary } from "@/components/dashboard/automations/AutomationTemplateLibrary";
 import API from "@/http";
 import {
@@ -73,6 +83,10 @@ export default function AutomationsDashboard() {
   const [statusFilter, setStatusFilter] = useState<
     "all" | "active" | "inactive"
   >("all");
+  const [triggerCategoryFilter, setTriggerCategoryFilter] =
+    useState<string>("all");
+  const [actionTypeFilter, setActionTypeFilter] = useState<string>("all");
+  const [conditionsFilter, setConditionsFilter] = useState<string>("all");
   const [confirmDialog, setConfirmDialog] = useState<ConfirmationDialog>({
     isOpen: false,
     automationId: "",
@@ -168,13 +182,57 @@ export default function AutomationsDashboard() {
     }
   };
 
+  // Get unique action types from automations
+  const uniqueActionTypes = Array.from(
+    new Set(
+      automations.flatMap((a) => a.actions.map((action: any) => action.type))
+    )
+  ).sort();
+
   const filteredAutomations = automations.filter((automation) => {
+    // Search filter
     const matchesSearch = automation.name
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
+
+    // Status filter
     const matchesStatus =
       statusFilter === "all" || automation.status === statusFilter;
-    return matchesSearch && matchesStatus;
+
+    // Trigger category filter
+    let matchesTriggerCategory = true;
+    if (triggerCategoryFilter !== "all") {
+      const triggerInfo = allTriggers.find(
+        (trigger) => trigger.type === automation.triggerType
+      );
+      matchesTriggerCategory = triggerInfo?.category === triggerCategoryFilter;
+    }
+
+    // Action type filter
+    let matchesActionType = true;
+    if (actionTypeFilter !== "all") {
+      matchesActionType = automation.actions.some(
+        (action: any) => action.type === actionTypeFilter
+      );
+    }
+
+    // Conditions filter
+    let matchesConditions = true;
+    if (conditionsFilter === "with-conditions") {
+      matchesConditions =
+        automation.useConditions && automation.conditions.length > 0;
+    } else if (conditionsFilter === "without-conditions") {
+      matchesConditions =
+        !automation.useConditions || automation.conditions.length === 0;
+    }
+
+    return (
+      matchesSearch &&
+      matchesStatus &&
+      matchesTriggerCategory &&
+      matchesActionType &&
+      matchesConditions
+    );
   });
 
   const toggleAutomationStatus = async (id: string, currentStatus: string) => {
@@ -338,74 +396,178 @@ export default function AutomationsDashboard() {
               <div className="bg-white rounded-md border border-gray-200 p-4">
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                   {/* Search and Filters */}
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
-                    {/* Search */}
-                    <div className="relative flex-1 max-w-md">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                      <Input
-                        placeholder="Search automations..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10 h-10"
-                      />
+                  <div className="space-y-3">
+                    {/* Search Row */}
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                      {/* Search */}
+                      <div className="relative flex-1 max-w-md">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <Input
+                          placeholder="Search automations..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="pl-10 h-10"
+                        />
+                      </div>
+
+                      {/* Status Filter */}
+                      <div className="inline-flex bg-gray-100 rounded-md p-1">
+                        {["all", "active", "inactive"].map((status) => (
+                          <button
+                            key={status}
+                            onClick={() =>
+                              setStatusFilter(
+                                status as "all" | "active" | "inactive"
+                              )
+                            }
+                            className={`px-4 py-2 rounded text-sm font-medium transition-all ${
+                              statusFilter === status
+                                ? "bg-white text-gray-900 shadow-sm"
+                                : "text-gray-600 hover:text-gray-900"
+                            }`}
+                          >
+                            {status === "all"
+                              ? "All"
+                              : status.charAt(0).toUpperCase() +
+                                status.slice(1)}
+                          </button>
+                        ))}
+                      </div>
                     </div>
 
-                    {/* Status Filter */}
-                    <div className="inline-flex bg-gray-100 rounded-md p-1">
-                      {["all", "active", "inactive"].map((status) => (
-                        <button
-                          key={status}
-                          onClick={() =>
-                            setStatusFilter(
-                              status as "all" | "active" | "inactive"
-                            )
-                          }
-                          className={`px-4 py-2 rounded text-sm font-medium transition-all ${
-                            statusFilter === status
-                              ? "bg-white text-gray-900 shadow-sm"
-                              : "text-gray-600 hover:text-gray-900"
-                          }`}
+                    {/* Filter Row */}
+                    <div className="flex flex-wrap items-center gap-3">
+                      {/* Trigger Category Filter */}
+                      <Select
+                        value={triggerCategoryFilter}
+                        onValueChange={setTriggerCategoryFilter}
+                      >
+                        <SelectTrigger className="w-full sm:w-[180px] h-10">
+                          <SelectValue placeholder="All Triggers" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Triggers</SelectItem>
+                          {triggerCategories.map((category) => (
+                            <SelectItem key={category.id} value={category.id}>
+                              {category.title}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+
+                      {/* Action Type Filter */}
+                      {uniqueActionTypes.length > 0 && (
+                        <Select
+                          value={actionTypeFilter}
+                          onValueChange={setActionTypeFilter}
                         >
-                          {status === "all"
-                            ? "All"
-                            : status.charAt(0).toUpperCase() + status.slice(1)}
-                        </button>
-                      ))}
+                          <SelectTrigger className="w-full sm:w-[180px] h-10">
+                            <SelectValue placeholder="All Actions" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All Actions</SelectItem>
+                            {uniqueActionTypes.map((actionType) => (
+                              <SelectItem key={actionType} value={actionType}>
+                                {getActionTypeLabel(actionType)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+
+                      {/* Conditions Filter */}
+                      <Select
+                        value={conditionsFilter}
+                        onValueChange={setConditionsFilter}
+                      >
+                        <SelectTrigger className="w-full sm:w-[160px] h-10">
+                          <SelectValue placeholder="All Complexity" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Complexity</SelectItem>
+                          <SelectItem value="with-conditions">
+                            With Conditions
+                          </SelectItem>
+                          <SelectItem value="without-conditions">
+                            Simple (No Conditions)
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+
+                      {/* Clear Filters Button */}
+                      {(searchTerm ||
+                        statusFilter !== "all" ||
+                        triggerCategoryFilter !== "all" ||
+                        actionTypeFilter !== "all" ||
+                        conditionsFilter !== "all") && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setSearchTerm("");
+                            setStatusFilter("all");
+                            setTriggerCategoryFilter("all");
+                            setActionTypeFilter("all");
+                            setConditionsFilter("all");
+                          }}
+                          className="text-blue-600 hover:text-blue-700 text-sm h-10"
+                        >
+                          Clear Filters
+                        </Button>
+                      )}
                     </div>
                   </div>
 
                   {/* Stats and Create Button */}
-                  <div className="flex items-center justify-between lg:justify-end gap-4">
-                    {/* Stats */}
-                    <div className="flex items-center gap-3 text-sm">
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <span className="text-green-600 font-medium">
-                          {
-                            automations.filter((a) => a.status === "active")
-                              .length
-                          }{" "}
-                          Active
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    {/* Results Count */}
+                    <div className="flex items-center gap-3">
+                      <Badge variant="secondary" className="text-sm px-3 py-1">
+                        {filteredAutomations.length}{" "}
+                        {filteredAutomations.length === 1
+                          ? "automation"
+                          : "automations"}
+                      </Badge>
+                      {filteredAutomations.length !== automations.length && (
+                        <span className="text-sm text-gray-500">
+                          of {automations.length} total
                         </span>
-                      </div>
-                      <span className="text-gray-300">•</span>
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                        <span className="text-gray-600 font-medium">
-                          {
-                            automations.filter((a) => a.status === "inactive")
-                              .length
-                          }{" "}
-                          Paused
-                        </span>
-                      </div>
+                      )}
                     </div>
 
-                    {/* Create Button */}
-                    <Button onClick={handleCreateAutomation} size="lg">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Create
-                    </Button>
+                    {/* Stats and Create Button */}
+                    <div className="flex items-center gap-4">
+                      {/* Stats */}
+                      <div className="hidden lg:flex items-center gap-3 text-sm">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <span className="text-green-600 font-medium">
+                            {
+                              automations.filter((a) => a.status === "active")
+                                .length
+                            }{" "}
+                            Active
+                          </span>
+                        </div>
+                        <span className="text-gray-300">•</span>
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                          <span className="text-gray-600 font-medium">
+                            {
+                              automations.filter((a) => a.status === "inactive")
+                                .length
+                            }{" "}
+                            Paused
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Create Button */}
+                      <Button onClick={handleCreateAutomation} size="lg">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -418,21 +580,33 @@ export default function AutomationsDashboard() {
                       <Sparkles className="h-6 w-6 text-gray-400" />
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      {searchTerm || statusFilter !== "all"
+                      {searchTerm ||
+                      statusFilter !== "all" ||
+                      triggerCategoryFilter !== "all" ||
+                      actionTypeFilter !== "all" ||
+                      conditionsFilter !== "all"
                         ? "No automations found"
                         : "No automations yet"}
                     </h3>
                     <p className="text-sm text-gray-600 mb-6 text-center">
-                      {searchTerm || statusFilter !== "all"
+                      {searchTerm ||
+                      statusFilter !== "all" ||
+                      triggerCategoryFilter !== "all" ||
+                      actionTypeFilter !== "all" ||
+                      conditionsFilter !== "all"
                         ? "Try adjusting your search or filter criteria"
                         : "Create your first automation to streamline your recruitment process"}
                     </p>
-                    {!searchTerm && statusFilter === "all" && (
-                      <Button onClick={handleCreateAutomation} size="lg">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Create Your First Automation
-                      </Button>
-                    )}
+                    {!searchTerm &&
+                      statusFilter === "all" &&
+                      triggerCategoryFilter === "all" &&
+                      actionTypeFilter === "all" &&
+                      conditionsFilter === "all" && (
+                        <Button onClick={handleCreateAutomation} size="lg">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Create Your First Automation
+                        </Button>
+                      )}
                   </div>
                 </div>
               ) : (

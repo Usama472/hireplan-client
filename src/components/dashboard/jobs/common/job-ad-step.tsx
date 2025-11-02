@@ -4,46 +4,14 @@ import { InputField } from "@/components/common/InputField";
 import { TiptapEditor } from "@/components/common/TiptapEditor";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import { AlertCircle, CheckCircle, Info } from "lucide-react";
 import { useFormContext } from "react-hook-form";
 
 export function JobAdStep() {
-  const { watch, setValue, formState } = useFormContext();
+  const { watch, formState } = useFormContext();
   const { errors } = formState;
   const jobTitle = watch("jobTitle") || "";
-  const jobBoardTitle = watch("jobBoardTitle") || "";
   const jobDescription = watch("jobDescription") || "";
-  const backgroundScreeningDisclaimer = watch("backgroundScreeningDisclaimer");
-
-  const getTitleValidation = (title: string, isMobile = false) => {
-    const maxLength = isMobile ? 35 : 60;
-    const length = title.length;
-
-    // Show validation error if it exists in the form state
-    if (errors.jobTitle && !isMobile) {
-      return { status: "error", message: "Job title is required" };
-    }
-
-    if (errors.jobBoardTitle && isMobile) {
-      return { status: "error", message: "Job board title is required" };
-    }
-
-    if (length === 0)
-      return { status: "neutral", message: "Enter a job title" };
-    if (length > maxLength)
-      return { status: "error", message: `Too long (${length}/${maxLength})` };
-    if (length <= maxLength * 0.8)
-      return {
-        status: "success",
-        message: `Good length (${length}/${maxLength})`,
-      };
-    return {
-      status: "warning",
-      message: `Getting long (${length}/${maxLength})`,
-    };
-  };
 
   const getDescriptionValidation = (description: string) => {
     // Create a temporary div to parse HTML and get text content
@@ -74,9 +42,6 @@ export function JobAdStep() {
     };
   };
 
-  const titleValidation = getTitleValidation(jobTitle);
-  const boardTitleValidation = getTitleValidation(jobBoardTitle);
-  const mobileValidation = getTitleValidation(jobBoardTitle, true);
   const descriptionValidation = getDescriptionValidation(jobDescription);
 
   const getStatusIcon = (status: string) => {
@@ -120,70 +85,6 @@ export function JobAdStep() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
         {/* Main Form */}
         <div className="lg:col-span-2 space-y-4 sm:space-y-6">
-          {/* Internal Job Title */}
-          <Card className="shadow-none border border-gray-200 rounded-xl">
-            <CardHeader className="pb-3 sm:pb-4">
-              <CardTitle className="text-base sm:text-lg">
-                Internal Job Title
-              </CardTitle>
-              <p className="text-xs sm:text-sm text-gray-600">
-                For internal use - include location, department, or other
-                identifiers <span className="text-red-500">*</span>
-              </p>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="space-y-1">
-                <InputField
-                  name="jobTitle"
-                  placeholder="e.g., Senior Frontend Developer - SF Office"
-                />
-                <div className="flex items-center gap-2 text-sm">
-                  {getStatusIcon(titleValidation.status)}
-                  <span className={getStatusColor(titleValidation.status)}>
-                    {titleValidation.message}
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* External Job Board Title */}
-          <Card className="shadow-none border border-gray-200 rounded-xl">
-            <CardHeader className="pb-3 sm:pb-4">
-              <CardTitle className="text-base sm:text-lg">
-                Job Board Title
-              </CardTitle>
-              <p className="text-xs sm:text-sm text-gray-600">
-                Public-facing title that appears on job boards{" "}
-                <span className="text-red-500">*</span>
-              </p>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="space-y-1">
-                <InputField
-                  name="jobBoardTitle"
-                  placeholder="e.g., Senior Frontend Developer"
-                />
-                <div className="space-y-2">
-                  <div className="hidden items-center gap-2 text-sm md:flex">
-                    {getStatusIcon(boardTitleValidation.status)}
-                    <span
-                      className={getStatusColor(boardTitleValidation.status)}
-                    >
-                      Desktop: {boardTitleValidation.message}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm md:hidden">
-                    {getStatusIcon(mobileValidation.status)}
-                    <span className={getStatusColor(mobileValidation.status)}>
-                      Mobile: {mobileValidation.message}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
           {/* Job Description */}
           <Card className="shadow-none border border-gray-200 rounded-xl">
             <CardHeader className="pb-3 sm:pb-4">
@@ -209,12 +110,14 @@ export function JobAdStep() {
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-100 rounded text-xs font-medium">
                           ✨ Enhance with AI
                         </span>{" "}
-                        button to improve clarity, structure, and appeal. The more details you provide initially, the better the AI can enhance your content.
+                        button to improve clarity, structure, and appeal. The
+                        more details you provide initially, the better the AI
+                        can enhance your content.
                       </p>
                     </div>
                   </div>
                 </div>
-                
+
                 <TiptapEditor
                   name="jobDescription"
                   placeholder="Describe the role, responsibilities, work culture, benefits, growth opportunities, and hiring process expectations..."
@@ -225,35 +128,20 @@ export function JobAdStep() {
                     jobTitle: jobTitle,
                     company: watch("company"),
                     requirements: watch("jobRequirements") || [],
+                    compensation: {
+                      type: watch("payType"),
+                      payRate: watch("payRate"),
+                    },
+                    location: {
+                      city: watch("jobLocation")?.city,
+                      state: watch("jobLocation")?.state,
+                      country: watch("jobLocation")?.country,
+                      workType: watch("jobLocationWorkType"),
+                    },
+                    language: watch("language"),
+                    employmentType: watch("employmentType"),
                   }}
                 />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Background Screening Disclaimer */}
-          <Card className="shadow-none border border-gray-200 rounded-xl">
-            <CardContent className="pt-4 sm:pt-6">
-              <div className="flex items-start space-x-3">
-                <Checkbox
-                  id="backgroundScreeningDisclaimer"
-                  checked={backgroundScreeningDisclaimer}
-                  onCheckedChange={(checked) =>
-                    setValue("backgroundScreeningDisclaimer", checked)
-                  }
-                />
-                <div className="space-y-1">
-                  <Label
-                    htmlFor="backgroundScreeningDisclaimer"
-                    className="text-sm font-medium"
-                  >
-                    Include Background & Drug Screening Disclaimer
-                  </Label>
-                  <p className="text-xs text-gray-600">
-                    Some job boards require this disclaimer to be included in
-                    job postings
-                  </p>
-                </div>
               </div>
             </CardContent>
           </Card>
@@ -261,27 +149,6 @@ export function JobAdStep() {
 
         {/* Guidelines Sidebar */}
         <div className="space-y-4 sm:space-y-6">
-          <Card className="bg-blue-50 border-blue-200 shadow-none rounded-xl">
-            <CardHeader className="pb-3 sm:pb-4">
-              <CardTitle className="text-base sm:text-lg text-blue-900">
-                Job Title Guidelines
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-xs sm:text-sm pt-0">
-              <div className="space-y-2">
-                <h4 className="font-medium text-blue-900">Best Practices:</h4>
-                <ul className="space-y-1 text-blue-800">
-                  <li>• Keep titles short and simple</li>
-                  <li>• Desktop: 60 characters or less</li>
-                  <li>• Mobile: 35 characters or less</li>
-                  <li>• Avoid internal jargon</li>
-                  <li>• No emojis or unnecessary symbols</li>
-                  <li>• Avoid clickbait and keyword stuffing</li>
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
-
           <Card className="bg-green-50 border-green-200 shadow-none rounded-xl">
             <CardHeader className="pb-3 sm:pb-4">
               <CardTitle className="text-base sm:text-lg text-green-900">
@@ -324,32 +191,6 @@ export function JobAdStep() {
             </CardHeader>
             <CardContent className="space-y-3 pt-0">
               <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Internal Title:</span>
-                  <Badge
-                    className="text-white"
-                    variant={
-                      titleValidation.status === "success"
-                        ? "default"
-                        : "secondary"
-                    }
-                  >
-                    {jobTitle.length}
-                  </Badge>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>Board Title:</span>
-                  <Badge
-                    className="text-white"
-                    variant={
-                      boardTitleValidation.status === "success"
-                        ? "default"
-                        : "secondary"
-                    }
-                  >
-                    {jobBoardTitle.length}
-                  </Badge>
-                </div>
                 <div className="flex justify-between text-sm">
                   <span>Description:</span>
                   <Badge

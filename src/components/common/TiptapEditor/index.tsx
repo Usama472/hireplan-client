@@ -21,10 +21,29 @@ interface TiptapEditorProps {
   className?: string;
   minHeight?: number;
   enableAI?: boolean;
+  onEditorReady?: (editor: any) => void;
   aiContext?: {
     jobTitle?: string;
     company?: string;
     requirements?: string[];
+    compensation?: {
+      type?: string;
+      payRate?: {
+        type?: string;
+        min?: number;
+        max?: number;
+        period?: string;
+        amount?: number;
+      };
+    };
+    location?: {
+      city?: string;
+      state?: string;
+      country?: string;
+      workType?: string;
+    };
+    language?: string;
+    employmentType?: string;
   };
 }
 
@@ -35,6 +54,7 @@ export function TiptapEditor({
   className,
   minHeight = 200,
   enableAI = false,
+  onEditorReady,
   aiContext,
 }: TiptapEditorProps) {
   const { setValue, watch } = useFormContext();
@@ -144,6 +164,13 @@ export function TiptapEditor({
     },
   });
 
+  // Expose editor instance to parent component
+  useEffect(() => {
+    if (editor && onEditorReady) {
+      onEditorReady(editor);
+    }
+  }, [editor, onEditorReady]);
+
   // Update editor content when form value changes externally
   useEffect(() => {
     if (editor && content !== editor.getHTML()) {
@@ -189,18 +216,24 @@ export function TiptapEditor({
         )}
         style={{ minHeight: `${minHeight}px` }}
       >
-        <Toolbar 
-          editor={editor} 
+        <Toolbar
+          editor={editor}
           enableAI={enableAI}
           aiContext={aiContext}
-          onAIEnhance={(enhancedContent: string, suggestedQualifications?: string[]) => {
+          onAIEnhance={(
+            enhancedContent: string,
+            suggestedQualifications?: string[]
+          ) => {
             editor?.commands.setContent(enhancedContent);
             setValue(name, enhancedContent);
-            
+
             // Store AI suggested qualifications for later use
             if (suggestedQualifications && suggestedQualifications.length > 0) {
-              console.log('📋 Storing AI qualification suggestions:', suggestedQualifications);
-              setValue('aiSuggestedQualifications', suggestedQualifications);
+              console.log(
+                "📋 Storing AI qualification suggestions:",
+                suggestedQualifications
+              );
+              setValue("aiSuggestedQualifications", suggestedQualifications);
             }
           }}
         />

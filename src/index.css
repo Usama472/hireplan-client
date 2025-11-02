@@ -19,7 +19,7 @@
     -webkit-text-size-adjust: 100%;
     -webkit-tap-highlight-color: transparent;
   }
-  
+
   body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -27,31 +27,31 @@
     min-height: 100vh;
     min-height: -webkit-fill-available;
   }
-  
+
   /* Prevent iOS zoom on input focus */
   input,
   select,
   textarea {
     font-size: 16px !important;
   }
-  
+
   /* Fix for iOS Safari 100vh issue */
   .min-h-screen {
     min-height: 100vh;
     min-height: -webkit-fill-available;
   }
-  
+
   /* Smooth scrolling for iOS */
   * {
     -webkit-overflow-scrolling: touch;
   }
-  
+
   /* Fix sticky positioning on iOS */
   .sticky {
     position: -webkit-sticky;
     position: sticky;
   }
-  
+
   /* Fix for iOS button styling */
   button,
   input[type="button"],
@@ -59,27 +59,28 @@
     -webkit-appearance: none;
     appearance: none;
   }
-  
+
   /* iOS Safe Area Support */
-  @supports(padding: max(0px)) {
+  @supports (padding: max(0px)) {
     body {
       padding-left: max(0px, env(safe-area-inset-left));
       padding-right: max(0px, env(safe-area-inset-right));
       padding-bottom: max(0px, env(safe-area-inset-bottom));
     }
   }
-  
+
   /* Fix iOS fixed positioning issues */
   .fixed {
     -webkit-transform: translateZ(0);
     transform: translateZ(0);
   }
-  
+
   /* Prevent rubber band scrolling on body */
-  html, body {
+  html,
+  body {
     overscroll-behavior-y: none;
   }
-  
+
   /* Fix for modals/dialogs on iOS */
   [role="dialog"],
   .dialog,
@@ -686,7 +687,7 @@ select {
   }
 
   /* Ensure page containers don't interfere with scroll */
-  main, 
+  main,
   div[class*="min-h-screen"] {
     overflow-x: hidden;
     position: relative;
@@ -699,74 +700,126 @@ select {
   section .space-y-8 > * + * {
     margin-top: 1.5rem !important; /* was 2rem, now 25% smaller */
   }
-  
+
   section .space-y-6 > * + * {
     margin-top: 1.125rem !important; /* was 1.5rem, now 25% smaller */
   }
-  
+
   section .gap-8 {
     gap: 1.5rem !important; /* was 2rem, now 25% smaller */
   }
-  
+
   section .gap-6 {
     gap: 1.125rem !important; /* was 1.5rem, now 25% smaller */
   }
-  
+
   /* Only apply to sections that are NOT hero/landing page sections */
   section:not([class*="hero"]):not([class*="Hero"]) .p-8 {
     padding: 1.5rem !important; /* was 2rem, now 25% smaller */
   }
-  
+
   section:not([class*="hero"]):not([class*="Hero"]) .p-6 {
     padding: 1.125rem !important; /* was 1.5rem, now 25% smaller */
   }
-  
+
   section:not([class*="hero"]):not([class*="Hero"]) .px-8 {
     padding-left: 1.5rem !important; /* was 2rem, now 25% smaller */
     padding-right: 1.5rem !important;
   }
-  
+
   section:not([class*="hero"]):not([class*="Hero"]) .px-6 {
     padding-left: 1.125rem !important; /* was 1.5rem, now 25% smaller */
     padding-right: 1.125rem !important;
   }
-  
+
   /* Don't override py-* (vertical padding) on sections to preserve hero heights */
-  
+
   section .mb-8 {
     margin-bottom: 1.5rem !important; /* was 2rem, now 25% smaller */
   }
-  
+
   section .mb-6 {
     margin-bottom: 1.125rem !important; /* was 1.5rem, now 25% smaller */
   }
-  
+
   section .mt-8 {
     margin-top: 1.5rem !important; /* was 2rem, now 25% smaller */
   }
-  
+
   section .mt-6 {
     margin-top: 1.125rem !important; /* was 1.5rem, now 25% smaller */
   }
-  
+
   /* Allow forms and cards to be more compact */
   form .space-y-8 > * + *,
   [class*="card"] .space-y-8 > * + * {
     margin-top: 1.5rem !important; /* was 2rem, now 25% smaller */
   }
-  
+
   form .space-y-6 > * + *,
   [class*="card"] .space-y-6 > * + * {
     margin-top: 1.125rem !important; /* was 1.5rem, now 25% smaller */
   }
-  
+
   form .gap-8,
   [class*="card"] .gap-8 {
     gap: 1.5rem !important; /* was 2rem, now 25% smaller */
   }
-  
+
   form .gap-6,
   [class*="card"] .gap-6 {
     gap: 1.125rem !important; /* was 1.5rem, now 25% smaller */
+  }
+}
+
+/* CSS Isolation for Scraped Website Header/Footer */
+@layer base {
+  /* Isolate scraped website header and footer from page content */
+  .website-header,
+  .website-footer {
+    isolation: isolate;
+    contain: layout style paint;
+    position: relative;
+    z-index: 1000;
+    /* Create a new stacking context */
+    transform: translateZ(0);
+  }
+
+  /* Prevent scraped styles from affecting page content */
+  .website-header *,
+  .website-footer * {
+    box-sizing: border-box;
+    /* Contain styles within header/footer */
+  }
+
+  /* Isolate careers page content from scraped header/footer */
+  .careers-page-content {
+    isolation: isolate;
+    contain: layout style paint;
+    position: relative;
+    z-index: 1;
+    /* Create a new stacking context separate from header/footer */
+    transform: translateZ(0);
+  }
+
+  /* Reset any inherited styles from scraped header on page content */
+  .careers-page-content * {
+    box-sizing: border-box;
+  }
+
+  /* Prevent scraped CSS from affecting Tailwind utilities in page content */
+  .careers-page-content .container {
+    /* Page container maintains its own styles */
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Ensure Tailwind classes in page content work independently */
+  .careers-page-content input,
+  .careers-page-content button,
+  .careers-page-content select,
+  .careers-page-content textarea {
+    /* Reset form elements to use our styles */
+    font-family: inherit;
   }
 }

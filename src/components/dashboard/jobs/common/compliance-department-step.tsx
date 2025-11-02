@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { EXEMPT_STATUSES } from "@/constants";
 import { INPUT_TYPES } from "@/interfaces";
 import { Shield, Building, Plus, Info } from "lucide-react";
@@ -17,6 +18,7 @@ export function ComplianceDepartmentStep() {
 
   const department = watch("department");
   const customDepartment = watch("customDepartment");
+  const backgroundScreeningDisclaimer = watch("backgroundScreeningDisclaimer");
 
   const departmentOptions = [
     { value: "engineering", label: "Engineering" },
@@ -195,6 +197,31 @@ export function ComplianceDepartmentStep() {
                 )}
               </div>
             )}
+          </div>
+
+          {/* Background Screening Disclaimer */}
+          <div className="space-y-1.5 sm:space-y-2 border-t border-gray-200 pt-8 pb-3">
+            <div className="flex items-start space-x-3">
+              <Checkbox
+                id="backgroundScreeningDisclaimer"
+                checked={backgroundScreeningDisclaimer}
+                onCheckedChange={(checked) =>
+                  setValue("backgroundScreeningDisclaimer", checked)
+                }
+              />
+              <div className="space-y-1">
+                <Label
+                  htmlFor="backgroundScreeningDisclaimer"
+                  className="text-xs sm:text-sm font-medium cursor-pointer"
+                >
+                  Include Background & Drug Screening Disclaimer
+                </Label>
+                <p className="text-xs text-gray-600">
+                  Some job boards require this disclaimer to be included in job
+                  postings
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* Information Box */}

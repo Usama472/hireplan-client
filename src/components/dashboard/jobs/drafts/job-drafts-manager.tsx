@@ -33,7 +33,7 @@ import {
 import API from "@/http";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import CollapsibleJobCreator from "../create/collapsible-job-creator";
+import CreateJob from "../create";
 
 interface JobDraft {
   id: string;
@@ -118,11 +118,11 @@ export default function JobDraftsManager() {
       draft.department?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (showCreator) {
+  if (showCreator && editingDraftId) {
     return (
-      <CollapsibleJobCreator
-        draftId={editingDraftId || undefined}
-        onSave={(jobId) => {
+      <CreateJob
+        draftId={editingDraftId}
+        onJobCreated={(jobId) => {
           setShowCreator(false);
           setEditingDraftId(null);
           navigate(`/dashboard/jobs/view/${jobId}`);

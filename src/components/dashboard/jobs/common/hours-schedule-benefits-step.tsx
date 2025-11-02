@@ -375,7 +375,7 @@ export function HoursScheduleBenefitsStep() {
                   </div>
                   <InputField
                     name="jobLocation.zipCode"
-                    placeholder="ZIP Code*"
+                    placeholder="ZIP Code"
                   />
                 </div>
               </div>
@@ -424,7 +424,7 @@ export function HoursScheduleBenefitsStep() {
                   </div>
                   <InputField
                     name="jobLocation.zipCode"
-                    placeholder="ZIP Code*"
+                    placeholder="ZIP Code"
                   />
                 </div>
               </div>
@@ -471,7 +471,7 @@ export function HoursScheduleBenefitsStep() {
                       </div>
                       <InputField
                         name="jobLocation.zipCode"
-                        placeholder="ZIP Code*"
+                        placeholder="ZIP Code"
                       />
                     </div>
                   </div>

@@ -1,31 +1,42 @@
-import { post } from '@/http/apiHelper'
+import { post } from "@/http/apiHelper";
 
 export interface EnhanceJobDescriptionRequest {
-  jobTitle: string
-  jobDescription: string
-  company?: string
-  requirements?: string[]
+  jobTitle: string;
+  jobDescription: string;
+  company?: string;
+  requirements?: string[];
+  compensation?: string;
+  location?: string;
+  language?: string;
+  employmentType?: string;
+  instructions?: string;
 }
 
 export interface EnhanceJobDescriptionResponse {
-  status: boolean
+  status: boolean;
   data: {
-    enhancedDescription: string
-    suggestedQualifications: string[]
-  }
+    enhancedDescription: string;
+    suggestedQualifications: string[];
+  };
 }
 
 export const enhanceJobDescription = async (
   data: EnhanceJobDescriptionRequest
-): Promise<{ enhancedDescription: string; suggestedQualifications: string[] }> => {
-  const response = await post('/ai/enhance-job-description', data) as EnhanceJobDescriptionResponse
-  
+): Promise<{
+  enhancedDescription: string;
+  suggestedQualifications: string[];
+}> => {
+  const response = (await post(
+    "/ai/enhance-job-description",
+    data
+  )) as EnhanceJobDescriptionResponse;
+
   if (!response.status) {
-    throw new Error('Failed to enhance job description')
+    throw new Error("Failed to enhance job description");
   }
-  
+
   return {
     enhancedDescription: response.data.enhancedDescription,
-    suggestedQualifications: response.data.suggestedQualifications || []
-  }
-}
+    suggestedQualifications: response.data.suggestedQualifications || [],
+  };
+};

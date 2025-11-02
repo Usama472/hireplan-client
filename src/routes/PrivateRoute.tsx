@@ -33,10 +33,10 @@ export const PrivateRoute = ({ children }: DefaultLayoutProps) => {
   // }
 
   return (
-    <SidebarProvider>
+    <SidebarProvider className="fixed">
       <ScrollToTop />
       <DashboardSidebar />
-      <SidebarInset className="min-h-screen max-h-screen bg-blue-50/30 flex flex-col">
+      <SidebarInset className="h-screen bg-blue-50/30 flex flex-col">
         <DashboardHeader />
         <div className="flex-1 overflow-y-auto w-full">{children}</div>
       </SidebarInset>

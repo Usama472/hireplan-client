@@ -58,6 +58,7 @@ export const EditEmailTemplate = () => {
     "idle" | "success" | "error"
   >("idle");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [bodyEditor, setBodyEditor] = useState<any>(null);
 
   // Fetch template data on component mount
   useEffect(() => {
@@ -75,7 +76,8 @@ export const EditEmailTemplate = () => {
 
       try {
         setIsFetching(true);
-        const { status, emailTemplate } = await API.emailTemplate.getEmailTemplate(id);
+        const { status, emailTemplate } =
+          await API.emailTemplate.getEmailTemplate(id);
         if (status) {
           form.reset({
             name: emailTemplate.name || "",
@@ -120,13 +122,45 @@ export const EditEmailTemplate = () => {
   });
 
   const insertVariable = (variable: string) => {
-    // Copy variable to clipboard
+    // Insert variable into editor at cursor position (or append if no cursor)
+    if (bodyEditor) {
+      try {
+        // Focus the editor first
+        bodyEditor.chain().focus().run();
+
+        // Insert the variable at cursor position
+        // If no selection, it will insert at cursor; if selection, it replaces it
+        bodyEditor.chain().insertContent(variable).run();
+
+        // Update form value to sync
+        const html = bodyEditor.getHTML();
+        form.setValue("body", html, { shouldValidate: true });
+      } catch (error) {
+        console.error("Error inserting variable:", error);
+        // Fallback: append to end if insertion fails
+        const currentContent = bodyEditor.getHTML();
+        const newContent = currentContent
+          ? `${currentContent} ${variable}`
+          : variable;
+        bodyEditor.commands.setContent(newContent);
+        form.setValue("body", newContent, { shouldValidate: true });
+      }
+    } else {
+      // If editor not ready, append to form value
+      const currentBody = form.getValues("body") || "";
+      form.setValue(
+        "body",
+        currentBody ? `${currentBody} ${variable}` : variable
+      );
+    }
+
+    // Also copy variable to clipboard for convenience
     navigator.clipboard
       .writeText(variable)
       .then(() => {
         toast({
-          title: "Variable copied! 📋",
-          description: `${variable} copied to clipboard successfully.`,
+          title: "Variable inserted! ✨",
+          description: `${variable} inserted into email body and copied to clipboard.`,
           duration: 3000,
           type: "success",
         });
@@ -141,8 +175,8 @@ export const EditEmailTemplate = () => {
         document.body.removeChild(textArea);
 
         toast({
-          title: "Variable copied! 📋",
-          description: `${variable} copied to clipboard successfully.`,
+          title: "Variable inserted! ✨",
+          description: `${variable} inserted into email body and copied to clipboard.`,
           duration: 3000,
           type: "success",
         });
@@ -162,7 +196,6 @@ export const EditEmailTemplate = () => {
 
     setIsLoading(true);
     setSubmitStatus("idle");
-
 
     try {
       const updatedTemplate: EmailTemplate = {
@@ -349,211 +382,213 @@ export const EditEmailTemplate = () => {
             onSubmit={form.handleSubmit(onSubmit as any)}
             onChange={handleFormChange}
           >
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <div className="w-full">
               {/* Main Form - Enhanced Design */}
-              <div className="lg:col-span-3">
-                <Card className="bg-card/50 backdrop-blur-sm border-border/50 shadow-xl shadow-primary/5 rounded-2xl overflow-hidden">
-                  <CardHeader className="pb-6 bg-gradient-to-r from-primary/10 to-accent/10 border-b border-border/50">
+              <Card className="bg-card/50 backdrop-blur-sm border-border/50 shadow-xl shadow-primary/5 rounded-2xl overflow-hidden">
+                <CardHeader className="pb-6 bg-gradient-to-r from-primary/10 to-accent/10 border-b border-border/50">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                      <Sparkles className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-xl font-semibold text-card-foreground">
+                        Template Configuration
+                      </CardTitle>
+                      <CardDescription className="text-muted-foreground">
+                        {isViewMode
+                          ? "Template information and content"
+                          : "Update your template details and content"}
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-8 space-y-8">
+                  {/* Template Status */}
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium">
+                      Template Status
+                    </Label>
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                        <Sparkles className="h-5 w-5" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-xl font-semibold text-card-foreground">
-                          Template Configuration
-                        </CardTitle>
-                        <CardDescription className="text-muted-foreground">
-                          {isViewMode
-                            ? "Template information and content"
-                            : "Update your template details and content"}
-                        </CardDescription>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="p-8 space-y-8">
-                    {/* Template Status */}
-                    <div className="space-y-3">
-                      <Label className="text-sm font-medium">
-                        Template Status
-                      </Label>
-                      <div className="flex items-center gap-3">
-                        <Switch
-                          checked={form.watch("isActive")}
-                          onCheckedChange={(checked) =>
-                            form.setValue("isActive", checked)
-                          }
-                          disabled={isViewMode || isLoading}
-                        />
-                        <span className="text-sm font-medium">
-                          {form.watch("isActive") ? "Active" : "Inactive"}
-                        </span>
-                        <span className="text-xs ml-2">
-                          {form.watch("isActive")
-                            ? "Template is available for use"
-                            : "Template is hidden from users"}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Template Name & Category - Enhanced Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <InputField
-                          name="name"
-                          label="Template Name"
-                          placeholder="e.g., Interview Invitation"
-                          showIsRequired
-                          disabled={isViewMode || isLoading}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <InputField
-                          name="category"
-                          label="Category"
-                          type="select"
-                          selectOptions={EMAIL_TEMPLATE_CATEGORIES.map(
-                            (cat) => ({
-                              value: cat.value,
-                              label: `${cat.icon} ${cat.label}`,
-                            })
-                          )}
-                          showIsRequired
-                          disabled={isViewMode || isLoading}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Description - Enhanced */}
-                    <div className="space-y-2">
-                      <InputField
-                        name="description"
-                        label="Description"
-                        placeholder="Brief description of when to use this template..."
-                        multiline
+                      <Switch
+                        checked={form.watch("isActive")}
+                        onCheckedChange={(checked) =>
+                          form.setValue("isActive", checked)
+                        }
                         disabled={isViewMode || isLoading}
                       />
+                      <span className="text-sm font-medium">
+                        {form.watch("isActive") ? "Active" : "Inactive"}
+                      </span>
+                      <span className="text-xs ml-2">
+                        {form.watch("isActive")
+                          ? "Template is available for use"
+                          : "Template is hidden from users"}
+                      </span>
                     </div>
+                  </div>
 
-                    {/* Subject Line - Enhanced */}
+                  {/* Template Name & Category - Enhanced Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <InputField
-                        name="subject"
-                        label="Subject Line"
-                        placeholder="e.g., Interview Invitation for {{job_title}} position"
+                        name="name"
+                        label="Template Name"
+                        placeholder="e.g., Interview Invitation"
                         showIsRequired
                         disabled={isViewMode || isLoading}
                       />
                     </div>
-
-                    {/* Email Body - Enhanced */}
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                       <InputField
-                        name="body"
-                        label="Email Body"
-                        placeholder="Enter your email template content..."
-                        type={INPUT_TYPES.EDITOR}
+                        name="category"
+                        label="Category"
+                        type="select"
+                        selectOptions={EMAIL_TEMPLATE_CATEGORIES.map((cat) => ({
+                          value: cat.value,
+                          label: `${cat.icon} ${cat.label}`,
+                        }))}
                         showIsRequired
                         disabled={isViewMode || isLoading}
                       />
                     </div>
+                  </div>
 
-                    {/* Action Buttons - Enhanced */}
-                    {!isViewMode && (
-                      <div className="flex items-center justify-end gap-4 pt-6 border-t border-border/50">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={goBack}
-                          disabled={isLoading}
-                          className="px-6 py-2 h-11 rounded-xl border-border/50 hover:bg-muted/50 transition-all duration-200 bg-transparent"
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          type="submit"
-                          disabled={isLoading || submitStatus === "success"}
-                          className="px-8 py-2 h-11 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-200 hover:shadow-xl hover:shadow-primary/30 hover:scale-105 disabled:hover:scale-100 disabled:opacity-70"
-                        >
-                          {isLoading ? (
-                            <>
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                              Updating...
-                            </>
-                          ) : submitStatus === "success" ? (
-                            <>
-                              <CheckCircle className="h-4 w-4 mr-2" />
-                              Template Updated!
-                            </>
-                          ) : (
-                            <>
-                              <Save className="h-4 w-4 mr-2" />
-                              Update Template
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
+                  {/* Description - Enhanced */}
+                  <div className="space-y-2">
+                    <InputField
+                      name="description"
+                      label="Description"
+                      placeholder="Brief description of when to use this template..."
+                      multiline
+                      disabled={isViewMode || isLoading}
+                    />
+                  </div>
 
-              {/* Sidebar - Enhanced Design */}
-              <div className="lg:col-span-1 space-y-6">
-                <VariableSection onInsertVariable={insertVariable} />
+                  {/* Subject Line - Enhanced */}
+                  <div className="space-y-2">
+                    <InputField
+                      name="subject"
+                      label="Subject Line"
+                      placeholder="e.g., Interview Invitation for {{job_title}} position"
+                      showIsRequired
+                      disabled={isViewMode || isLoading}
+                    />
+                  </div>
 
-                {/* View Mode Toggle & Actions */}
-                <Card className="bg-card/50 backdrop-blur-sm border-border/50 shadow-xl shadow-primary/5 rounded-2xl overflow-hidden">
-                  <CardHeader className="pb-4 bg-gradient-to-r from-muted/10 to-accent/10 border-b border-border/50">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-muted/10 text-muted-foreground">
-                        {isViewMode ? (
-                          <Eye className="h-4 w-4" />
+                  {/* Variable Section - Horizontal View */}
+                  {!isViewMode && (
+                    <div className="space-y-3">
+                      <VariableSection
+                        onInsertVariable={insertVariable}
+                        variant="horizontal"
+                      />
+                    </div>
+                  )}
+
+                  {/* Email Body - Enhanced */}
+                  <div className="space-y-3">
+                    <InputField
+                      name="body"
+                      label="Email Body"
+                      placeholder="Enter your email template content..."
+                      type={INPUT_TYPES.EDITOR}
+                      showIsRequired
+                      disabled={isViewMode || isLoading}
+                      editorRef={setBodyEditor}
+                    />
+                  </div>
+
+                  {/* Action Buttons - Enhanced */}
+                  {!isViewMode && (
+                    <div className="flex items-center justify-end gap-4 pt-6 border-t border-border/50">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={goBack}
+                        disabled={isLoading}
+                        className="px-6 py-2 h-11 rounded-xl border-border/50 hover:bg-muted/50 transition-all duration-200 bg-transparent"
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={isLoading || submitStatus === "success"}
+                        className="px-8 py-2 h-11 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-200 hover:shadow-xl hover:shadow-primary/30 hover:scale-105 disabled:hover:scale-100 disabled:opacity-70"
+                      >
+                        {isLoading ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                            Updating...
+                          </>
+                        ) : submitStatus === "success" ? (
+                          <>
+                            <CheckCircle className="h-4 w-4 mr-2" />
+                            Template Updated!
+                          </>
                         ) : (
-                          <EyeOff className="h-4 w-4" />
+                          <>
+                            <Save className="h-4 w-4 mr-2" />
+                            Update Template
+                          </>
                         )}
-                      </div>
-                      <div>
-                        <CardTitle className="text-base font-semibold text-card-foreground">
-                          Actions
-                        </CardTitle>
-                        <CardDescription className="text-xs text-muted-foreground">
-                          Toggle view mode and manage template
-                        </CardDescription>
-                      </div>
+                      </Button>
                     </div>
-                  </CardHeader>
-                  <CardContent className="p-4 space-y-3">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={toggleViewMode}
-                      className="w-full bg-blue-200/10 border-blue-300 hover:border-blue-500 text-blue-600 hover:text-blue-700 hover:bg-blue-50 transition-all duration-200"
-                    >
-                      {isViewMode ? (
-                        <>
-                          <EyeOff className="h-4 w-4 mr-2" />
-                          Switch to Edit Mode
-                        </>
-                      ) : (
-                        <>
-                          <Eye className="h-4 w-4 mr-2" />
-                          Switch to View Mode
-                        </>
-                      )}
-                    </Button>
+                  )}
+                </CardContent>
+              </Card>
 
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setIsDeleteModalOpen(true)}
-                      className="w-full bg-red-200/10 border-red-300 hover:border-red-500 text-red-600 hover:text-red-700 hover:bg-red-50 transition-all duration-200"
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete Template
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
+              {/* View Mode Toggle & Actions */}
+              <Card className="bg-card/50 backdrop-blur-sm border-border/50 shadow-xl shadow-primary/5 rounded-2xl overflow-hidden mt-8">
+                <CardHeader className="pb-4 bg-gradient-to-r from-muted/10 to-accent/10 border-b border-border/50">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-muted/10 text-muted-foreground">
+                      {isViewMode ? (
+                        <Eye className="h-4 w-4" />
+                      ) : (
+                        <EyeOff className="h-4 w-4" />
+                      )}
+                    </div>
+                    <div>
+                      <CardTitle className="text-base font-semibold text-card-foreground">
+                        Actions
+                      </CardTitle>
+                      <CardDescription className="text-xs text-muted-foreground">
+                        Toggle view mode and manage template
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-4 space-y-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={toggleViewMode}
+                    className="w-full bg-blue-200/10 border-blue-300 hover:border-blue-500 text-blue-600 hover:text-blue-700 hover:bg-blue-50 transition-all duration-200"
+                  >
+                    {isViewMode ? (
+                      <>
+                        <EyeOff className="h-4 w-4 mr-2" />
+                        Switch to Edit Mode
+                      </>
+                    ) : (
+                      <>
+                        <Eye className="h-4 w-4 mr-2" />
+                        Switch to View Mode
+                      </>
+                    )}
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsDeleteModalOpen(true)}
+                    className="w-full bg-red-200/10 border-red-300 hover:border-red-500 text-red-600 hover:text-red-700 hover:bg-red-50 transition-all duration-200"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete Template
+                  </Button>
+                </CardContent>
+              </Card>
             </div>
           </form>
         </FormProvider>

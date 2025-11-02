@@ -26,7 +26,6 @@ import {
   List,
   Plus,
   Search,
-  Filter,
   Eye,
   Users,
   Target,
@@ -64,9 +63,9 @@ export default function JobsPage() {
     null
   );
   const [isDeleting, setIsDeleting] = useState(false);
-  const [locationFilter, setLocationFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
-  const [sortFilter, setSortFilter] = useState<string>("newest");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [departmentFilter, setDepartmentFilter] = useState<string>("all");
   const navigate = useNavigate();
   const { data: session } = useAuthSessionContext();
   const company = session?.user?.company;
@@ -177,32 +176,56 @@ export default function JobsPage() {
       : "Remote",
   }));
 
-  // Get unique locations for filter
-  const uniqueLocations = Array.from(
+  // Get unique departments for filter
+  const uniqueDepartments = Array.from(
     new Set(
       jobsWithLocation
-        .map((job) => job.location)
-        .filter((loc) => loc !== "Location not specified")
+        .map((job) => job.department || job.customDepartment)
+        .filter((dept) => dept && dept !== "")
     )
   ).sort();
 
-  // Apply location filter
-  const filteredJobs =
-    locationFilter === "all"
-      ? jobsWithLocation
-      : jobsWithLocation.filter((job) => job.location === locationFilter);
+  // Apply all filters
+  let filteredJobs = jobsWithLocation;
 
-  const totalApplicants = filteredJobs.reduce(
+  // Employment type filter
+  if (typeFilter !== "all") {
+    filteredJobs = filteredJobs.filter(
+      (job) => job.employmentType === typeFilter
+    );
+  }
+
+  // Status filter
+  if (statusFilter !== "all") {
+    filteredJobs = filteredJobs.filter(
+      (job) =>
+        (job.status || "active").toLowerCase() === statusFilter.toLowerCase()
+    );
+  }
+
+  // Department filter
+  if (departmentFilter !== "all") {
+    filteredJobs = filteredJobs.filter(
+      (job) =>
+        job.department === departmentFilter ||
+        job.customDepartment === departmentFilter
+    );
+  }
+
+  // No sorting - keep jobs in original order
+  const filteredJobsFinal = filteredJobs;
+
+  const totalApplicants = filteredJobsFinal.reduce(
     (total, job) => total + (job.applicantsCount || 0),
     0
   );
-  const totalViews = filteredJobs.reduce(
+  const totalViews = filteredJobsFinal.reduce(
     (total, job) => total + (job.views || 0),
     0
   );
   const avgApplicants =
-    filteredJobs.length > 0
-      ? Math.round(totalApplicants / filteredJobs.length)
+    filteredJobsFinal.length > 0
+      ? Math.round(totalApplicants / filteredJobsFinal.length)
       : 0;
 
   return (
@@ -281,7 +304,7 @@ export default function JobsPage() {
                 Active Jobs
               </p>
               <p className="text-xl font-bold text-gray-900">
-                {filteredJobs.length}
+                {filteredJobsFinal.length}
               </p>
             </div>
           </div>
@@ -453,15 +476,43 @@ export default function JobsPage() {
 
                 {/* Filters */}
                 <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
-                  <div className="flex flex-wrap gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="gap-2 text-sm h-10 border-gray-300"
-                    >
-                      <Filter className="w-4 h-4" />
-                      All Statuses
-                    </Button>
+                  <div className="flex flex-wrap gap-2 items-center">
+                    {/* Active/Closed Status Toggle */}
+                    <div className="inline-flex bg-gray-100 rounded-md p-1 border border-gray-200">
+                      <button
+                        type="button"
+                        onClick={() => setStatusFilter("all")}
+                        className={`px-4 py-1.5 rounded text-sm font-medium transition-all ${
+                          statusFilter === "all"
+                            ? "bg-white text-gray-900 shadow-sm"
+                            : "text-gray-600 hover:text-gray-900"
+                        }`}
+                      >
+                        All Jobs
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setStatusFilter("active")}
+                        className={`px-4 py-1.5 rounded text-sm font-medium transition-all ${
+                          statusFilter === "active"
+                            ? "bg-green-50 text-green-700 shadow-sm border border-green-200"
+                            : "text-gray-600 hover:text-gray-900"
+                        }`}
+                      >
+                        Active
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setStatusFilter("closed")}
+                        className={`px-4 py-1.5 rounded text-sm font-medium transition-all ${
+                          statusFilter === "closed"
+                            ? "bg-gray-50 text-gray-700 shadow-sm border border-gray-200"
+                            : "text-gray-600 hover:text-gray-900"
+                        }`}
+                      >
+                        Closed
+                      </button>
+                    </div>
 
                     <Select value={typeFilter} onValueChange={setTypeFilter}>
                       <SelectTrigger className="w-[150px] h-10">
@@ -472,40 +523,25 @@ export default function JobsPage() {
                         <SelectItem value="full-time">Full-time</SelectItem>
                         <SelectItem value="part-time">Part-time</SelectItem>
                         <SelectItem value="contract">Contract</SelectItem>
+                        <SelectItem value="temporary">Temporary</SelectItem>
                         <SelectItem value="internship">Internship</SelectItem>
                       </SelectContent>
                     </Select>
 
                     <Select
-                      value={locationFilter}
-                      onValueChange={setLocationFilter}
+                      value={departmentFilter}
+                      onValueChange={setDepartmentFilter}
                     >
-                      <SelectTrigger className="w-[180px] h-10">
-                        <SelectValue placeholder="All Locations" />
+                      <SelectTrigger className="w-[160px] h-10">
+                        <SelectValue placeholder="All Departments" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Locations</SelectItem>
-                        {uniqueLocations.map((location) => (
-                          <SelectItem key={location} value={location}>
-                            {location}
+                        <SelectItem value="all">All Departments</SelectItem>
+                        {uniqueDepartments.map((department) => (
+                          <SelectItem key={department} value={department}>
+                            {department}
                           </SelectItem>
                         ))}
-                      </SelectContent>
-                    </Select>
-
-                    <Select value={sortFilter} onValueChange={setSortFilter}>
-                      <SelectTrigger className="w-[160px] h-10">
-                        <SelectValue placeholder="Sort by" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="newest">Newest</SelectItem>
-                        <SelectItem value="oldest">Oldest</SelectItem>
-                        <SelectItem value="most-applicants">
-                          Most Apps
-                        </SelectItem>
-                        <SelectItem value="least-applicants">
-                          Least Apps
-                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -513,24 +549,25 @@ export default function JobsPage() {
                   {/* Results */}
                   <div className="flex items-center gap-2">
                     <Badge variant="secondary" className="text-sm px-3 py-1">
-                      {filteredJobs.length}{" "}
-                      {filteredJobs.length === 1 ? "job" : "jobs"}
+                      {filteredJobsFinal.length}{" "}
+                      {filteredJobsFinal.length === 1 ? "job" : "jobs"}
                     </Badge>
                     {(hasSearchQuery ||
-                      locationFilter !== "all" ||
-                      typeFilter !== "all") && (
+                      typeFilter !== "all" ||
+                      statusFilter !== "all" ||
+                      departmentFilter !== "all") && (
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => {
                           handleClearSearch();
-                          setLocationFilter("all");
                           setTypeFilter("all");
-                          setSortFilter("newest");
+                          setStatusFilter("all");
+                          setDepartmentFilter("all");
                         }}
                         className="text-blue-600 hover:text-blue-700 text-sm h-10"
                       >
-                        Clear
+                        Clear Filters
                       </Button>
                     )}
                   </div>
@@ -541,9 +578,9 @@ export default function JobsPage() {
               <TabsContent value="grid" className="mt-6">
                 {loading ? (
                   <JobsGridSkeleton />
-                ) : filteredJobs.length > 0 ? (
+                ) : filteredJobsFinal.length > 0 ? (
                   <JobsGrid
-                    jobs={filteredJobs}
+                    jobs={filteredJobsFinal}
                     onEdit={handleJobEdit}
                     onDelete={handleJobDelete}
                     onClose={handleJobCardClose}
@@ -552,14 +589,15 @@ export default function JobsPage() {
                   <EmptyJobsState
                     onClearFilters={() => {
                       handleClearSearch();
-                      setLocationFilter("all");
                       setTypeFilter("all");
-                      setSortFilter("newest");
+                      setStatusFilter("all");
+                      setDepartmentFilter("all");
                     }}
                     hasFilters={
                       hasSearchQuery ||
-                      locationFilter !== "all" ||
-                      typeFilter !== "all"
+                      typeFilter !== "all" ||
+                      statusFilter !== "all" ||
+                      departmentFilter !== "all"
                     }
                   />
                 )}
@@ -568,9 +606,9 @@ export default function JobsPage() {
               <TabsContent value="list" className="mt-6">
                 {loading ? (
                   <JobsListSkeleton />
-                ) : filteredJobs.length > 0 ? (
+                ) : filteredJobsFinal.length > 0 ? (
                   <JobsList
-                    jobs={filteredJobs}
+                    jobs={filteredJobsFinal}
                     onEdit={handleJobEdit}
                     onDelete={handleJobDelete}
                     onClose={handleJobCardClose}
@@ -579,14 +617,15 @@ export default function JobsPage() {
                   <EmptyJobsState
                     onClearFilters={() => {
                       handleClearSearch();
-                      setLocationFilter("all");
                       setTypeFilter("all");
-                      setSortFilter("newest");
+                      setStatusFilter("all");
+                      setDepartmentFilter("all");
                     }}
                     hasFilters={
                       hasSearchQuery ||
-                      locationFilter !== "all" ||
-                      typeFilter !== "all"
+                      typeFilter !== "all" ||
+                      statusFilter !== "all" ||
+                      departmentFilter !== "all"
                     }
                   />
                 )}

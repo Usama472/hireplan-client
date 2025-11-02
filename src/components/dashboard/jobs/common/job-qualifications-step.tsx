@@ -13,20 +13,23 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
-import { Plus, X, CheckCircle, Star, Info, Sparkles, Loader2 } from "lucide-react";
+import { Plus, X, CheckCircle, Info, Sparkles } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import useAuthSessionContext from "@/lib/context/AuthSessionContext";
-import API from "@/http";
-import { toast } from "sonner";
 
 export function JobQualificationsStep() {
   const { watch, setValue } = useFormContext();
   const { subscription } = useAuthSessionContext();
   const [newQualification, setNewQualification] = useState("");
   const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
-  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
 
   // Check if user has AI features (plan-based with custom pricing)
   const hasAIFeatures =
@@ -40,12 +43,15 @@ export function JobQualificationsStep() {
 
   // Unified qualifications list
   const allQualifications = watch("qualifications") || [];
-  const storedAiSuggestions = watch("aiSuggestedQualifications") || [];
+  const storedAiSuggestions = watch("aiSuggestedQualifications");
 
   // Load AI suggestions from form (generated during job description enhancement)
   useEffect(() => {
-    if (storedAiSuggestions && storedAiSuggestions.length > 0) {
-      console.log('✅ Found AI-suggested qualifications from enhancement:', storedAiSuggestions);
+    if (Array.isArray(storedAiSuggestions) && storedAiSuggestions.length > 0) {
+      console.log(
+        "✅ Found AI-suggested qualifications from enhancement:",
+        storedAiSuggestions
+      );
       setAiSuggestions(storedAiSuggestions);
     }
   }, [storedAiSuggestions]);
@@ -73,11 +79,34 @@ export function JobQualificationsStep() {
   const updateRequiredToggle = (index: number, isRequired: boolean) => {
     const updated = allQualifications.map((qual: any, i: number) => {
       if (i === index) {
-        // If AI category is "need", force it to stay Required
-        if (qual.aiCategory === "need" && !isRequired) {
-          return qual; // Don't change - keep it Required
+        if (hasAIFeatures) {
+          // Expert logic: Bidirectional sync between Required toggle and AI category
+          if (isRequired) {
+            // Required ON: Always set AI category to "need" (critical requirement)
+            return {
+              ...qual,
+              isRequired: true,
+              aiCategory: "need",
+            };
+          } else {
+            // Required OFF (Preferred): Convert "need" to "should", preserve other categories
+            const newCategory =
+              qual.aiCategory === "need"
+                ? "should"
+                : qual.aiCategory || "should";
+            return {
+              ...qual,
+              isRequired: false,
+              aiCategory: newCategory,
+            };
+          }
+        } else {
+          // No AI features: Just update the required status
+          return {
+            ...qual,
+            isRequired,
+          };
         }
-        return { ...qual, isRequired };
       }
       return qual;
     });
@@ -85,16 +114,20 @@ export function JobQualificationsStep() {
   };
 
   const updateAICategory = (index: number, aiCategory: string) => {
-    const updated = allQualifications.map((qual: any, i: number) =>
-      i === index
-        ? {
-            ...qual,
-            aiCategory,
-            // If "Need" category, set to Required. Otherwise, set to Preferred
-            isRequired: aiCategory === "need",
-          }
-        : qual
-    );
+    const updated = allQualifications.map((qual: any, i: number) => {
+      if (i === index) {
+        // Expert logic: Bidirectional sync between AI category and Required toggle
+        // "Need" category always means Required (critical)
+        // "Should" or "Nice" categories mean Preferred (not critical)
+        const newIsRequired = aiCategory === "need";
+        return {
+          ...qual,
+          aiCategory,
+          isRequired: newIsRequired,
+        };
+      }
+      return qual;
+    });
     setValue("qualifications", updated);
   };
 
@@ -192,14 +225,6 @@ export function JobQualificationsStep() {
             </div>
           )}
 
-          {/* Loading State */}
-          {isLoadingSuggestions && (
-            <div className="flex items-center gap-2 text-sm text-gray-500 bg-purple-50/50 border border-purple-200 rounded-lg p-3">
-              <Loader2 className="w-4 h-4 animate-spin text-purple-500" />
-              <span>AI is analyzing your job posting to suggest relevant qualifications...</span>
-            </div>
-          )}
-
           {/* Qualifications List */}
           {allQualifications.length > 0 && (
             <div className="space-y-2 sm:space-y-3">
@@ -230,71 +255,123 @@ export function JobQualificationsStep() {
                     {/* Controls */}
                     <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0 w-full sm:w-auto justify-between sm:justify-end">
                       {/* Required/Preferred Toggle */}
-                      <div className="flex items-center gap-1.5 sm:gap-2">
-                        <span className="text-xs text-gray-500 whitespace-nowrap">
-                          {qual.isRequired ? "Required" : "Preferred"}
-                        </span>
-                        <Switch
-                          checked={qual.isRequired === true}
-                          onCheckedChange={(checked) =>
-                            updateRequiredToggle(index, checked)
-                          }
-                          disabled={qual.aiCategory === "need"}
-                        />
-                      </div>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="flex items-center gap-1.5 sm:gap-2">
+                            <span className="text-xs text-gray-500 whitespace-nowrap">
+                              {qual.isRequired ? "Required" : "Preferred"}
+                            </span>
+                            <Switch
+                              checked={qual.isRequired === true}
+                              onCheckedChange={(checked) =>
+                                updateRequiredToggle(index, checked)
+                              }
+                              // disabled={qual.aiCategory === "need"}
+                            />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-xs">
+                          <p className="text-xs">
+                            {qual.isRequired
+                              ? "Required: Candidates must meet this qualification to be considered for the position."
+                              : "Preferred: This is a bonus qualification that candidates may have, but it's not mandatory."}
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
 
                       {/* AI Category Dropdown */}
                       {hasAIFeatures && (
-                        <Select
-                          value={qual.aiCategory || "should"}
-                          onValueChange={(value) =>
-                            updateAICategory(index, value)
-                          }
-                        >
-                          <SelectTrigger className="h-7 w-20 sm:w-28 text-xs border-gray-300 bg-white hover:bg-gray-50">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent align="end" className="min-w-32">
-                            <SelectItem
-                              value="need"
-                              className="text-xs hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50"
-                            >
-                              <div className="flex items-center gap-2">
-                                <div className="w-2 h-2 bg-gradient-to-r from-red-500 to-pink-500 rounded-full flex-shrink-0 shadow-sm"></div>
-                                <span>Need</span>
-                              </div>
-                            </SelectItem>
-                            <SelectItem
-                              value="should"
-                              className="text-xs hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100"
-                            >
-                              <div className="flex items-center gap-2">
-                                <div className="w-2 h-2 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex-shrink-0 shadow-sm"></div>
-                                <span>Should</span>
-                              </div>
-                            </SelectItem>
-                            <SelectItem
-                              value="nice"
-                              className="text-xs hover:bg-gradient-to-r hover:from-purple-50 hover:to-purple-100"
-                            >
-                              <div className="flex items-center gap-2">
-                                <div className="w-2 h-2 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex-shrink-0 shadow-sm"></div>
-                                <span>Nice</span>
-                              </div>
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div>
+                              <Select
+                                value={qual.aiCategory || "should"}
+                                onValueChange={(value) =>
+                                  updateAICategory(index, value)
+                                }
+                              >
+                                <SelectTrigger className="h-7 w-20 sm:w-28 text-xs border-gray-300 bg-white hover:bg-gray-50">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent align="end" className="min-w-32">
+                                  <SelectItem
+                                    value="need"
+                                    className="text-xs hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50"
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-2 h-2 bg-gradient-to-r from-red-500 to-pink-500 rounded-full flex-shrink-0 shadow-sm"></div>
+                                      <span>Need</span>
+                                    </div>
+                                  </SelectItem>
+                                  <SelectItem
+                                    value="should"
+                                    className="text-xs hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100"
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-2 h-2 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex-shrink-0 shadow-sm"></div>
+                                      <span>Should</span>
+                                    </div>
+                                  </SelectItem>
+                                  <SelectItem
+                                    value="nice"
+                                    className="text-xs hover:bg-gradient-to-r hover:from-purple-50 hover:to-purple-100"
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-2 h-2 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex-shrink-0 shadow-sm"></div>
+                                      <span>Nice</span>
+                                    </div>
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-xs">
+                            <div className="space-y-1.5 text-xs">
+                              <p className="font-medium mb-1">
+                                AI Scoring Priority:
+                              </p>
+                              <p>
+                                <span className="font-medium text-red-600">
+                                  Need:
+                                </span>{" "}
+                                Critical qualification - candidates without this
+                                are unlikely to pass
+                              </p>
+                              <p>
+                                <span className="font-medium text-blue-600">
+                                  Should:
+                                </span>{" "}
+                                Important qualification - significantly impacts
+                                candidate ranking
+                              </p>
+                              <p>
+                                <span className="font-medium text-purple-600">
+                                  Nice:
+                                </span>{" "}
+                                Bonus qualification - nice to have but not
+                                essential
+                              </p>
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
                       )}
 
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeQualification(index)}
-                        className="h-6 w-6 p-0 text-gray-400 hover:text-red-600"
-                      >
-                        <X className="w-3 h-3" />
-                      </Button>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeQualification(index)}
+                            className="h-6 w-6 p-0 text-gray-400 hover:text-red-600"
+                          >
+                            <X className="w-3 h-3" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="top">
+                          <p className="text-xs">Remove this qualification</p>
+                        </TooltipContent>
+                      </Tooltip>
                     </div>
                   </div>
                 </div>
@@ -309,256 +386,6 @@ export function JobQualificationsStep() {
           )}
         </CardContent>
       </Card>
-
-      {/* AI Weighting Controls - Only for Professional/Enterprise */}
-      {hasAIFeatures && allQualifications.length > 0 && (
-        <Card className="border border-blue-200 bg-blue-50/30 shadow-none rounded-xl">
-          <CardHeader className="pb-3 sm:pb-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2 text-base sm:text-lg font-medium text-blue-600">
-                  🤖 AI Scoring Configuration
-                </CardTitle>
-                <p className="text-xs sm:text-sm text-gray-600">
-                  {showAdvancedAI ? "Configure detailed AI evaluation settings" : "AI will automatically score candidates using smart defaults"}
-                </p>
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setShowAdvancedAI(!showAdvancedAI)}
-                className="text-xs whitespace-nowrap"
-              >
-                {showAdvancedAI ? "🎯 Simple Mode" : "🔧 Advanced"}
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4 sm:space-y-6 pt-0">
-            {/* Simple Mode - Just show that AI is enabled */}
-            {!showAdvancedAI && (
-              <div className="text-center py-6">
-                <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <CheckCircle className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-lg font-semibold text-blue-900 mb-2">
-                  ✅ AI Qualification Scoring Enabled
-                </h3>
-                <p className="text-sm text-blue-700 max-w-md mx-auto">
-                  AI will automatically evaluate candidates against your qualifications using intelligent defaults. No manual configuration needed!
-                </p>
-              </div>
-            )}
-
-            {/* Advanced Mode - Show detailed configuration */}
-            {showAdvancedAI && (
-              <>
-                {/* Category Summary */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
-              <div className="text-center p-3 sm:p-4 bg-gradient-to-br from-red-50 to-pink-50 border border-red-200/50 rounded-xl shadow-sm">
-                <div className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
-                  {
-                    allQualifications.filter(
-                      (q: any) => q.aiCategory === "need"
-                    ).length
-                  }
-                </div>
-                <div className="text-xs font-medium text-red-700/80">
-                  Need (Auto-reject)
-                </div>
-              </div>
-
-              <div className="text-center p-3 sm:p-4 bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200/50 rounded-xl shadow-sm">
-                <div className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent">
-                  {
-                    allQualifications.filter(
-                      (q: any) => q.aiCategory === "should"
-                    ).length
-                  }
-                </div>
-                <div className="text-xs font-medium text-blue-700/80">
-                  Should Have
-                </div>
-              </div>
-
-              <div className="text-center p-3 sm:p-4 bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200/50 rounded-xl shadow-sm">
-                <div className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-500 to-purple-600 bg-clip-text text-transparent">
-                  {
-                    allQualifications.filter(
-                      (q: any) => q.aiCategory === "nice"
-                    ).length
-                  }
-                </div>
-                <div className="text-xs font-medium text-purple-700/80">
-                  Nice to Have
-                </div>
-              </div>
-            </div>
-
-            {/* Interactive Scoring Bar */}
-            <div className="bg-white border rounded-lg p-3 sm:p-4 space-y-3 sm:space-y-4">
-              <div className="space-y-2 sm:space-y-3">
-                <Label className="text-xs sm:text-sm font-medium block">
-                  AI Scoring Configuration
-                </Label>
-                <div className="text-xs text-gray-600 space-y-2">
-                  <p>
-                    <span className="font-medium text-gray-700">Approval Threshold:</span> When qualifications reach <span className="font-semibold text-blue-600">{passThreshold[0]}%</span>, candidates advance to the next screening round.
-                  </p>
-                  <p>
-                    <span className="font-medium text-gray-700">Weight Distribution:</span> Should have <span className="font-semibold text-blue-600">{shouldVsNiceRatio[0]}%</span> vs Nice to have <span className="font-semibold text-purple-600">{100 - shouldVsNiceRatio[0]}%</span>.
-                  </p>
-                  <p>
-                    <span className="font-medium text-red-600">Auto-Reject:</span> Candidates missing any "Need To Have" qualifications are automatically rejected.
-                  </p>
-                </div>
-              </div>
-
-              {/* Interactive Combined Visual Bar */}
-              <div
-                className="relative h-12 bg-gradient-to-r from-gray-100 to-gray-200 rounded-full shadow-inner cursor-pointer mb-8"
-                onMouseDown={(e) => {
-                  // Don't handle if it's on the approval threshold slider
-                  if ((e.target as HTMLElement).closest('.approval-threshold-slider')) {
-                    return;
-                  }
-                  
-                  e.preventDefault();
-                  const bar = e.currentTarget;
-                  
-                  const handleMouseMove = (moveEvent: MouseEvent) => {
-                    const rect = bar.getBoundingClientRect();
-                    const x = moveEvent.clientX - rect.left;
-                    const percentage = Math.round((x / rect.width) * 100);
-                    setShouldVsNiceRatio([
-                      Math.max(0, Math.min(100, percentage)),
-                    ]);
-                  };
-                  
-                  const handleMouseUp = () => {
-                    document.removeEventListener("mousemove", handleMouseMove);
-                    document.removeEventListener("mouseup", handleMouseUp);
-                    document.body.style.userSelect = "";
-                  };
-                  
-                  // Initial position set
-                  handleMouseMove(e.nativeEvent);
-                  
-                  document.body.style.userSelect = "none";
-                  document.addEventListener("mousemove", handleMouseMove);
-                  document.addEventListener("mouseup", handleMouseUp);
-                }}
-              >
-                {/* Should Have Section - Blue */}
-                <div
-                  className="absolute left-0 top-0 h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-500 ease-out"
-                  style={{ width: `${shouldVsNiceRatio[0]}%` }}
-                  title="Should Have"
-                ></div>
-
-                {/* Nice to Have Section - Purple */}
-                <div
-                  className="absolute top-0 h-full bg-gradient-to-r from-purple-500 to-purple-600 transition-all duration-500 ease-out"
-                  style={{
-                    left: `${shouldVsNiceRatio[0]}%`,
-                    width: `${100 - shouldVsNiceRatio[0]}%`,
-                  }}
-                  title="Nice to Have"
-                ></div>
-
-                {/* Approval Threshold Slider */}
-                <div
-                  className="approval-threshold-slider absolute -top-1 h-14 w-4 z-50 cursor-grab active:cursor-grabbing"
-                  style={{ left: `calc(${passThreshold[0]}% - 8px)` }}
-                  title={`Drag to adjust approval threshold: ${passThreshold[0]}%`}
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-
-                    const bar = e.currentTarget.parentElement;
-                    if (!bar) return;
-
-                    let isDragging = false;
-
-                    const handleMouseMove = (moveEvent: MouseEvent) => {
-                      isDragging = true;
-                      moveEvent.preventDefault();
-                      moveEvent.stopPropagation();
-                      
-                      const rect = bar.getBoundingClientRect();
-                      const x = moveEvent.clientX - rect.left;
-                      const percentage = Math.round((x / rect.width) * 100);
-                      setPassThreshold([
-                        Math.max(0, Math.min(100, percentage)),
-                      ]);
-                    };
-
-                    const handleMouseUp = (upEvent: MouseEvent) => {
-                      upEvent.preventDefault();
-                      upEvent.stopPropagation();
-                      
-                      document.removeEventListener("mousemove", handleMouseMove);
-                      document.removeEventListener("mouseup", handleMouseUp);
-                      document.body.style.userSelect = "";
-                      document.body.style.pointerEvents = "";
-                      
-                      // Prevent the parent click handler from firing
-                      if (isDragging) {
-                        setTimeout(() => {
-                          isDragging = false;
-                        }, 10);
-                      }
-                    };
-
-                    document.body.style.userSelect = "none";
-                    document.body.style.pointerEvents = "none";
-                    document.addEventListener("mousemove", handleMouseMove);
-                    document.addEventListener("mouseup", handleMouseUp);
-                  }}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }}
-                >
-                  {/* Visible Line Through Bar */}
-                  <div className="absolute top-1 left-1/2 w-0.5 h-12 bg-white shadow-lg transform -translate-x-1/2"></div>
-
-                  {/* Draggable Handle */}
-                  <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-6 h-6 bg-blue-500 rounded-full shadow-xl flex items-center justify-center hover:bg-blue-600 transition-all duration-200 border-2 border-white">
-                    <div className="flex gap-0.5">
-                      <div className="w-0.5 h-2 bg-white rounded-full"></div>
-                      <div className="w-0.5 h-2 bg-white rounded-full"></div>
-                    </div>
-                  </div>
-
-                  {/* Threshold Value Display */}
-                  <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-xs px-2 py-1 rounded-md shadow-lg font-medium whitespace-nowrap">
-                    Approval Rate: {passThreshold[0]}%
-                  </div>
-                </div>
-              </div>
-
-              {/* Legend */}
-              <div className="flex justify-between text-xs font-medium">
-                <span className="text-blue-600">
-                  🔵 Should Have: {shouldVsNiceRatio[0]}%
-                </span>
-                <span className="text-purple-600">
-                  🟣 Nice to Have: {100 - shouldVsNiceRatio[0]}%
-                </span>
-                <span className="text-gray-700">
-                  📏 Approval: {passThreshold[0]}%
-                </span>
-              </div>
-            </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-
-      {/* Information Box */}
       <div className="p-4 bg-blue-50 border border-blue-200 rounded-md">
         <div className="flex items-start gap-3">
           <Info className="w-5 h-5 text-blue-500 mt-0.5" />
@@ -591,6 +418,246 @@ export function JobQualificationsStep() {
           </div>
         </div>
       </div>
+      {/* AI Weighting Controls - Only for Professional/Enterprise */}
+      {hasAIFeatures && allQualifications.length > 0 && (
+        <Card className="border border-blue-200 bg-blue-50/30 shadow-none rounded-xl">
+          <CardHeader className="pb-3 sm:pb-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg font-medium text-blue-600">
+                  🤖 AI Scoring Configuration
+                </CardTitle>
+                <p className="text-xs sm:text-sm text-gray-600">
+                  {showAdvancedAI
+                    ? "Configure detailed AI evaluation settings"
+                    : "AI will automatically score candidates using smart defaults"}
+                </p>
+              </div>
+              <ToggleGroup
+                type="single"
+                value={showAdvancedAI ? "advanced" : "simple"}
+                onValueChange={(value) => {
+                  if (value) {
+                    setShowAdvancedAI(value === "advanced");
+                  }
+                }}
+                variant="outline"
+                size="sm"
+                className="h-8"
+              >
+                <ToggleGroupItem
+                  value="simple"
+                  aria-label="Simple mode"
+                  className="text-xs px-3"
+                >
+                  <span className="mr-1.5">🎯</span>
+                  Simple
+                </ToggleGroupItem>
+                <ToggleGroupItem
+                  value="advanced"
+                  aria-label="Advanced mode"
+                  className="text-xs px-3"
+                >
+                  <span className="mr-1.5">🔧</span>
+                  Advanced
+                </ToggleGroupItem>
+              </ToggleGroup>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4 sm:space-y-6 pt-0">
+            {/* Simple Mode - Just show that AI is enabled */}
+            {!showAdvancedAI && (
+              <div className="text-center py-6">
+                <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold text-blue-900 mb-2">
+                  ✅ AI Qualification Scoring Enabled
+                </h3>
+                <p className="text-sm text-blue-700 max-w-md mx-auto">
+                  AI will automatically evaluate candidates against your
+                  qualifications using intelligent defaults. No manual
+                  configuration needed!
+                </p>
+              </div>
+            )}
+
+            {/* Advanced Mode - Show detailed configuration */}
+            {showAdvancedAI && (
+              <>
+                {/* Category Summary */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
+                  <div className="text-center p-3 sm:p-4 bg-gradient-to-br from-red-50 to-pink-50 border border-red-200/50 rounded-xl shadow-sm">
+                    <div className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
+                      {
+                        allQualifications.filter(
+                          (q: any) => q.aiCategory === "need"
+                        ).length
+                      }
+                    </div>
+                    <div className="text-xs font-medium text-red-700/80">
+                      Need (Auto-reject)
+                    </div>
+                  </div>
+
+                  <div className="text-center p-3 sm:p-4 bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200/50 rounded-xl shadow-sm">
+                    <div className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent">
+                      {
+                        allQualifications.filter(
+                          (q: any) => q.aiCategory === "should"
+                        ).length
+                      }
+                    </div>
+                    <div className="text-xs font-medium text-blue-700/80">
+                      Should Have
+                    </div>
+                  </div>
+
+                  <div className="text-center p-3 sm:p-4 bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200/50 rounded-xl shadow-sm">
+                    <div className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-500 to-purple-600 bg-clip-text text-transparent">
+                      {
+                        allQualifications.filter(
+                          (q: any) => q.aiCategory === "nice"
+                        ).length
+                      }
+                    </div>
+                    <div className="text-xs font-medium text-purple-700/80">
+                      Nice to Have
+                    </div>
+                  </div>
+                </div>
+
+                {/* AI Scoring Configuration */}
+                <div className="bg-white border rounded-lg p-4 sm:p-6 space-y-6">
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-900 mb-1">
+                      AI Scoring Configuration
+                    </h3>
+                    <p className="text-xs text-gray-600">
+                      Configure how AI evaluates and scores candidates based on
+                      your qualifications
+                    </p>
+                  </div>
+
+                  {/* Weight Distribution Slider */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm font-medium text-gray-900">
+                        Weight Distribution
+                      </Label>
+                      <div className="flex items-center gap-3 text-xs font-semibold">
+                        <span className="text-blue-600">
+                          Should: {shouldVsNiceRatio[0]}%
+                        </span>
+                        <span className="text-gray-400">|</span>
+                        <span className="text-purple-600">
+                          Nice: {100 - shouldVsNiceRatio[0]}%
+                        </span>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      {/* Visual Distribution Bar */}
+                      <div className="relative h-6 bg-gray-200 rounded-full overflow-hidden shadow-inner">
+                        <div
+                          className="absolute left-0 top-0 h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-300 ease-out"
+                          style={{ width: `${shouldVsNiceRatio[0]}%` }}
+                        />
+                        <div
+                          className="absolute top-0 h-full bg-gradient-to-r from-purple-500 to-purple-600 transition-all duration-300 ease-out"
+                          style={{
+                            left: `${shouldVsNiceRatio[0]}%`,
+                            width: `${100 - shouldVsNiceRatio[0]}%`,
+                          }}
+                        />
+                      </div>
+                      {/* Slider Control */}
+                      <Slider
+                        value={shouldVsNiceRatio}
+                        onValueChange={setShouldVsNiceRatio}
+                        min={0}
+                        max={100}
+                        step={1}
+                        className="w-full"
+                      />
+                      <div className="flex justify-between text-xs text-gray-500">
+                        <span>More weight on "Nice to Have"</span>
+                        <span>More weight on "Should Have"</span>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">
+                      Adjust the relative importance between "Should Have" and
+                      "Nice to Have" qualifications in candidate scoring.
+                    </p>
+                  </div>
+
+                  {/* Divider */}
+                  <div className="border-t border-gray-200"></div>
+
+                  {/* Approval Threshold Slider */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm font-medium text-gray-900">
+                        Approval Threshold
+                      </Label>
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg font-bold text-blue-600">
+                          {passThreshold[0]}%
+                        </span>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      {/* Visual Threshold Bar */}
+                      <div className="relative h-8 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 rounded-full overflow-hidden shadow-inner">
+                        {/* Threshold Indicator Line */}
+                        <div
+                          className="absolute top-0 bottom-0 w-1 bg-blue-600 shadow-lg z-10 transition-all duration-300"
+                          style={{ left: `${passThreshold[0]}%` }}
+                        >
+                          <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-blue-600 rounded-full border-2 border-white shadow-md"></div>
+                        </div>
+                        {/* Threshold Fill */}
+                        <div
+                          className="absolute left-0 top-0 h-full bg-gradient-to-r from-green-400 to-blue-500 transition-all duration-300"
+                          style={{ width: `${passThreshold[0]}%` }}
+                        />
+                      </div>
+                      {/* Slider Control */}
+                      <Slider
+                        value={passThreshold}
+                        onValueChange={setPassThreshold}
+                        min={0}
+                        max={100}
+                        step={1}
+                        className="w-full"
+                      />
+                      <div className="flex justify-between text-xs text-gray-500">
+                        <span>0% - Very strict</span>
+                        <span>100% - Very lenient</span>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">
+                      Candidates must reach this threshold to advance to the
+                      next screening round.
+                    </p>
+                  </div>
+
+                  {/* Info Box */}
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                    <div className="flex items-start gap-2">
+                      <Info className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+                      <p className="text-xs text-red-800">
+                        <span className="font-semibold">Auto-Reject:</span>{" "}
+                        Candidates missing any "Need To Have" qualifications are
+                        automatically rejected, regardless of their score.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

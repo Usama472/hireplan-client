@@ -1,8 +1,10 @@
 import {
   Briefcase,
+  Building2,
   Calendar,
   FileText,
   Filter,
+  LayoutGrid,
   LifeBuoy,
   MessageCircle,
   PlusCircle,
@@ -26,6 +28,8 @@ import { APP_NAME, ROUTES } from "@/constants";
 import { PERMISSIONS } from "@/constants/permissions";
 import useAuthSessionContext from "@/lib/context/AuthSessionContext";
 import { useLocation, Link } from "react-router-dom";
+import API from "@/http";
+import { toast } from "sonner";
 import { NavProjects } from "./nav-projects";
 import { NavUser } from "./nav-user";
 
@@ -49,6 +53,7 @@ export const DashboardSidebar = ({
   } as any;
   const { data: authData, subscription } = useAuthSessionContext();
   const location = useLocation();
+  const company = authData?.user?.company;
 
   const user = {
     name:
@@ -61,28 +66,50 @@ export const DashboardSidebar = ({
 
   const userPermissions = authData?.user?.appRole?.permissions || [];
 
+  // Build Jobs menu with sub-items
   if (userPermissions.includes(PERMISSIONS.JOB_GET)) {
+    const jobsSubItems: any[] = [];
+
+    // Always add "All Jobs" as the first sub-item
+    jobsSubItems.push({
+      name: "All Jobs",
+      url: ROUTES.DASHBOARD.MAIN,
+      icon: LayoutGrid,
+    });
+
+    if (userPermissions.includes(PERMISSIONS.JOB_CREATE)) {
+      jobsSubItems.push({
+        name: "Create Job",
+        url: ROUTES.DASHBOARD.CREATE_JOB,
+        icon: PlusCircle,
+      });
+      jobsSubItems.push({
+        name: "Drafts",
+        url: ROUTES.DASHBOARD.DRAFTS,
+        icon: FileText,
+      });
+    }
+
+    if (userPermissions.includes(PERMISSIONS.EMAIL_TEMPLATE_CREATE)) {
+      jobsSubItems.push({
+        name: "Templates",
+        url: ROUTES.DASHBOARD.TEMPLATES,
+        icon: FileText,
+      });
+    }
+
     staticData.projects.push({
       name: "Jobs",
       url: ROUTES.DASHBOARD.MAIN,
       icon: Briefcase,
+      items: jobsSubItems.length > 0 ? jobsSubItems : undefined,
     });
+  }
+  if (userPermissions.includes(PERMISSIONS.JOB_GET)) {
     staticData.projects.push({
       name: "Applicants",
       url: ROUTES.DASHBOARD.APPLICANTS,
       icon: UserCheck,
-    });
-  }
-  if (userPermissions.includes(PERMISSIONS.JOB_CREATE)) {
-    staticData.projects.push({
-      name: "Create Job",
-      url: ROUTES.DASHBOARD.CREATE_JOB,
-      icon: PlusCircle,
-    });
-    staticData.projects.push({
-      name: "Drafts",
-      url: ROUTES.DASHBOARD.DRAFTS,
-      icon: FileText,
     });
   }
   if (userPermissions.includes(PERMISSIONS.CHAT_ACCESS)) {
@@ -92,13 +119,7 @@ export const DashboardSidebar = ({
       icon: MessageCircle,
     });
   }
-  if (userPermissions.includes(PERMISSIONS.EMAIL_TEMPLATE_CREATE)) {
-    staticData.projects.push({
-      name: "Templates",
-      url: ROUTES.DASHBOARD.TEMPLATES,
-      icon: FileText,
-    });
-  }
+
   if (userPermissions.includes(PERMISSIONS.STAFF_CREATE)) {
     staticData.projects.push({
       name: "Staff",
@@ -113,6 +134,34 @@ export const DashboardSidebar = ({
       icon: Calendar,
     });
   }
+
+  staticData.projects.push({
+    name: "Career Page",
+    url: "#",
+    icon: Building2,
+    onClick: async () => {
+      let slug = (company as any)?.slug;
+      if (!slug && (company as any)?._id) {
+        // Fallback: fetch company slug from API
+        try {
+          const response = await API.company.getCompanySlug(
+            (company as any)._id
+          );
+          slug = response?.slug;
+        } catch (error) {
+          console.error("Error fetching company slug:", error);
+        }
+      }
+      if (slug) {
+        const careerPageUrl = `${window.location.origin}/company/${slug}`;
+        window.open(careerPageUrl, "_blank", "noopener,noreferrer");
+      } else {
+        toast.error(
+          "Company career page not available. Please contact support."
+        );
+      }
+    },
+  });
 
   // if (userPermissions.includes(PERMISSIONS.EMAIL_TEMPLATE_CREATE)) {
   //   staticData.projects.push({

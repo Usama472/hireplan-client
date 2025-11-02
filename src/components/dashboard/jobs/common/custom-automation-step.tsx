@@ -2,7 +2,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { allTriggers } from "@/constants/automations-constants";
 import API from "@/http";
 import { useAITemplates } from "@/hooks/useAITemplates";
@@ -61,14 +68,17 @@ interface CustomAutomationStepProps {
 // Helper function to check if automation has AI follow-up actions
 const hasAIFollowupAction = (automation: Automation): boolean => {
   // Check regular actions
-  const hasInActions = automation.actions?.some((action: any) => 
-    action.type === 'ai_follow_up' || action.type === 'send_another_followup'
+  const hasInActions = automation.actions?.some(
+    (action: any) =>
+      action.type === "ai_follow_up" || action.type === "send_another_followup"
   );
 
   // Check score rules
   const hasInScoreRules = (automation as any).scoreRules?.some((rule: any) =>
-    rule.actions?.some((action: any) => 
-      action.type === 'ai_follow_up' || action.type === 'send_another_followup'
+    rule.actions?.some(
+      (action: any) =>
+        action.type === "ai_follow_up" ||
+        action.type === "send_another_followup"
     )
   );
 
@@ -84,13 +94,18 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
   isSelectable = false,
 }) => {
   const [automations, setAutomations] = useState<Automation[]>([]);
-  const [filteredAutomations, setFilteredAutomations] = useState<Automation[]>([]);
+  const [filteredAutomations, setFilteredAutomations] = useState<Automation[]>(
+    []
+  );
   const [loading, setLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState<string[]>(
     selectedAutomationIds
   );
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLabel, setSelectedLabel] = useState<string>("");
+  const [selectedTriggerType, setSelectedTriggerType] = useState<string>("");
+  const [selectedStatus, setSelectedStatus] = useState<string>("active");
+  const [selectedActionType, setSelectedActionType] = useState<string>("");
   const [availableLabels, setAvailableLabels] = useState<string[]>([]);
   const [editingTags, setEditingTags] = useState<string | null>(null);
   const [newTag, setNewTag] = useState("");
@@ -111,12 +126,12 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
       const response: AutomationsResponse =
         await API.automation.getAutomations();
       if (response.success) {
-        const activeAutomations = response.results.filter((a) => a.status === "active");
-        setAutomations(activeAutomations);
-        setFilteredAutomations(activeAutomations);
-        
+        // Don't filter by status here - let the filter handle it
+        setAutomations(response.results);
+        setFilteredAutomations(response.results);
+
         // Extract unique labels
-        const allLabels = activeAutomations.flatMap(a => a.labels || []);
+        const allLabels = response.results.flatMap((a) => a.labels || []);
         const uniqueLabels = [...new Set(allLabels)].sort();
         setAvailableLabels(uniqueLabels);
       }
@@ -129,7 +144,7 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
 
   const addTagToAutomation = async (automationId: string, tag: string) => {
     try {
-      const automation = automations.find(a => a.id === automationId);
+      const automation = automations.find((a) => a.id === automationId);
       if (!automation) return;
 
       // Check if tag already exists
@@ -139,22 +154,22 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
       }
 
       const updatedLabels = [...new Set([...(automation.labels || []), tag])];
-      
+
       await API.automation.updateAutomation(automationId, {
         labels: updatedLabels,
       });
 
       // Update local state
-      const updatedAutomations = automations.map(a =>
+      const updatedAutomations = automations.map((a) =>
         a.id === automationId ? { ...a, labels: updatedLabels } : a
       );
       setAutomations(updatedAutomations);
-      
+
       // Update available labels
-      const allLabels = updatedAutomations.flatMap(a => a.labels || []);
+      const allLabels = updatedAutomations.flatMap((a) => a.labels || []);
       const uniqueLabels = [...new Set(allLabels)].sort();
       setAvailableLabels(uniqueLabels);
-      
+
       setNewTag("");
       toast.success(`Tag "${tag}" added successfully`);
     } catch (error) {
@@ -165,26 +180,26 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
 
   const removeTagFromAutomation = async (automationId: string, tag: string) => {
     try {
-      const automation = automations.find(a => a.id === automationId);
+      const automation = automations.find((a) => a.id === automationId);
       if (!automation) return;
 
-      const updatedLabels = (automation.labels || []).filter(l => l !== tag);
-      
+      const updatedLabels = (automation.labels || []).filter((l) => l !== tag);
+
       await API.automation.updateAutomation(automationId, {
         labels: updatedLabels,
       });
 
       // Update local state
-      const updatedAutomations = automations.map(a =>
+      const updatedAutomations = automations.map((a) =>
         a.id === automationId ? { ...a, labels: updatedLabels } : a
       );
       setAutomations(updatedAutomations);
-      
+
       // Update available labels
-      const allLabels = updatedAutomations.flatMap(a => a.labels || []);
+      const allLabels = updatedAutomations.flatMap((a) => a.labels || []);
       const uniqueLabels = [...new Set(allLabels)].sort();
       setAvailableLabels(uniqueLabels);
-      
+
       toast.success(`Tag "${tag}" removed successfully`);
     } catch (error) {
       console.error("Error removing tag:", error);
@@ -201,28 +216,61 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
     setSelectedIds(selectedAutomationIds);
   }, [selectedAutomationIds]);
 
-  // Filter automations based on search and label
+  // Filter automations based on search and filters
   useEffect(() => {
     let filtered = automations;
 
     // Filter by search term
     if (searchTerm.trim()) {
       const searchLower = searchTerm.toLowerCase();
-      filtered = filtered.filter(automation => 
-        automation.name.toLowerCase().includes(searchLower) ||
-        (automation.labels || []).some(label => label.toLowerCase().includes(searchLower))
+      filtered = filtered.filter(
+        (automation) =>
+          automation.name.toLowerCase().includes(searchLower) ||
+          (automation.labels || []).some((label) =>
+            label.toLowerCase().includes(searchLower)
+          )
       );
     }
 
     // Filter by selected label
     if (selectedLabel) {
-      filtered = filtered.filter(automation => 
+      filtered = filtered.filter((automation) =>
         (automation.labels || []).includes(selectedLabel)
       );
     }
 
+    // Filter by trigger type
+    if (selectedTriggerType) {
+      filtered = filtered.filter(
+        (automation) => automation.triggerType === selectedTriggerType
+      );
+    }
+
+    // Filter by status
+    if (selectedStatus) {
+      filtered = filtered.filter(
+        (automation) => automation.status === selectedStatus
+      );
+    }
+
+    // Filter by action type
+    if (selectedActionType) {
+      filtered = filtered.filter((automation) =>
+        automation.actions.some(
+          (action: any) => action.type === selectedActionType
+        )
+      );
+    }
+
     setFilteredAutomations(filtered);
-  }, [automations, searchTerm, selectedLabel]);
+  }, [
+    automations,
+    searchTerm,
+    selectedLabel,
+    selectedTriggerType,
+    selectedStatus,
+    selectedActionType,
+  ]);
 
   const handleSelectionChange = (automationId: string, isSelected: boolean) => {
     const newSelectedIds = isSelected
@@ -343,12 +391,17 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
             {/* Tag Filter Dropdown */}
             {availableLabels.length > 0 && (
               <div className="sm:w-64">
-                <Select value={selectedLabel} onValueChange={setSelectedLabel}>
+                <Select
+                  value={selectedLabel || "all"}
+                  onValueChange={(value) =>
+                    setSelectedLabel(value === "all" ? "" : value)
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Filter by tag" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All tags</SelectItem>
+                    <SelectItem value="all">All tags</SelectItem>
                     {availableLabels.map((label) => (
                       <SelectItem key={label} value={label}>
                         {label}
@@ -360,10 +413,103 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
             )}
           </div>
 
+          {/* Additional Filters Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {/* Trigger Type Filter */}
+            <div>
+              <Label className="text-xs text-gray-500 mb-2 block">
+                Trigger Type
+              </Label>
+              <Select
+                value={selectedTriggerType || "all"}
+                onValueChange={(value) =>
+                  setSelectedTriggerType(value === "all" ? "" : value)
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="All triggers" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All triggers</SelectItem>
+                  {allTriggers.map((trigger) => (
+                    <SelectItem key={trigger.type} value={trigger.type}>
+                      {trigger.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Status Filter */}
+            <div>
+              <Label className="text-xs text-gray-500 mb-2 block">Status</Label>
+              <Select
+                value={selectedStatus || "all"}
+                onValueChange={(value) =>
+                  setSelectedStatus(value === "all" ? "" : value)
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All statuses</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Action Type Filter */}
+            <div>
+              <Label className="text-xs text-gray-500 mb-2 block">
+                Action Type
+              </Label>
+              <Select
+                value={selectedActionType || "all"}
+                onValueChange={(value) =>
+                  setSelectedActionType(value === "all" ? "" : value)
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="All actions" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All actions</SelectItem>
+                  <SelectItem value="send_email_applicant">
+                    Email Applicant
+                  </SelectItem>
+                  <SelectItem value="send_email_recruiter">
+                    Email Recruiter
+                  </SelectItem>
+                  <SelectItem value="send_email_recruiter_team">
+                    Email Team
+                  </SelectItem>
+                  <SelectItem value="send_email_reminders">
+                    Email Reminders
+                  </SelectItem>
+                  <SelectItem value="update_job_status">
+                    Update Status
+                  </SelectItem>
+                  <SelectItem value="send_pipeline_summary">
+                    Pipeline Summary
+                  </SelectItem>
+                  <SelectItem value="auto_expire_jobs">Auto Expire</SelectItem>
+                  <SelectItem value="ai_follow_up">AI Follow-up</SelectItem>
+                  <SelectItem value="send_another_followup">
+                    Send Another Follow-up
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
           {/* Quick Tag Filters */}
           {availableLabels.length > 0 && (
             <div>
-              <span className="text-xs font-medium text-gray-500 mb-2 block">Quick Filters:</span>
+              <span className="text-xs font-medium text-gray-500 mb-2 block">
+                Quick Filters:
+              </span>
               <div className="flex flex-wrap gap-2">
                 {availableLabels.map((label) => (
                   <Badge
@@ -374,12 +520,12 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
                         ? "bg-blue-600 text-white border-blue-600"
                         : "bg-white text-blue-700 border-blue-200 hover:bg-blue-50"
                     }`}
-                    onClick={() => setSelectedLabel(selectedLabel === label ? "" : label)}
+                    onClick={() =>
+                      setSelectedLabel(selectedLabel === label ? "" : label)
+                    }
                   >
                     {label}
-                    {selectedLabel === label && (
-                      <X className="h-3 w-3 ml-1" />
-                    )}
+                    {selectedLabel === label && <X className="h-3 w-3 ml-1" />}
                   </Badge>
                 ))}
               </div>
@@ -387,7 +533,11 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
           )}
 
           {/* Active Filters Display */}
-          {(searchTerm || selectedLabel) && (
+          {(searchTerm ||
+            selectedLabel ||
+            selectedTriggerType ||
+            selectedStatus ||
+            selectedActionType) && (
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-sm text-gray-500">Active filters:</span>
               {searchTerm && (
@@ -412,12 +562,50 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
                   </button>
                 </Badge>
               )}
+              {selectedTriggerType && (
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  Trigger:{" "}
+                  {allTriggers.find((t) => t.type === selectedTriggerType)
+                    ?.label || selectedTriggerType}
+                  <button
+                    onClick={() => setSelectedTriggerType("")}
+                    className="ml-1 hover:text-gray-700"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              )}
+              {selectedStatus && (
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  Status: {selectedStatus === "active" ? "Active" : "Inactive"}
+                  <button
+                    onClick={() => setSelectedStatus("")}
+                    className="ml-1 hover:text-gray-700"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              )}
+              {selectedActionType && (
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  Action: {getActionTypeLabel(selectedActionType)}
+                  <button
+                    onClick={() => setSelectedActionType("")}
+                    className="ml-1 hover:text-gray-700"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              )}
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => {
                   setSearchTerm("");
                   setSelectedLabel("");
+                  setSelectedTriggerType("");
+                  setSelectedStatus("");
+                  setSelectedActionType("");
                 }}
                 className="text-xs"
               >
@@ -518,18 +706,10 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
                   className={`bg-white border rounded-xl transition-all duration-200 p-4 sm:p-6 flex flex-col ${
                     isSelectable
                       ? selectedIds.includes(automation.id)
-                        ? "border-blue-200 bg-blue-50/30 cursor-pointer"
-                        : "border-gray-100 hover:border-gray-200 cursor-pointer"
+                        ? "border-blue-200 bg-blue-50/30"
+                        : "border-gray-100 hover:border-gray-200"
                       : "border-gray-100 hover:border-gray-200"
                   }`}
-                  onClick={() => {
-                    if (isSelectable) {
-                      handleSelectionChange(
-                        automation.id,
-                        !selectedIds.includes(automation.id)
-                      );
-                    }
-                  }}
                 >
                   {/* Header */}
                   <div className="flex items-start justify-between mb-3 sm:mb-4">
@@ -555,23 +735,18 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
                         </p>
                       </div>
                     </div>
-                    {isSelectable && selectedIds.includes(automation.id) && (
-                      <div className="flex-shrink-0">
-                        <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
-                          <svg
-                            className="w-4 h-4 text-white"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                        </div>
+                    {isSelectable && (
+                      <div
+                        className="flex-shrink-0 ml-3"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Switch
+                          checked={selectedIds.includes(automation.id)}
+                          onCheckedChange={(checked) => {
+                            handleSelectionChange(automation.id, checked);
+                          }}
+                          className="[&:has(input:checked)>div]:!bg-blue-600"
+                        />
                       </div>
                     )}
                   </div>
@@ -597,11 +772,17 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
                   {/* Tags/Labels */}
                   <div className="mb-4" onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-xs font-medium text-gray-500">Tags:</span>
+                      <span className="text-xs font-medium text-gray-500">
+                        Tags:
+                      </span>
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => setEditingTags(editingTags === automation.id ? null : automation.id)}
+                        onClick={() =>
+                          setEditingTags(
+                            editingTags === automation.id ? null : automation.id
+                          )
+                        }
                         className="h-5 px-2 text-xs text-blue-600 hover:text-blue-700"
                       >
                         {editingTags === automation.id ? "Done" : "+ Add Tag"}
@@ -618,7 +799,9 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
                             {label}
                             {editingTags === automation.id && (
                               <button
-                                onClick={() => removeTagFromAutomation(automation.id, label)}
+                                onClick={() =>
+                                  removeTagFromAutomation(automation.id, label)
+                                }
                                 className="ml-1 hover:text-red-600"
                               >
                                 <X className="h-3 w-3" />
@@ -627,10 +810,12 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
                           </Badge>
                         ))
                       ) : (
-                        <span className="text-xs text-gray-400 italic">No tags</span>
+                        <span className="text-xs text-gray-400 italic">
+                          No tags
+                        </span>
                       )}
                     </div>
-                    
+
                     {/* Add tag input */}
                     {editingTags === automation.id && (
                       <div className="mt-2 flex gap-2">
@@ -639,7 +824,7 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
                           value={newTag}
                           onChange={(e) => setNewTag(e.target.value)}
                           onKeyPress={(e) => {
-                            if (e.key === 'Enter' && newTag.trim()) {
+                            if (e.key === "Enter" && newTag.trim()) {
                               addTagToAutomation(automation.id, newTag.trim());
                             }
                           }}
@@ -706,83 +891,117 @@ export const CustomAutomationStep: React.FC<CustomAutomationStepProps> = ({
                   </div>
 
                   {/* AI Follow-up Template Configuration - Only show if selected and has AI follow-up */}
-                  {isSelectable && selectedIds.includes(automation.id) && hasAIFollowupAction(automation) && (
-                    <div className="mt-4 pt-4 border-t border-blue-200" onClick={(e) => e.stopPropagation()}>
-                      <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-4 rounded-lg border border-purple-200">
-                        <div className="flex items-center gap-2 mb-3">
-                          <Brain className="h-5 w-5 text-purple-600" />
-                          <h4 className="text-sm font-semibold text-purple-900">
-                            Configure AI Follow-up Questions
-                          </h4>
-                        </div>
-                        
-                        {/* Template Selector */}
-                        <div className="space-y-3">
-                          <div>
-                            <Label className="text-xs text-gray-700">Question Template</Label>
-                            <Select
-                              value={aiFollowupTemplate.templateId || 'custom'}
-                              onValueChange={(value) => {
-                                if (value === 'custom') {
-                                  setValue("aiFollowupTemplate", {
-                                    enabled: true,
-                                    templateId: "",
-                                    questions: [
-                                      { question: "", category: "custom", scoringCriteria: "" },
-                                      { question: "", category: "custom", scoringCriteria: "" },
-                                      { question: "", category: "custom", scoringCriteria: "" },
-                                    ],
-                                    emailSubject: "",
-                                    responseDeadlineHours: 72,
-                                  });
-                                } else {
-                                  const template = aiTemplates.find(t => t.id === value);
-                                  if (template) {
-                                    setValue("aiFollowupTemplate", {
-                                      enabled: true,
-                                      templateId: value,
-                                      questions: template.questions.map((q: any) => ({
-                                        question: q.text || q.question || "",
-                                        category: "custom",
-                                        scoringCriteria: q.scoringCriteria || "",
-                                      })),
-                                      emailSubject: `Follow-up: ${template.name}`,
-                                      responseDeadlineHours: 72,
-                                    });
-                                  }
-                                }
-                              }}
-                            >
-                              <SelectTrigger className="bg-white text-xs h-8">
-                                <SelectValue placeholder="Select template" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="custom">Custom Questions</SelectItem>
-                                {aiTemplates.map((template) => (
-                                  <SelectItem key={template.id} value={template.id}>
-                                    {template.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                  {isSelectable &&
+                    selectedIds.includes(automation.id) &&
+                    hasAIFollowupAction(automation) && (
+                      <div
+                        className="mt-4 pt-4 border-t border-blue-200"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-4 rounded-lg border border-purple-200">
+                          <div className="flex items-center gap-2 mb-3">
+                            <Brain className="h-5 w-5 text-purple-600" />
+                            <h4 className="text-sm font-semibold text-purple-900">
+                              Configure AI Follow-up Questions
+                            </h4>
                           </div>
 
-                          {aiFollowupTemplate.enabled && aiFollowupTemplate.questions.length > 0 && (
-                            <div className="text-xs text-purple-700 bg-purple-100/50 p-2 rounded">
-                              ✓ {aiFollowupTemplate.questions.length} questions configured
+                          {/* Template Selector */}
+                          <div className="space-y-3">
+                            <div>
+                              <Label className="text-xs text-gray-700">
+                                Question Template
+                              </Label>
+                              <Select
+                                value={
+                                  aiFollowupTemplate.templateId || "custom"
+                                }
+                                onValueChange={(value) => {
+                                  if (value === "custom") {
+                                    setValue("aiFollowupTemplate", {
+                                      enabled: true,
+                                      templateId: "",
+                                      questions: [
+                                        {
+                                          question: "",
+                                          category: "custom",
+                                          scoringCriteria: "",
+                                        },
+                                        {
+                                          question: "",
+                                          category: "custom",
+                                          scoringCriteria: "",
+                                        },
+                                        {
+                                          question: "",
+                                          category: "custom",
+                                          scoringCriteria: "",
+                                        },
+                                      ],
+                                      emailSubject: "",
+                                      responseDeadlineHours: 72,
+                                    });
+                                  } else {
+                                    const template = aiTemplates.find(
+                                      (t) => t.id === value
+                                    );
+                                    if (template) {
+                                      setValue("aiFollowupTemplate", {
+                                        enabled: true,
+                                        templateId: value,
+                                        questions: template.questions.map(
+                                          (q: any) => ({
+                                            question:
+                                              q.text || q.question || "",
+                                            category: "custom",
+                                            scoringCriteria:
+                                              q.scoringCriteria || "",
+                                          })
+                                        ),
+                                        emailSubject: `Follow-up: ${template.name}`,
+                                        responseDeadlineHours: 72,
+                                      });
+                                    }
+                                  }
+                                }}
+                              >
+                                <SelectTrigger className="bg-white text-xs h-8">
+                                  <SelectValue placeholder="Select template" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="custom">
+                                    Custom Questions
+                                  </SelectItem>
+                                  {aiTemplates.map((template) => (
+                                    <SelectItem
+                                      key={template.id}
+                                      value={template.id}
+                                    >
+                                      {template.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
                             </div>
-                          )}
 
-                          {!aiFollowupTemplate.enabled && (
-                            <div className="text-xs text-amber-700 bg-amber-50 p-2 rounded flex items-center gap-2">
-                              <AlertCircle className="h-3 w-3" />
-                              Please select a template to configure questions
-                            </div>
-                          )}
+                            {aiFollowupTemplate.enabled &&
+                              aiFollowupTemplate.questions.length > 0 && (
+                                <div className="text-xs text-purple-700 bg-purple-100/50 p-2 rounded">
+                                  ✓ {aiFollowupTemplate.questions.length}{" "}
+                                  questions configured
+                                </div>
+                              )}
+
+                            {!aiFollowupTemplate.enabled && (
+                              <div className="text-xs text-amber-700 bg-amber-50 p-2 rounded flex items-center gap-2">
+                                <AlertCircle className="h-3 w-3" />
+                                Please select a template to configure questions
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
                 </div>
               );
             })}
