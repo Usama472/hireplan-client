@@ -10,6 +10,16 @@ export const FORM_STEPS = [
   { id: 3, title: "Review & Submit", description: "Confirm your information" },
 ];
 
+export const COMPANY_SIGNUP_STEPS = [
+  {
+    id: 1,
+    title: "Account Setup",
+    description: "Create your admin password",
+  },
+  { id: 2, title: "Company Details", description: "Review and update company information" },
+  { id: 3, title: "Review & Complete", description: "Confirm and finish setup" },
+];
+
 export const COMPANY_SIZES: SelectOption[] = [
   { value: "1-10", label: "1-10 employees" },
   { value: "11-50", label: "11-50 employees" },

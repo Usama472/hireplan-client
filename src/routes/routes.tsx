@@ -73,6 +73,9 @@ import OwnerAnalytics from "@/pages/owner/analytics/index";
 // Support
 import SupportPage from "@/pages/dashboard/support";
 
+// Company Signup
+import CompanySignup from "@/pages/CompanySignup";
+
 export const appRoutes: AppRoutesType[] = [
   {
     id: HOME_TEXT,
@@ -91,6 +94,12 @@ export const appRoutes: AppRoutesType[] = [
     id: SIGNUP_TEXT,
     url: ROUTES.SIGNUP,
     element: <Signup />,
+    isPrivate: false,
+  },
+  {
+    id: "company-signup",
+    url: ROUTES.COMPANY_SIGNUP,
+    element: <CompanySignup />,
     isPrivate: false,
   },
   {

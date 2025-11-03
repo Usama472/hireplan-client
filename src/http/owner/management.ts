@@ -125,6 +125,46 @@ class OwnerManagementService {
     return ownerPost(`/owner/management/companies/${companyId}/ai-cleanup-website`, options);
   }
 
+  async createCompanyWithSignupLink(data: {
+    companyName: string;
+    websiteUrl?: string;
+    industry?: string;
+    companySize?: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    zipCode?: string;
+    country?: string;
+    adminEmail: string;
+    adminFirstName: string;
+    adminLastName: string;
+    planId?: 'starter' | 'professional' | 'enterprise';
+    customMonthlyPrice?: number | null;
+    maxJobPostings?: number | null;
+    trialDays?: number;
+  }): Promise<{
+    company: {
+      id: string;
+      companyName: string;
+      organizationId: number;
+      slug: string;
+      planId?: string;
+      customMonthlyPrice?: number | null;
+      maxJobPostings?: number | null;
+    };
+    signupLink: string;
+    signupToken: string;
+    expiresAt: Date;
+    adminEmail: string;
+  }> {
+    try {
+      const response = await ownerPost('/owner/management/companies-signup-link', data);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || 'Failed to create company');
+    }
+  }
+
   async createCompany(data: {
     companyName: string;
     websiteUrl?: string;

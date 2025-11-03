@@ -1,88 +1,48 @@
 import AutomationBuilder from "@/components/dashboard/automations/automation-builder";
 import { Button } from "@/components/ui/button";
-import type { AutomationType } from "@/interfaces/automations";
-import { useToast } from "@/lib/hooks/use-toast";
-import API from "@/http";
-// Removed global DataLoadingManager import
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "sonner";
+import API from "@/http";
+import { AutomationProvider } from "@/contexts/AutomationContext";
 
 export default function EditAutomationPage() {
-  const [automation, setAutomation] = useState<AutomationType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [automationData, setAutomationData] = useState(null);
   const navigate = useNavigate();
   const { id } = useParams();
-  const { toast } = useToast();
 
-  // Fetch automation data
+  // Load automation data
   useEffect(() => {
-    const fetchAutomation = async () => {
-      if (!id) return;
+    const loadAutomation = async () => {
+      if (!id) {
+        toast.error("No automation ID provided");
+        navigate("/dashboard/automations");
+        return;
+      }
 
       try {
         setIsLoading(true);
         const response = await API.automation.getAutomationById(id);
-            
-            if (response?.success && response?.automation) {
-              setAutomation(response.automation);
-            } else {
-              toast({
-                title: "Automation not found",
-                description: "The automation you're trying to edit doesn't exist.",
-                type: "error",
-              });
-              navigate("/dashboard/automations");
-            }
-          } catch (error) {
-            console.error("Error fetching automation:", error);
-            toast({
-              title: "Error loading automation",
-              description: "Failed to load the automation. Please try again.",
-              type: "error",
-            });
-            navigate("/dashboard/automations");
-          } finally {
-            setIsLoading(false);
-          }
+        
+        if (response?.success && response?.automation) {
+          setAutomationData(response.automation);
+        } else {
+          toast.error("Automation not found");
+          navigate("/dashboard/automations");
+        }
+      } catch (error) {
+        console.error("Error loading automation:", error);
+        toast.error("Failed to load automation");
+        navigate("/dashboard/automations");
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    fetchAutomation();
-  }, [id, navigate, toast]);
-
-  // Handle save automation
-  const handleSaveAutomation = async (updatedAutomation: AutomationType) => {
-    if (!id) return;
-
-    try {
-      setIsLoading(true);
-      const response = await API.automation.updateAutomation(id, updatedAutomation);
-      
-      if (response?.success) {
-        toast({
-          title: "Automation updated",
-          description: `${updatedAutomation.name} has been updated successfully.`,
-          type: "success",
-        });
-        navigate("/dashboard/automations");
-      } else {
-        toast({
-          title: "Update failed",
-          description: "Failed to update the automation. Please try again.",
-          type: "error",
-        });
-      }
-    } catch (error) {
-      console.error("Error updating automation:", error);
-      toast({
-        title: "Update failed",
-        description: "An error occurred while updating the automation.",
-        type: "error",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    loadAutomation();
+  }, [id, navigate]);
 
   // Handle cancel/back
   const handleCancel = () => {
@@ -95,16 +55,33 @@ export default function EditAutomationPage() {
     }
   };
 
+  // Loading state
   if (isLoading) {
     return (
       <div className="min-h-full bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto" />
+          <p className="mt-4 text-gray-600">Loading automation...</p>
+        </div>
       </div>
     );
   }
 
-  if (!automation) {
-    return null;
+  // If no automation data loaded, show error
+  if (!automationData) {
+    return (
+      <div className="min-h-full bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Automation not found</p>
+          <Button 
+            onClick={() => navigate("/dashboard/automations")}
+            className="mt-4"
+          >
+            Back to Automations
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -121,7 +98,9 @@ export default function EditAutomationPage() {
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
-            <h1 className="text-base sm:text-lg font-bold text-gray-900">Edit Automation</h1>
+            <h1 className="text-base sm:text-lg font-bold text-gray-900">
+              Edit Automation
+            </h1>
           </div>
           <div>
             <Button variant="ghost" onClick={handleCancel} size="sm" className="mr-1.5">
@@ -133,12 +112,9 @@ export default function EditAutomationPage() {
 
       {/* Main Content */}
       <div className="max-w-[1200px] mx-auto py-3 px-2.5 sm:px-3">
-        <AutomationBuilder
-          mode="standalone"
-          onSave={handleSaveAutomation}
-          automation={automation}
-          isPageLayout={true}
-        />
+        <AutomationProvider initialAutomation={automationData}>
+          <AutomationBuilder />
+        </AutomationProvider>
       </div>
     </div>
   );

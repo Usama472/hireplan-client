@@ -5,12 +5,12 @@ import {
 } from "@/constants/automations-constants";
 import { cn } from "@/lib/utils";
 import { CheckCircle2 } from "lucide-react";
-import { useState } from "react";
 import { useNavigate } from "react-router";
+import { useAutomation } from "@/contexts/AutomationContext";
 
 export default function TriggerSection() {
   const navigate = useNavigate();
-  const [selectedTriggerType, setSelectedTriggerType] = useState<string>("");
+  const { selectedTriggerType, setSelectedTriggerType, isEditMode, automationName } = useAutomation();
 
   return (
     <div className="space-y-3">

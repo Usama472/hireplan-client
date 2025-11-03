@@ -133,12 +133,12 @@ const CompaniesContentNew: React.FC = () => {
 
     try {
       setIsCreating(true);
-      const result = await ownerManagementService.createCompany(newCompany);
+      const result = await ownerManagementService.createCompanyWithSignupLink(newCompany);
       
       toast.success(
         <div>
           <p className="font-semibold">Company created!</p>
-          <p className="text-xs mt-1">Invitation sent to {result.admin.email}</p>
+          <p className="text-xs mt-1">Signup link sent to {result.adminEmail}</p>
         </div>
       );
       

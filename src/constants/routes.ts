@@ -49,6 +49,7 @@ export const ROUTES = {
   HOME: "/",
   LOGIN: "/login",
   SIGNUP: "/signup",
+  COMPANY_SIGNUP: "/company-signup",
   FORGOT_PASSWORD: "/forgot-password",
   RESET_PASSWORD: "/reset-password",
   // RESET_PASSWORD_QUERY: "/reset-password",

@@ -2,6 +2,7 @@ import AutomationBuilder from "@/components/dashboard/automations/automation-bui
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { AutomationProvider } from "@/contexts/AutomationContext";
 
 export default function CreateAutomationPage() {
   const navigate = useNavigate();
@@ -45,7 +46,9 @@ export default function CreateAutomationPage() {
 
       {/* Main Content */}
       <div className="max-w-[1200px] mx-auto py-3 px-2.5 sm:px-3">
-        <AutomationBuilder />
+        <AutomationProvider>
+          <AutomationBuilder />
+        </AutomationProvider>
       </div>
     </div>
   );

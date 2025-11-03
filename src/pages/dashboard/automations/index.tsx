@@ -126,21 +126,21 @@ export default function AutomationsDashboard() {
   const getTriggerIcon = (triggerType: string) => {
     switch (triggerType) {
       case "application_created":
-        return <UserCheck className="h-5 w-5 text-blue-600" />;
+        return <UserCheck className="h-5 w-5 text-primary" />;
       case "application_status_changed":
-        return <FileCheck className="h-5 w-5 text-indigo-600" />;
+        return <FileCheck className="h-5 w-5 text-secondary" />;
       case "resume_score_updated":
-        return <CheckCircle2 className="h-5 w-5 text-green-600" />;
+        return <CheckCircle2 className="h-5 w-5 text-emerald-600" />;
       case "job_created":
         return <Briefcase className="h-5 w-5 text-amber-600" />;
       case "job_published":
         return <Briefcase className="h-5 w-5 text-emerald-600" />;
       case "job_expired":
-        return <AlertCircle className="h-5 w-5 text-red-600" />;
+        return <AlertCircle className="h-5 w-5 text-red-500" />;
       case "cron":
-        return <Calendar className="h-5 w-5 text-purple-600" />;
+        return <Calendar className="h-5 w-5 text-secondary" />;
       default:
-        return <Zap className="h-5 w-5 text-gray-600" />;
+        return <Zap className="h-5 w-5 text-gray-500" />;
     }
   };
 
@@ -150,15 +150,15 @@ export default function AutomationsDashboard() {
       case "send_email_recruiter":
       case "send_email_recruiter_team":
       case "send_email_reminders":
-        return <Mail className="h-4 w-4 text-blue-600" />;
+        return <Mail className="h-4 w-4 text-primary" />;
       case "update_job_status":
         return <FileCheck className="h-4 w-4 text-emerald-600" />;
       case "send_pipeline_summary":
-        return <TrendingUp className="h-4 w-4 text-purple-600" />;
+        return <TrendingUp className="h-4 w-4 text-secondary" />;
       case "auto_expire_jobs":
-        return <AlertCircle className="h-4 w-4 text-red-600" />;
+        return <AlertCircle className="h-4 w-4 text-red-500" />;
       default:
-        return <Target className="h-4 w-4 text-gray-600" />;
+        return <Target className="h-4 w-4 text-gray-500" />;
     }
   };
 
@@ -618,7 +618,7 @@ export default function AutomationsDashboard() {
                     return (
                       <div
                         key={automation.id}
-                        className="bg-white border border-gray-200 rounded-md hover:border-blue-300 transition-all p-4 flex flex-col"
+                        className="bg-white border border-gray-200 rounded-md hover:border-primary/30 transition-all p-4 flex flex-col"
                       >
                         {/* Header */}
                         <div className="flex items-start gap-3 mb-4">
@@ -725,7 +725,7 @@ export default function AutomationsDashboard() {
                               variant="outline"
                               size="sm"
                               onClick={() => navigate(`/dashboard/automations/edit/${automation.id}`)}
-                              className="flex-1 h-9 text-blue-600 border-blue-200 hover:bg-blue-50"
+                              className="flex-1 h-9 text-primary border-primary/30 hover:bg-primary/5 hover:border-primary/50 transition-all"
                             >
                               <Edit className="h-4 w-4 mr-2" />
                               Edit
@@ -739,10 +739,10 @@ export default function AutomationsDashboard() {
                                   automation.status
                                 )
                               }
-                              className={`flex-1 h-9 ${
+                              className={`flex-1 h-9 transition-all ${
                                 automation.status === "active"
-                                  ? "text-orange-600 border-orange-200 hover:bg-orange-50"
-                                  : "text-green-600 border-green-200 hover:bg-green-50"
+                                  ? "text-amber-600 border-amber-200 hover:bg-amber-50 hover:border-amber-300"
+                                  : "text-emerald-600 border-emerald-200 hover:bg-emerald-50 hover:border-emerald-300"
                               }`}
                             >
                               {automation.status === "active" ? (
@@ -763,7 +763,7 @@ export default function AutomationsDashboard() {
                               onClick={() =>
                                 handleDeleteAutomation(automation.id)
                               }
-                              className="text-red-600 border-red-200 hover:bg-red-50 h-9 w-9 p-0"
+                              className="text-red-500 border-red-200 hover:bg-red-50 hover:border-red-300 h-9 w-9 p-0 transition-all"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
