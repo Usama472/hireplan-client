@@ -19,19 +19,69 @@ export const mutateSession = async ({
   shouldBroadcast,
   accessToken,
 }: Params) => {
-  if (accessToken) {
-    localStorage.setItem(clientAccessToken, accessToken);
-  } else {
-    localStorage.removeItem(clientAccessToken);
-    localStorage.removeItem('cachedUserProfile'); // Clear cached profile on logout
-  }
-  if (shouldBroadcast) {
-    AuthBroadcastChannel().postMessage({
-      event: "session",
-      data: { trigger: "mutateSession" },
-    });
+  const { mobileSessionManager } = await import('@/utils/mobile-session-manager');
+  
+  try {
+    if (accessToken) {
+      // Use enhanced mobile session manager
+      const user = await getUserProfile(accessToken);
+      const success = await mobileSessionManager.setSession({ accessToken, user });
+      
+      if (!success) {
+        throw new Error('Failed to store session data');
+      }
+      
+      // Legacy storage for compatibility
+      localStorage.setItem(clientAccessToken, accessToken);
+      localStorage.setItem('cachedUserProfile', JSON.stringify(user));
+      
+    } else {
+      // Clear session using mobile manager
+      mobileSessionManager.clearSession();
+      
+      // Legacy cleanup
+      localStorage.removeItem(clientAccessToken);
+      localStorage.removeItem('cachedUserProfile');
+    }
+    
+    if (shouldBroadcast) {
+      AuthBroadcastChannel().postMessage({
+        event: "session",
+        data: { trigger: "mutateSession" },
+      });
+    }
+  } catch (error) {
+    console.error('⚠️ Session mutation error:', error);
+    
+    // Fallback to legacy method
+    if (accessToken) {
+      localStorage.setItem(clientAccessToken, accessToken);
+    } else {
+      localStorage.removeItem(clientAccessToken);
+      localStorage.removeItem('cachedUserProfile');
+    }
+    
+    // Still broadcast the change
+    if (shouldBroadcast) {
+      AuthBroadcastChannel().postMessage({
+        event: "session",
+        data: { trigger: "mutateSession" },
+      });
+    }
   }
 };
+
+// Helper to get user profile
+async function getUserProfile(accessToken: string): Promise<any> {
+  try {
+    const response = await API.user.getProfile();
+    return response.user;
+  } catch (error) {
+    console.warn('Failed to fetch user profile, using cached data');
+    const cached = localStorage.getItem('cachedUserProfile');
+    return cached ? JSON.parse(cached) : null;
+  }
+}
 
 export const getSession = async ({ shouldBroadcast }: Params) => {
   const accessToken = localStorage.getItem(clientAccessToken);

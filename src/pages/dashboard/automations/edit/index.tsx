@@ -2,6 +2,8 @@ import AutomationBuilder from "@/components/dashboard/automations/automation-bui
 import { Button } from "@/components/ui/button";
 import type { AutomationType } from "@/interfaces/automations";
 import { useToast } from "@/lib/hooks/use-toast";
+import API from "@/http";
+// Removed global DataLoadingManager import
 import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -15,116 +17,71 @@ export default function EditAutomationPage() {
 
   // Fetch automation data
   useEffect(() => {
-    // In a real implementation, this would be an API call
-    // Mock data for this example
-    const mockAutomations = [
-      {
-        id: "1",
-        name: "Send rejection email after 10 days",
-        description:
-          "Automatically sends a rejection email 10 days after an application is rejected",
-        trigger: {
-          type: "application_status_changed",
-          config: {
-            from: null,
-            to: "rejected",
-          },
-        },
-        conditions: [
-          {
-            field: "resumeScore",
-            operator: "<",
-            value: "50",
-          },
-        ],
-        actions: [
-          {
-            type: "send_email",
-            config: {
-              templateId: "rejection-standard",
-              delay: {
-                value: 10,
-                unit: "days",
-              },
-              timezone: "Asia/Karachi",
-            },
-          },
-        ],
-        enabled: true,
-        lastRunAt: "2023-10-15T14:30:00Z",
-        nextRunAt: "2023-10-25T14:30:00Z",
-        createdAt: "2023-10-15T14:30:00Z",
-        updatedAt: "2023-10-15T14:30:00Z",
-        labels: [],
-      },
-      {
-        id: "2",
-        name: "Send follow-up to qualified candidates",
-        description:
-          "Sends a follow-up email to candidates with high resume scores",
-        trigger: {
-          type: "resume_score_updated",
-          config: {},
-        },
-        conditions: [
-          {
-            field: "resumeScore",
-            operator: ">",
-            value: "75",
-          },
-        ],
-        actions: [
-          {
-            type: "send_email",
-            config: {
-              templateId: "qualified-followup",
-              delay: {
-                value: 1,
-                unit: "days",
-              },
-              timezone: "America/New_York",
-            },
-          },
-        ],
-        enabled: true,
-        lastRunAt: "2023-10-18T09:45:00Z",
-        nextRunAt: "2023-10-19T09:45:00Z",
-        createdAt: "2023-10-10T11:20:00Z",
-        updatedAt: "2023-10-10T11:20:00Z",
-        labels: [],
-      },
-    ];
+    const fetchAutomation = async () => {
+      if (!id) return;
 
-    setTimeout(() => {
-      const found = mockAutomations.find((a) => a.id === id);
-      if (found) {
-        setAutomation(found as AutomationType);
-      } else {
-        toast({
-          title: "Automation not found",
-          description: "The automation you're trying to edit doesn't exist.",
-          type: "error",
-        });
-        navigate("/dashboard/automations");
-      }
-      setIsLoading(false);
-    }, 500);
+      try {
+        setIsLoading(true);
+        const response = await API.automation.getAutomationById(id);
+            
+            if (response?.success && response?.automation) {
+              setAutomation(response.automation);
+            } else {
+              toast({
+                title: "Automation not found",
+                description: "The automation you're trying to edit doesn't exist.",
+                type: "error",
+              });
+              navigate("/dashboard/automations");
+            }
+          } catch (error) {
+            console.error("Error fetching automation:", error);
+            toast({
+              title: "Error loading automation",
+              description: "Failed to load the automation. Please try again.",
+              type: "error",
+            });
+            navigate("/dashboard/automations");
+          } finally {
+            setIsLoading(false);
+          }
+    };
+
+    fetchAutomation();
   }, [id, navigate, toast]);
 
   // Handle save automation
-  const handleSaveAutomation = (updatedAutomation: AutomationType) => {
-    setIsLoading(true);
+  const handleSaveAutomation = async (updatedAutomation: AutomationType) => {
+    if (!id) return;
 
-    // In a real implementation, this would be an API call
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      setIsLoading(true);
+      const response = await API.automation.updateAutomation(id, updatedAutomation);
+      
+      if (response?.success) {
+        toast({
+          title: "Automation updated",
+          description: `${updatedAutomation.name} has been updated successfully.`,
+          type: "success",
+        });
+        navigate("/dashboard/automations");
+      } else {
+        toast({
+          title: "Update failed",
+          description: "Failed to update the automation. Please try again.",
+          type: "error",
+        });
+      }
+    } catch (error) {
+      console.error("Error updating automation:", error);
       toast({
-        title: "Automation updated",
-        description: `${updatedAutomation.name} has been updated successfully.`,
-        type: "success",
+        title: "Update failed",
+        description: "An error occurred while updating the automation.",
+        type: "error",
       });
-      navigate("/dashboard/automations");
-    }, 800);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Handle cancel/back

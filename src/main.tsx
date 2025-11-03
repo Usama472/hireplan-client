@@ -1,7 +1,13 @@
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
+import './utils/prevent-layout-shifts'
+import './utils/data-loading'
 import './polyfills'
+import { PerformanceProvider } from './components/providers/performance-provider'
+// Enhanced mobile optimizations
+import './utils/network-manager'
+import './utils/mobile-session-manager'
 
 // Enhanced iOS/Safari detection
 const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);

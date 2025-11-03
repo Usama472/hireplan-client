@@ -618,10 +618,14 @@ export default function EditJob() {
     if (hasProfessionalFeatures) {
       return {
         position: 1,
+        "position-details": 1,
+        "hours-schedule": 1,
+        compliance: 1,
         "job-ad": 2,
         qualifications: 3,
         "ai-analysis": 4,
         posting: 5,
+        schedule: 5,
         automation: 6,
         booking: 7,
         review: 8,
@@ -629,9 +633,13 @@ export default function EditJob() {
     } else {
       return {
         position: 1,
+        "position-details": 1,
+        "hours-schedule": 1,
+        compliance: 1,
         "job-ad": 2,
         qualifications: 3,
         posting: 4,
+        schedule: 4,
         booking: 5,
         automation: 6,
         review: 7,
@@ -640,38 +648,67 @@ export default function EditJob() {
   };
 
   // Get completed sections from form data
-  const getCompletedSections = (formData: JobFormSchema) => {
+  const getCompletedSections = (formData: Partial<JobFormSchema> & { startDate?: any; endDate?: any }) => {
     const sections = [];
+    
+    // Helper function to check if a value is a valid Date
+    const isValidDate = (date: any): date is Date => {
+      return date instanceof Date && !isNaN(date.getTime());
+    };
+    
+    // Check job ad completion
     if (formData.jobDescription) {
       sections.push("job-ad");
     }
-    if (
-      formData.jobTitle &&
-      formData.jobBoardTitle &&
-      formData.department &&
-      formData.payRate &&
-      formData.positionsToHire
-    ) {
+    
+    // Check position details completion (basic fields)
+    const hasBasicPosition = formData.jobTitle && formData.jobBoardTitle && formData.positionsToHire;
+    
+    // Check hours/schedule completion
+    const hasHoursSchedule = formData.hoursPerWeek && formData.schedule;
+    
+    // Check compliance/department completion
+    const hasCompliance = formData.department && (formData.exemptStatus || formData.eeoJobCategory);
+    
+    // Mark position as complete if all sub-sections are filled
+    if (hasBasicPosition && hasHoursSchedule && hasCompliance) {
       sections.push("position");
     }
+    
+    // Also track individual sub-sections for better UX
+    if (hasBasicPosition) {
+      sections.push("position-details");
+    }
+    if (hasHoursSchedule) {
+      sections.push("hours-schedule");
+    }
+    if (hasCompliance) {
+      sections.push("compliance");
+    }
+    
+    // Check qualifications completion
     if (
       formData.requiredQualifications &&
       formData.requiredQualifications.length > 0
     ) {
       sections.push("qualifications");
     }
-    if (formData.startDate && formData.endDate) {
+    
+    // Check posting schedule completion
+    if (isValidDate(formData.startDate) && isValidDate(formData.endDate)) {
       sections.push("schedule");
     }
-    if (formData.startDate) {
+    if (isValidDate(formData.startDate)) {
       sections.push("posting");
     }
+    
     // Check for AI Analysis completion (Professional+ only)
     if (hasProfessionalFeatures) {
       if (formData.customQuestions && formData.customQuestions.length > 0) {
         sections.push("ai-analysis");
       }
     }
+    
     // Check for automation completion
     if (
       formData.automation &&
@@ -680,10 +717,12 @@ export default function EditJob() {
     ) {
       sections.push("automation");
     }
+    
     // Check for booking page completion
     if (formData.availabilityId) {
       sections.push("booking");
     }
+    
     return sections;
   };
 
@@ -691,7 +730,7 @@ export default function EditJob() {
   const getCompletedStepIndices = (): number[] => {
     const stepMap = getStepMap();
     const formData = watch();
-    const currentCompletedSections = getCompletedSections(formData);
+    const currentCompletedSections = getCompletedSections(formData as any);
 
     const completedIndices: number[] = [];
     currentCompletedSections.forEach((sectionId) => {
@@ -1195,10 +1234,15 @@ export default function EditJob() {
                 <div className="p-2 bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg border border-primary/10">
                   <FileText className="h-4 w-4 text-primary" />
                 </div>
-                <div>
+                <div className="flex-1 min-w-0">
                   <h1 className="text-base font-bold text-gray-900 leading-tight">
                     Edit Job
                   </h1>
+                  {form.watch("jobTitle") && (
+                    <p className="text-sm font-medium text-primary truncate">
+                      {form.watch("jobTitle")}
+                    </p>
+                  )}
                   <p className="text-xs text-gray-600">
                     Step {currentStep} of {totalSteps}
                   </p>

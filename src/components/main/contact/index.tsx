@@ -188,10 +188,10 @@ export default function ContactPage() {
                         Speak directly with our team
                       </p>
                       <a
-                        href="tel:+1-555-123-4567"
+                        href="tel:+1-302-500-4435"
                         className="text-purple-600 hover:text-purple-700 font-medium transition-colors duration-200 text-sm"
                       >
-                        +1 (555) 123-4567
+                        +1 (302) 500-4435
                       </a>
                     </div>
                   </div>
@@ -210,8 +210,8 @@ export default function ContactPage() {
                         When you can reach us
                       </p>
                       <div className="text-orange-600 text-sm space-y-1 font-medium">
-                        <div>Monday - Friday: 9:00 AM - 6:00 PM PST</div>
-                        <div>Saturday: 10:00 AM - 2:00 PM PST</div>
+                        <div>Monday - Friday: 9:00 AM - 6:00 PM EST</div>
+                        <div>Saturday: 10:00 AM - 2:00 PM EST</div>
                         <div>Sunday: Closed</div>
                       </div>
                     </div>

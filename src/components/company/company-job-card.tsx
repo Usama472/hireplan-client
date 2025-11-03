@@ -7,458 +7,196 @@ import {
   Calendar,
   DollarSign,
   MapPin,
+  Clock,
+  Building,
   CheckCircle,
-  Star,
+  Users,
 } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 interface CompanyJobCardProps {
   job: JobFormDataWithId;
   onApply?: () => void;
 }
+
 const formatSalary = (payRate: JobFormDataWithId["payRate"]) => {
-  if (payRate.type === "exact-amount" && "amount" in payRate) {
-    return `$${payRate.amount.toLocaleString()}`;
-  } else if (payRate.type === "range" && "min" in payRate && "max" in payRate) {
+  if (!payRate) return "Salary not specified";
+  
+  if (payRate.type === "range" && payRate.min && payRate.max) {
     return `$${payRate.min.toLocaleString()} - $${payRate.max.toLocaleString()}`;
-  } else if (payRate.type === "starting-amount" && "amount" in payRate) {
-    return `Starting at $${payRate.amount.toLocaleString()}`;
-  } else if (payRate.type === "maximum-amount" && "amount" in payRate) {
-    return `Up to $${payRate.amount.toLocaleString()}`;
   }
-  return "Competitive";
-};
-
-const formatPayType = (payType: JobFormDataWithId["payType"]) => {
-  const payTypeMap: Record<string, string> = {
-    hourly: "per hour",
-    salary: "per year",
-    "base-commission": "base + commission",
-    "base-tips": "base + tips",
-    "base-bonus": "base + bonus",
-    "commission-only": "commission only",
-    other: "",
-  };
-
-  return payTypeMap[payType] || "";
-};
-
-const getPriorityColor = (status: JobFormDataWithId["jobStatus"]) => {
-  const statusColors: Record<string, { background: string; color: string }> = {
-    low: { background: "#dbeafe", color: "#1e40af" },
-    medium: { background: "#fef3c7", color: "#92400e" },
-    high: { background: "#ffedd5", color: "#9a3412" },
-    urgent: { background: "#fee2e2", color: "#991b1b" },
-  };
-
-  return statusColors[status] || { background: "#f3f4f6", color: "#1f2937" };
-};
-
-const getWorkplaceTypeIcon = (type: JobFormDataWithId["workplaceType"]) => {
-  switch (type) {
-    case "remote":
-      return "🌐";
-    case "hybrid":
-      return "🏠/🏢";
-    case "onsite":
-      return "🏢";
-    default:
-      return "🏢";
+  
+  if (payRate.type === "exact-amount" && payRate.min) {
+    return `$${payRate.min.toLocaleString()}`;
   }
+  
+  if (payRate.type === "starting-amount" && payRate.min) {
+    return `Starting at $${payRate.min.toLocaleString()}`;
+  }
+  
+  if (payRate.type === "maximum-amount" && payRate.max) {
+    return `Up to $${payRate.max.toLocaleString()}`;
+  }
+  
+  return "Competitive salary";
 };
 
 const CompanyJobCard: React.FC<CompanyJobCardProps> = ({ job, onApply }) => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const location = job.jobLocation
     ? `${job.jobLocation.city}, ${job.jobLocation.state}`
-    : "Location not specified";
+    : "Remote";
 
-  const formattedDate = new Date(job.endDate).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-
-  const priorityStyle = getPriorityColor(job.jobStatus);
+  const formattedDate = job.endDate 
+    ? new Date(job.endDate).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      })
+    : "Open";
 
   const handleApplyClick = () => {
     const applyUrl = `/company/${slug}/job/${job.id}/apply`;
     navigate(applyUrl);
-
     if (onApply) onApply();
   };
 
+  const cleanDescription = job.jobDescription
+    .replace(/<[^>]*>/g, '')
+    .replace(/\n/g, ' ')
+    .trim();
+
+  const truncatedDescription = job.jobDescription.length > 200 
+    ? job.jobDescription.substring(0, 200) + '...' 
+    : job.jobDescription;
+
   return (
-    <Card
-      className="rounded-md shadow-none"
-      style={{
-        overflow: "hidden",
-        border: "1px solid #e2e8f0",
-        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-        backgroundColor: "#ffffff",
-        marginBottom: "1.5rem",
-        position: "relative",
-      }}
-      onMouseOver={(e) => {
-        e.currentTarget.style.boxShadow = "none";
-        e.currentTarget.style.borderColor = "#cbd5e1";
-      }}
-      onMouseOut={(e) => {
-        e.currentTarget.style.boxShadow = "none";
-        e.currentTarget.style.borderColor = "#e2e8f0";
-      }}
-    >
-      {/* Header Section */}
-      <div
-        style={{
-          backgroundColor: "#f8fafc",
-          borderBottom: "1px solid #e2e8f0",
-          padding: "2rem",
-        }}
-      >
-        <h3
-          style={{
-            fontSize: "1.75rem",
-            fontWeight: "700",
-            color: "#0f172a",
-            lineHeight: "1.3",
-            margin: "0",
-            marginBottom: "1.5rem",
-          }}
-        >
-          {job.jobBoardTitle}
-        </h3>
-
-        {/* Quick Info Tags */}
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
-          <div
-            style={{
-              backgroundColor: "#ffffff",
-              border: "1px solid #e2e8f0",
-              padding: "0.5rem 0.875rem",
-              borderRadius: "0.75rem",
-              fontSize: "0.875rem",
-              fontWeight: "600",
-              color: "#374151",
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
-            }}
-          >
-            <Briefcase
-              style={{ height: "1rem", width: "1rem", color: "#6b7280" }}
-            />
-            <span style={{ textTransform: "capitalize" }}>
-              {job.employmentType.replace("-", " ")}
-            </span>
-          </div>
-
-          <div
-            style={{
-              backgroundColor: "#ffffff",
-              border: "1px solid #e2e8f0",
-              padding: "0.5rem 0.875rem",
-              borderRadius: "0.75rem",
-              fontSize: "0.875rem",
-              fontWeight: "600",
-              color: "#374151",
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
-            }}
-          >
-            <span style={{ fontSize: "1rem" }}>
-              {getWorkplaceTypeIcon(job.workplaceType)}
-            </span>
-            <span style={{ textTransform: "capitalize" }}>
-              {job.workplaceType}
-            </span>
-          </div>
-
-          {job.workplaceType !== "remote" && (
-            <div
-              style={{
-                backgroundColor: "#ffffff",
-                border: "1px solid #e2e8f0",
-                padding: "0.5rem 0.875rem",
-                borderRadius: "0.75rem",
-                fontSize: "0.875rem",
-                fontWeight: "600",
-                color: "#374151",
-                display: "flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
-              }}
-            >
-              <MapPin
-                style={{ height: "1rem", width: "1rem", color: "#6b7280" }}
-              />
-              <span>{location}</span>
+    <Card className="group relative bg-white border border-gray-200 hover:border-gray-300 transition-all duration-200 hover:shadow-md rounded-lg overflow-hidden">
+      {/* Header Strip */}
+      <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-4 py-3 border-b border-gray-100">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center border border-gray-200">
+              <Briefcase className="h-4 w-4 text-gray-600" />
             </div>
-          )}
+            <div>
+              <h3 className="text-xl font-semibold text-gray-900 leading-tight">
+                {job.jobBoardTitle}
+              </h3>
+              <div className="flex items-center gap-4 text-base text-gray-600 mt-1">
+                <div className="flex items-center gap-1">
+                  <Building className="h-3 w-3" />
+                  <span>{job.employmentType || "Full-time"}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <MapPin className="h-3 w-3" />
+                  <span>{location}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <Badge variant="outline" className="bg-white text-gray-700 border-gray-300 text-sm">
+            {job.workplaceType || "On-site"}
+          </Badge>
         </div>
       </div>
 
-      {/* Content Section */}
-      <div style={{ padding: "2rem" }}>
-        {/* Salary Information */}
-        <div
-          style={{
-            marginBottom: "1.5rem",
-            padding: "1rem 1.25rem",
-            backgroundColor: "#f0fdf4",
-            border: "1px solid #bbf7d0",
-            borderRadius: "0.75rem",
-            display: "flex",
-            alignItems: "center",
-            gap: "0.75rem",
-          }}
-        >
-          <DollarSign
-            style={{ height: "1.25rem", width: "1.25rem", color: "#10b981" }}
-          />
-          <div>
-            <div
-              style={{ fontSize: "1rem", fontWeight: "700", color: "#065f46" }}
-            >
-              {formatSalary(job.payRate)} {formatPayType(job.payType)}
-            </div>
-          </div>
-        </div>
-
-        {/* Job Description */}
-        <div style={{ marginBottom: "2rem" }}>
-          <h4
-            style={{
-              fontSize: "1.25rem",
-              fontWeight: "700",
-              color: "#0f172a",
-              marginBottom: "1rem",
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem",
-            }}
-          >
-            <div
-              style={{
-                width: "0.25rem",
-                height: "1.5rem",
-                backgroundColor: "#3b82f6",
-                borderRadius: "0.125rem",
-              }}
-            ></div>
-            About this role
-          </h4>
-          <div
-            style={{
-              backgroundColor: "#f8fafc",
-              border: "1px solid #e2e8f0",
-              borderRadius: "0.75rem",
-              padding: "1.25rem",
-              maxHeight: "16rem",
-              overflowY: "auto",
-              fontSize: "1rem",
-              lineHeight: "1.7",
-              color: "#374151",
-            }}
-          >
-            <div
-              style={{
-                whiteSpace: "pre-wrap",
-                wordBreak: "break-word",
-              }}
+      {/* Main Content */}
+      <div className="p-4">
+        {/* Description */}
+        <div className="mb-4">
+          <div className="bg-gray-50 rounded-lg p-4 border-l-4 border-blue-500">
+            <div 
+              className="text-gray-700 text-base leading-relaxed prose prose-base max-w-none
+                         prose-ul:my-2 prose-li:my-1 prose-p:my-2 prose-strong:text-gray-900
+                         prose-ul:pl-4 prose-li:pl-0"
               dangerouslySetInnerHTML={{
-                __html: job.jobDescription
-                  .replace(/<[^>]*>?/gm, "")
-                  .replace(/\n/g, "<br>"),
+                __html: isExpanded ? job.jobDescription : truncatedDescription
               }}
             />
           </div>
+          {cleanDescription.length > 200 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="text-blue-600 hover:text-purple-600 hover:bg-blue-50 mt-3 h-8 px-3 text-sm font-medium"
+            >
+              {isExpanded ? 'Show less' : 'Read more'}
+            </Button>
+          )}
         </div>
 
-        {/* Required Qualifications */}
-        {job.requiredQualifications &&
-          job.requiredQualifications.length > 0 && (
-            <div style={{ marginBottom: "2rem" }}>
-              <h4
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: "700",
-                  color: "#0f172a",
-                  marginBottom: "1rem",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                }}
-              >
-                <CheckCircle
-                  style={{
-                    height: "1.25rem",
-                    width: "1.25rem",
-                    color: "#10b981",
-                  }}
-                />
-                Required Qualifications
-              </h4>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "0.875rem",
-                }}
-              >
-                {job.requiredQualifications.slice(0, 4).map((qual, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      display: "flex",
-                      alignItems: "flex-start",
-                      gap: "1rem",
-                      padding: "1rem",
-                      backgroundColor: "#f8fafc",
-                      borderRadius: "0.75rem",
-                      border: "1px solid #e2e8f0",
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: "0.5rem",
-                        height: "0.5rem",
-                        backgroundColor: "#10b981",
-                        borderRadius: "50%",
-                        marginTop: "0.625rem",
-                        flexShrink: 0,
-                      }}
-                    ></div>
-                    <span
-                      style={{
-                        fontSize: "1rem",
-                        color: "#374151",
-                        lineHeight: "1.6",
-                        fontWeight: "500",
-                      }}
-                    >
-                      {qual.text}
-                    </span>
-                  </div>
-                ))}
-              </div>
+        {/* Key Info Grid */}
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <div className="bg-gray-50 rounded-lg p-3">
+            <div className="flex items-center gap-2 mb-1">
+              <DollarSign className="h-4 w-4 text-green-600" />
+              <span className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+                Salary
+              </span>
             </div>
-          )}
+            <p className="text-base font-semibold text-gray-900">
+              {formatSalary(job.payRate)}
+            </p>
+          </div>
+          
+          <div className="bg-gray-50 rounded-lg p-3">
+            <div className="flex items-center gap-2 mb-1">
+              <Calendar className="h-4 w-4 text-blue-600" />
+              <span className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+                Apply By
+              </span>
+            </div>
+            <p className="text-base font-semibold text-gray-900">
+              {formattedDate}
+            </p>
+          </div>
+        </div>
 
-        {/* Preferred Qualifications */}
-        {job.preferredQualifications &&
-          job.preferredQualifications.length > 0 && (
-            <div style={{ marginBottom: "2rem" }}>
-              <h4
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: "700",
-                  color: "#0f172a",
-                  marginBottom: "1rem",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                }}
-              >
-                <Star
-                  style={{
-                    height: "1.25rem",
-                    width: "1.25rem",
-                    color: "#f59e0b",
-                  }}
-                />
-                Preferred Qualifications
-              </h4>
-              <div
-                style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}
-              >
-                {job.preferredQualifications.slice(0, 6).map((qual, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      padding: "0.75rem 1rem",
-                      backgroundColor: "#fef3c7",
-                      color: "#92400e",
-                      fontSize: "0.95rem",
-                      fontWeight: "600",
-                      borderRadius: "0.75rem",
-                      border: "1px solid #fcd34d",
-                    }}
-                  >
-                    {qual.text}
-                  </div>
-                ))}
-              </div>
+        {/* Requirements */}
+        {job.jobRequirements && job.jobRequirements.length > 0 && (
+          <div className="mb-4">
+            <h4 className="text-base font-semibold text-gray-900 mb-2 flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              Requirements
+            </h4>
+            <div className="space-y-2">
+              {job.jobRequirements.slice(0, 3).map((req, index) => (
+                <div key={index} className="flex items-start gap-2">
+                  <div className="w-1 h-1 bg-gray-400 rounded-full mt-2 flex-shrink-0" />
+                  <span className="text-base text-gray-600 leading-relaxed">{req}</span>
+                </div>
+              ))}
+              {job.jobRequirements.length > 3 && (
+                <p className="text-sm text-gray-500 ml-3 font-medium">
+                  +{job.jobRequirements.length - 3} more requirements
+                </p>
+              )}
             </div>
-          )}
+          </div>
+        )}
 
         {/* Footer */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            paddingTop: "2rem",
-            borderTop: "1px solid #e2e8f0",
-            marginTop: "1rem",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              color: "#64748b",
-              fontSize: "0.875rem",
-              fontWeight: "500",
-            }}
-          >
-            <Calendar
-              style={{
-                height: "1rem",
-                width: "1rem",
-                marginRight: "0.5rem",
-                color: "#94a3b8",
-              }}
-            />
-            <span>Apply by {formattedDate}</span>
+        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <Clock className="h-3 w-3" />
+            <span>Posted {new Date(job.createdAt).toLocaleDateString()}</span>
           </div>
-
-          <Button
+          <Button 
             onClick={handleApplyClick}
-            className="rounded-md shadow-none"
-            style={{
-              backgroundColor: "#1f2937",
-              color: "white",
-              paddingLeft: "2rem",
-              paddingRight: "2rem",
-              paddingTop: "1rem",
-              paddingBottom: "1rem",
-              fontSize: "1rem",
-              fontWeight: "600",
-              border: "none",
-              transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-              cursor: "pointer",
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = "#111827";
-              e.currentTarget.style.boxShadow = "none";
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = "#1f2937";
-              e.currentTarget.style.boxShadow = "none";
-            }}
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-2 text-base font-medium rounded-lg transition-all shadow-lg hover:shadow-xl"
           >
             Apply Now
           </Button>
         </div>
       </div>
+
+      {/* Subtle hover indicator */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-purple-50 opacity-0 group-hover:opacity-30 transition-opacity duration-200 pointer-events-none" />
     </Card>
   );
 };

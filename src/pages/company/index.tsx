@@ -177,6 +177,7 @@ const modifyHeaderNavigation = (headerHtml: string): string => {
   }
 };
 
+
 const CompanyPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
 
@@ -282,6 +283,7 @@ const CompanyPage: React.FC = () => {
     selectedLocation !== "all" ||
     searchQuery.trim() !== "";
 
+
   useEffect(() => {
     const fetchWebsiteData = async () => {
       try {
@@ -307,7 +309,7 @@ const CompanyPage: React.FC = () => {
             domain: domainName,
           });
 
-          // Apply cached styles and metadata
+          // Load scraped CSS but isolate it to prevent interference with job cards
           if (
             company.scrapedData.cssLinks &&
             Array.isArray(company.scrapedData.cssLinks)
@@ -395,6 +397,7 @@ const CompanyPage: React.FC = () => {
 
       const metaThemeColor = document.querySelector('meta[name="theme-color"]');
       if (metaThemeColor) metaThemeColor.remove();
+
     };
   }, [slug]);
 
@@ -467,44 +470,45 @@ const CompanyPage: React.FC = () => {
           {jobs.length > 0 && (
             <div className="mb-8">
               {/* Search and Filters */}
-              <Card className="border-gray-200 shadow-sm mb-8">
-                <div className="p-4 sm:p-6 space-y-4">
+              <Card className="border-2 border-gray-200 shadow-lg mb-10 rounded-xl bg-white">
+                <div className="p-8 space-y-8">
                   {/* Search Bar */}
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-7 w-7 text-gray-500" />
                     <Input
                       placeholder="Search jobs by title, description, or location..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                      className="pl-16 h-16 text-xl font-medium border-2 border-gray-300 focus:border-black focus:ring-black rounded-xl bg-gray-50 focus:bg-white transition-all"
                     />
                     {searchQuery && (
                       <button
                         onClick={() => setSearchQuery("")}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors"
+                        className="absolute right-5 top-1/2 -translate-y-1/2 p-2 hover:bg-gray-200 rounded-full transition-colors"
                       >
-                        <X className="h-4 w-4 text-gray-400" />
+                        <X className="h-6 w-6 text-gray-500" />
                       </button>
                     )}
                   </div>
 
                   {/* Filters */}
-                  <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="flex flex-col lg:flex-row gap-6">
                     <div className="flex-1">
                       <Select
                         value={selectedJobTitle}
                         onValueChange={setSelectedJobTitle}
                       >
-                        <SelectTrigger className="h-11 border-gray-300">
-                          <div className="flex items-center gap-2">
-                            <Briefcase className="h-4 w-4 text-gray-400" />
+                        <SelectTrigger className="h-16 border-2 border-gray-300 rounded-xl bg-gray-50 hover:bg-white focus:border-black transition-all text-xl font-medium">
+                          <div className="flex items-center gap-4 px-2">
+                            <Briefcase className="h-6 w-6 text-gray-600" />
                             <SelectValue
                               placeholder={`All Job Titles (${jobs.length})`}
+                              className="text-xl font-medium"
                             />
                           </div>
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">
+                        <SelectContent className="rounded-xl border-2 border-gray-200 shadow-xl">
+                          <SelectItem value="all" className="text-base font-medium py-4 px-6">
                             All Job Titles ({jobs.length})
                           </SelectItem>
                           {uniqueJobTitles.map((title) => {
@@ -512,7 +516,7 @@ const CompanyPage: React.FC = () => {
                               (job) => job.jobBoardTitle === title
                             ).length;
                             return (
-                              <SelectItem key={title} value={title}>
+                              <SelectItem key={title} value={title} className="text-base font-medium py-4 px-6">
                                 {title} ({count})
                               </SelectItem>
                             );
@@ -521,21 +525,22 @@ const CompanyPage: React.FC = () => {
                       </Select>
                     </div>
 
-                    <div className="sm:w-64">
+                    <div className="lg:w-80">
                       <Select
                         value={selectedLocation}
                         onValueChange={setSelectedLocation}
                       >
-                        <SelectTrigger className="h-11 border-gray-300">
-                          <div className="flex items-center gap-2">
-                            <MapPin className="h-4 w-4 text-gray-400" />
+                        <SelectTrigger className="h-16 border-2 border-gray-300 rounded-xl bg-gray-50 hover:bg-white focus:border-black transition-all text-xl font-medium">
+                          <div className="flex items-center gap-4 px-2">
+                            <MapPin className="h-6 w-6 text-gray-600" />
                             <SelectValue
                               placeholder={`All Locations (${jobs.length})`}
+                              className="text-xl font-medium"
                             />
                           </div>
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">
+                        <SelectContent className="rounded-xl border-2 border-gray-200 shadow-xl">
+                          <SelectItem value="all" className="text-base font-medium py-4 px-6">
                             All Locations ({jobs.length})
                           </SelectItem>
                           {uniqueLocations.map((location) => {
@@ -546,7 +551,7 @@ const CompanyPage: React.FC = () => {
                                   location
                             ).length;
                             return (
-                              <SelectItem key={location} value={location}>
+                              <SelectItem key={location} value={location} className="text-base font-medium py-4 px-6">
                                 {location} ({count})
                               </SelectItem>
                             );
@@ -558,83 +563,89 @@ const CompanyPage: React.FC = () => {
 
                   {/* Active Filters */}
                   {hasActiveFilters && (
-                    <div className="pt-4 border-t border-gray-200 flex flex-wrap items-center gap-2">
-                      <Filter className="h-4 w-4 text-gray-500" />
-                      <span className="text-sm font-medium text-gray-700">
-                        Active filters:
-                      </span>
-                      {selectedJobTitle !== "all" && (
-                        <Badge
-                          variant="secondary"
-                          className="gap-1.5 px-3 py-1"
-                        >
-                          <Briefcase className="h-3 w-3" />
-                          {selectedJobTitle}
-                          <button
-                            onClick={() => setSelectedJobTitle("all")}
-                            className="ml-1 hover:bg-gray-200 rounded-full p-0.5 transition-colors"
+                    <div className="pt-6 border-t-2 border-gray-200 flex flex-wrap items-center gap-4">
+                      <div className="flex items-center gap-3">
+                        <Filter className="h-6 w-6 text-gray-600" />
+                        <span className="text-lg font-bold text-black">
+                          Active filters:
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-3">
+                        {selectedJobTitle !== "all" && (
+                          <Badge
+                            variant="secondary"
+                            className="gap-3 px-5 py-3 text-base font-semibold bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition-colors"
                           >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </Badge>
-                      )}
-                      {selectedLocation !== "all" && (
-                        <Badge
-                          variant="secondary"
-                          className="gap-1.5 px-3 py-1"
-                        >
-                          <MapPin className="h-3 w-3" />
-                          {selectedLocation}
-                          <button
-                            onClick={() => setSelectedLocation("all")}
-                            className="ml-1 hover:bg-gray-200 rounded-full p-0.5 transition-colors"
+                            <Briefcase className="h-5 w-5" />
+                            {selectedJobTitle}
+                            <button
+                              onClick={() => setSelectedJobTitle("all")}
+                              className="ml-2 hover:bg-gray-300 rounded-full p-1 transition-colors"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </Badge>
+                        )}
+                        {selectedLocation !== "all" && (
+                          <Badge
+                            variant="secondary"
+                            className="gap-3 px-5 py-3 text-base font-semibold bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition-colors"
                           >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </Badge>
-                      )}
-                      {searchQuery && (
-                        <Badge
-                          variant="secondary"
-                          className="gap-1.5 px-3 py-1"
-                        >
-                          <Search className="h-3 w-3" />"{searchQuery}"
-                          <button
-                            onClick={() => setSearchQuery("")}
-                            className="ml-1 hover:bg-gray-200 rounded-full p-0.5 transition-colors"
+                            <MapPin className="h-5 w-5" />
+                            {selectedLocation}
+                            <button
+                              onClick={() => setSelectedLocation("all")}
+                              className="ml-2 hover:bg-gray-300 rounded-full p-1 transition-colors"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </Badge>
+                        )}
+                        {searchQuery && (
+                          <Badge
+                            variant="secondary"
+                            className="gap-3 px-5 py-3 text-base font-semibold bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition-colors"
                           >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </Badge>
-                      )}
+                            <Search className="h-5 w-5" />"{searchQuery}"
+                            <button
+                              onClick={() => setSearchQuery("")}
+                              className="ml-2 hover:bg-gray-300 rounded-full p-1 transition-colors"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </Badge>
+                        )}
+                      </div>
                       <Button
                         variant="ghost"
-                        size="sm"
+                        size="lg"
                         onClick={() => {
                           setSelectedJobTitle("all");
                           setSelectedLocation("all");
                           setSearchQuery("");
                         }}
-                        className="h-7 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 ml-auto"
+                        className="h-12 text-base font-bold text-black hover:text-gray-700 hover:bg-gray-100 ml-auto px-6 rounded-lg transition-all"
                       >
-                        Clear all
+                        Clear all filters
                       </Button>
                     </div>
                   )}
 
                   {/* Results Count */}
-                  <div className="pt-2 border-t border-gray-100">
-                    <p className="text-sm text-gray-600">
-                      Showing{" "}
-                      <span className="font-semibold text-gray-900">
-                        {filteredJobs.length}
-                      </span>{" "}
-                      of{" "}
-                      <span className="font-semibold text-gray-900">
-                        {jobs.length}
-                      </span>{" "}
-                      positions
-                    </p>
+                  <div className="pt-6 border-t-2 border-gray-200">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xl font-medium text-gray-700">
+                        Showing{" "}
+                        <span className="font-bold text-black text-2xl">
+                          {filteredJobs.length}
+                        </span>{" "}
+                        of{" "}
+                        <span className="font-bold text-black text-2xl">
+                          {jobs.length}
+                        </span>{" "}
+                        positions
+                      </p>
+                    </div>
                   </div>
                 </div>
               </Card>
@@ -666,7 +677,7 @@ const CompanyPage: React.FC = () => {
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">
                   No jobs match your filters
                 </h3>
-                <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                <p className="text-base text-gray-600 mb-6 max-w-md mx-auto">
                   Try adjusting your search or filters to see more opportunities
                 </p>
                 <Button
@@ -692,7 +703,7 @@ const CompanyPage: React.FC = () => {
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">
                   No positions available
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-base text-gray-600">
                   Check back soon for new opportunities
                 </p>
               </div>
@@ -704,7 +715,7 @@ const CompanyPage: React.FC = () => {
             <Card className="border-gray-200 shadow-sm">
               <div className="p-4 sm:p-6">
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <div className="text-sm text-gray-600">
+                  <div className="text-base text-gray-600">
                     Showing{" "}
                     <span className="font-semibold text-gray-900">
                       {Math.min(
@@ -790,12 +801,12 @@ const CompanyPage: React.FC = () => {
           )}
         </div>
 
-        {/* Job Detail Modal */}
-        <JobDetailModal
+        {/* Job Detail Modal - COMMENTED OUT (using inline Read More instead) */}
+        {/* <JobDetailModal
           job={selectedJob}
           open={showJobModal}
           onOpenChange={setShowJobModal}
-        />
+        /> */}
 
         {scrapedData?.footer && (
           <div

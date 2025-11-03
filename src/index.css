@@ -694,81 +694,423 @@ select {
   }
 }
 
-/* Compact spacing overrides for entire application */
+/* Compact spacing overrides - ONLY for dashboard forms, not company/public pages */
 @layer utilities {
-  /* Reduce large spacing utilities to be more compact - but exclude hero/landing sections */
-  section .space-y-8 > * + * {
+  /* Apply spacing overrides ONLY to dashboard forms and admin sections */
+  .dashboard-content form .space-y-8 > * + *,
+  .admin-section .space-y-8 > * + * {
     margin-top: 1.5rem !important; /* was 2rem, now 25% smaller */
   }
 
-  section .space-y-6 > * + * {
+  .dashboard-content form .space-y-6 > * + *,
+  .admin-section .space-y-6 > * + * {
     margin-top: 1.125rem !important; /* was 1.5rem, now 25% smaller */
   }
 
-  section .gap-8 {
+  .dashboard-content form .gap-8,
+  .admin-section .gap-8 {
     gap: 1.5rem !important; /* was 2rem, now 25% smaller */
   }
 
-  section .gap-6 {
+  .dashboard-content form .gap-6,
+  .admin-section .gap-6 {
     gap: 1.125rem !important; /* was 1.5rem, now 25% smaller */
   }
 
-  /* Only apply to sections that are NOT hero/landing page sections */
-  section:not([class*="hero"]):not([class*="Hero"]) .p-8 {
+  /* Apply padding overrides ONLY to dashboard sections, not public company pages */
+  .dashboard-content .p-8 {
     padding: 1.5rem !important; /* was 2rem, now 25% smaller */
   }
 
-  section:not([class*="hero"]):not([class*="Hero"]) .p-6 {
+  .dashboard-content .p-6 {
     padding: 1.125rem !important; /* was 1.5rem, now 25% smaller */
   }
 
-  section:not([class*="hero"]):not([class*="Hero"]) .px-8 {
+  .dashboard-content .px-8 {
     padding-left: 1.5rem !important; /* was 2rem, now 25% smaller */
     padding-right: 1.5rem !important;
   }
 
-  section:not([class*="hero"]):not([class*="Hero"]) .px-6 {
+  .dashboard-content .px-6 {
     padding-left: 1.125rem !important; /* was 1.5rem, now 25% smaller */
     padding-right: 1.125rem !important;
   }
 
-  /* Don't override py-* (vertical padding) on sections to preserve hero heights */
-
-  section .mb-8 {
+  .dashboard-content .mb-8 {
     margin-bottom: 1.5rem !important; /* was 2rem, now 25% smaller */
   }
 
-  section .mb-6 {
+  .dashboard-content .mb-6 {
     margin-bottom: 1.125rem !important; /* was 1.5rem, now 25% smaller */
   }
 
-  section .mt-8 {
+  .dashboard-content .mt-8 {
     margin-top: 1.5rem !important; /* was 2rem, now 25% smaller */
   }
 
-  section .mt-6 {
+  .dashboard-content .mt-6 {
     margin-top: 1.125rem !important; /* was 1.5rem, now 25% smaller */
   }
+}
 
-  /* Allow forms and cards to be more compact */
-  form .space-y-8 > * + *,
-  [class*="card"] .space-y-8 > * + * {
-    margin-top: 1.5rem !important; /* was 2rem, now 25% smaller */
+/* Enhanced mobile layout management */
+@layer base {
+  /* Prevent mobile detection flashing - REMOVED: This was causing animation issues */
+  
+  /* Smooth mobile layout transitions */
+  .layout-transitioning {
+    overflow: hidden; /* Prevent scroll during transition */
+    /* Only apply to the container, not all children */
+    transition: opacity 0.15s ease !important;
+  }
+  
+  /* Mobile-specific optimizations */
+  [data-mobile="true"] {
+    /* Mobile layout optimizations */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: none;
+  }
+  
+  [data-mobile="true"] .sidebar {
+    /* Smoother mobile sidebar rendering */
+    -webkit-transform: translate3d(0,0,0);
+    transform: translate3d(0,0,0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+  
+  /* Prevent layout shifts and component glitches globally */
+  * {
+    /* Ensure consistent box-sizing */
+    box-sizing: border-box;
   }
 
-  form .space-y-6 > * + *,
-  [class*="card"] .space-y-6 > * + * {
-    margin-top: 1.125rem !important; /* was 1.5rem, now 25% smaller */
+  /* Prevent font loading flashes */
+  body {
+    font-display: swap;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  form .gap-8,
-  [class*="card"] .gap-8 {
-    gap: 1.5rem !important; /* was 2rem, now 25% smaller */
+  /* Prevent transition glitches on page load */
+  .preload-transitions * {
+    transition: none !important;
+    animation: none !important;
   }
 
-  form .gap-6,
-  [class*="card"] .gap-6 {
-    gap: 1.125rem !important; /* was 1.5rem, now 25% smaller */
+  /* Mobile-optimized default transitions */
+  html:not(.preload-transitions) * {
+    transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+    transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94); /* More mobile-friendly easing */
+    transition-duration: 200ms; /* Slightly longer for smoother feel on mobile */
+  }
+
+  /* Faster transitions on desktop */
+  @media (min-width: 769px) {
+    html:not(.preload-transitions) * {
+      transition-duration: 150ms;
+      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+  }
+
+  /* MOBILE-SAFE layout optimizations - no aggressive containment */
+  @media (min-width: 769px) {
+    /* Only apply containment on desktop where it works better */
+    [class*="Card"],
+    [class*="card"] {
+      contain: layout;
+    }
+
+    [class*="shadow"] {
+      contain: layout style;
+    }
+
+    [class*="grid"],
+    [class*="flex"] {
+      contain: layout;
+    }
+  }
+
+  /* Prevent image loading shifts */
+  img {
+    height: auto;
+    max-width: 100%;
+    vertical-align: middle;
+  }
+
+  /* SMART LOADING SYSTEM - Device-aware, desktop-safe */
+  .smart-loading {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .smart-loading::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(1px);
+    z-index: 1000;
+    pointer-events: none;
+    opacity: 0;
+    animation: fadeIn 0.2s ease forwards;
+  }
+
+  .smart-loading-spinner::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #e2e8f0;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: smartSpin 1s linear infinite;
+    z-index: 1001;
+  }
+
+  @keyframes fadeIn {
+    to { opacity: 1; }
+  }
+
+  @keyframes smartSpin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Respect reduced motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    .smart-loading-spinner::after {
+      animation: none;
+      border-top-color: #3b82f6;
+    }
+    
+    .smart-loading::before {
+      animation: none;
+      opacity: 1;
+    }
+  }
+
+  /* Legacy loading support for backward compatibility */
+  .loading-in-progress {
+    position: relative;
+  }
+  
+  .loading-in-progress::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  /* Mobile-safe rendering optimizations */
+  @media (min-width: 769px) {
+    /* Only apply these optimizations on desktop */
+    .grid > *:first-child {
+      transform: translateZ(0);
+      will-change: auto;
+      backface-visibility: hidden;
+    }
+
+    [class*="JobCard"] {
+      contain: layout style;
+      transform: translateZ(0);
+    }
+  }
+
+  /* Mobile-specific smooth rendering */
+  @media (max-width: 768px) {
+    .grid > * {
+      /* Use simpler rendering on mobile */
+      -webkit-transform: translate3d(0,0,0);
+      transform: translate3d(0,0,0);
+    }
+  }
+
+  /* Skeleton loading states to prevent layout jumps */
+  .skeleton {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+}
+
+/* Enhanced mobile performance optimizations */
+@layer base {
+  /* Low performance mode optimizations */
+  .low-performance-mode {
+    /* Disable expensive effects on low-end devices */
+  }
+  
+  .low-performance-mode * {
+    will-change: auto !important;
+    /* Don't completely disable transforms - just optimize them */
+    filter: none !important;
+    backdrop-filter: none !important;
+  }
+  
+  .low-performance-mode .shadow-lg,
+  .low-performance-mode .shadow-xl {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  /* Reduce animations for motion-sensitive users or slow devices - LESS AGGRESSIVE */
+  .reduce-animations,
+  .reduce-animations * {
+    animation-duration: 0.2s !important; /* Still fast but not invisible */
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.15s !important; /* Shortened but still visible */
+    scroll-behavior: auto !important;
+  }
+  
+  /* Network-aware optimizations */
+  .slow-connection .lazy-image,
+  .slow-connection .background-image {
+    display: none;
+  }
+  
+  .slow-connection .gradient-bg {
+    background: var(--background) !important;
+  }
+  
+  /* Offline state styling */
+  .offline {
+    filter: grayscale(1);
+  }
+  
+  .offline::after {
+    content: "Offline";
+    position: fixed;
+    top: 0;
+    right: 0;
+    background: #ef4444;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    z-index: 9999;
+  }
+  
+  /* Enhanced mobile touch targets */
+  @media (max-width: 768px) {
+    button,
+    [role="button"],
+    input[type="button"],
+    input[type="submit"] {
+      min-height: 44px; /* iOS accessibility guidelines */
+      min-width: 44px;
+    }
+    
+    /* Improve tap targets for mobile */
+    .tap-target {
+      padding: 0.75rem;
+      margin: 0.25rem;
+    }
+    
+    /* Better mobile form styling */
+    input,
+    textarea,
+    select {
+      font-size: 16px !important; /* Prevents zoom on iOS */
+      padding: 0.75rem;
+    }
+    
+    /* Mobile-optimized cards with smooth animations */
+    .card-mobile {
+      margin: 0.5rem;
+      border-radius: 0.75rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      /* Smooth mobile animations */
+      transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+    }
+    
+    /* Smooth mobile button interactions */
+    button {
+      transition: background-color 0.2s ease-out;
+      -webkit-tap-highlight-color: rgba(0,0,0,0.1);
+    }
+    
+    button:active {
+      transform: scale(0.98);
+    }
+    
+    /* Improve mobile scrolling */
+    * {
+      -webkit-overflow-scrolling: touch;
+    }
+  }
+  
+  /* Performance monitoring in development */
+  @media (max-width: 768px) {
+    .perf-monitor {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 0.5rem;
+      font-size: 0.75rem;
+      z-index: 9999;
+      pointer-events: none;
+    }
+  }
+  
+  /* Better mobile scrolling */
+  .mobile-scroll {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  
+  /* Mobile-friendly focus states */
+  @media (max-width: 768px) {
+    *:focus {
+      outline: 2px solid #3b82f6;
+      outline-offset: 2px;
+    }
+    
+    /* Remove hover states on touch devices */
+    @media (hover: none) {
+      .hover\\:bg-gray-50:hover {
+        background-color: inherit;
+      }
+      
+      .hover\\:text-blue-600:hover {
+        color: inherit;
+      }
+    }
+  }
+  .loading-skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading-shimmer 1.5s infinite;
+  }
+
+  @keyframes loading-shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  /* Prevent flash of empty content */
+  .prevent-flash {
+    min-height: 40px;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+  }
+
+  .prevent-flash.loaded {
+    opacity: 1;
   }
 }
 
@@ -822,4 +1164,160 @@ select {
     /* Reset form elements to use our styles */
     font-family: inherit;
   }
+
+  /* FORCE text styles for all company page content - override ANY external CSS */
+  .careers-page-content,
+  .careers-page-content *,
+  .careers-page-content *::before,
+  .careers-page-content *::after {
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif !important;
+  }
+
+  /* Job card text overrides - ultra specific */
+  .careers-page-content .group.relative h1,
+  .careers-page-content .group.relative h2,
+  .careers-page-content .group.relative h3,
+  .careers-page-content .group.relative h4,
+  .careers-page-content .group.relative h5,
+  .careers-page-content .group.relative h6 {
+    font-size: 1.875rem !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+    color: #000000 !important;
+    margin: 0 0 1rem 0 !important;
+  }
+
+  .careers-page-content .group.relative p,
+  .careers-page-content .group.relative div,
+  .careers-page-content .group.relative span:not(.lucide),
+  .careers-page-content .group.relative li {
+    font-size: 1.125rem !important;
+    font-weight: 500 !important;
+    line-height: 1.6 !important;
+    color: #374151 !important;
+  }
+
+  .careers-page-content .group.relative button,
+  .careers-page-content .group.relative button span,
+  .careers-page-content .group.relative [role="button"] {
+    font-size: 1.125rem !important;
+    font-weight: 700 !important;
+    padding: 1rem 2.5rem !important;
+    color: #ffffff !important;
+    background-color: #000000 !important;
+  }
+
+  /* Search bar overrides - ultra specific */
+  .careers-page-content input[type="text"],
+  .careers-page-content input[type="search"],
+  .careers-page-content input:not([type]),
+  .careers-page-content input {
+    font-size: 1.25rem !important;
+    font-weight: 500 !important;
+    height: 4rem !important;
+    line-height: 1.5 !important;
+    color: #000000 !important;
+    border: 2px solid #d1d5db !important;
+    padding: 1rem 4rem 1rem 4rem !important;
+  }
+
+  /* Dropdown overrides - ultra specific */
+  .careers-page-content [data-radix-select-trigger],
+  .careers-page-content [data-radix-select-trigger] *,
+  .careers-page-content button[role="combobox"],
+  .careers-page-content button[role="combobox"] * {
+    font-size: 1.125rem !important;
+    font-weight: 500 !important;
+    height: 4rem !important;
+    line-height: 1.5 !important;
+    color: #000000 !important;
+    padding: 1rem !important;
+  }
+
+  .careers-page-content [data-radix-select-item],
+  .careers-page-content [data-radix-select-item] *,
+  .careers-page-content [role="option"],
+  .careers-page-content [role="option"] * {
+    font-size: 1.125rem !important;
+    font-weight: 500 !important;
+    line-height: 1.5 !important;
+    color: #000000 !important;
+    padding: 1rem 1.5rem !important;
+  }
+
+  /* Badge overrides */
+  .careers-page-content .inline-flex,
+  .careers-page-content [class*="badge"],
+  .careers-page-content [class*="Badge"] {
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    padding: 0.75rem 1.25rem !important;
+    color: #374151 !important;
+  }
+
+  /* Results counter overrides */
+  .careers-page-content [class*="text-lg"],
+  .careers-page-content [class*="text-xl"] {
+    font-size: 1.125rem !important;
+    font-weight: 500 !important;
+    color: #374151 !important;
+  }
+
+  /* Nuclear option: Override everything with specific text classes */
+  .careers-page-content .text-3xl,
+  .careers-page-content .text-2xl,
+  .careers-page-content .text-xl,
+  .careers-page-content .text-lg,
+  .careers-page-content .text-base,
+  .careers-page-content .text-sm {
+    font-size: inherit !important;
+  }
+
+  .careers-page-content .text-3xl { font-size: 1.875rem !important; }
+  .careers-page-content .text-2xl { font-size: 1.5rem !important; }
+  .careers-page-content .text-xl { font-size: 1.25rem !important; }
+  .careers-page-content .text-lg { font-size: 1.125rem !important; }
+  .careers-page-content .text-base { font-size: 1rem !important; }
+  .careers-page-content .text-sm { font-size: 0.875rem !important; }
+
+  /* CLEAN JOB CARD OVERRIDES - REASONABLE AND READABLE */
+  html body .careers-page-content .group.relative h1,
+  html body .careers-page-content .group.relative h2,
+  html body .careers-page-content .group.relative h3,
+  html body .careers-page-content .group.relative h4 {
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    line-height: 1.4 !important;
+    color: #1a202c !important;
+    font-family: ui-sans-serif, system-ui, sans-serif !important;
+  }
+
+  html body .careers-page-content .group.relative p,
+  html body .careers-page-content .group.relative div:not(.absolute):not([class*="lucide"]),
+  html body .careers-page-content .group.relative span:not([class*="lucide"]),
+  html body .careers-page-content .group.relative li {
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    line-height: 1.5 !important;
+    color: #4a5568 !important;
+    font-family: ui-sans-serif, system-ui, sans-serif !important;
+  }
+
+  html body .careers-page-content .group.relative button,
+  html body .careers-page-content .group.relative button * {
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    padding: 8px 24px !important;
+    font-family: ui-sans-serif, system-ui, sans-serif !important;
+  }
+
+  /* Clean text size hierarchy */
+  html body .careers-page-content .group.relative .text-lg { font-size: 18px !important; }
+  html body .careers-page-content .group.relative .text-base { font-size: 14px !important; }
+  html body .careers-page-content .group.relative .text-sm { font-size: 14px !important; }
+  html body .careers-page-content .group.relative .text-xs { font-size: 12px !important; }
+
+  /* Font weight overrides */
+  html body .careers-page-content .group.relative .font-semibold { font-weight: 600 !important; }
+  html body .careers-page-content .group.relative .font-medium { font-weight: 500 !important; }
 }

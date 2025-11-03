@@ -639,7 +639,7 @@ const PrivacyPolicy = () => {
                         Phone
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-700">
-                        [Your Business Phone Number]
+                        +1 (302) 500-4435
                       </td>
                     </tr>
                     <tr className="hover:bg-gray-50">

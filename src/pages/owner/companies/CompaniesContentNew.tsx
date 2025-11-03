@@ -24,11 +24,13 @@ import {
   Save,
   Loader2,
   Mail,
-  Sparkles
+  Sparkles,
+  Code
 } from 'lucide-react';
 import { ownerManagementService } from '@/http/owner';
 import type { Company, User as CompanyUser } from '@/http/owner';
 import { toast } from 'sonner';
+import CompanyWebsiteEditor from '@/components/owner/company-website-editor';
 
 const CompaniesContentNew: React.FC = () => {
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -700,6 +702,18 @@ const CompaniesContentNew: React.FC = () => {
                               </div>
                             </div>
                           </div>
+                        </div>
+
+                        {/* Website Editor Section */}
+                        <div className="mt-6">
+                          <CompanyWebsiteEditor 
+                            company={company}
+                            onUpdate={(updatedCompany) => {
+                              setCompanies(companies.map(c => 
+                                c.id === updatedCompany.id ? updatedCompany : c
+                              ));
+                            }}
+                          />
                         </div>
 
                         {/* Users Table */}

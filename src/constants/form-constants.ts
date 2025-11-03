@@ -96,7 +96,10 @@ export const PLANS = [
 export const stepFields: JobFormStepFields = {
   1: [
     "jobTitle",
-    "jobBoardTitle",
+    "jobBoardTitle", 
+    "jobDescription"
+  ],
+  2: [
     "jobStatus",
     "workplaceType",
     "jobLocation",
@@ -109,12 +112,15 @@ export const stepFields: JobFormStepFields = {
     "positionsToHire",
     "jobRequirements",
     "exemptStatus",
-    "eeoJobCategory",
+    "eeoJobCategory"
   ],
-  2: ["requiredQualifications", "preferredQualifications", "customQuestions"],
-  3: ["jobDescription"],
-  4: ["startDate", "endDate", "externalApplicationSetup", "automation"],
+  3: [
+    "startDate", 
+    "endDate", 
+    "externalApplicationSetup", 
+    "automation"
+  ],
+  4: [],
   5: [],
-  6: [],
-  7: ["availabilityId"], // Add validation for the availability step (adjusted for step order)
+  6: ["availabilityId"]
 };

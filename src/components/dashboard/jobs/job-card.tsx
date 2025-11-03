@@ -23,7 +23,8 @@ import {
   X,
   MoreVertical,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import React from "react";
 import { DeleteJobModal } from "./delete-job-modal";
 
 interface JobCardProps {
@@ -77,8 +78,13 @@ const formatLocation = (job: JobFormDataWithId) => {
 };
 
 const getDaysUntilDeadline = (endDate: Date) => {
+  // Use a stable date (start of day) to prevent re-renders from time changes
   const today = new Date();
+  today.setHours(0, 0, 0, 0); // Normalize to start of day for stability
+  
   const deadline = new Date(endDate);
+  deadline.setHours(0, 0, 0, 0); // Normalize deadline too
+  
   const diffTime = deadline.getTime() - today.getTime();
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   return diffDays;
@@ -114,7 +120,7 @@ const getStatusConfig = (status: string) => {
   return configs[status as keyof typeof configs] || configs.draft;
 };
 
-export function JobCard({
+export const JobCard = React.memo(function JobCard({
   job,
   onEdit,
   onDelete,
@@ -125,11 +131,43 @@ export function JobCard({
   const [isDeleting, setIsDeleting] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
-  const salary = formatSalary(job);
-  const salaryPeriod = formatSalaryPeriod(job);
-  const location = formatLocation(job);
-  const daysLeft = job.endDate ? getDaysUntilDeadline(job.endDate) : null;
-  const statusConfig = getStatusConfig(job.status || "draft");
+  // DEBUG: Log when this component re-renders
+  console.log(`🔄 JobCard ${job.id} re-rendered:`, {
+    applicantsCount: job.applicantsCount,
+    status: job.status,
+    title: job.jobTitle
+  });
+
+  // Memoize expensive calculations to prevent re-renders
+  const { salary, salaryPeriod, location, daysLeft, statusConfig, applicantStats } = useMemo(() => ({
+    salary: formatSalary(job),
+    salaryPeriod: formatSalaryPeriod(job),
+    location: formatLocation(job),
+    daysLeft: job.endDate ? getDaysUntilDeadline(job.endDate) : null,
+    statusConfig: getStatusConfig(job.status || "draft"),
+    // Pre-calculate applicant stats to prevent re-calculations
+    applicantStats: {
+      pending: Math.floor((job.applicantsCount || 0) * 0.4),
+      shortlist: Math.floor((job.applicantsCount || 0) * 0.3),
+      rejected: Math.floor((job.applicantsCount || 0) * 0.3)
+    }
+  }), [
+    job.id, 
+    job.payRate?.type,
+    job.payRate?.min, 
+    job.payRate?.max,
+    job.payType, 
+    job.jobLocation?.city,
+    job.jobLocation?.state,
+    job.endDate, 
+    job.status, 
+    job.applicantsCount,
+    job.jobTitle,
+    job.jobBoardTitle,
+    job.workplaceType,
+    job.employmentType,
+    job.createdAt
+  ]); // All primitive dependencies for complete stability
 
   const handleDeleteConfirm = async (jobToDelete: JobFormDataWithId) => {
     setIsDeleting(true);
@@ -157,7 +195,7 @@ export function JobCard({
 
   return (
     <>
-      <Card className="group bg-white rounded-md border border-gray-200 hover:border-blue-300 transition-all duration-200">
+      <Card className="group bg-white rounded-md border border-gray-200 hover:border-blue-300 transition-colors duration-200">
         <CardContent className="p-6 space-y-5">
           {/* Header */}
           <div className="flex items-start justify-between gap-3">
@@ -173,7 +211,7 @@ export function JobCard({
               >
                 <span
                   className={cn(
-                    "w-1.5 h-1.5 rounded-full mr-1.5 animate-pulse",
+                    "w-1.5 h-1.5 rounded-full mr-1.5",
                     statusConfig.dot
                   )}
                 ></span>
@@ -232,7 +270,7 @@ export function JobCard({
 
           {/* Job Title */}
           <div className="space-y-3">
-            <h3 className="font-semibold text-lg text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2 leading-relaxed">
+            <h3 className="font-semibold text-lg text-gray-900 line-clamp-2 leading-relaxed">
               {job.jobTitle || job.jobBoardTitle}
             </h3>
 
@@ -268,42 +306,183 @@ export function JobCard({
             </span>
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-3">
-            <div className="text-center p-4 bg-gray-50 rounded-md border border-gray-100">
-              <div className="flex justify-center mb-2">
+          {/* Stats - ULTRA-STABLE Numbers Section */}
+          <div 
+            className="grid grid-cols-3 gap-3" 
+            style={{
+              minHeight: '80px', 
+              height: '80px',
+              contain: 'layout style size',
+              transform: 'translateZ(0)',
+              willChange: 'auto'
+            }}
+          >
+            <div 
+              className="text-center p-4 bg-gray-50 rounded-md border border-gray-100" 
+              style={{
+                minHeight: '80px', 
+                height: '80px',
+                contain: 'layout style size',
+                transform: 'translateZ(0)',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center'
+              }}
+            >
+              <div style={{height: '16px', marginBottom: '8px', display: 'flex', justifyContent: 'center'}}>
                 <Clock className="w-4 h-4 text-yellow-600" />
               </div>
-              <p className="text-xs text-gray-500 mb-1.5 font-medium">
+              <p 
+                className="text-xs text-gray-500 font-medium" 
+                style={{
+                  height: '12px', 
+                  lineHeight: '12px',
+                  marginBottom: '6px',
+                  fontSize: '12px'
+                }}
+              >
                 Pending
               </p>
-              <p className="text-lg font-bold text-gray-900">
-                {Math.floor((job.applicantsCount || 0) * 0.4)}
-              </p>
+              <div 
+                style={{
+                  width: '32px', 
+                  height: '20px',
+                  minWidth: '32px', 
+                  minHeight: '20px',
+                  margin: '0 auto',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <span 
+                  style={{
+                    fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace',
+                    fontVariantNumeric: 'tabular-nums',
+                    fontSize: '18px',
+                    lineHeight: '20px',
+                    fontWeight: '700',
+                    color: '#111827',
+                    width: '100%',
+                    textAlign: 'center',
+                    display: 'block'
+                  }}
+                >
+                  {applicantStats.pending}
+                </span>
+              </div>
             </div>
 
-            <div className="text-center p-4 bg-gray-50 rounded-md border border-gray-100">
-              <div className="flex justify-center mb-2">
+            <div 
+              className="text-center p-4 bg-gray-50 rounded-md border border-gray-100" 
+              style={{
+                minHeight: '80px', 
+                height: '80px',
+                contain: 'layout style size',
+                transform: 'translateZ(0)',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center'
+              }}
+            >
+              <div style={{height: '16px', marginBottom: '8px', display: 'flex', justifyContent: 'center'}}>
                 <Users className="w-4 h-4 text-green-600" />
               </div>
-              <p className="text-xs text-gray-500 mb-1.5 font-medium">
+              <p 
+                className="text-xs text-gray-500 font-medium" 
+                style={{
+                  height: '12px', 
+                  lineHeight: '12px',
+                  marginBottom: '6px',
+                  fontSize: '12px'
+                }}
+              >
                 Shortlist
               </p>
-              <p className="text-lg font-bold text-gray-900">
-                {Math.floor((job.applicantsCount || 0) * 0.3)}
-              </p>
+              <div 
+                style={{
+                  width: '32px', 
+                  height: '20px',
+                  minWidth: '32px', 
+                  minHeight: '20px',
+                  margin: '0 auto',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <span 
+                  style={{
+                    fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace',
+                    fontVariantNumeric: 'tabular-nums',
+                    fontSize: '18px',
+                    lineHeight: '20px',
+                    fontWeight: '700',
+                    color: '#111827',
+                    width: '100%',
+                    textAlign: 'center',
+                    display: 'block'
+                  }}
+                >
+                  {applicantStats.shortlist}
+                </span>
+              </div>
             </div>
 
-            <div className="text-center p-4 bg-gray-50 rounded-md border border-gray-100">
-              <div className="flex justify-center mb-2">
+            <div 
+              className="text-center p-4 bg-gray-50 rounded-md border border-gray-100" 
+              style={{
+                minHeight: '80px', 
+                height: '80px',
+                contain: 'layout style size',
+                transform: 'translateZ(0)',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center'
+              }}
+            >
+              <div style={{height: '16px', marginBottom: '8px', display: 'flex', justifyContent: 'center'}}>
                 <Briefcase className="w-4 h-4 text-red-600" />
               </div>
-              <p className="text-xs text-gray-500 mb-1.5 font-medium">
+              <p 
+                className="text-xs text-gray-500 font-medium" 
+                style={{
+                  height: '12px', 
+                  lineHeight: '12px',
+                  marginBottom: '6px',
+                  fontSize: '12px'
+                }}
+              >
                 Rejected
               </p>
-              <p className="text-lg font-bold text-gray-900">
-                {Math.floor((job.applicantsCount || 0) * 0.3)}
-              </p>
+              <div 
+                style={{
+                  width: '32px', 
+                  height: '20px',
+                  minWidth: '32px', 
+                  minHeight: '20px',
+                  margin: '0 auto',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <span 
+                  style={{
+                    fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace',
+                    fontVariantNumeric: 'tabular-nums',
+                    fontSize: '18px',
+                    lineHeight: '20px',
+                    fontWeight: '700',
+                    color: '#111827',
+                    width: '100%',
+                    textAlign: 'center',
+                    display: 'block'
+                  }}
+                >
+                  {applicantStats.rejected}
+                </span>
+              </div>
             </div>
           </div>
 
@@ -343,7 +522,7 @@ export function JobCard({
             </Button>
             <Button className="flex-1" onClick={() => onViewDetails?.(job)}>
               View
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
         </CardContent>
@@ -358,4 +537,4 @@ export function JobCard({
       />
     </>
   );
-}
+});

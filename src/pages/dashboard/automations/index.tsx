@@ -27,6 +27,7 @@ import {
   Briefcase,
   Calendar,
   CheckCircle2,
+  Edit,
   FileCheck,
   Library,
   Mail,
@@ -720,6 +721,15 @@ export default function AutomationsDashboard() {
 
                           {/* Action Buttons */}
                           <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => navigate(`/dashboard/automations/edit/${automation.id}`)}
+                              className="flex-1 h-9 text-blue-600 border-blue-200 hover:bg-blue-50"
+                            >
+                              <Edit className="h-4 w-4 mr-2" />
+                              Edit
+                            </Button>
                             <Button
                               variant="outline"
                               size="sm"

@@ -57,8 +57,32 @@ export const LoginForm = () => {
         
         await mutateSession({ shouldBroadcast: true, accessToken: token });
         
-        // Use window.location.href for a hard redirect to ensure fresh state
-        window.location.href = "/dashboard/jobs";
+        // Enhanced mobile-friendly redirect
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        
+        if (isMobile) {
+          // For mobile devices, use a more reliable redirect method
+          console.log('📱 Mobile device detected - using enhanced redirect');
+          
+          // Wait a bit longer for mobile localStorage to sync
+          await new Promise(resolve => setTimeout(resolve, 300));
+          
+          // Verify session is properly set before redirect
+          const verifyToken = localStorage.getItem('client_access_token');
+          if (verifyToken === token) {
+            console.log('✅ Session verified, redirecting...');
+            // Use replace to prevent back button issues on mobile
+            window.location.replace("/dashboard/jobs");
+          } else {
+            console.warn('⚠️ Session verification failed, retrying...');
+            await mutateSession({ shouldBroadcast: true, accessToken: token });
+            await new Promise(resolve => setTimeout(resolve, 200));
+            window.location.replace("/dashboard/jobs");
+          }
+        } else {
+          // Desktop redirect
+          window.location.href = "/dashboard/jobs";
+        }
       }
     } catch (err: any) {
       const errMessage = errorResolver(err);

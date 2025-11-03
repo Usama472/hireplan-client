@@ -20,6 +20,7 @@ import useAuthSessionContext from "@/lib/context/AuthSessionContext";
 import { usePaginationQuery } from "@/lib/hooks/usePaginateQuery";
 import usePermission from "@/lib/hooks/usePermission";
 import { errorResolver } from "@/lib/utils";
+// Removed global DataLoadingManager import
 import {
   Briefcase,
   Grid3X3,
@@ -38,8 +39,7 @@ import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { DeleteJobModal } from "./delete-job-modal";
 import { EmptyJobsState } from "./empty-jobs-state";
-import { JobsGridSkeleton } from "./job-card-skeleton";
-import { JobsListSkeleton } from "./job-list-item-skeleton";
+import { JobsGridSkeleton, JobsListViewSkeleton } from "@/components/common/skeleton-loader";
 import { JobsGrid } from "./jobs-grid";
 import { JobsList } from "./jobs-list";
 import { useNotifications } from "@/lib/hooks/use-notifications";
@@ -69,10 +69,17 @@ export default function JobsPage() {
   const navigate = useNavigate();
   const { data: session } = useAuthSessionContext();
   const company = session?.user?.company;
+  
+  // Simple loading state - no complex state management
+  const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false);
 
-  // Get expired job notifications from the notification system
-  const { expiredJobNotifications, refetch: refetchNotifications } =
-    useNotifications();
+  // TEMPORARILY DISABLED: Get expired job notifications from the notification system
+  // const { expiredJobNotifications, refetch: refetchNotifications } =
+  //   useNotifications();
+  
+  // Mock empty notifications for testing
+  const expiredJobNotifications: any[] = [];
+  const refetchNotifications = async () => {};
 
   const {
     data: jobsData,
@@ -83,7 +90,14 @@ export default function JobsPage() {
   } = usePaginationQuery({
     key: "queryJobs",
     limit: 12,
-    fetchFun: API.job.getJobs,
+    fetchFun: async (...args) => {
+      const result = await API.job.getJobs(...args);
+      // Mark as loaded on first successful fetch - no complex state updates
+      if (!hasInitiallyLoaded) {
+        setHasInitiallyLoaded(true);
+      }
+      return result;
+    },
     parseResponse: (data: JobsResponse) => data.jobs,
   });
 
@@ -105,15 +119,15 @@ export default function JobsPage() {
       toast.success("Job deleted successfully");
 
       await refetch();
-      setShowDeleteModal(false);
-      setJobToDelete(null);
-    } catch (error) {
-      const errorMessage = errorResolver(error);
-      console.error("Error deleting job:", error);
-      toast.error(`Failed to delete job: ${errorMessage}`);
-    } finally {
-      setIsDeleting(false);
-    }
+          setShowDeleteModal(false);
+          setJobToDelete(null);
+        } catch (error) {
+          const errorMessage = errorResolver(error);
+          console.error("Error deleting job:", error);
+          toast.error(`Failed to delete job: ${errorMessage}`);
+        } finally {
+          setIsDeleting(false);
+        }
   };
 
   const handleCloseDeleteModal = () => {
@@ -141,14 +155,14 @@ export default function JobsPage() {
         await API.notification.dismissNotification(notificationId);
       }
 
-      toast.success("Job closed successfully");
-      await refetch();
-      await refetchNotifications();
-    } catch (error) {
-      const errorMessage = errorResolver(error);
-      console.error("Error closing job:", error);
-      toast.error(`Failed to close job: ${errorMessage}`);
-    }
+          toast.success("Job closed successfully");
+          await refetch();
+          await refetchNotifications();
+        } catch (error) {
+          const errorMessage = errorResolver(error);
+          console.error("Error closing job:", error);
+          toast.error(`Failed to close job: ${errorMessage}`);
+        }
   };
 
   const handleDismissNotification = async (notificationId: string) => {
@@ -168,6 +182,8 @@ export default function JobsPage() {
 
   const jobs = jobsData || [];
   const hasSearchQuery = searchQuery !== "";
+
+  // Remove debug logging
 
   const jobsWithLocation = jobs.map((job) => ({
     ...job,
@@ -605,7 +621,7 @@ export default function JobsPage() {
 
               <TabsContent value="list" className="mt-6">
                 {loading ? (
-                  <JobsListSkeleton />
+                  <JobsListViewSkeleton />
                 ) : filteredJobsFinal.length > 0 ? (
                   <JobsList
                     jobs={filteredJobsFinal}

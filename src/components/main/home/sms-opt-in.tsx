@@ -96,7 +96,7 @@ export function SMSOptIn() {
                     type="tel"
                     value={phoneNumber}
                     onChange={handlePhoneChange}
-                    placeholder="(555) 123-4567"
+                    placeholder="(302) 500-4435"
                     className="pl-10 sm:pl-12 h-10 text-sm bg-white border-2 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-gray-900 transition-all duration-200 placeholder:text-gray-500 shadow-sm"
                     maxLength={14}
                     required

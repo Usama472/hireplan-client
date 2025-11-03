@@ -1,4 +1,4 @@
-import { ownerGet, ownerPost } from './apiHelper';
+import { ownerGet, ownerPost, ownerPut } from './apiHelper';
 
 export interface Company {
   id: string;
@@ -11,6 +11,30 @@ export interface Company {
   planId?: 'starter' | 'professional' | 'enterprise';
   customMonthlyPrice?: number | null;
   createdAt: string;
+  websiteUrl?: string;
+  scrapedData?: {
+    header?: string;
+    footer?: string;
+    title?: string;
+    favicon?: string;
+    mainColor?: string;
+    cssLinks?: string[];
+    scrapedAt?: string;
+    aiJobCardDesign?: {
+      enabled: boolean;
+      jobCardTemplate?: string | null;
+      adaptiveCSS?: string | null;
+      designPatterns?: {
+        colorScheme: string[];
+        typography?: string | null;
+        buttonStyle?: string | null;
+        cardStyle?: string | null;
+        spacing?: string | null;
+      };
+      lastAnalyzedAt?: string | null;
+      websiteUrl?: string | null;
+    };
+  };
 }
 
 export interface User {
@@ -47,6 +71,58 @@ class OwnerManagementService {
     } catch (error) {
       throw new Error('Failed to fetch companies');
     }
+  }
+
+  async getCompanyById(companyId: string): Promise<Company> {
+    try {
+      const response = await ownerGet(`/owner/management/companies/${companyId}/details`);
+      return response.data;
+    } catch (error) {
+      throw new Error('Failed to fetch company details');
+    }
+  }
+
+  async updateCompanyScrapedData(companyId: string, scrapedData: {
+    header?: string;
+    footer?: string;
+    title?: string;
+    favicon?: string;
+    mainColor?: string;
+    cssLinks?: string[];
+    aiJobCardDesign?: {
+      enabled: boolean;
+      jobCardTemplate?: string | null;
+      adaptiveCSS?: string | null;
+      designPatterns?: {
+        colorScheme: string[];
+        typography?: string | null;
+        buttonStyle?: string | null;
+        cardStyle?: string | null;
+        spacing?: string | null;
+      };
+      websiteUrl?: string | null;
+    };
+  }) {
+    const url = `/owner/management/companies/${companyId}/scraped-data`;
+    console.log('🔄 Making PUT request to:', url);
+    console.log('📦 Request data:', scrapedData);
+    
+    try {
+      const result = await ownerPut(url, scrapedData);
+      console.log('✅ PUT request successful:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ PUT request failed:', error);
+      throw error;
+    }
+  }
+
+  async aiCleanupWebsite(companyId: string, options: {
+    websiteUrl: string;
+    cleanupType: 'basic' | 'advanced' | 'full';
+    preserveExisting?: boolean;
+  }) {
+    return ownerPost(`/owner/management/companies/${companyId}/ai-cleanup-website`, options);
   }
 
   async createCompany(data: {
@@ -231,6 +307,33 @@ class OwnerManagementService {
       return response.data;
     } catch (error) {
       throw new Error('Failed to fetch company details');
+    }
+  }
+
+  async analyzeWebsiteDesign(companyId: string, data: {
+    websiteUrl: string;
+    existingContent: {
+      header: string;
+      footer: string;
+      mainColor: string;
+      cssLinks: string[];
+    };
+  }): Promise<{
+    jobCardTemplate: string;
+    adaptiveCSS: string;
+    designPatterns: {
+      colorScheme: string[];
+      typography: string;
+      buttonStyle: string;
+      cardStyle: string;
+      spacing: string;
+    };
+  }> {
+    try {
+      const response = await ownerPost(`/owner/management/companies/${companyId}/analyze-design`, data);
+      return response.data;
+    } catch (error) {
+      throw new Error('Failed to analyze website design');
     }
   }
 }
