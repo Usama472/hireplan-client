@@ -310,6 +310,47 @@ const CompaniesContentNew: React.FC = () => {
                     className="mt-1"
                   />
                 </div>
+                
+                {/* Plan & Pricing */}
+                <div className="pt-3 border-t">
+                  <h5 className="font-medium text-xs text-gray-600 mb-3 flex items-center gap-1">
+                    <CreditCard className="w-3 h-3" />
+                    Subscription & Pricing
+                  </h5>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-xs flex items-center gap-1">
+                        <Award className="w-3 h-3" />
+                        Plan
+                      </Label>
+                      <select
+                        value={newCompany.planId}
+                        onChange={(e) => setNewCompany({ ...newCompany, planId: e.target.value as any })}
+                        className="w-full mt-1 px-3 py-2 text-sm border border-gray-200 rounded-md focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="starter">Starter</option>
+                        <option value="professional">Professional</option>
+                        <option value="enterprise">Enterprise</option>
+                      </select>
+                    </div>
+                    <div>
+                      <Label className="text-xs flex items-center gap-1">
+                        <CreditCard className="w-3 h-3" />
+                        Monthly Price
+                      </Label>
+                      <div className="flex items-center gap-1 mt-1">
+                        <span className="text-sm text-gray-500">$</span>
+                        <Input
+                          type="number"
+                          value={newCompany.customMonthlyPrice || ''}
+                          onChange={(e) => setNewCompany({ ...newCompany, customMonthlyPrice: e.target.value ? parseFloat(e.target.value) : 0 })}
+                          placeholder="149"
+                          className="text-sm"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Admin User */}
@@ -347,43 +388,6 @@ const CompaniesContentNew: React.FC = () => {
                     placeholder="john@example.com"
                     className="mt-1"
                   />
-                </div>
-                
-                {/* Plan & Pricing */}
-                <div className="pt-3 border-t">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <Label className="text-xs flex items-center gap-1">
-                        <Award className="w-3 h-3" />
-                        Plan
-                      </Label>
-                      <select
-                        value={newCompany.planId}
-                        onChange={(e) => setNewCompany({ ...newCompany, planId: e.target.value as any })}
-                        className="w-full mt-1 px-3 py-2 text-sm border border-gray-200 rounded-md focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="starter">Starter</option>
-                        <option value="professional">Professional</option>
-                        <option value="enterprise">Enterprise</option>
-                      </select>
-                    </div>
-                    <div>
-                      <Label className="text-xs flex items-center gap-1">
-                        <CreditCard className="w-3 h-3" />
-                        Monthly Price
-                      </Label>
-                      <div className="flex items-center gap-1 mt-1">
-                        <span className="text-sm text-gray-500">$</span>
-                        <Input
-                          type="number"
-                          value={newCompany.customMonthlyPrice || ''}
-                          onChange={(e) => setNewCompany({ ...newCompany, customMonthlyPrice: e.target.value ? parseFloat(e.target.value) : 0 })}
-                          placeholder="149"
-                          className="text-sm"
-                        />
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
