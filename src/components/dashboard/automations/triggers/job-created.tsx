@@ -18,9 +18,8 @@ import {
   Trash2,
   Users,
 } from "lucide-react";
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
+import { useAutomation } from "@/contexts/AutomationContext";
 import { useGlobalEmailTemplates } from "../../global-setting/hooks/useGlobalEmailTemplates";
 interface Condition {
   id: string;
@@ -43,28 +42,24 @@ interface Action {
 }
 
 export default function JobCreatedTrigger() {
-  const [useConditions, setUseConditions] = useState<boolean>(false);
+  const { 
+    automationName, 
+    setAutomationName,
+    automationStatus,
+    setAutomationStatus,
+    useConditions, 
+    setUseConditions,
+    conditions,
+    setConditions,
+    actions,
+    setActions,
+    isEditMode,
+    formTouched,
+    setFormTouched
+  } = useAutomation();
+  
   const { availableTemplates } = useGlobalEmailTemplates();
-
   const navigate = useNavigate();
-  const [conditions, setConditions] = useState<Condition[]>([
-    { id: "1", field: "department", operator: "equals", value: "" },
-  ]);
-  const [automationName, setAutomationName] = useState<string>("");
-  const [automationStatus, setAutomationStatus] = useState<boolean>(true);
-
-  const [actions, setActions] = useState<Action[]>([
-    {
-      id: "1",
-      type: "send_email_recruiter",
-      config: { templateId: "", delay: { value: 0, unit: "minutes" } },
-    },
-  ]);
-
-  const [isValid, setIsValid] = useState<boolean>(true);
-  const [validationMessage, setValidationMessage] = useState<string>("");
-  const [formTouched, setFormTouched] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   // Available fields for job-based conditions
   const jobConditionFields = [
     { value: "department", label: "Department" },
@@ -210,79 +205,6 @@ export default function JobCreatedTrigger() {
     );
   };
 
-  const validateForm = () => {
-    if (!automationName.trim()) {
-      setIsValid(false);
-      setValidationMessage("Please enter an automation name");
-      return false;
-    }
-
-    if (actions.length === 0) {
-      setIsValid(false);
-      setValidationMessage("At least one action is required");
-      return false;
-    }
-
-    for (const action of actions) {
-      if (
-        action.type === "send_email_recruiter" ||
-        action.type === "send_email_recruiter_team"
-      ) {
-        if (!action.config.templateId || action.config.templateId === "") {
-          setIsValid(false);
-          const recipient =
-            action.type === "send_email_recruiter"
-              ? "recruiter"
-              : "recruiter team";
-          setValidationMessage(
-            `Please select an email template for the ${recipient} email action`
-          );
-          return false;
-        }
-      }
-    }
-
-    setIsValid(true);
-    setValidationMessage("");
-    return true;
-  };
-
-  useEffect(() => {
-    if (formTouched) {
-      validateForm();
-    }
-  }, [actions, formTouched]);
-
-  const handleSave = async () => {
-    setFormTouched(true);
-    setIsLoading(true);
-    if (validateForm()) {
-      console.log("Form submitted", {
-        name: automationName,
-        status: automationStatus ? "active" : "inactive",
-        useConditions,
-        conditions: useConditions ? conditions : [],
-        actions,
-        triggerType: "job_created",
-      });
-      try {
-        await API.automation.createAutomation({
-          name: automationName,
-          status: automationStatus ? "active" : "inactive",
-          triggerType: "job_created",
-          useConditions: useConditions,
-          conditions: useConditions ? conditions : [],
-          actions: actions,
-        });
-        navigate("/dashboard/automations");
-      } catch (err: any) {
-        toast.error("Failed to create automation", {
-          description: err.message,
-        });
-      }
-    }
-    setIsLoading(false);
-  };
 
   const getActionIcon = (type: string) => {
     const actionType = actionTypes.find((a) => a.value === type);
@@ -938,35 +860,6 @@ export default function JobCreatedTrigger() {
         </div>
       </div>
 
-      {!isValid && (
-        <div className="flex items-center gap-2 text-red-500 bg-red-50 p-4 rounded-lg border border-red-100">
-          <AlertCircle className="h-5 w-5 flex-shrink-0" />
-          <span>{validationMessage}</span>
-        </div>
-      )}
-
-      {/* Save Button */}
-      <div className="flex justify-end mt-8 pt-4 border-t">
-        <div className="flex gap-3">
-          <Button
-            variant="outline"
-            onClick={() => {
-              navigate("/dashboard/automations");
-            }}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSave}
-            disabled={isLoading}
-            className={`bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-8 py-2 ${
-              isLoading ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-          >
-            {isLoading ? "Saving..." : "Save Automation"}
-          </Button>
-        </div>
-      </div>
     </div>
   );
 }

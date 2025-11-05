@@ -76,11 +76,20 @@ import SupportPage from "@/pages/dashboard/support";
 // Company Signup
 import CompanySignup from "@/pages/CompanySignup";
 
+// ATS Landing Page
+import ATSPage from "@/pages/ats";
+
 export const appRoutes: AppRoutesType[] = [
   {
     id: HOME_TEXT,
     url: ROUTES.HOME,
     element: <Home />,
+    isPrivate: false,
+  },
+  {
+    id: "ats",
+    url: ROUTES.ATS,
+    element: <ATSPage />,
     isPrivate: false,
   },
   {

@@ -1,23 +1,19 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import API from "@/http";
 import { Brain, Plus, Trash2, Mail, ClipboardList, MessageSquare, Calendar, CheckCircle2, ArrowDown } from "lucide-react";
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
+import { useAutomation } from "@/contexts/AutomationContext";
 import { useGlobalEmailTemplates } from "../../global-setting/hooks/useGlobalEmailTemplates";
 import useAuthSessionContext from "@/lib/context/AuthSessionContext";
 import { TagManager } from "../common/tag-manager";
 
 interface ScoreRule {
   id: string;
-  scoreMin: number;
-  scoreMax: number;
+  minScore: number;
+  maxScore: number;
   actions: RuleAction[];
   label: string;
-  // Nested chain for "send_another_followup" actions
-  nextRoundRules?: ScoreRule[]; // Rules that apply after the 2nd follow-up completes
 }
 
 interface RuleAction {
@@ -27,14 +23,22 @@ interface RuleAction {
 }
 
 export default function AIFollowupTrigger() {
+  const { 
+    automationName, 
+    setAutomationName,
+    automationStatus,
+    setAutomationStatus,
+    scoreRules,
+    setScoreRules,
+    labels,
+    setLabels,
+    isEditMode,
+    setFormTouched
+  } = useAutomation();
+  
   const navigate = useNavigate();
   const { availableTemplates } = useGlobalEmailTemplates();
   const { subscription } = useAuthSessionContext();
-  
-  const [automationName, setAutomationName] = useState("");
-  const [automationStatus, setAutomationStatus] = useState(true);
-  const [scoreRules, setScoreRules] = useState<ScoreRule[]>([]);
-  const [labels, setLabels] = useState<string[]>([]);
 
   const hasAI = subscription?.planId === 'professional' || subscription?.planId === 'enterprise';
 
@@ -51,44 +55,14 @@ export default function AIFollowupTrigger() {
     const nextRuleNumber = scoreRules.length + 1;
     setScoreRules([...scoreRules, { 
       id: `rule-${Date.now()}`,
-      scoreMin: 0, 
-      scoreMax: 100, 
+      minScore: 0, 
+      maxScore: 100, 
       actions: [],
       label: `Rule ${nextRuleNumber}`,
-      nextRoundRules: [], // Initialize empty nested rules
     }]);
   };
 
-  const addNextRoundRule = (parentRuleId: string) => {
-    setScoreRules(scoreRules.map(rule => {
-      if (rule.id === parentRuleId) {
-        const nextRules = rule.nextRoundRules || [];
-        return {
-          ...rule,
-          nextRoundRules: [...nextRules, {
-            id: `nextrule-${Date.now()}`,
-            scoreMin: 0,
-            scoreMax: 100,
-            actions: [],
-            label: `After 2nd Follow-up`,
-          }]
-        };
-      }
-      return rule;
-    }));
-  };
 
-  const removeNextRoundRule = (parentRuleId: string, nextRuleId: string) => {
-    setScoreRules(scoreRules.map(rule => {
-      if (rule.id === parentRuleId && rule.nextRoundRules) {
-        return {
-          ...rule,
-          nextRoundRules: rule.nextRoundRules.filter(r => r.id !== nextRuleId)
-        };
-      }
-      return rule;
-    }));
-  };
 
   const removeRule = (id: string) => {
     setScoreRules(scoreRules.filter(r => r.id !== id));
@@ -120,32 +94,6 @@ export default function AIFollowupTrigger() {
     ));
   };
 
-  const handleSubmit = async () => {
-    if (!automationName.trim()) {
-      toast.error("Enter automation name");
-      return;
-    }
-
-    if (scoreRules.length === 0 || !scoreRules.some(r => r.actions.length > 0)) {
-      toast.error("Add at least one rule with actions");
-      return;
-    }
-
-    try {
-      await API.automation.createAutomation({
-        name: automationName,
-        triggerType: "ai_followup_response_received",
-        status: automationStatus ? "active" : "inactive",
-        scoreRules: scoreRules.filter(r => r.actions.length > 0),
-        labels: labels,
-        actions: [], // Empty array since we're using scoreRules
-      });
-      toast.success("Workflow created!");
-      navigate("/dashboard/automations");
-    } catch (error: any) {
-      toast.error(error.message || "Failed to create");
-    }
-  };
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6">
@@ -218,8 +166,8 @@ export default function AIFollowupTrigger() {
                     type="number"
                     min="0"
                     max="100"
-                    value={rule.scoreMin}
-                    onChange={(e) => updateRule(rule.id, { scoreMin: parseInt(e.target.value) || 0 })}
+                    value={rule.minScore}
+                    onChange={(e) => updateRule(rule.id, { minScore: parseInt(e.target.value) || 0 })}
                     className="w-16 h-8 text-center"
                   />
                   <span className="text-sm">to</span>
@@ -227,8 +175,8 @@ export default function AIFollowupTrigger() {
                     type="number"
                     min="0"
                     max="100"
-                    value={rule.scoreMax}
-                    onChange={(e) => updateRule(rule.id, { scoreMax: parseInt(e.target.value) || 100 })}
+                    value={rule.maxScore}
+                    onChange={(e) => updateRule(rule.id, { maxScore: parseInt(e.target.value) || 100 })}
                     className="w-16 h-8 text-center"
                   />
                   <span className="text-sm font-medium">%</span>
@@ -349,98 +297,6 @@ export default function AIFollowupTrigger() {
             )}
 
             {/* Nested Rules for "Send Another Follow-up" actions */}
-            {rule.actions.some(a => a.type === 'send_another_followup') && (
-              <div className="mt-4 pl-8 border-l-4 border-purple-300">
-                <div className="flex items-center justify-between mb-3">
-                  <p className="text-sm font-semibold text-purple-900">
-                    Then after 2nd follow-up completes:
-                  </p>
-                  <Button 
-                    onClick={() => addNextRoundRule(rule.id)} 
-                    variant="outline" 
-                    size="sm"
-                    className="text-purple-600 border-purple-300"
-                  >
-                    <Plus className="w-3 h-3 mr-1" />
-                    Add Rule
-                  </Button>
-                </div>
-
-                {(!rule.nextRoundRules || rule.nextRoundRules.length === 0) ? (
-                  <div className="text-center py-4 bg-purple-50/50 rounded border-2 border-dashed border-purple-200">
-                    <p className="text-xs text-purple-700">No rules for 2nd follow-up yet</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {rule.nextRoundRules.map((nextRule, nextIdx) => (
-                      <div key={nextRule.id} className="bg-purple-50 p-4 rounded-lg border border-purple-200">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-medium text-purple-900">If 2nd score:</span>
-                            <Input
-                              type="number"
-                              min="0"
-                              max="100"
-                              value={nextRule.scoreMin}
-                              onChange={(e) => {
-                                const updated = scoreRules.map(r => {
-                                  if (r.id === rule.id && r.nextRoundRules) {
-                                    return {
-                                      ...r,
-                                      nextRoundRules: r.nextRoundRules.map(nr => 
-                                        nr.id === nextRule.id ? { ...nr, scoreMin: parseInt(e.target.value) || 0 } : nr
-                                      )
-                                    };
-                                  }
-                                  return r;
-                                });
-                                setScoreRules(updated);
-                              }}
-                              className="w-14 h-7 text-xs text-center"
-                            />
-                            <span className="text-xs">to</span>
-                            <Input
-                              type="number"
-                              min="0"
-                              max="100"
-                              value={nextRule.scoreMax}
-                              onChange={(e) => {
-                                const updated = scoreRules.map(r => {
-                                  if (r.id === rule.id && r.nextRoundRules) {
-                                    return {
-                                      ...r,
-                                      nextRoundRules: r.nextRoundRules.map(nr => 
-                                        nr.id === nextRule.id ? { ...nr, scoreMax: parseInt(e.target.value) || 100 } : nr
-                                      )
-                                    };
-                                  }
-                                  return r;
-                                });
-                                setScoreRules(updated);
-                              }}
-                              className="w-14 h-7 text-xs text-center"
-                            />
-                            <span className="text-xs font-medium">%</span>
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeNextRoundRule(rule.id, nextRule.id)}
-                            className="h-7 text-red-600"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
-                        </div>
-                        
-                        <p className="text-xs text-purple-800">
-                          Then: [Configure final actions like Reject, Interview, etc.]
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         ))}
 
@@ -456,15 +312,6 @@ export default function AIFollowupTrigger() {
         )}
       </div>
 
-      {/* Submit */}
-      <div className="flex justify-between pt-6 border-t">
-        <Button variant="outline" onClick={() => navigate("/dashboard/automations")}>
-          Cancel
-        </Button>
-        <Button onClick={handleSubmit} disabled={scoreRules.length === 0}>
-          Create Automation
-        </Button>
-      </div>
     </div>
   );
 }

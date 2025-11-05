@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import API from '@/http'
 // Removed global DataLoadingManager import
 import {
@@ -18,9 +19,19 @@ import {
   GraduationCap,
   Users,
   FileText,
+  Shield,
 } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import {
+  EEO_RACE_ETHNICITY_OPTIONS,
+  EEO_GENDER_OPTIONS,
+  EEO_VETERAN_STATUS_OPTIONS,
+  EEO_DISABILITY_STATUS_OPTIONS,
+  EEO_DISCLAIMER_TEXT,
+  EEO_VETERAN_DISCLAIMER_TEXT,
+  EEO_DISABILITY_DISCLAIMER_TEXT,
+} from '@/constants/eeo-constants'
 
 interface Job {
   jobId: string
@@ -73,6 +84,14 @@ interface CustomField {
   required: boolean
 }
 
+interface EEOData {
+  raceEthnicity: string
+  gender: string
+  veteranStatus: string
+  disabilityStatus: string
+  completedEEO: boolean
+}
+
 interface JobApplicationFormData {
   firstName: string
   lastName: string
@@ -84,6 +103,7 @@ interface JobApplicationFormData {
   smsConsent: boolean
   customQuestionAnswers: CustomQuestionAnswer[]
   customFields: CustomField[]
+  eeoData: EEOData
 }
 
 const JobApplicationPage: React.FC = () => {
@@ -115,6 +135,13 @@ const JobApplicationPage: React.FC = () => {
     smsConsent: true,
     customQuestionAnswers: [],
     customFields: [],
+    eeoData: {
+      raceEthnicity: '',
+      gender: '',
+      veteranStatus: '',
+      disabilityStatus: '',
+      completedEEO: false,
+    }
   })
 
   // Track if user has made significant progress to determine if we should save draft
@@ -127,7 +154,8 @@ const JobApplicationPage: React.FC = () => {
     { id: 2, title: 'Location & Contact', description: 'Where are you located?' },
     { id: 3, title: 'Resume & Experience', description: 'Share your experience' },
     { id: 4, title: 'Additional Questions', description: 'Complete your application' },
-    { id: 5, title: 'Review & Submit', description: 'Review and submit' }
+    { id: 5, title: 'EEO Self-Identification', description: 'Voluntary information (US only)' },
+    { id: 6, title: 'Review & Submit', description: 'Review and submit' }
   ]
 
   // Calculate completion percentage
@@ -213,6 +241,13 @@ const JobApplicationPage: React.FC = () => {
             resume: null, // Can't restore file from backend
             customQuestionAnswers: existingApp.customQuestionAnswers || [],
             customFields: existingApp.customFields || [],
+            eeoData: existingApp.eeoData || {
+              raceEthnicity: '',
+              gender: '',
+              veteranStatus: '',
+              disabilityStatus: '',
+              completedEEO: false,
+            }
           })
         }
       }
@@ -284,6 +319,13 @@ const JobApplicationPage: React.FC = () => {
                 resume: null, // Can't restore file from localStorage
                 customQuestionAnswers: progressData.customQuestionAnswers || [],
                 customFields: progressData.customFields || [],
+                eeoData: progressData.eeoData || {
+                  raceEthnicity: '',
+                  gender: '',
+                  veteranStatus: '',
+                  disabilityStatus: '',
+                  completedEEO: false,
+                }
               })
               setCurrentStep(progressData.currentStep || 1)
               setHasSignificantProgress(true)
@@ -316,6 +358,13 @@ const JobApplicationPage: React.FC = () => {
                 resume: null, // Can't restore file from backend
                 customQuestionAnswers: existingApp.customQuestionAnswers || [],
                 customFields: existingApp.customFields || [],
+                eeoData: existingApp.eeoData || {
+                  raceEthnicity: '',
+                  gender: '',
+                  veteranStatus: '',
+                  disabilityStatus: '',
+                  completedEEO: false,
+                }
               })
               
               // Store token for future detection
@@ -1151,8 +1200,158 @@ const JobApplicationPage: React.FC = () => {
                   </div>
                 )}
 
-                {/* Step 5: Review & Submit */}
+                {/* Step 5: EEO Self-Identification (US Only) */}
                 {currentStep === 5 && (
+                  <div className='space-y-6'>
+                    <div className="text-center mb-6">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">Voluntary Self-Identification</h3>
+                      <p className="text-gray-600">Help us ensure equal employment opportunities</p>
+                    </div>
+                    
+                    <div className='bg-gradient-to-r from-green-50/50 to-blue-50/50 rounded-lg p-6 border border-green-200 shadow-sm backdrop-blur-sm'>
+                      <h3 className='text-lg font-semibold text-gray-900 mb-4 flex items-center'>
+                        <span className='bg-gradient-to-r from-green-500 to-blue-600 text-white w-8 h-8 rounded-full inline-flex items-center justify-center text-sm mr-3 shadow-sm'>
+                          <Shield className='h-4 w-4' />
+                        </span>
+                        Equal Employment Opportunity
+                      </h3>
+
+                      {/* EEO Disclaimer */}
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                        <h4 className="font-semibold text-blue-900 mb-2">Important Information</h4>
+                        <p className="text-sm text-blue-800 leading-relaxed">
+                          {EEO_DISCLAIMER_TEXT}
+                        </p>
+                      </div>
+
+                      <div className='space-y-6'>
+                        {/* Race/Ethnicity */}
+                        <div>
+                          <Label className='text-sm font-medium text-gray-700 mb-2 block'>
+                            Race/Ethnicity (Voluntary)
+                          </Label>
+                          <Select 
+                            value={formData.eeoData.raceEthnicity} 
+                            onValueChange={(value) => setFormData(prev => ({
+                              ...prev,
+                              eeoData: { ...prev.eeoData, raceEthnicity: value }
+                            }))}
+                          >
+                            <SelectTrigger className="h-10 text-sm">
+                              <SelectValue placeholder="Select race/ethnicity (optional)" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {EEO_RACE_ETHNICITY_OPTIONS.map(option => (
+                                <SelectItem key={option.value} value={option.value}>
+                                  {option.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        {/* Gender */}
+                        <div>
+                          <Label className='text-sm font-medium text-gray-700 mb-2 block'>
+                            Gender (Voluntary)
+                          </Label>
+                          <Select 
+                            value={formData.eeoData.gender} 
+                            onValueChange={(value) => setFormData(prev => ({
+                              ...prev,
+                              eeoData: { ...prev.eeoData, gender: value }
+                            }))}
+                          >
+                            <SelectTrigger className="h-10 text-sm">
+                              <SelectValue placeholder="Select gender (optional)" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {EEO_GENDER_OPTIONS.map(option => (
+                                <SelectItem key={option.value} value={option.value}>
+                                  {option.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        {/* Veteran Status */}
+                        <div>
+                          <Label className='text-sm font-medium text-gray-700 mb-2 block'>
+                            Veteran Status (Voluntary)
+                          </Label>
+                          <div className="bg-yellow-50 border border-yellow-200 rounded p-3 mb-3">
+                            <p className="text-xs text-yellow-800">
+                              {EEO_VETERAN_DISCLAIMER_TEXT}
+                            </p>
+                          </div>
+                          <Select 
+                            value={formData.eeoData.veteranStatus} 
+                            onValueChange={(value) => setFormData(prev => ({
+                              ...prev,
+                              eeoData: { ...prev.eeoData, veteranStatus: value }
+                            }))}
+                          >
+                            <SelectTrigger className="h-10 text-sm">
+                              <SelectValue placeholder="Select veteran status (optional)" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {EEO_VETERAN_STATUS_OPTIONS.map(option => (
+                                <SelectItem key={option.value} value={option.value}>
+                                  {option.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        {/* Disability Status */}
+                        <div>
+                          <Label className='text-sm font-medium text-gray-700 mb-2 block'>
+                            Disability Status (Voluntary)
+                          </Label>
+                          <div className="bg-purple-50 border border-purple-200 rounded p-3 mb-3">
+                            <p className="text-xs text-purple-800">
+                              {EEO_DISABILITY_DISCLAIMER_TEXT}
+                            </p>
+                          </div>
+                          <Select 
+                            value={formData.eeoData.disabilityStatus} 
+                            onValueChange={(value) => setFormData(prev => ({
+                              ...prev,
+                              eeoData: { ...prev.eeoData, disabilityStatus: value, completedEEO: true }
+                            }))}
+                          >
+                            <SelectTrigger className="h-10 text-sm">
+                              <SelectValue placeholder="Select disability status (optional)" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {EEO_DISABILITY_STATUS_OPTIONS.map(option => (
+                                <SelectItem key={option.value} value={option.value}>
+                                  {option.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        {/* Privacy Notice */}
+                        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                          <h5 className="font-medium text-gray-900 mb-2">Your Privacy is Protected</h5>
+                          <div className="text-xs text-gray-600 space-y-1">
+                            <p>✓ This information is completely voluntary</p>
+                            <p>✓ Your responses will be kept confidential</p>
+                            <p>✓ This data will not affect hiring decisions</p>
+                            <p>✓ Used only for federal reporting compliance</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 6: Review & Submit */}
+                {currentStep === 6 && (
                   <div className='space-y-6'>
                     <div className="text-center mb-6">
                       <h3 className="text-xl font-bold text-gray-900 mb-2">Review your application</h3>
@@ -1194,7 +1393,7 @@ const JobApplicationPage: React.FC = () => {
                           </div>
                         )}
                         
-                        {formData.customQuestionAnswers.length > 0 && (
+                          {formData.customQuestionAnswers.length > 0 && (
                           <div>
                             <h4 className='font-medium text-gray-700'>Additional Questions</h4>
                             <div className='space-y-2'>
@@ -1207,6 +1406,28 @@ const JobApplicationPage: React.FC = () => {
                                   </div>
                                 )
                               })}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* EEO Information */}
+                        {formData.eeoData.completedEEO && (
+                          <div>
+                            <h4 className='font-medium text-gray-700'>EEO Self-Identification</h4>
+                            <p className='text-sm text-gray-600 mb-2'>Voluntary demographic information (confidential)</p>
+                            <div className='space-y-1 text-sm'>
+                              {formData.eeoData.raceEthnicity && (
+                                <p><span className='font-medium'>Race/Ethnicity:</span> {EEO_RACE_ETHNICITY_OPTIONS.find(opt => opt.value === formData.eeoData.raceEthnicity)?.label}</p>
+                              )}
+                              {formData.eeoData.gender && (
+                                <p><span className='font-medium'>Gender:</span> {EEO_GENDER_OPTIONS.find(opt => opt.value === formData.eeoData.gender)?.label}</p>
+                              )}
+                              {formData.eeoData.veteranStatus && (
+                                <p><span className='font-medium'>Veteran Status:</span> {EEO_VETERAN_STATUS_OPTIONS.find(opt => opt.value === formData.eeoData.veteranStatus)?.label}</p>
+                              )}
+                              {formData.eeoData.disabilityStatus && (
+                                <p><span className='font-medium'>Disability Status:</span> {EEO_DISABILITY_STATUS_OPTIONS.find(opt => opt.value === formData.eeoData.disabilityStatus)?.label}</p>
+                              )}
                             </div>
                           </div>
                         )}

@@ -1,6 +1,7 @@
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
+import './styles/desktop-animation-fix.css'
 import './utils/prevent-layout-shifts'
 import './utils/data-loading'
 import './polyfills'

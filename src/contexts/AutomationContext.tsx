@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
 import { AutomationType } from '@/interfaces/automations';
 
 // Extended automation type that handles both frontend and backend formats
@@ -103,6 +103,7 @@ interface AutomationProviderProps {
 
 export const AutomationProvider: React.FC<AutomationProviderProps> = ({ children, initialAutomation = null }) => {
   const isEditMode = !!initialAutomation;
+  const hasInitialized = useRef(false);
   
   // Basic automation info
   const [automationName, setAutomationName] = useState(initialAutomation?.name || '');
@@ -185,9 +186,11 @@ export const AutomationProvider: React.FC<AutomationProviderProps> = ({ children
   const [validationMessage, setValidationMessage] = useState('');
   const [formTouched, setFormTouched] = useState(false);
 
-  // Update state when initialAutomation changes
+  // Initialize from initialAutomation once (prevent infinite loops)
   useEffect(() => {
-    if (initialAutomation) {
+    if (initialAutomation && !hasInitialized.current) {
+      hasInitialized.current = true;
+      
       setAutomationName(initialAutomation.name || '');
       setSelectedTriggerType(initialAutomation.trigger?.type || initialAutomation.triggerType || '');
       setAutomationStatus(initialAutomation.status === 'active' || initialAutomation.enabled !== false);
@@ -240,7 +243,7 @@ export const AutomationProvider: React.FC<AutomationProviderProps> = ({ children
         });
       }
     }
-  }, [initialAutomation]);
+  }, []); // Empty dependency array to run only once
 
   return (
     <AutomationContext.Provider

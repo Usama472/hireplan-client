@@ -1,0 +1,83 @@
+/* Global Desktop Animation Performance Fix */
+/* This fixes choppy animations throughout the entire application */
+
+@media (min-width: 769px) {
+  /* Force GPU acceleration for all framer-motion elements */
+  [data-framer-motion] {
+    will-change: transform, opacity !important;
+    transform: translateZ(0) !important;
+    backface-visibility: hidden !important;
+    -webkit-backface-visibility: hidden !important;
+    perspective: 1000px !important;
+  }
+
+  /* Ensure smooth animations for all motion elements */
+  [data-framer-motion] * {
+    will-change: transform, opacity !important;
+    transform: translateZ(0) !important;
+    backface-visibility: hidden !important;
+  }
+
+  /* Optimize backdrop-blur for desktop performance */
+  .backdrop-blur-sm {
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+  }
+
+  /* CRITICAL: Disable conflicting global CSS transitions on framer-motion elements */
+  [data-framer-motion] *,
+  [data-framer-motion] {
+    transition: none !important;
+  }
+
+  /* Reduce expensive visual effects that cause choppiness */
+  .mix-blend-multiply {
+    mix-blend-mode: normal !important;
+  }
+
+  /* Optimize gradients for better performance */
+  .bg-gradient-to-r,
+  .bg-gradient-to-br,
+  .bg-gradient-to-l {
+    background-attachment: local !important;
+  }
+
+  /* Force hardware acceleration for hover effects */
+  .group:hover .group-hover\\:scale-110 {
+    transform: translateZ(0) scale(1.1) !important;
+  }
+
+  /* Optimize all animations for smooth 60fps performance */
+  .animate-spin {
+    animation-duration: 1s !important;
+    animation-timing-function: linear !important;
+  }
+
+  /* Performance optimization for cards and interactive elements */
+  .card,
+  [class*="card"],
+  [class*="Card"] {
+    contain: layout style !important;
+    transform: translateZ(0) !important;
+  }
+
+  /* Smooth hover transitions without conflicts */
+  .hover\\:shadow-lg:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+    transition: box-shadow 0.15s ease !important;
+  }
+
+  /* Ensure buttons have smooth interactions */
+  button, 
+  [role="button"] {
+    transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease !important;
+  }
+}
+
+/* Prevent animation conflicts during page load */
+.preload * {
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+  transition-duration: 0s !important;
+  transition-delay: 0s !important;
+}

@@ -47,6 +47,7 @@ export const SHORT_URL_ROUTES = {
 
 export const ROUTES = {
   HOME: "/",
+  ATS: "/ats",
   LOGIN: "/login",
   SIGNUP: "/signup",
   COMPANY_SIGNUP: "/company-signup",

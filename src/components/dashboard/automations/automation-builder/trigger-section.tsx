@@ -112,28 +112,6 @@ export default function TriggerSection() {
         </RadioGroup>
       </div>
 
-      <div className="flex justify-end mt-3">
-        <button
-          className={cn(
-            "px-3 py-1.5 rounded-md bg-primary text-white text-xs font-medium h-8",
-            "transition-colors hover:bg-primary/90",
-            "disabled:opacity-50 disabled:cursor-not-allowed",
-            !selectedTriggerType && "opacity-50 cursor-not-allowed"
-          )}
-          disabled={!selectedTriggerType}
-          onClick={() => {
-            if (selectedTriggerType) {
-              console.log(
-                "Configure and continue with trigger:",
-                selectedTriggerType
-              );
-              navigate(`/dashboard/automations/create/${selectedTriggerType}`);
-            }
-          }}
-        >
-          Configure and Continue
-        </button>
-      </div>
     </div>
   );
 }

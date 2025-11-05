@@ -115,16 +115,25 @@ export default function AutomationBuilder() {
         triggerType: selectedTriggerType,
         useConditions: useConditions,
         conditions: useConditions ? conditions : [],
-        actions: selectedTriggerType === 'ai_followup' ? [] : actions,
-        scoreRules: selectedTriggerType === 'ai_followup' ? scoreRules : [],
+        actions: (selectedTriggerType === 'ai_followup' || selectedTriggerType === 'ai_followup_response_received') ? [] : actions,
+        scoreRules: (selectedTriggerType === 'ai_followup' || selectedTriggerType === 'ai_followup_response_received') ? scoreRules : [],
         labels: labels,
         schedule: selectedTriggerType === 'cron' ? schedule : undefined,
       };
 
+      console.log('🔧 AutomationBuilder Save Debug:', {
+        isEditMode,
+        automationId: automation?.id,
+        triggerType: selectedTriggerType,
+        dataToSend: automationData
+      });
+
       let response;
       if (isEditMode && automation?.id) {
+        console.log('📤 Making API call: updateAutomation', automation.id);
         response = await API.automation.updateAutomation(automation.id, automationData);
       } else {
+        console.log('📤 Making API call: createAutomation');
         response = await API.automation.createAutomation(automationData);
       }
 
@@ -194,6 +203,8 @@ export default function AutomationBuilder() {
       case "resume_score_updated":
         return <ResumeScoreUpdatedTrigger />;
       case "ai_followup":
+        return <AIFollowupTrigger />;
+      case "ai_followup_response_received":
         return <AIFollowupTrigger />;
       case "cron":
         return <ScheduledTimeTrigger />;
